@@ -20,8 +20,8 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "release": "turbo run build"
   },
   "devDependencies": {
