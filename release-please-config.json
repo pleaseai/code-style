@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "packages": {
+    "packages/eslint-config": {
+      "package-name": "@pleaseai/eslint-config"
+    },
+    "packages/perttier-config": {
+      "package-name": "@pleaseai/prettier-config"
+    }
+  }
+}

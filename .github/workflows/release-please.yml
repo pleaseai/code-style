@@ -1,0 +1,57 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      eslint-config-released: ${{ steps.release.outputs['packages/eslint-config--release_created'] }}
+      prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Set npm auth token
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @pleaseai/eslint-config
+        if: ${{ needs.release-please.outputs.eslint-config-released == 'true' }}
+        run: bun publish --access public
+        working-directory: packages/eslint-config
+
+      - name: Publish @pleaseai/prettier-config
+        if: ${{ needs.release-please.outputs.prettier-config-released == 'true' }}
+        run: bun publish --access public
+        working-directory: packages/perttier-config
