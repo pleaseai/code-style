@@ -1,5 +1,5 @@
-import antfu from '@antfu/eslint-config'
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
+import antfu from '@antfu/eslint-config'
 
 export function pleaseai(
   options: OptionsConfig = {},
@@ -14,9 +14,9 @@ export function pleaseai(
       },
       typescript: true,
       gitignore: true,
-        rules: {
-            'test/prefer-lowercase-title': 'off',
-        },
+      rules: {
+        'test/prefer-lowercase-title': 'off',
+      },
       ...options,
     },
     ...userConfigs,
