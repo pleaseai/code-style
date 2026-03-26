@@ -1,0 +1,27 @@
+.github/workflows/release-please.yml
+  4197f50ddd858a5b 20,32,34
+.github/workflows/ci.yml
+  4197f50ddd858a5b 13,15,26
+.github/dependabot.yml
+  4197f50ddd858a5b 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "176f99ba85cdbcd25a6c51b27637f0ceaba96737",
+  "prompts": {
+    "4197f50ddd858a5b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f45b495-2423-48de-aa0c-bbf66233252e",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee <amond@amond.net>",
+      "messages": [],
+      "total_additions": 27,
+      "total_deletions": 6,
+      "accepted_lines": 27,
+      "overriden_lines": 0
+    }
+  }
+}
