@@ -1,7 +1,7 @@
 {
   "name": "@pleaseai/eslint-config",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ESLint config for PleaseAI projects",
   "exports": {
     ".": {
