@@ -395,15 +395,15 @@ You can opt-in to the [`formatters`](#formatters) feature to format your CSS. No
 PleaseAI defaults to `lessOpinionated: true`, which enforces `curly: ['error', 'all']` — always require braces around control flow bodies:
 
 ```js
-// PleaseAI style
-if (foo) {
-  return
+// PleaseAI style — always requires braces
+function example() {
+  if (foo) {
+    return true
+  }
 }
-
-// NOT this (antfu default)
-if (foo)
-  return
 ```
+
+The antfu default (`lessOpinionated: false`) allows brace-less single-line `if` with a newline, but PleaseAI enforces `curly: ['error', 'all']`.
 
 Note: `antfu/top-level-function` is re-enabled, so top-level `function` declarations are still preferred over arrow functions.
 
