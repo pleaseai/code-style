@@ -7,6 +7,7 @@ export function pleaseai(
 ): ReturnType<typeof antfu> {
   return antfu(
     {
+      lessOpinionated: true,
       stylistic: {
         indent: 2,
         quotes: 'single',
@@ -15,6 +16,7 @@ export function pleaseai(
       typescript: true,
       gitignore: true,
       rules: {
+        'antfu/top-level-function': 'error',
         'test/prefer-lowercase-title': 'off',
       },
       ...options,

@@ -24,6 +24,8 @@ This config wraps `@antfu/eslint-config` with the following defaults:
 | Semicolons | No |
 | TypeScript | Enabled |
 | Gitignore | Enabled |
+| `lessOpinionated` | `true` — disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
+| `antfu/top-level-function` | Re-enabled — prefer `function` declarations at top level |
 
 Additionally, `test/prefer-lowercase-title` is disabled.
 
@@ -375,6 +377,35 @@ This config inherits `@antfu/eslint-config`'s plugin renaming for a consistent D
 | `ts/*` | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
 | `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
 | `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
+
+## FAQ
+
+### Prettier?
+
+This config uses ESLint for both linting and formatting, so Prettier is not needed. See [Why I don't use Prettier](https://antfu.me/posts/why-not-prettier) by Anthony Fu.
+
+If you need to format files that ESLint cannot handle yet (`.css`, `.html`, etc.), use the [formatters](#formatters) option instead.
+
+### How to format CSS?
+
+You can opt-in to the [`formatters`](#formatters) feature to format your CSS. Note that it only does formatting, not linting. If you want proper linting support, give [`stylelint`](https://stylelint.io/) a try.
+
+### Curly braces style?
+
+PleaseAI defaults to `lessOpinionated: true`, which enforces `curly: ['error', 'all']` — always require braces around control flow bodies:
+
+```js
+// PleaseAI style
+if (foo) {
+  return
+}
+
+// NOT this (antfu default)
+if (foo)
+  return
+```
+
+Note: `antfu/top-level-function` is re-enabled, so top-level `function` declarations are still preferred over arrow functions.
 
 ## Re-exports
 
