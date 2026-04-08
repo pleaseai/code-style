@@ -1,0 +1,15 @@
+# Nuxt
+.nuxt/
+.output/
+.data/
+dist/
+
+# Node
+node_modules/
+
+# Cloudflare
+.wrangler/
+
+# Misc
+.DS_Store
+*.log

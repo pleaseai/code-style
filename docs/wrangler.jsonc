@@ -1,0 +1,7 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pleaseai-code-style",
+  "pages_build_output_dir": ".output/public",
+  "compatibility_date": "2026-04-08",
+  "compatibility_flags": ["nodejs_compat"]
+}
