@@ -1,0 +1,29 @@
+docs/adr/0001-choose-documentation-framework.md
+  d66b0a58af1e3fcd 24,26
+CLAUDE.md
+  d66b0a58af1e3fcd 45-52,56-58
+package.json
+  d66b0a58af1e3fcd 18-19
+bunfig.toml
+  d66b0a58af1e3fcd 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "f2056717b3f11834bd67a788c45818f7db4207f2",
+  "prompts": {
+    "d66b0a58af1e3fcd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "caba7ff4-050f-4985-9459-87265f6e0d82",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 5,
+      "accepted_lines": 17,
+      "overriden_lines": 0
+    }
+  }
+}
