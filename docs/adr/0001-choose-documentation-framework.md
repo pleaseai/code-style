@@ -21,9 +21,9 @@ An initial attempt with **Docus** (Nuxt-based) failed in the build step. Bun sto
 
 ## Decision
 
-Use **Docus** (Nuxt-based) with docs excluded from Bun workspaces (independent `node_modules`).
+Use **Docus** (Nuxt-based) as a Bun workspace member, with the root `bunfig.toml` configured to use the **hoisted linker**.
 
-The Bun workspace build issue (Nitro's esbuild excludes `node_modules/`, causing `@rollup/plugin-inject` to fail on Docus's raw `.ts` files) is resolved by keeping docs as a standalone project with its own dependency tree. MCP toolkit is disabled (`mcp: { enabled: false }`) to avoid the `agents/mcp` Cloudflare Workers import issue. Content database uses SQLite locally and D1 conditionally via `NUXT_CONTENT_DATABASE_TYPE` env var.
+The Bun workspace build issue (Nitro's esbuild excludes `node_modules/`, causing `@rollup/plugin-inject` to fail on Docus's raw `.ts` files in `.bun/` symlinked paths) is resolved by switching from Bun's default isolated linker (which uses `.bun/` cache symlinks) to the hoisted linker (npm-style flat `node_modules`). MCP toolkit is disabled (`mcp: { enabled: false }`) to avoid the `agents/mcp` Cloudflare Workers import issue. Content database uses SQLite locally and D1 conditionally via `NUXT_CONTENT_DATABASE_TYPE` env var.
 
 ## Options
 

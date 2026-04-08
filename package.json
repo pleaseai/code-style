@@ -15,7 +15,8 @@
   },
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "docs"
     ]
   },
   "scripts": {
