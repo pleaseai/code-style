@@ -1,0 +1,29 @@
+docs/wrangler.jsonc
+  d66b0a58af1e3fcd 4,6-13
+docs/adr/0001-choose-documentation-framework.md
+  d66b0a58af1e3fcd 1-153
+docs/package.json
+  d66b0a58af1e3fcd 7
+docs/nuxt.config.ts
+  d66b0a58af1e3fcd 3-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "5500e0413467926326db1e81bb48710939eb681b",
+  "prompts": {
+    "d66b0a58af1e3fcd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "caba7ff4-050f-4985-9459-87265f6e0d82",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 328,
+      "total_deletions": 70,
+      "accepted_lines": 186,
+      "overriden_lines": 0
+    }
+  }
+}
