@@ -1,0 +1,43 @@
+docs/content/1.eslint-config/2.package-json.md
+  d66b0a58af1e3fcd 1-38
+docs/nuxt.config.ts
+  d66b0a58af1e3fcd 1-3
+docs/.gitignore
+  d66b0a58af1e3fcd 1-15
+docs/content/1.eslint-config/1.index.md
+  d66b0a58af1e3fcd 1-100
+docs/app/app.config.ts
+  d66b0a58af1e3fcd 1-21
+docs/content/2.prettier-config.md
+  d66b0a58af1e3fcd 1-74
+docs/package.json
+  d66b0a58af1e3fcd 1-21
+docs/content/index.md
+  d66b0a58af1e3fcd 1-47
+package.json
+  d66b0a58af1e3fcd 25-28
+docs/wrangler.jsonc
+  d66b0a58af1e3fcd 1-7
+docs/content/3.editorconfig.md
+  d66b0a58af1e3fcd 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "4430f1303b7bc20be2600c008caedac8c43e964b",
+  "prompts": {
+    "d66b0a58af1e3fcd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "caba7ff4-050f-4985-9459-87265f6e0d82",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 380,
+      "total_deletions": 23,
+      "accepted_lines": 356,
+      "overriden_lines": 0
+    }
+  }
+}
