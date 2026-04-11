@@ -9,6 +9,9 @@
     },
     "packages/perttier-config": {
       "package-name": "@pleaseai/prettier-config"
+    },
+    "packages/cli": {
+      "package-name": "@pleaseai/code-style"
     }
   }
 }
