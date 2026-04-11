@@ -1,0 +1,29 @@
+packages/eslint-config/README.md
+  7a1f3ef32f058a2b 3-4
+packages/eslint-config/README.ko.md
+  7a1f3ef32f058a2b 1,3,5,7,9-356,358,362,368,382,409,411,413,415-424,426-428,430,432,437-439,441,443,445,453,455,466,468,471-476,479-546,549-576
+packages/cli/README.md
+  7a1f3ef32f058a2b 3-4
+packages/cli/README.ko.md
+  7a1f3ef32f058a2b 1,3,5-7,9-10,12,14,17-20,23,25,27,29-33,35,37,41-42,44,46-47,49,51,55-57,59,61,63-66,68,70-71,73,75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "4bb80b9f816891f834eb4baa080459d19f35b93e",
+  "prompts": {
+    "7a1f3ef32f058a2b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7453d902-6a7e-49f7-a8a1-ca767aeac6f5",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 3294,
+      "total_deletions": 1314,
+      "accepted_lines": 3294,
+      "overriden_lines": 0
+    }
+  }
+}
