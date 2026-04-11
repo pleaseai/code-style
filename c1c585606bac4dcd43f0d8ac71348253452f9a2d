@@ -1,0 +1,38 @@
+README.ko.md
+  7a1f3ef32f058a2b 1-73
+README.md
+  7a1f3ef32f058a2b 3-4,7-8,14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "c1c585606bac4dcd43f0d8ac71348253452f9a2d",
+  "prompts": {
+    "7a1f3ef32f058a2b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7453d902-6a7e-49f7-a8a1-ca767aeac6f5",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 78,
+      "total_deletions": 0,
+      "accepted_lines": 78,
+      "overriden_lines": 0
+    },
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
