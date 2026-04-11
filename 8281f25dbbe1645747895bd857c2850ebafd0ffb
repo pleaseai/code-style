@@ -1,0 +1,23 @@
+docs/wrangler.jsonc
+  a26bec88146a2f47 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "8281f25dbbe1645747895bd857c2850ebafd0ffb",
+  "prompts": {
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 3,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
