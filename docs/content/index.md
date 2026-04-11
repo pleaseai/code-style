@@ -1,56 +1,115 @@
 ---
-title: PleaseAI Code Style
-description: Shared code style configurations for PleaseAI projects.
+seo:
+  title: PleaseAI Code Style
+  description: Shared ESLint, Prettier, and EditorConfig configurations for consistent code style across PleaseAI projects.
 navigation: false
 ---
 
-# PleaseAI Code Style
+<!-- eslint-disable markdown/no-missing-atx-heading-space -->
 
-Shared ESLint, Prettier, and EditorConfig configurations for consistent code style across PleaseAI projects — plus a CLI that wires them all up in one command.
+::u-page-hero
+#title
+PleaseAI Code Style
 
-## Packages
+#description
+Shared ESLint, Prettier, and EditorConfig configurations for consistent code style across PleaseAI projects — plus a CLI that wires them up in one command.
 
-:::card-group
-  ::card
+#links
+  :::u-button
   ---
-  title: ESLint Config
-  icon: i-lucide-shield-check
-  to: /eslint-config
-  ---
-  Opinionated ESLint flat config built on top of `@antfu/eslint-config`.
-  ::
-
-  ::card
-  ---
-  title: Prettier Config
-  icon: i-lucide-paintbrush
-  to: /prettier-config
-  ---
-  Shared Prettier configuration for consistent formatting.
-  ::
-
-  ::card
-  ---
-  title: EditorConfig
-  icon: i-lucide-file-cog
-  to: /editorconfig
-  ---
-  Shared `.editorconfig` for consistent editor settings.
-  ::
-
-  ::card
-  ---
-  title: CLI
-  icon: i-lucide-terminal
+  color: neutral
+  size: xl
   to: /cli
+  trailing-icon: i-lucide-arrow-right
   ---
-  One-command setup for eslint, prettier, editorconfig, and the `AGENTS.md` rules block.
-  ::
-:::
+  Get started
+  :::
 
-## Quick Start
+  :::u-button
+  ---
+  color: neutral
+  icon: i-simple-icons-github
+  size: xl
+  target: _blank
+  to: https://github.com/pleaseai/code-style
+  variant: outline
+  ---
+  Star on GitHub
+  :::
+::
 
-The fastest path is the CLI — it installs the packages and writes the config files for you:
+::u-page-section
+#title
+Packages
+
+#description
+Everything you need for consistent code style, shipped as focused packages.
+
+  :::u-page-grid
+    ::::u-page-card
+    ---
+    class: col-span-2 lg:col-span-1
+    icon: i-lucide-shield-check
+    spotlight: true
+    to: /eslint-config
+    ---
+    #title
+    ESLint Config
+
+    #description
+    Opinionated ESLint flat config built on top of `@antfu/eslint-config`.
+    ::::
+
+    ::::u-page-card
+    ---
+    class: col-span-2 lg:col-span-1
+    icon: i-lucide-paintbrush
+    spotlight: true
+    to: /prettier-config
+    ---
+    #title
+    Prettier Config
+
+    #description
+    Shared Prettier configuration for consistent formatting.
+    ::::
+
+    ::::u-page-card
+    ---
+    class: col-span-2 lg:col-span-1
+    icon: i-lucide-file-cog
+    spotlight: true
+    to: /editorconfig
+    ---
+    #title
+    EditorConfig
+
+    #description
+    Shared `.editorconfig` for consistent editor settings.
+    ::::
+
+    ::::u-page-card
+    ---
+    class: col-span-2 lg:col-span-1
+    icon: i-lucide-terminal
+    spotlight: true
+    to: /cli
+    ---
+    #title
+    CLI
+
+    #description
+    One-command setup for eslint, prettier, editorconfig, and the `AGENTS.md` rules block.
+    ::::
+  :::
+::
+
+::u-page-section
+#title
+Quick Start
+
+#description
+The fastest path is the CLI — it installs the packages and writes the config files for you.
 
 :::code-group
 ```bash [bun]
@@ -87,3 +146,4 @@ import pleaseai from '@pleaseai/eslint-config'
 
 export default pleaseai()
 ```
+::
