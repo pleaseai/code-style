@@ -111,6 +111,7 @@ Quick Start
 #description
 The fastest path is the CLI — it installs the packages and writes the config files for you.
 
+#body
 :::code-group
 ```bash [bun]
 bunx @pleaseai/code-style

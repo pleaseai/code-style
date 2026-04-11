@@ -111,6 +111,7 @@ PleaseAI 프로젝트를 위한 공유 ESLint, Prettier, EditorConfig 설정 —
 #description
 가장 빠른 방법은 CLI입니다 — 패키지를 설치하고 설정 파일까지 자동으로 작성해 줍니다.
 
+#body
 :::code-group
 ```bash [bun]
 bunx @pleaseai/code-style
