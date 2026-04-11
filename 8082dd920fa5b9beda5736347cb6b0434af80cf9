@@ -1,0 +1,25 @@
+docs/content/4.cli.md
+  a26bec88146a2f47 1-135
+docs/content/index.md
+  a26bec88146a2f47 9,13-19,23-28,32-37,41-49,53-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "8082dd920fa5b9beda5736347cb6b0434af80cf9",
+  "prompts": {
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 185,
+      "total_deletions": 9,
+      "accepted_lines": 183,
+      "overriden_lines": 0
+    }
+  }
+}
