@@ -1,0 +1,65 @@
+docs/content/en/1.eslint-config/6.editor.md
+  7a1f3ef32f058a2b 1-145
+docs/content/en/index.md
+  7a1f3ef32f058a2b 1-149
+docs/content/ko/1.eslint-config/1.index.md
+  7a1f3ef32f058a2b 1-308
+docs/content/ko/1.eslint-config/5.advanced.md
+  7a1f3ef32f058a2b 1-156
+docs/content/ko/1.eslint-config/6.editor.md
+  7a1f3ef32f058a2b 1-145
+docs/content/en/4.cli.md
+  7a1f3ef32f058a2b 1-135
+docs/content/en/1.eslint-config/5.advanced.md
+  7a1f3ef32f058a2b 1-156
+docs/content/en/1.eslint-config/2.package-json.md
+  7a1f3ef32f058a2b 1-38
+docs/content/en/1.eslint-config/3.nuxt.md
+  7a1f3ef32f058a2b 1-67
+docs/content/ko/index.md
+  7a1f3ef32f058a2b 1-149
+docs/content/ko/3.editorconfig.md
+  7a1f3ef32f058a2b 1-25
+docs/content/en/1.eslint-config/1.index.md
+  7a1f3ef32f058a2b 1-308
+docs/content/en/2.prettier-config.md
+  7a1f3ef32f058a2b 1-74
+docs/content/ko/1.eslint-config/3.nuxt.md
+  7a1f3ef32f058a2b 1-67
+docs/content/ko/2.prettier-config.md
+  7a1f3ef32f058a2b 1-74
+docs/content/ko/1.eslint-config/2.package-json.md
+  7a1f3ef32f058a2b 1-38
+docs/content/ko/1.eslint-config/4.frameworks.md
+  7a1f3ef32f058a2b 1-217
+docs/content/en/3.editorconfig.md
+  7a1f3ef32f058a2b 1-25
+docs/package.json
+  7a1f3ef32f058a2b 14
+docs/content/ko/4.cli.md
+  7a1f3ef32f058a2b 1-135
+docs/content/en/1.eslint-config/4.frameworks.md
+  7a1f3ef32f058a2b 1-217
+docs/nuxt.config.ts
+  7a1f3ef32f058a2b 6-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "5519e0f6489cd7ff33cc97a4de2419181c3c3c14",
+  "prompts": {
+    "7a1f3ef32f058a2b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7453d902-6a7e-49f7-a8a1-ca767aeac6f5",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 2650,
+      "overriden_lines": 0
+    }
+  }
+}
