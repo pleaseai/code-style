@@ -1,0 +1,23 @@
+docs/content/1.eslint-config/1.index.md
+  a26bec88146a2f47 79-97,123-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "12f4ed519b6f70aa63d873abe8a0829bac8a6c91",
+  "prompts": {
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 77,
+      "overriden_lines": 0
+    }
+  }
+}
