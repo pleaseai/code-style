@@ -11,6 +11,7 @@
     "preview:cf": "wrangler pages dev"
   },
   "dependencies": {
+    "@nuxtjs/i18n": "^10.2.4",
     "better-sqlite3": "^12.6.2",
     "docus": "latest",
     "nuxt": "^4.3.1"
