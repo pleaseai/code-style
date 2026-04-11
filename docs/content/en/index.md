@@ -19,7 +19,7 @@ Shared ESLint, Prettier, and EditorConfig configurations for consistent code sty
   ---
   color: neutral
   size: xl
-  to: /cli
+  to: /en/cli
   trailing-icon: i-lucide-arrow-right
   ---
   Get started
@@ -51,7 +51,7 @@ Everything you need for consistent code style, shipped as focused packages.
     class: col-span-2 lg:col-span-1
     icon: i-lucide-shield-check
     spotlight: true
-    to: /eslint-config
+    to: /en/eslint-config
     ---
     #title
     ESLint Config
@@ -65,7 +65,7 @@ Everything you need for consistent code style, shipped as focused packages.
     class: col-span-2 lg:col-span-1
     icon: i-lucide-paintbrush
     spotlight: true
-    to: /prettier-config
+    to: /en/prettier-config
     ---
     #title
     Prettier Config
@@ -79,7 +79,7 @@ Everything you need for consistent code style, shipped as focused packages.
     class: col-span-2 lg:col-span-1
     icon: i-lucide-file-cog
     spotlight: true
-    to: /editorconfig
+    to: /en/editorconfig
     ---
     #title
     EditorConfig
@@ -93,7 +93,7 @@ Everything you need for consistent code style, shipped as focused packages.
     class: col-span-2 lg:col-span-1
     icon: i-lucide-terminal
     spotlight: true
-    to: /cli
+    to: /en/cli
     ---
     #title
     CLI
