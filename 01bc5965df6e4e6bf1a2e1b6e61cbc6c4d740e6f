@@ -1,0 +1,29 @@
+docs/content/1.eslint-config/6.editor.md
+  a26bec88146a2f47 1-145
+docs/content/1.eslint-config/4.frameworks.md
+  a26bec88146a2f47 1-217
+docs/content/1.eslint-config/5.advanced.md
+  a26bec88146a2f47 1-156
+docs/content/1.eslint-config/1.index.md
+  a26bec88146a2f47 3,10,14-19,21,39-42,45,53-54,57,63-68,71-75,79-80,83,93,101,103,108-116,118-119,122-126,130,141,143,145,147-179,181-183,185-188,190-192,194,196,202-204,208-248,252-274,276-283,286,293-295,298
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "01bc5965df6e4e6bf1a2e1b6e61cbc6c4d740e6f",
+  "prompts": {
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 708,
+      "total_deletions": 56,
+      "accepted_lines": 704,
+      "overriden_lines": 0
+    }
+  }
+}
