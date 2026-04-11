@@ -1,0 +1,23 @@
+packages/eslint-config/README.md
+  a26bec88146a2f47 105-135,283-316,407-450,490-508,521-546
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "ac90468410aeb7ac13b0896e3aa1253d7035c14b",
+  "prompts": {
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 212,
+      "total_deletions": 1,
+      "accepted_lines": 212,
+      "overriden_lines": 0
+    }
+  }
+}
