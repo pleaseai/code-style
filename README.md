@@ -1,12 +1,17 @@
 # @pleaseai/code-style
 
+English | [한국어](./README.ko.md)
+
 A monorepo providing shared code style configurations for PleaseAI projects — for outsourcing, open source, and internal use.
+
+Documentation: <https://code-style.pages.dev>
 
 ## Packages
 
 | Package | Description |
 |---------|-------------|
 | [`@pleaseai/eslint-config`](./packages/eslint-config) | ESLint flat config wrapping `@antfu/eslint-config` with PleaseAI defaults |
+| [`@pleaseai/prettier-config`](./packages/perttier-config) | Shared Prettier config (JSON) |
 | [`@pleaseai/editorconfig`](./packages/editorconfig) | Shared `.editorconfig` for consistent editor settings |
 
 ## `@pleaseai/eslint-config`
