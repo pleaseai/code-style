@@ -1,5 +1,7 @@
 # @pleaseai/code-style
 
+English | [한국어](./README.ko.md)
+
 CLI that wires PleaseAI's shared code style into any project — installs the
 eslint/prettier/editorconfig packages and manages the `AGENTS.md` rules block
 so AI coding assistants know how to write code that passes lint on the first

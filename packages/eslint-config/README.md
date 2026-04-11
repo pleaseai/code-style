@@ -1,5 +1,7 @@
 # @pleaseai/eslint-config
 
+English | [한국어](./README.ko.md)
+
 [![npm](https://img.shields.io/npm/v/@pleaseai/eslint-config?color=444&label=)](https://npmjs.com/package/@pleaseai/eslint-config)
 
 PleaseAI's shared ESLint config, built on top of [@antfu/eslint-config](https://github.com/antfu/eslint-config).
