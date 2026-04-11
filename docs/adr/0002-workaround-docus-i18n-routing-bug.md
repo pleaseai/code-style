@@ -264,9 +264,10 @@ generated.
 - [ ] Remove the workaround once upstream ships a fix. Pin `docus` to a
       known-good version in `docs/package.json` instead of `"latest"` to
       prevent silent regressions.
-- [ ] Fix remaining unprefixed inline markdown links in
-      `docs/content/en/1.eslint-config/**` (`](/eslint-config/frameworks)`,
-      etc.). Korean content is already clean.
+- [x] Fix remaining unprefixed inline markdown links in
+      `docs/content/en/1.eslint-config/**` — done in commit `0f94f60`
+      (covers markdown links, YAML `to:` props, and MDC component
+      `::tip{to="..."}` / `::note{to="..."}` attrs).
 
 ## References
 
