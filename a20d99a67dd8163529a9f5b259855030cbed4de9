@@ -1,0 +1,51 @@
+packages/cli/src/fs-utils.ts
+  a26bec88146a2f47 1-98
+packages/cli/rules.md
+  a26bec88146a2f47 1-68
+packages/cli/tsconfig.json
+  a26bec88146a2f47 1-15
+.release-please-manifest.json
+  a26bec88146a2f47 3-4
+packages/cli/package.json
+  a26bec88146a2f47 1-55
+packages/cli/src/i18n.ts
+  a26bec88146a2f47 1-118
+packages/cli/src/commands.ts
+  a26bec88146a2f47 1-169
+packages/cli/src/index.ts
+  a26bec88146a2f47 1-62
+release-please-config.json
+  a26bec88146a2f47 12-14
+packages/cli/src/appliers.ts
+  a26bec88146a2f47 1-184
+packages/cli/tsdown.config.ts
+  a26bec88146a2f47 1-11
+packages/cli/src/i18n.test.ts
+  a26bec88146a2f47 1-86
+packages/cli/src/tools.ts
+  a26bec88146a2f47 1-43
+packages/cli/src/fs-utils.test.ts
+  a26bec88146a2f47 1-212
+packages/cli/README.md
+  a26bec88146a2f47 1-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "a20d99a67dd8163529a9f5b259855030cbed4de9",
+  "prompts": {
+    "a26bec88146a2f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e543e50-4c85-45fb-9f0f-fde1e26b81ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Minsu Lee",
+      "messages": [],
+      "total_additions": 302,
+      "total_deletions": 2,
+      "accepted_lines": 1205,
+      "overriden_lines": 0
+    }
+  }
+}
