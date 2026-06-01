@@ -70,7 +70,7 @@ const collectionName = computed(() =>
 )
 
 const { data: page } = await useAsyncData(
-  collectionName.value,                            // ← static key: "landing_ko"
+  collectionName.value, // ← static key: "landing_ko"
   () => queryCollection(collectionName.value).path(route.path).first(),
 )
 if (!page.value) {
@@ -83,7 +83,7 @@ route-scoped key:
 
 ```ts
 useAsyncData(
-  kebabCase(route.path),                           // ← per-route key
+  kebabCase(route.path), // ← per-route key
   () => queryCollection(collectionName.value).path(route.path).first(),
 )
 ```
