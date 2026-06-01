@@ -47,11 +47,17 @@ jobs:
 
       # npm CLI is the publisher: bun publish supports neither npm OIDC
       # trusted publishing nor --provenance (oven-sh/bun#22423). setup-node
-      # provisions the registry .npmrc and an npm new enough for provenance.
+      # provisions the registry .npmrc; id-token: write + a trusted publisher
+      # configured on npmjs.com let npm authenticate tokenlessly via OIDC.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
+
+      # OIDC trusted publishing requires npm >= 11.5.1; pin to the latest 11.x
+      # in case the runner's bundled npm predates it.
+      - name: Ensure npm supports trusted publishing
+        run: npm install -g npm@^11.5.1
 
       - name: Install dependencies
         run: bun install
@@ -70,8 +76,6 @@ jobs:
             bun pm pack
             npm publish pleaseai-eslint-config-*.tgz --provenance --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @pleaseai/prettier-config
         if: ${{ needs.release-please.outputs.prettier-config-released == 'true' }}
@@ -84,8 +88,6 @@ jobs:
             bun pm pack
             npm publish pleaseai-prettier-config-*.tgz --provenance --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @pleaseai/code-style
         if: ${{ needs.release-please.outputs.code-style-released == 'true' }}
@@ -98,5 +100,3 @@ jobs:
             bun pm pack
             npm publish pleaseai-code-style-*.tgz --provenance --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
