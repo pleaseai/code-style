@@ -1,0 +1,19 @@
+packages/eslint-config/tsdown.config.ts
+  s_e08b214b707da6::t_bc73d9db8185a2 9-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "178e0959cf86ba0eb34adf0be70eaf0888db4512",
+  "prompts": {},
+  "sessions": {
+    "s_e08b214b707da6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a923110e-dd67-4cad-aef2-123df6ee505d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
