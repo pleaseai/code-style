@@ -16,6 +16,7 @@ jobs:
       releases_created: ${{ steps.release.outputs.releases_created }}
       eslint-config-released: ${{ steps.release.outputs['packages/eslint-config--release_created'] }}
       prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
+      code-style-released: ${{ steps.release.outputs['packages/cli--release_created'] }}
     steps:
       - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         id: app-token
@@ -34,6 +35,9 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance / trusted publishing (OIDC)
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -41,23 +45,58 @@ jobs:
         with:
           bun-version: latest
 
+      # npm CLI is the publisher: bun publish supports neither npm OIDC
+      # trusted publishing nor --provenance (oven-sh/bun#22423). setup-node
+      # provisions the registry .npmrc; id-token: write + a trusted publisher
+      # configured on npmjs.com let npm authenticate tokenlessly via OIDC.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+
+      # OIDC trusted publishing requires npm >= 11.5.1; pin to the latest 11.x
+      # in case the runner's bundled npm predates it.
+      - name: Ensure npm supports trusted publishing
+        run: npm install -g npm@^11.5.1
+
       - name: Install dependencies
         run: bun install
 
       - name: Build
         run: bun run build
 
-      - name: Set npm auth token
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish @pleaseai/eslint-config
         if: ${{ needs.release-please.outputs.eslint-config-released == 'true' }}
-        run: bun publish --access public
         working-directory: packages/eslint-config
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "@pleaseai/eslint-config@$VERSION" version 2>/dev/null; then
+            echo "⚠ @pleaseai/eslint-config@$VERSION already published, skipping"
+          else
+            bun pm pack
+            npm publish pleaseai-eslint-config-*.tgz --provenance --access public
+          fi
 
       - name: Publish @pleaseai/prettier-config
         if: ${{ needs.release-please.outputs.prettier-config-released == 'true' }}
-        run: bun publish --access public
         working-directory: packages/perttier-config
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "@pleaseai/prettier-config@$VERSION" version 2>/dev/null; then
+            echo "⚠ @pleaseai/prettier-config@$VERSION already published, skipping"
+          else
+            bun pm pack
+            npm publish pleaseai-prettier-config-*.tgz --provenance --access public
+          fi
+
+      - name: Publish @pleaseai/code-style
+        if: ${{ needs.release-please.outputs.code-style-released == 'true' }}
+        working-directory: packages/cli
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "@pleaseai/code-style@$VERSION" version 2>/dev/null; then
+            echo "⚠ @pleaseai/code-style@$VERSION already published, skipping"
+          else
+            bun pm pack
+            npm publish pleaseai-code-style-*.tgz --provenance --access public
+          fi
