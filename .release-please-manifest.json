@@ -1,5 +1,5 @@
 {
-  "packages/eslint-config": "0.0.3",
+  "packages/eslint-config": "0.0.4",
   "packages/perttier-config": "0.0.1",
-  "packages/cli": "0.0.2"
+  "packages/cli": "0.0.3"
 }
