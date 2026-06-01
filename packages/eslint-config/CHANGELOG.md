@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/pleaseai/code-style/compare/eslint-config-v0.0.3...eslint-config-v0.0.4) (2026-06-01)
+
+
+### Bug Fixes
+
+* pin dist output extensions so published packages resolve ([#19](https://github.com/pleaseai/code-style/issues/19)) ([116a92b](https://github.com/pleaseai/code-style/commit/116a92b960547b948e4e50c11a7b52d2b25eec83))
+
 ## [0.0.3](https://github.com/pleaseai/code-style/compare/eslint-config-v0.0.2...eslint-config-v0.0.3) (2026-04-02)
 
 
