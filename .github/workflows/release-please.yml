@@ -18,7 +18,7 @@ jobs:
       prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
       code-style-released: ${{ steps.release.outputs['packages/cli--release_created'] }}
     steps:
-      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -49,7 +49,7 @@ jobs:
       # trusted publishing nor --provenance (oven-sh/bun#22423). setup-node
       # provisions the registry .npmrc; id-token: write + a trusted publisher
       # configured on npmjs.com let npm authenticate tokenlessly via OIDC.
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
