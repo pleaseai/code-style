@@ -1,6 +1,11 @@
 {
   "name": "@pleaseai/prettier-config",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pleaseai/code-style.git",
+    "directory": "packages/perttier-config"
+  },
   "main": "index.json",
   "peerDependencies": {
     "prettier": "^2.8.8 || ^3.0.0"
