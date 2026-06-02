@@ -83,8 +83,11 @@ jobs:
       - name: Build
         run: bun run build
 
+      # Each publish step is independent: !cancelled() keeps the rest running
+      # if one package's publish fails (e.g. a first-ever publish that OIDC
+      # can't authorize), instead of skipping every later package.
       - name: Publish @pleaseai/eslint-config
-        if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.eslint-config-released == 'true' }}
+        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.eslint-config-released == 'true') }}
         working-directory: packages/eslint-config
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -96,7 +99,7 @@ jobs:
           fi
 
       - name: Publish @pleaseai/prettier-config
-        if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.prettier-config-released == 'true' }}
+        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.prettier-config-released == 'true') }}
         working-directory: packages/perttier-config
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -108,7 +111,7 @@ jobs:
           fi
 
       - name: Publish @pleaseai/code-style
-        if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true' }}
+        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true') }}
         working-directory: packages/cli
         run: |
           VERSION=$(node -p "require('./package.json').version")
