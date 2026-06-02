@@ -1,0 +1,23 @@
+.github/workflows/release-please.yml
+  s_e08b214b707da6::t_984679876e4f3a 20-22
+  s_e08b214b707da6::t_89e1177cb6e252 7-12
+  s_e08b214b707da6::t_cfbdbbdb3b0eef 45-54
+packages/perttier-config/package.json
+  s_e08b214b707da6::t_44a1b46277fd37 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3d0652f4c853342d72279924fb3c185c5983dc78",
+  "prompts": {},
+  "sessions": {
+    "s_e08b214b707da6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a923110e-dd67-4cad-aef2-123df6ee505d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
