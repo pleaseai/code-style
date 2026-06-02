@@ -1,0 +1,21 @@
+packages/eslint-config/package.json
+  s_e08b214b707da6::t_dd3e21d2e4608e 6-10
+packages/perttier-config/package.json
+  s_e08b214b707da6::t_ef7275743624d9 4-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "0447f42a8ab0d4b7a834076f80b00e2cbdb1ad7c",
+  "prompts": {},
+  "sessions": {
+    "s_e08b214b707da6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a923110e-dd67-4cad-aef2-123df6ee505d",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
