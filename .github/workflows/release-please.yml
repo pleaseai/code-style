@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_only:
-        description: 'Skip release-please and publish current package.json versions to npm'
+        description: Skip release-please and publish current package.json versions to npm
         type: boolean
         default: false
 
