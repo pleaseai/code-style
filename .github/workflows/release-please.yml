@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      publish_only:
+        description: 'Skip release-please and publish current package.json versions to npm'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -11,6 +17,9 @@ permissions:
 
 jobs:
   release-please:
+    # Skip the release machinery entirely on a publish_only dispatch — that
+    # path republishes the current versions without cutting a new release.
+    if: ${{ github.event_name == 'push' || inputs.publish_only != true }}
     runs-on: ubuntu-latest
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
@@ -33,7 +42,16 @@ jobs:
 
   publish:
     needs: release-please
-    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    # Run when release-please cut a release, OR on a manual publish_only
+    # dispatch (where release-please was skipped). always() lets this job
+    # evaluate even though its needs was skipped.
+    if: |
+      always() &&
+      (
+        (github.event_name == 'workflow_dispatch' && inputs.publish_only == true) ||
+        (needs.release-please.result == 'success' &&
+         needs.release-please.outputs.releases_created == 'true')
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -66,7 +84,7 @@ jobs:
         run: bun run build
 
       - name: Publish @pleaseai/eslint-config
-        if: ${{ needs.release-please.outputs.eslint-config-released == 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.eslint-config-released == 'true' }}
         working-directory: packages/eslint-config
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -78,7 +96,7 @@ jobs:
           fi
 
       - name: Publish @pleaseai/prettier-config
-        if: ${{ needs.release-please.outputs.prettier-config-released == 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.prettier-config-released == 'true' }}
         working-directory: packages/perttier-config
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -90,7 +108,7 @@ jobs:
           fi
 
       - name: Publish @pleaseai/code-style
-        if: ${{ needs.release-please.outputs.code-style-released == 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true' }}
         working-directory: packages/cli
         run: |
           VERSION=$(node -p "require('./package.json').version")

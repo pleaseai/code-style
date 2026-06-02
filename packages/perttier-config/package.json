@@ -1,5 +1,6 @@
 {
   "name": "@pleaseai/prettier-config",
+  "version": "0.0.1",
   "main": "index.json",
   "peerDependencies": {
     "prettier": "^2.8.8 || ^3.0.0"
