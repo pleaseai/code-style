@@ -4,3 +4,9 @@ dist/
 .idea/
 .DS_Store
 .eslintcache
+
+# npm pack build artifacts
+*.tgz
+
+# Local Claude Code settings (not committed)
+.claude/settings.local.json
