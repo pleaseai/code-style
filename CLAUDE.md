@@ -4,7 +4,7 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 
 ## Tech Stack
 
-- Package manager: bun (>=1.3.10)
+- Package manager: bun (>=1.3.14)
 - Build orchestration: Turborepo
 - Module system: ESM only (`"type": "module"`)
 - Node: >=22.0.0
