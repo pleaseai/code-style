@@ -1,0 +1,32 @@
+.gitignore
+  s_d8fe9dc661cccd::t_b05cad5bf728ea 7-12
+CLAUDE.md
+  s_0a395964c09566::t_7c6f01ea505158 7
+package.json
+  s_0a395964c09566::t_e9ca680494cff5 6
+  s_0a395964c09566::t_684b66d339ed2d 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "b2041f550516aa454c8471faca725d4d7262f108",
+  "prompts": {},
+  "sessions": {
+    "s_0a395964c09566": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2895f200-f1ea-44fb-a0c2-8025055bad3b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_d8fe9dc661cccd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "868261b0-fd15-480c-9cd4-b0459f2c7974",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
