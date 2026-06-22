@@ -1,0 +1,19 @@
+docs/adr/0001-choose-documentation-framework.md
+  s_d8fe9dc661cccd::t_a04057804977d8 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "a6fa6d6d02c41e2e314848e080c68d869f872baf",
+  "prompts": {},
+  "sessions": {
+    "s_d8fe9dc661cccd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "868261b0-fd15-480c-9cd4-b0459f2c7974",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
