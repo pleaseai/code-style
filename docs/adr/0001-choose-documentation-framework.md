@@ -10,7 +10,7 @@ Accepted
 
 ### Constraints
 
-- **Package manager**: Bun (>=1.3.10) with workspace hoisting
+- **Package manager**: Bun (>=1.3.14) with workspace hoisting
 - **Module system**: ESM only
 - **Deployment**: Cloudflare Pages (static or SSR)
 - **Content**: Markdown-based, code examples, package configuration tables
