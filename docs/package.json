@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@nuxtjs/i18n": "^10.2.4",
-    "better-sqlite3": "^12.6.2",
+    "better-sqlite3": "^13.0.1",
     "docus": "latest",
     "nuxt": "^4.3.1"
   },
