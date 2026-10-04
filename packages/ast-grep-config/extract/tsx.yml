@@ -26,12 +26,34 @@ rule:
             inside:
               any:
                 - kind: export_statement
+                  inside:
+                    kind: program
                   not:
                     has:
                       regex: ^default$
                 - kind: ambient_declaration
                   inside:
                     kind: export_statement
+                    inside:
+                      kind: program
+    # export namespace|module <name> { … } (the namespace, never its members)
+    - all:
+        - kind: identifier
+        - inside:
+            field: name
+            any:
+              - kind: internal_module
+              - kind: module
+            inside:
+              any:
+                - kind: export_statement
+                  inside:
+                    kind: program
+                - kind: ambient_declaration
+                  inside:
+                    kind: export_statement
+                    inside:
+                      kind: program
     # export const|let <name> = …
     - all:
         - kind: identifier
@@ -44,6 +66,8 @@ rule:
                 - kind: variable_declaration
               inside:
                 kind: export_statement
+                inside:
+                  kind: program
     # export { local as <name> } / export { <name> } (local exports only)
     - all:
         - kind: identifier
@@ -57,6 +81,8 @@ rule:
                   kind: export_clause
                   inside:
                     kind: export_statement
+                    inside:
+                      kind: program
                     not:
                       has:
                         field: source
@@ -72,10 +98,35 @@ rule:
                   kind: export_clause
                   inside:
                     kind: export_statement
+                    inside:
+                      kind: program
                     not:
                       has:
                         field: source
                         kind: string
+---
+# `export const { a } = obj` / `export const [a] = arr`: the bound names are not
+# extracted. The whole pattern is matched so the file reads as "unknown symbols"
+# and is excluded from the exactly-one-public-symbol check.
+id: export-destructure
+language: tsx
+severity: hint
+message: destructured export
+rule:
+  any:
+    - kind: object_pattern
+    - kind: array_pattern
+  inside:
+    field: name
+    kind: variable_declarator
+    inside:
+      any:
+        - kind: lexical_declaration
+        - kind: variable_declaration
+      inside:
+        kind: export_statement
+        inside:
+          kind: program
 ---
 id: helper-candidate
 language: tsx

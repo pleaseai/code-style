@@ -80,6 +80,16 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     expect(fixtures).toEqual([])
   })
 
+  test('kotlin: same-named helpers in separate modules are not counted together', () => {
+    const module = (name: string, tests: string[]): Record<string, string> => Object.fromEntries([
+      [`${name}/build.gradle.kts`, ''],
+      [`${name}/src/main/kotlin/com/acme/Main.kt`, 'package com.acme'],
+      [`${name}/src/test/kotlin/com/acme/FakeClock.kt`, 'package com.acme\nclass FakeClock'],
+      ...tests.map(t => [`${name}/src/test/kotlin/com/acme/${t}Test.kt`, `package com.acme\nclass ${t}Test { val c = FakeClock() }`]),
+    ])
+    expect(findingsFor({ ...module('a', ['One']), ...module('b', ['Two']) }, SLUG)).toEqual([])
+  })
+
   test('java: an imported helper used by two tests is reported', () => {
     const findings = findingsFor({
       'src/main/java/com/acme/Invoice.java': 'package com.acme;',

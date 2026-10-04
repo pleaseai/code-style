@@ -3,7 +3,9 @@
 #
 # Out-of-line module declarations (`mod name;`), optionally with a preceding
 # `#[path = "…"]` attribute captured as $PATH. Declarations nested in an
-# inline `mod x { … }` block or a function body are not extracted.
+# inline `mod x { … }` block or a function body are not extracted as
+# `mod-decl`; `mod-decl-nested` reports them so the checker knows a crate's
+# module tree cannot be resolved completely.
 id: mod-decl
 language: rust
 severity: hint
@@ -42,6 +44,23 @@ rule:
                     pattern: $PATH
       # No `#[path]`: still a declaration (first branch wins when it matches).
       - kind: mod_item
+---
+id: mod-decl-nested
+language: rust
+severity: hint
+message: module declaration inside an inline module or function body
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: mod_item
+    not:
+      any:
+        - has:
+            field: body
+            kind: declaration_list
+        - inside:
+            kind: source_file
 ---
 id: test-attr
 language: rust

@@ -11,6 +11,8 @@ export interface FilenameLanguage {
   language: Extract<Language, 'typescript' | 'dart'>
   /** Extraction rule ids whose match text is a public top-level name. */
   nameRules: string[]
+  /** Rule ids whose presence means the file's exports cannot be enumerated; such files are skipped. */
+  opaqueRules?: string[]
   normalize: (name: string) => string
   isPublic: (name: string) => boolean
   /** File name without extension, or `null` when the file is exempt. */
@@ -36,12 +38,13 @@ export function typescriptFilenames(units: Unit[]): FilenameLanguage {
   return {
     language: 'typescript',
     nameRules: ['export-name'],
+    opaqueRules: ['export-destructure'],
     normalize: toKebabCase,
     isPublic: () => true,
     units,
     stem(file, unit) {
       const name = baseName(file)
-      if (!TS_SOURCE.test(name) || name.endsWith('.d.ts') || underTestRoot(file, unit)) {
+      if (!TS_SOURCE.test(name) || /\.d\.[cm]?ts$/.test(name) || underTestRoot(file, unit)) {
         return null
       }
       const stem = name.replace(TS_SOURCE, '')
@@ -88,6 +91,7 @@ export function dartFilenames(units: Unit[], partFiles: Set<string>): FilenameLa
  */
 export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage): Finding[] {
   const byFile = new Map<string, Map<string, number>>()
+  const opaque = new Set(matches.filter(m => lang.opaqueRules?.includes(m.ruleId) === true).map(m => m.file))
   for (const m of matches) {
     if (!lang.nameRules.includes(m.ruleId) || !lang.isPublic(m.text)) {
       continue
@@ -100,7 +104,7 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
   }
   const findings: Finding[] = []
   for (const [file, names] of byFile) {
-    if (names.size !== 1) {
+    if (names.size !== 1 || opaque.has(file)) {
       continue
     }
     const stem = lang.stem(file, unitOf(file, lang.units))

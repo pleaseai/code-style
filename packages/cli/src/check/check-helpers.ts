@@ -200,7 +200,12 @@ export function jvmHelpers(
     const fqn = pkg === '' ? c.name : `${pkg}.${c.name}`
     const word = new RegExp(`\\b${c.name.replace(/\$/g, '\\$')}\\b`)
     const out = new Set<string>()
+    // Another module can declare the same fully qualified name; only the owning module's tests use this helper.
+    const owner = unitOf(c.file, units)
     for (const file of testFiles) {
+      if (unitOf(file, units) !== owner) {
+        continue
+      }
       const specs = importsOf.get(file) ?? []
       if (specs.some(s => s === fqn || s.startsWith(`${fqn}.`) || (pkg !== '' && s === `${pkg}.*`))) {
         out.add(file)

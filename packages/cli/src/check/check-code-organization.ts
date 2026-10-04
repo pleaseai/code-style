@@ -22,8 +22,11 @@ const EXTENSIONS: Record<ExtractLanguage, RegExp> = {
   rust: /\.rs$/,
 }
 
-function extract(root: string, files: string[], language: ExtractLanguage): ExtractMatch[] {
-  return files.some(f => EXTENSIONS[language].test(f)) ? runExtraction(root, language) : []
+/** Matches in `fileSet` only: ast-grep's own walker does not know about ignored directories. */
+function extract(root: string, files: string[], fileSet: Set<string>, language: ExtractLanguage): ExtractMatch[] {
+  return files.some(f => EXTENSIONS[language].test(f))
+    ? runExtraction(root, language).filter(m => fileSet.has(m.file))
+    : []
 }
 
 /**
@@ -39,11 +42,11 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const files = listFiles(root)
   const fileSet = new Set(files)
 
-  const ts = [...extract(root, files, 'typescript'), ...extract(root, files, 'tsx')]
-  const dart = extract(root, files, 'dart')
-  const kotlin = extract(root, files, 'kotlin')
-  const java = extract(root, files, 'java')
-  const rust = extract(root, files, 'rust')
+  const ts = [...extract(root, files, fileSet, 'typescript'), ...extract(root, files, fileSet, 'tsx')]
+  const dart = extract(root, files, fileSet, 'dart')
+  const kotlin = extract(root, files, fileSet, 'kotlin')
+  const java = extract(root, files, fileSet, 'java')
+  const rust = extract(root, files, fileSet, 'rust')
 
   const tsUnits = TYPESCRIPT_LAYOUT.units(files, base, root)
   const dartUnits = DART_LAYOUT.units(files, base, root)

@@ -170,9 +170,13 @@ export function checkRust(
   const fileSet = new Set(files)
   const decls = new Map<string, ModDecl[]>()
   const unitTestFiles = new Set<string>()
+  const nestedDeclFiles = new Set<string>()
   for (const m of matches) {
     if (m.ruleId === 'mod-decl') {
       decls.set(m.file, [...(decls.get(m.file) ?? []), { name: m.text, path: m.vars.PATH }])
+    }
+    else if (m.ruleId === 'mod-decl-nested') {
+      nestedDeclFiles.add(m.file)
     }
     else if (m.ruleId === 'test-attr') {
       unitTestFiles.add(m.file)
@@ -185,6 +189,8 @@ export function checkRust(
     const nestedPackages = loaded.packages.filter(p => p !== pkg && isUnder(p.dir, pkg.dir) && p.dir !== pkg.dir)
     const owned = (f: string): boolean => isUnder(f, pkg.dir) && !nestedPackages.some(p => isUnder(f, p.dir))
     const roots = new Set(pkg.roots)
+    // `mod x;` inside an inline module or fn body is not followed, so reachability is only a lower bound.
+    const reachabilityKnown = ![...nestedDeclFiles].some(owned)
     const fromTarget = new Map<string, Set<string>>()
     const reachedByAny = new Set<string>()
     for (const root of pkg.roots) {
@@ -199,10 +205,21 @@ export function checkRust(
       if (!owned(file)) {
         continue
       }
+      const users = fromTarget.get(file)
+      if (users != null && users.size >= 2 && !isUnder(file, commonDir)) {
+        findings.push({
+          slug: 'test-helpers-in-dedicated-location',
+          kind: 'shared-helper-outside-location',
+          severity: 'warning',
+          language: 'rust',
+          file,
+          message: `Helper module is shared by ${users.size} test targets (${[...users].sort().slice(0, 3).join(', ')}) but lives outside ${commonDir}/. Move it to ${commonDir}/mod.rs (or a submodule) and load it with \`mod common;\`.`,
+        })
+      }
       if (isUnder(file, testsDir)) {
         const inner = relativeTo(file, testsDir).split('/')
         const inTargetDir = inner.length > 1 && fileSet.has(joinPath(testsDir, inner[0] ?? '', 'main.rs'))
-        if (!roots.has(file) && !reachedByAny.has(file) && !isUnder(file, commonDir) && !inTargetDir) {
+        if (reachabilityKnown && !roots.has(file) && !reachedByAny.has(file) && !isUnder(file, commonDir) && !inTargetDir) {
           findings.push({
             slug: 'test-path-derivable-from-source',
             kind: 'undiscovered-integration-test',
@@ -212,19 +229,8 @@ export function checkRust(
             message: 'Cargo does not compile this file: it is not a test target and no test target loads it with `mod`. Move it to tests/<name>.rs (or tests/<name>/main.rs), or register it with a [[test]] entry in Cargo.toml.',
           })
         }
-        const users = fromTarget.get(file)
-        if (users != null && users.size >= 2 && !isUnder(file, commonDir)) {
-          findings.push({
-            slug: 'test-helpers-in-dedicated-location',
-            kind: 'shared-helper-outside-location',
-            severity: 'warning',
-            language: 'rust',
-            file,
-            message: `Helper module is shared by ${users.size} test targets (${[...users].sort().slice(0, 3).join(', ')}) but lives outside ${commonDir}/. Move it to ${commonDir}/mod.rs (or a submodule) and load it with \`mod common;\`.`,
-          })
-        }
       }
-      else if (unitTestFiles.has(file) && !roots.has(file) && !reachedByAny.has(file)) {
+      else if (reachabilityKnown && unitTestFiles.has(file) && !roots.has(file) && !reachedByAny.has(file)) {
         findings.push({
           slug: 'test-path-derivable-from-source',
           kind: 'unreachable-unit-test',

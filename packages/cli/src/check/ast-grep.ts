@@ -106,7 +106,7 @@ export function resolveToolchain(anchors: string[]): Toolchain {
 export function runExtraction(root: string, language: ExtractLanguage, paths: string[] = ['.']): ExtractMatch[] {
   const { bin, extractDir } = resolveToolchain(resolutionAnchors(root))
   const ruleFile = join(extractDir, `${language}.yml`)
-  const res = spawnSync(bin, ['scan', '--rule', ruleFile, '--json=stream', ...paths], {
+  const res = spawnSync(bin, ['scan', '-c', join(extractDir, 'sgconfig.yml'), '--rule', ruleFile, '--json=stream', ...paths], {
     cwd: root,
     encoding: 'utf-8',
     maxBuffer: 512 * 1024 * 1024,

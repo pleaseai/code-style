@@ -1,8 +1,8 @@
 import { join } from 'node:path'
 import { afterEach, describe, expect, test } from 'bun:test'
-import { resolutionAnchors, resolveToolchain } from '../../src/check/ast-grep.js'
+import { resolutionAnchors, resolveToolchain, runExtraction } from '../../src/check/ast-grep.js'
 import { MissingDependencyError } from '../../src/check/errors.js'
-import { createFixture } from '../test-utils/fixture.js'
+import { checkFixture, createFixture } from '../test-utils/fixture.js'
 
 let cleanup = (): void => {}
 afterEach(() => cleanup())
@@ -31,5 +31,28 @@ describe('resolveToolchain', () => {
     expect(() => resolveToolchain([join(fixture.root, 'package.json')])).toThrow(MissingDependencyError)
     expect(() => resolveToolchain([join(fixture.root, 'package.json')]))
       .toThrow('bun add -D @pleaseai/ast-grep-config @ast-grep/cli')
+  })
+})
+
+describe('runExtraction', () => {
+  test('ignores the checked project\'s sgconfig.yml', () => {
+    const fixture = createFixture({
+      'package.json': '{}',
+      'sgconfig.yml': 'ruleDirs: []\nlanguageGlobs:\n  tsx: ["*.ts"]\n',
+      'src/zed.ts': 'export function Zed() {}',
+    })
+    cleanup = fixture.cleanup
+    expect(runExtraction(fixture.root, 'typescript').map(m => m.text)).toEqual(['Zed'])
+  })
+})
+
+describe('checkCodeOrganization file set', () => {
+  test('does not report files in ignored directories of a non-git root', () => {
+    const result = checkFixture({
+      'package.json': '{}',
+      'node_modules/pkg/foo.ts': 'export function Zed() {}',
+      'dist/bar.ts': 'export function Zed() {}',
+    })
+    expect(result.findings).toEqual([])
   })
 })

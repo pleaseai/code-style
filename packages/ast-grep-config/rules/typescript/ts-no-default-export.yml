@@ -29,6 +29,8 @@ rule:
 # glob starts with `**/` to work in monorepo packages too.
 ignores:
   - '**/*.d.ts'
+  - '**/*.d.mts'
+  - '**/*.d.cts'
   - '**/*.config.{ts,mts,cts}'
   - '**/*.config.*.{ts,mts,cts}'
   - '**/*.stories.{ts,mts,cts}'

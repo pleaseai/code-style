@@ -40,6 +40,36 @@ describe('code-filename-matches-primary-symbol (TypeScript)', () => {
   })
 })
 
+describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
+  test('a namespace is the primary symbol, not its members', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/api.ts': 'export namespace Api { export class User {} }',
+      'src/billing.ts': 'export namespace Billing { export class A {}\nexport class B {} }',
+    }, SLUG)).toEqual([])
+    const findings = findingsFor({ ...PKG, 'src/api.ts': 'export namespace Billing { export class User {} }' }, SLUG)
+    expect(findings[0]?.message).toContain('billing.ts')
+  })
+
+  test('destructured exports make the symbol set unknown, so the file is not checked', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/mixed.ts': 'export function foo() {}\nexport const { bar } = obj',
+      'src/only-pattern.ts': 'export const [first] = list',
+      'src/tsx-mixed.tsx': 'export function Foo() {}\nexport const { bar } = obj',
+    }, SLUG)).toEqual([])
+  })
+
+  test('declaration files of every module flavor are exempt', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/types.d.mts': 'export declare class User {}',
+      'src/types.d.cts': 'export declare class User {}',
+      'src/types.d.ts': 'export declare class User {}',
+    }, SLUG)).toEqual([])
+  })
+})
+
 describe('code-filename-matches-primary-symbol (Dart)', () => {
   const PUBSPEC = { 'pubspec.yaml': 'name: app' }
 

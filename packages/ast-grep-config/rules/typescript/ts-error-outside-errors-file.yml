@@ -36,6 +36,8 @@ rule:
 ignores:
   - '**/errors.ts'
   - '**/*.d.ts'
+  - '**/*.d.mts'
+  - '**/*.d.cts'
   - '**/*.test.ts'
   - '**/*.spec.ts'
   - '**/test/**'

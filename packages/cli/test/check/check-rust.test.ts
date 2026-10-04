@@ -55,6 +55,17 @@ describe('rust integration tests', () => {
     })])
   })
 
+  test('a helper outside tests/ shared by two targets is reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'src/support.rs': 'pub fn setup() {}',
+      'tests/a.rs': '#[path = "../src/support.rs"]\nmod support;',
+      'tests/b.rs': '#[path = "../src/support.rs"]\nmod support;',
+    }, stub([['lib', 'src/lib.rs'], ['test', 'tests/a.rs'], ['test', 'tests/b.rs']]))
+    expect(kinds(result)).toEqual(['shared-helper-outside-location src/support.rs'])
+  })
+
   test('tests/common/ and submodules of a tests/<name>/main.rs target are never reported', () => {
     const result = checkFixture({
       ...CARGO,
@@ -89,6 +100,15 @@ describe('rust unit-test split files', () => {
       'src/parser_tests.rs': '#[test]\nfn parses() {}',
     }, stub([['lib', 'src/lib.rs']]))
     expect(kinds(result)).toEqual(['unreachable-unit-test src/parser_tests.rs'])
+  })
+
+  test('a #[test] file declared inside an inline module is not reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'pub mod outer { mod child; }',
+      'src/outer/child.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
   })
 })
 
