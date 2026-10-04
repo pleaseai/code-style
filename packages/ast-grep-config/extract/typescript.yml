@@ -99,7 +99,9 @@ rule:
                 not:
                   has:
                     field: alias
-                    kind: identifier
+                    any:
+                      - kind: identifier
+                      - kind: string
                 inside:
                   kind: export_clause
                   inside:
@@ -141,7 +143,7 @@ rule:
                 kind: program
 ---
 # Re-exports (`export { a } from`, `export * from`, `export * as ns from`) and
-# default exports add public symbols that export-name does not enumerate, so
+# default and string-named exports add public symbols that export-name does not enumerate, so
 # the file reads as "unknown symbols" like export-destructure.
 id: export-opaque
 language: typescript
@@ -164,6 +166,14 @@ rule:
           has:
             kind: identifier
             regex: ^default$
+    # `export { foo as "string name" }` / `export { "string name" as foo }`:
+    # string-literal specifier names are not enumerated by export-name.
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          has:
+            kind: string
 ---
 id: helper-candidate
 language: typescript
@@ -202,6 +212,32 @@ rule:
                     inside:
                       kind: program
 ---
+# `export { local as exported }` (local exports only): the match is the local
+# name, `$ALIAS` the name importers see.
+id: export-local-alias
+language: typescript
+severity: hint
+message: aliased local export
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: export_specifier
+    has:
+      field: alias
+      kind: identifier
+      pattern: $ALIAS
+    inside:
+      kind: export_clause
+      inside:
+        kind: export_statement
+        inside:
+          kind: program
+        not:
+          has:
+            field: source
+            kind: string
+---
 id: import-name
 language: typescript
 severity: hint
@@ -217,6 +253,32 @@ rule:
       has:
         field: source
         pattern: $SRC
+---
+# `export { local as exported }` (local exports only): the match is the local
+# name, `$ALIAS` the name importers see.
+id: export-local-alias
+language: typescript
+severity: hint
+message: aliased local export
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: export_specifier
+    has:
+      field: alias
+      kind: identifier
+      pattern: $ALIAS
+    inside:
+      kind: export_clause
+      inside:
+        kind: export_statement
+        inside:
+          kind: program
+        not:
+          has:
+            field: source
+            kind: string
 ---
 id: import-namespace
 language: typescript

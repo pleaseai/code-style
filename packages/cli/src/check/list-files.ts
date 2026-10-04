@@ -46,7 +46,8 @@ export function listFiles(root: string): string[] {
   })
   if (git.status === 0) {
     // `--cached` still lists tracked files deleted from the work tree.
-    return git.stdout.split('\0').filter(f => f !== '' && existsSync(join(root, f))).sort()
+    // An unmerged path is listed once per index stage.
+    return [...new Set(git.stdout.split('\0'))].filter(f => f !== '' && existsSync(join(root, f))).sort()
   }
   const out: string[] = []
   walk(root, root, out)

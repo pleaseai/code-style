@@ -163,6 +163,38 @@ describe('rust unit-test split files', () => {
   })
 })
 
+describe('rust module path edge cases', () => {
+  test('a nested `#[path]` mod withholds the whole crate, so a test file it loads under tests/ is not reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'mod outer;',
+      'src/outer.rs': 'pub mod inner {\n  #[path = "../../tests/loaded.rs"]\n  mod loaded;\n}',
+      'tests/loaded.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([expect.stringContaining('(from src/outer.rs)')])
+  })
+
+  test('`#[cfg_attr(test, path = "…")] mod tests;` reaches the conditional file as well as the default one', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '#[cfg_attr(test, path = "checks.rs")]\nmod tests;',
+      'src/checks.rs': '#[test]\nfn works() {}',
+      'src/tests.rs': '#[test]\nfn also() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
+  test('`mod r#async;` loads async.rs', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'mod r#async;',
+      'src/async.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+})
+
 describe('rust without cargo', () => {
   test('skips Rust with a visible notice instead of passing silently', () => {
     const result = checkFixture({

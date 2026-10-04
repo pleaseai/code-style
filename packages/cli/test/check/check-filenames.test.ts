@@ -21,6 +21,14 @@ describe('code-filename-matches-primary-symbol (TypeScript)', () => {
     expect(findings[0]?.message).toContain('parse-config.ts')
   })
 
+  test('acronym symbols match a file name that does not split the acronym', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/graphql-client.ts': 'export class GraphQLClient {}',
+      'src/oauth2-client.ts': 'export class OAuth2Client {}',
+    }, SLUG)).toEqual([])
+  })
+
   test('files with several public symbols, or none, are not checked', () => {
     expect(findingsFor({
       ...PKG,
@@ -80,6 +88,14 @@ describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
     }, SLUG)).toEqual([])
   })
 
+  test('string-literal export aliases make the symbol set unknown, so the file is not checked', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/alias.ts': 'export const foo = 1\nexport { foo as "another" }',
+      'src/alias.tsx': 'export const foo = 1\nexport { foo as "another" }',
+    }, SLUG)).toEqual([])
+  })
+
   test('files under hidden directories are scanned', () => {
     const findings = findingsFor({ ...PKG, 'src/.hidden/mixed.ts': 'export function good() {}' }, SLUG)
     expect(findings.map(f => f.file)).toEqual(['src/.hidden/mixed.ts'])
@@ -117,6 +133,13 @@ describe('code-filename-matches-primary-symbol (Dart)', () => {
       'lib/errors.dart': 'class AuthException implements Exception {}',
       'lib/model.g.dart': 'class Generated {}',
       'lib/part_a.dart': 'part of \'model.dart\';\nclass Other {}',
+    }, SLUG)).toEqual([])
+  })
+
+  test('a library that re-exports others has an unknown symbol set, so it is not checked', () => {
+    expect(findingsFor({
+      ...PUBSPEC,
+      'lib/api.dart': 'export \'other.dart\';\nclass Foo {}',
     }, SLUG)).toEqual([])
   })
 

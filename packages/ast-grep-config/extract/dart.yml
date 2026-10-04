@@ -98,3 +98,12 @@ severity: hint
 message: part file
 rule:
   kind: part_of_directive
+---
+# `export 'other.dart';` re-exports public symbols that top-level-name does not
+# enumerate, so the file reads as "unknown symbols" in the filename check.
+id: export-directive
+language: dart
+severity: hint
+message: re-export
+rule:
+  kind: library_export

@@ -64,6 +64,81 @@ rule:
         - inside:
             kind: source_file
 ---
+# A nested `mod x;` carrying a path attribute (`#[path = "…"]` or
+# `#[cfg_attr(…, path = "…")]`). rustc resolves it relative to the inline
+# module's directory and it can load a file anywhere in the crate, so the
+# checker withholds reachability for the whole crate.
+id: mod-decl-nested-path
+language: rust
+severity: hint
+message: module declaration with a path attribute inside an inline module or function body
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: mod_item
+    not:
+      any:
+        - has:
+            field: body
+            kind: declaration_list
+        - inside:
+            kind: source_file
+    follows:
+      stopBy:
+        not:
+          any:
+            - kind: attribute_item
+            - kind: line_comment
+            - kind: block_comment
+      kind: attribute_item
+      regex: \bpath\s*=
+---
+# `#[cfg_attr(<predicate>, path = "…")] mod x;`: the declaration loads the
+# `path` file under that predicate and `x.rs` otherwise, so both are possible
+# targets. Reported in addition to the plain `mod-decl` of the same node.
+id: mod-decl-cfg-path
+language: rust
+severity: hint
+message: module declaration with a conditional path attribute
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: mod_item
+    not:
+      has:
+        field: body
+        kind: declaration_list
+    inside:
+      kind: source_file
+    follows:
+      stopBy:
+        not:
+          any:
+            - kind: attribute_item
+            - kind: line_comment
+            - kind: block_comment
+      kind: attribute_item
+      has:
+        kind: attribute
+        all:
+          - has:
+              kind: identifier
+              regex: ^cfg_attr$
+          - has:
+              kind: token_tree
+              has:
+                kind: string_literal
+                follows:
+                  regex: ^=$
+                  follows:
+                    kind: identifier
+                    regex: ^path$
+                has:
+                  kind: string_content
+                  pattern: $PATH
+---
 id: test-attr
 language: rust
 severity: hint

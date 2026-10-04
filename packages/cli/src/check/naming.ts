@@ -23,3 +23,8 @@ export function toKebabCase(name: string): string {
 export function toSnakeCase(name: string): string {
   return words(name).join('_')
 }
+
+/** Separator-free comparison key: `GraphQLClient` and `graphql-client` both give `graphqlclient`. */
+export function nameKey(name: string): string {
+  return words(name).join('')
+}

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { toKebabCase, toSnakeCase } from '../../src/check/naming.js'
+import { nameKey, toKebabCase, toSnakeCase } from '../../src/check/naming.js'
 
 describe('toKebabCase', () => {
   test.each([
@@ -22,5 +22,20 @@ describe('toSnakeCase', () => {
     ['JSONParser', 'json_parser'],
   ])('%s → %s', (input, expected) => {
     expect(toSnakeCase(input)).toBe(expected)
+  })
+})
+
+describe('nameKey', () => {
+  test.each([
+    ['GraphQLClient', 'graphql-client'],
+    ['OAuth2Client', 'oauth2-client'],
+    ['UserService', 'user.service'],
+    ['user_repository', 'UserRepository'],
+  ])('%s matches %s', (symbol, stem) => {
+    expect(nameKey(symbol)).toBe(nameKey(stem))
+  })
+
+  test('different words do not match', () => {
+    expect(nameKey('UserService')).not.toBe(nameKey('user-store'))
   })
 })

@@ -184,9 +184,11 @@ export function checkRust(
   const unitTestFiles = new Set<string>()
   const nestedDeclFiles = new Set<string>()
   const pathLoaded = new Set<string>()
+  const nestedPathFiles = new Set<string>()
   for (const m of matches) {
-    if (m.ruleId === 'mod-decl') {
-      decls.set(m.file, [...(decls.get(m.file) ?? []), { name: m.text, path: m.vars.PATH }])
+    if (m.ruleId === 'mod-decl' || m.ruleId === 'mod-decl-cfg-path') {
+      // `mod r#async;` loads `async.rs`.
+      decls.set(m.file, [...(decls.get(m.file) ?? []), { name: m.text.replace(/^r#/, ''), path: m.vars.PATH }])
       if (m.vars.PATH != null) {
         const dir = posix.dirname(m.file) === '.' ? '' : posix.dirname(m.file)
         pathLoaded.add(posix.normalize(joinPath(dir, m.vars.PATH)))
@@ -194,6 +196,9 @@ export function checkRust(
     }
     else if (m.ruleId === 'mod-decl-nested') {
       nestedDeclFiles.add(m.file)
+    }
+    else if (m.ruleId === 'mod-decl-nested-path') {
+      nestedPathFiles.add(m.file)
     }
     else if (m.ruleId === 'test-attr') {
       unitTestFiles.add(m.file)
@@ -212,9 +217,10 @@ export function checkRust(
     const owned = (f: string): boolean => isUnder(f, pkg.dir) && !nestedDirs.some(d => isUnder(f, d))
     const roots = new Set(pkg.roots)
     // `mod x;` inside an inline module or fn body is not followed: withhold judgement only for the subtree it could load from.
+    // A nested `#[path]` can load a file anywhere in the crate, so it withholds the whole package.
     const unknownDirs = [...nestedDeclFiles]
       .filter(owned)
-      .map(f => ({ file: f, dir: nestedModDir(f, roots.has(f), pathLoaded) }))
+      .map(f => ({ file: f, dir: nestedPathFiles.has(f) ? pkg.dir : nestedModDir(f, roots.has(f), pathLoaded) }))
     const reachabilityUnknown = (f: string): boolean => unknownDirs.some(u => isUnder(f, u.dir))
     if (unknownDirs.length > 0) {
       const where = unknownDirs.map(u => `${u.dir === '' ? '.' : u.dir}/ (from ${u.file})`).sort().join(', ')

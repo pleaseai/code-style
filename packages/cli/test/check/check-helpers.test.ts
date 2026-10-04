@@ -16,6 +16,16 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
     expect(findings[0]?.message).toContain('test/test-utils/')
   })
 
+  test('a helper exported under an alias is matched by the alias its importers use', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'test/helpers.ts': 'class FakeClock {}\nexport { FakeClock as MockClock }',
+      'test/user.test.ts': 'import { MockClock } from \'./helpers\'',
+      'test/order.test.ts': 'import { MockClock } from \'./helpers\'',
+    }, SLUG)
+    expect(findings).toEqual([expect.objectContaining({ file: 'test/helpers.ts', line: 1 })])
+  })
+
   test('resolves `.mjs` imports to `.mts` even when a same-named `.ts` exists', () => {
     const findings = findingsFor({
       ...PKG,

@@ -136,9 +136,19 @@ export function typescriptHelpers(
     byName.set(name, set)
     imports.set(target, byName)
   }
+  // file → local name → names it is exported under (`export { local as exported }`)
+  const aliases = new Map<string, Map<string, string[]>>()
+  for (const m of matches) {
+    if (m.ruleId === 'export-local-alias' && m.vars.ALIAS != null) {
+      const byLocal = aliases.get(m.file) ?? new Map<string, string[]>()
+      byLocal.set(m.text, [...(byLocal.get(m.text) ?? []), m.vars.ALIAS])
+      aliases.set(m.file, byLocal)
+    }
+  }
   lang.importers = (c) => {
     const byName = imports.get(c.file)
-    return new Set([...(byName?.get(c.name) ?? []), ...(byName?.get('*') ?? [])])
+    const exportedAs = [c.name, ...(aliases.get(c.file)?.get(c.name) ?? [])]
+    return new Set([...exportedAs.flatMap(n => [...(byName?.get(n) ?? [])]), ...(byName?.get('*') ?? [])])
   }
   return lang
 }

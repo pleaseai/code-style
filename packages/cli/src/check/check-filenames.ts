@@ -2,7 +2,7 @@ import type { ExtractMatch } from './ast-grep.js'
 import type { Unit } from './layouts.js'
 import type { Finding, Language } from './types.js'
 import { isUnder, relativeTo, unitOf } from './layouts.js'
-import { toKebabCase, toSnakeCase } from './naming.js'
+import { nameKey, toKebabCase, toSnakeCase } from './naming.js'
 
 const SLUG = 'code-filename-matches-primary-symbol'
 
@@ -63,6 +63,7 @@ export function dartFilenames(units: Unit[], partFiles: Set<string>): FilenameLa
   return {
     language: 'dart',
     nameRules: ['top-level-name', 'top-level-type-alias'],
+    opaqueRules: ['export-directive'],
     normalize: toSnakeCase,
     isPublic: name => !name.startsWith('_'),
     units,
@@ -114,7 +115,7 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
       continue
     }
     const [[symbol, line]] = [...names]
-    if (lang.normalize(stem) === lang.normalize(symbol)) {
+    if (nameKey(stem) === nameKey(symbol)) {
       continue
     }
     const ext = baseName(file).slice(stem.length)
