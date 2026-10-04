@@ -121,7 +121,11 @@ will be overwritten.
 - ESM only — never emit \`require\`/\`module.exports\`
 - TypeScript: \`strict: true\`, prefer \`type\` over \`interface\`, no implicit \`any\`
 - Prefer named exports, early returns, \`async\`/\`await\`, optional chaining
-- File size target: ≤ 500 lines; colocate \`*.test.ts\` with the source
+- File size target: ≤ 500 lines
+- Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
+  (\`src/foo/bar.ts\` → \`test/foo/bar.test.ts\`); no \`import.meta.vitest\` in-source tests
+- Code organization (named exports, file names, error files, test paths, shared helpers):
+  \`node_modules/@pleaseai/code-organization/README.md\`; check with \`please-code-org check\`
 - Conventional Commits for all commit messages
 
 For the full rules (what an AI coding assistant needs to know before writing code),

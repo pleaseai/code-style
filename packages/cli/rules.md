@@ -22,8 +22,11 @@ code, so generated output passes lint on the first try.
 - Import ordering (auto-fixable): node builtins → external → internal aliases →
   parent → sibling → index, with a blank line between groups and alphabetised
   within each group.
-- Prefer **named exports**. Reserve default exports for framework-required
-  entry points (e.g. a Next.js page, a Vite plugin).
+- Use **named exports** so one name search finds the definition and every use.
+  Default exports are only for files whose shape a framework dictates (config
+  files, Nuxt `pages/`/`layouts/`/`middleware/`/`plugins/`, Nitro
+  `server/api/`/`routes/`, Storybook stories). The `ts-no-default-export`
+  rule of `@pleaseai/code-organization` lists the exact paths.
 
 ## TypeScript
 
@@ -47,11 +50,34 @@ code, so generated output passes lint on the first try.
 
 ## File Organisation
 
-- One primary export per file when practical.
+- One primary export per file when practical. A file with a single public
+  symbol is named after it in kebab-case (`UserService` → `user-service.ts`).
 - Target file size ≤ 500 lines; split when a file grows past that.
-- Colocate tests as `*.test.ts` next to the source they cover.
+- Put a module's error classes in its `errors.ts`.
 - Avoid barrel re-exports (`index.ts` that just re-exports everything) for
   internal modules — they defeat tree-shaking.
+
+## Testing
+
+- Tests live under the package's test root, `test/` or `tests/` (one per
+  package), at a path mirrored from the source they test, with a `.test.ts`
+  (or `.spec.ts`) suffix:
+  - one source root: drop its name — `src/foo/bar.ts` → `test/foo/bar.test.ts`;
+  - several roots (Nuxt 4 `app/`, `server/`, `shared/`): keep it —
+    `server/utils/db.ts` → `test/unit/server/utils/db.test.ts`.
+- One environment segment is allowed directly under the test root: `unit`,
+  `nuxt`, `browser`, or `e2e`. End-to-end tests with no single source file go
+  under `test/e2e/`.
+- Never write `*.test.ts` next to the source, and never use Vitest in-source
+  tests (`if (import.meta.vitest)`).
+- Helpers shared by two or more test files go in `test/test-utils/`; a helper
+  used by one test file stays in that file.
+- Not every source file needs a test. These rules say where a test goes, not
+  whether it must exist.
+
+These are the `@pleaseai/code-organization` rules (ADR-0022). Check them with
+`ast-grep scan` (structural rules) and `please-code-org check` (file names and
+test paths); each warning links to a README that explains the fix.
 
 ## JSON & `package.json`
 
