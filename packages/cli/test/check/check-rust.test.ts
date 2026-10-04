@@ -1,9 +1,9 @@
-import type { CargoMetadataProvider } from '../src/types.js'
+import type { CargoMetadataProvider } from '../../src/check/types.js'
 import { spawnSync } from 'node:child_process'
 import process from 'node:process'
 import { describe, expect, test } from 'bun:test'
-import { CargoUnavailableError } from '../src/errors.js'
-import { cargoStub, checkFixture } from './test-utils/fixture.js'
+import { CargoUnavailableError } from '../../src/check/errors.js'
+import { cargoStub, checkFixture } from '../test-utils/fixture.js'
 
 const CARGO = { 'Cargo.toml': '[package]\nname = "fixture"\nversion = "0.1.0"\nedition = "2021"\n' }
 

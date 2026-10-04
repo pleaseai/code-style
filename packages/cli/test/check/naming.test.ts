@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { toKebabCase, toSnakeCase } from '../src/naming.js'
+import { toKebabCase, toSnakeCase } from '../../src/check/naming.js'
 
 describe('toKebabCase', () => {
   test.each([

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { findingsFor } from './test-utils/fixture.js'
+import { findingsFor } from '../test-utils/fixture.js'
 
 const SLUG = 'code-filename-matches-primary-symbol'
 const PKG = { 'package.json': '{}' }

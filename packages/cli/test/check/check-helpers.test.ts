@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { findingsFor } from './test-utils/fixture.js'
+import { findingsFor } from '../test-utils/fixture.js'
 
 const SLUG = 'test-helpers-in-dedicated-location'
 const PKG = { 'package.json': '{}', 'src/user.ts': 'export const user = 1', 'src/order.ts': 'export const order = 1' }
@@ -29,8 +29,8 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
     expect(findingsFor({
       ...PKG,
       'test/test-utils/mocks.ts': 'export function createMockUser() {}',
-      'test/user.test.ts': 'import { createMockUser } from \'./test-utils/mocks\'',
-      'test/order.test.ts': 'import { createMockUser } from \'./test-utils/mocks\'',
+      'test/user.test.ts': 'import { createMockUser } from \'../test-utils/mocks\'',
+      'test/order.test.ts': 'import { createMockUser } from \'../test-utils/mocks\'',
     }, SLUG)).toEqual([])
   })
 

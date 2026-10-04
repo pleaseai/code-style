@@ -21,3 +21,11 @@ export class CargoUnavailableError extends Error {
     this.name = 'CargoUnavailableError'
   }
 }
+
+/** Neither the checked project nor this CLI can resolve `@pleaseai/ast-grep-config` and `@ast-grep/cli`. */
+export class MissingDependencyError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'MissingDependencyError'
+  }
+}

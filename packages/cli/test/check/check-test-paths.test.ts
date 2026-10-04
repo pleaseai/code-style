@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { ConfigError } from '../src/errors.js'
-import { checkFixture, findingsFor } from './test-utils/fixture.js'
+import { ConfigError } from '../../src/check/errors.js'
+import { checkFixture, findingsFor } from '../test-utils/fixture.js'
 
 const SLUG = 'test-path-derivable-from-source'
 const PKG = { 'package.json': '{}' }

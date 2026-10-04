@@ -23,7 +23,9 @@ interface Messages {
   done: string
   cancelled: string
   unknownCommand: (cmd: string) => string
+  unexpectedArguments: (args: string) => string
   usage: string
+  checkUsage: string
 }
 
 const messages: Record<Locale, Messages> = {
@@ -48,6 +50,7 @@ const messages: Record<Locale, Messages> = {
     done: 'Done!',
     cancelled: 'Cancelled.',
     unknownCommand: cmd => `Unknown command: ${cmd}`,
+    unexpectedArguments: args => `Unexpected arguments: ${args}`,
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -55,12 +58,29 @@ Commands:
   init       Interactive setup (select packages + write configs)
   update     Re-apply the AGENTS.md rules block only
   doctor     Check current project status
+  check      Check file names, test paths, and shared test helpers (see check --help)
 
 Options:
   --yes, -y        Accept defaults, overwrite existing files
   --lang <ko|en>   Force CLI locale
   --help, -h       Show this message
   --version, -v    Print version`,
+    checkUsage: `Usage:
+  please-style check [path] [options]
+
+Checks file names, test locations, and shared test helpers against the
+ADR-0022 code-organization standard (layer 3). Structural rules (layer 2) run
+separately with \`ast-grep scan\`.
+
+Options:
+  --json             Print findings as JSON
+  --strict           Exit 1 when there is any finding (default: warn only, exit 0)
+  --config <file>    Config file (default: <path>/code-organization.json)
+  --help, -h         Show this message
+  --version, -v      Print version
+
+Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config error.
+`,
   },
   ko: {
     appTitle: 'PleaseAI code-style 설치',
@@ -83,6 +103,7 @@ Options:
     done: '완료!',
     cancelled: '취소되었습니다.',
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
+    unexpectedArguments: args => `예상하지 못한 인자: ${args}`,
     usage: `사용법:
   pleaseai-code-style <command> [options]
 
@@ -90,12 +111,29 @@ Options:
   init       대화형 설치 (패키지 선택 + 설정 파일 생성)
   update     AGENTS.md 룰 블록만 다시 적용
   doctor     현재 프로젝트 상태 점검
+  check      파일 이름, 테스트 경로, 공유 테스트 헬퍼 검사 (check --help 참고)
 
 옵션:
   --yes, -y        기본값 수락, 기존 파일 덮어쓰기
   --lang <ko|en>   CLI 로케일 강제 지정
   --help, -h       이 메시지 표시
   --version, -v    버전 출력`,
+    checkUsage: `사용법:
+  please-style check [path] [options]
+
+파일 이름, 테스트 위치, 공유 테스트 헬퍼를 ADR-0022 code-organization 표준
+(3층)에 맞춰 검사합니다. 구조 규칙(2층)은 \`ast-grep scan\`으로 따로
+실행합니다.
+
+옵션:
+  --json             발견 사항을 JSON으로 출력
+  --strict           발견 사항이 하나라도 있으면 exit 1 (기본: 경고만, exit 0)
+  --config <file>    설정 파일 (기본: <path>/code-organization.json)
+  --help, -h         이 메시지 표시
+  --version, -v      버전 출력
+
+종료 코드: 0 정상 또는 경고만, 1 --strict에서 발견 사항 있음, 2 사용법 또는 설정 오류.
+`,
   },
 }
 

@@ -1,8 +1,8 @@
-import type { CargoMetadata, CheckOptions, CheckResult, Finding } from '../../src/types.js'
+import type { CargoMetadata, CheckOptions, CheckResult, Finding } from '../../src/check/types.js'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { checkCodeOrganization } from '../../src/check-code-organization.js'
+import { checkCodeOrganization } from '../../src/check/check-code-organization.js'
 
 export interface Fixture {
   root: string

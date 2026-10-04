@@ -1,9 +1,9 @@
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, test } from 'bun:test'
-import { createFixture } from './test-utils/fixture.js'
+import { createFixture } from '../test-utils/fixture.js'
 
-const CLI = fileURLToPath(new URL('../src/cli.ts', import.meta.url))
+const CLI = fileURLToPath(new URL('../../src/index.ts', import.meta.url))
 
 let cleanup = (): void => {}
 afterEach(() => cleanup())
@@ -17,7 +17,7 @@ function run(files: Record<string, string>, args: string[]): { status: number | 
 
 const ORPHAN = { 'package.json': '{}', 'src/a.ts': '', 'test/b.test.ts': '' }
 
-describe('please-code-org check', () => {
+describe('please-style check', () => {
   test('warns but exits 0 by default (warn rollout)', () => {
     const res = run(ORPHAN, ['check', '<root>'])
     expect(res.status).toBe(0)
@@ -37,8 +37,20 @@ describe('please-code-org check', () => {
     expect(parsed.notices).toEqual([])
   })
 
-  test('exits 2 on an unknown command or an invalid config', () => {
-    expect(run(ORPHAN, ['lint', '<root>']).status).toBe(2)
+  test('prints its own usage for check --help and is listed in the global usage', () => {
+    const own = run(ORPHAN, ['check', '--help'])
+    expect(own.status).toBe(0)
+    expect(own.stdout).toContain('please-style check [path] [options]')
+    const global = run(ORPHAN, ['--help'])
+    expect(global.status).toBe(0)
+    expect(global.stdout).toMatch(/^ {2}check {6}/m)
+  })
+
+  test('exits 2 on an unknown flag, extra arguments, or an invalid config', () => {
+    const flag = run(ORPHAN, ['check', '<root>', '--fix'])
+    expect(flag.status).toBe(2)
+    expect(flag.stderr).toContain('--fix')
+    expect(run(ORPHAN, ['check', '<root>', 'extra']).status).toBe(2)
     const bad = run({ ...ORPHAN, 'code-organization.json': '{"colocated":true}' }, ['check', '<root>'])
     expect(bad.status).toBe(2)
     expect(bad.stderr).toContain('unknown key "colocated"')

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { mergeConfigs, readConfigFile } from '../src/config.js'
-import { ConfigError } from '../src/errors.js'
-import { createFixture } from './test-utils/fixture.js'
+import { mergeConfigs, readConfigFile } from '../../src/check/config.js'
+import { ConfigError } from '../../src/check/errors.js'
+import { createFixture } from '../test-utils/fixture.js'
 
 let cleanup = (): void => {}
 afterEach(() => cleanup())
