@@ -1,0 +1,133 @@
+packages/code-organization/package.json
+  s_79262c7689b9bc::t_da72428158c751 1-37
+packages/code-organization/rule-tests/__snapshots__/dart-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_a41de35efa28d4 1-72
+packages/code-organization/rule-tests/__snapshots__/java-error-outside-error-package-snapshot.yml
+  s_79262c7689b9bc::t_b252da71ef8365 1-56
+packages/code-organization/rule-tests/__snapshots__/kotlin-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_1754236e7f4e58 1-106
+packages/code-organization/rule-tests/__snapshots__/rust-error-outside-error-file-snapshot.yml
+  s_79262c7689b9bc::t_189be2d0b47094 1-68
+packages/code-organization/rule-tests/__snapshots__/rust-no-glob-reexport-snapshot.yml
+  s_79262c7689b9bc::t_c879b4e4e9e506 1-44
+packages/code-organization/rule-tests/__snapshots__/ts-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_9d98e6b18d297b 1-118
+packages/code-organization/rule-tests/__snapshots__/ts-no-default-export-snapshot.yml
+  s_79262c7689b9bc::t_1eed7a031387b6 1-78
+packages/code-organization/rule-tests/__snapshots__/ts-no-in-source-test-snapshot.yml
+  s_79262c7689b9bc::t_de037f6c3b9361 1-38
+packages/code-organization/rule-tests/__snapshots__/tsx-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_bf52020d0c34aa 1-118
+packages/code-organization/rule-tests/__snapshots__/tsx-no-default-export-snapshot.yml
+  s_79262c7689b9bc::t_f2f8679f68a097 1-78
+packages/code-organization/rule-tests/__snapshots__/tsx-no-in-source-test-snapshot.yml
+  s_79262c7689b9bc::t_eddbdd54936de4 1-38
+packages/code-organization/rule-tests/dart-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_c691f02e89fced 1-12
+packages/code-organization/rule-tests/java-error-outside-error-package-test.yml
+  s_79262c7689b9bc::t_944ee36099b84f 1-12
+packages/code-organization/rule-tests/kotlin-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_6d9e7b602fa5b5 1-13
+packages/code-organization/rule-tests/rust-error-outside-error-file-test.yml
+  s_1f9516ee682828::t_91f9394c151be5 1-21
+packages/code-organization/rule-tests/rust-no-glob-reexport-test.yml
+  s_79262c7689b9bc::t_2ad04c072b48c8 1-10
+packages/code-organization/rule-tests/ts-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_316264a68be8bb 1-14
+packages/code-organization/rule-tests/ts-no-default-export-test.yml
+  s_79262c7689b9bc::t_bf95ec99edb1bc 1-16
+packages/code-organization/rule-tests/ts-no-in-source-test-test.yml
+  s_79262c7689b9bc::t_28f9aeb29f59f0 1-12
+packages/code-organization/rule-tests/tsx-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_aea652ed36d730 1-14
+packages/code-organization/rule-tests/tsx-no-default-export-test.yml
+  s_79262c7689b9bc::t_462da76ae81265 1-16
+packages/code-organization/rule-tests/tsx-no-in-source-test-test.yml
+  s_79262c7689b9bc::t_3a6ccd41de7639 1-12
+packages/code-organization/rules/dart/dart-error-outside-errors-file.md
+  s_79262c7689b9bc::t_f93cdca4c577af 1-77
+packages/code-organization/rules/dart/dart-error-outside-errors-file.yml
+  s_d11ceb05a7eaa6::t_2c4b3f8c73ea0f 1-40
+packages/code-organization/rules/java/java-error-outside-error-package.md
+  s_79262c7689b9bc::t_27934c1cc32fd5 1-67
+packages/code-organization/rules/java/java-error-outside-error-package.yml
+  s_92287ade03e99b::t_13fda78146e437 1-31
+packages/code-organization/rules/kotlin/kotlin-error-outside-errors-file.md
+  s_79262c7689b9bc::t_c4656ef54abf84 1-69
+packages/code-organization/rules/kotlin/kotlin-error-outside-errors-file.yml
+  s_79262c7689b9bc::t_d15ec973d5a33a 1-41
+packages/code-organization/rules/rust/rust-error-outside-error-file.md
+  s_79262c7689b9bc::t_7f97f9867907c4 1-81
+packages/code-organization/rules/rust/rust-error-outside-error-file.yml
+  s_79262c7689b9bc::t_a194ad7f094b94 1-44
+packages/code-organization/rules/rust/rust-no-glob-reexport.md
+  s_79262c7689b9bc::t_b5e0aaaf049f63 1-54
+packages/code-organization/rules/rust/rust-no-glob-reexport.yml
+  s_79262c7689b9bc::t_a91961016f5a6e 1-21
+packages/code-organization/rules/tsx/tsx-error-outside-errors-file.md
+  s_79262c7689b9bc::t_c554afc12f756f 1-79
+packages/code-organization/rules/tsx/tsx-error-outside-errors-file.yml
+  s_79262c7689b9bc::t_411ad4c9f9eb8e 1-43
+packages/code-organization/rules/tsx/tsx-no-default-export.md
+  s_79262c7689b9bc::t_7774b9c1e0ca04 1-72
+packages/code-organization/rules/tsx/tsx-no-default-export.yml
+  s_79262c7689b9bc::t_df5f3cb1f2f7a1 1-55
+packages/code-organization/rules/tsx/tsx-no-in-source-test.md
+  s_79262c7689b9bc::t_7a2f8d7659704a 1-79
+packages/code-organization/rules/tsx/tsx-no-in-source-test.yml
+  s_92287ade03e99b::t_c19a7fa9e68877 1-20
+packages/code-organization/rules/typescript/ts-error-outside-errors-file.md
+  s_79262c7689b9bc::t_b31cb02ef4a258 1-78
+packages/code-organization/rules/typescript/ts-error-outside-errors-file.yml
+  s_92287ade03e99b::t_e0c2b4d2a8cdab 1-42
+packages/code-organization/rules/typescript/ts-no-default-export.md
+  s_79262c7689b9bc::t_08e41c32e423d8 1-68
+packages/code-organization/rules/typescript/ts-no-default-export.yml
+  s_79262c7689b9bc::t_14ea7a9ee7fd05 1-55
+packages/code-organization/rules/typescript/ts-no-in-source-test.md
+  s_79262c7689b9bc::t_c2093efa66eb7b 1-79
+packages/code-organization/rules/typescript/ts-no-in-source-test.yml
+  s_92287ade03e99b::t_88f5b9dff62e41 1-20
+packages/code-organization/sgconfig.yml
+  s_79262c7689b9bc::t_d512aaf5768eba 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8a2651ad985dfb44072fb6eb045b7b4b9bfb0aaf",
+  "prompts": {},
+  "sessions": {
+    "s_1f9516ee682828": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61ed18a7-bbcb-494c-81f1-f3c43f4585aa",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_92287ade03e99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2528c3cc-a4bd-412c-9799-dbad76e87ec3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_d11ceb05a7eaa6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1f3aa2d5-53ff-484e-aaef-3a905644ff1c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
