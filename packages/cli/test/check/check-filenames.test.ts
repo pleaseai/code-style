@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { findingsFor } from '../test-utils/fixture.js'
+import { checkFixture, findingsFor } from '../test-utils/fixture.js'
 
 const SLUG = 'code-filename-matches-primary-symbol'
 const PKG = { 'package.json': '{}' }
@@ -151,5 +151,47 @@ describe('code-filename-matches-primary-symbol (Dart)', () => {
       'example/demo.dart': 'void main() {}',
       'web/app.dart': 'void main() {}',
     }, SLUG)).toEqual([])
+  })
+})
+
+describe('unsupported-syntax notices', () => {
+  const PUBSPEC = { 'pubspec.yaml': 'name: app' }
+
+  test('TypeScript files with unenumerable exports yield one aggregated notice, without findings', () => {
+    const result = checkFixture({
+      ...PKG,
+      'src/barrel.ts': 'export * from \'./a\'\nexport function one() {}',
+      'src/dflt.ts': 'export default function main() {}',
+      'src/destructured.ts': 'export const { a } = obj',
+    })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([
+      'TypeScript: filename check skipped 3 file(s) whose exports cannot be enumerated (re-export, default export, destructured export): src/barrel.ts, src/destructured.ts, src/dflt.ts',
+    ])
+  })
+
+  test('a Dart export directive yields a notice', () => {
+    const result = checkFixture({ ...PUBSPEC, 'lib/barrel.dart': 'export \'src/a.dart\';\nclass Widget {}' })
+    expect(result.notices).toEqual(['Dart: filename check skipped 1 file(s) whose exports cannot be enumerated (re-export): lib/barrel.dart'])
+  })
+
+  test('files exempt by convention, or judged anyway, yield no notice', () => {
+    const result = checkFixture({
+      ...PKG,
+      'src/index.ts': 'export * from \'./a\'',
+      'src/errors.ts': 'export { x as default }',
+      'src/util.ts': 'export function a() {}\nexport function b() {}\nexport * from \'./c\'',
+      'src/a.test.ts': 'export default 1',
+    })
+    expect(result.notices).toEqual([])
+  })
+
+  test('lists at most 3 example paths in sorted order, then an ellipsis', () => {
+    const files = Object.fromEntries(['e', 'a', 'd', 'b', 'c'].map(n => [`src/${n}.ts`, 'export * from \'./x\'']))
+    const result = checkFixture({ ...PKG, ...files })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([
+      'TypeScript: filename check skipped 5 file(s) whose exports cannot be enumerated (re-export): src/a.ts, src/b.ts, src/c.ts, …',
+    ])
   })
 })

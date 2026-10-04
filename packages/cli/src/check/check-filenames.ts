@@ -6,6 +6,23 @@ import { nameKey, toKebabCase, toSnakeCase } from './naming.js'
 
 const SLUG = 'code-filename-matches-primary-symbol'
 
+const LANGUAGE_LABEL: Record<FilenameLanguage['language'], string> = { typescript: 'TypeScript', dart: 'Dart' }
+
+/** Display order of the reasons in a notice. */
+const OPAQUE_REASONS = ['re-export', 'default export', 'destructured export', 'string-literal export name'] as const
+type OpaqueReason = typeof OPAQUE_REASONS[number]
+
+/** Why an opaque-rule match makes the file's exports impossible to enumerate. */
+function opaqueReason(m: ExtractMatch): OpaqueReason {
+  if (m.ruleId === 'export-destructure') {
+    return 'destructured export'
+  }
+  if (m.ruleId === 'export-directive' || /\bfrom\s*['"`]/.test(m.text)) {
+    return 're-export'
+  }
+  return /^export\s+default\b|\bas\s+default\b|\{\s*default\b/.test(m.text) ? 'default export' : 'string-literal export name'
+}
+
 /** Per-language inputs: which files are eligible and how names normalize. */
 export interface FilenameLanguage {
   language: Extract<Language, 'typescript' | 'dart'>
@@ -93,8 +110,25 @@ export function dartFilenames(units: Unit[], partFiles: Set<string>): FilenameLa
  * with the language's file-naming convention.
  */
 export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage): Finding[] {
+  return inspectFilenames(matches, lang).findings
+}
+
+/** Maximum example paths listed in one notice. */
+const NOTICE_EXAMPLES = 3
+
+/**
+ * Like `checkFilenames`, plus one aggregated notice for the files the check
+ * would have judged but skipped because their exports cannot be enumerated.
+ * Files exempt by convention (`index.ts`, test files, …) never count.
+ */
+export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage): { findings: Finding[], notices: string[] } {
   const byFile = new Map<string, Map<string, number>>()
-  const opaque = new Set(matches.filter(m => lang.opaqueRules?.includes(m.ruleId) === true).map(m => m.file))
+  const opaque = new Map<string, Set<OpaqueReason>>()
+  for (const m of matches) {
+    if (lang.opaqueRules?.includes(m.ruleId) === true) {
+      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add(opaqueReason(m)))
+    }
+  }
   for (const m of matches) {
     if (!lang.nameRules.includes(m.ruleId) || !lang.isPublic(m.text)) {
       continue
@@ -106,6 +140,13 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
     byFile.set(m.file, names)
   }
   const findings: Finding[] = []
+  const skipped = new Map<string, Set<OpaqueReason>>()
+  for (const [file, reasons] of opaque) {
+    // Two or more enumerated names are never judged anyway; fewer leave the opaque exports as the unknown part.
+    if ((byFile.get(file)?.size ?? 0) <= 1 && lang.stem(file, unitOf(file, lang.units)) != null) {
+      skipped.set(file, reasons)
+    }
+  }
   for (const [file, names] of byFile) {
     if (names.size !== 1 || opaque.has(file)) {
       continue
@@ -129,5 +170,15 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
       message: `File name does not match its only public symbol \`${symbol}\`. Rename the file to \`${lang.normalize(symbol)}${ext}\`, or rename the symbol after the file.`,
     })
   }
-  return findings
+  return { findings, notices: skippedNotice(lang, skipped) }
+}
+
+function skippedNotice(lang: FilenameLanguage, skipped: Map<string, Set<OpaqueReason>>): string[] {
+  if (skipped.size === 0) {
+    return []
+  }
+  const paths = [...skipped.keys()].sort()
+  const reasons = OPAQUE_REASONS.filter(r => [...skipped.values()].some(set => set.has(r)))
+  const examples = paths.slice(0, NOTICE_EXAMPLES).join(', ')
+  return [`${LANGUAGE_LABEL[lang.language]}: filename check skipped ${paths.length} file(s) whose exports cannot be enumerated (${reasons.join(', ')}): ${examples}${paths.length > NOTICE_EXAMPLES ? ', …' : ''}`]
 }

@@ -78,7 +78,7 @@ function loadPackages(
       if (err instanceof CargoUnavailableError) {
         throw err
       }
-      notices.push(`Rust: \`cargo metadata\` failed in ${dir === '.' ? '.' : dir} (${err instanceof Error ? err.message : String(err)}); skipped that crate.`)
+      notices.push(`Rust: test-path and helper checks skipped that crate (\`cargo metadata\` failed in ${dir}: ${err instanceof Error ? err.message : String(err)}).`)
       continue
     }
     for (const pkg of metadata?.packages ?? []) {
@@ -174,7 +174,7 @@ export function checkRust(
     if (err instanceof CargoUnavailableError) {
       return {
         findings: [],
-        notices: [`Rust: cargo is not available (${err.message}); skipped Rust test-path and helper checks. Install Rust or run the check where cargo is on PATH.`],
+        notices: [`Rust: test-path and helper checks skipped: cargo is not available (${err.message}). Install Rust or run the check where cargo is on PATH.`],
       }
     }
     throw err
@@ -224,7 +224,7 @@ export function checkRust(
     const reachabilityUnknown = (f: string): boolean => unknownDirs.some(u => isUnder(f, u.dir))
     if (unknownDirs.length > 0) {
       const where = unknownDirs.map(u => `${u.dir === '' ? '.' : u.dir}/ (from ${u.file})`).sort().join(', ')
-      loaded.notices.push(`Rust: crate ${pkg.dir === '' ? '.' : pkg.dir} declares \`mod x;\` inside an inline module or fn body, which is not followed; skipped test-reachability checks for ${where}.`)
+      loaded.notices.push(`Rust: test-reachability check skipped for ${where} (crate ${pkg.dir === '' ? '.' : pkg.dir} declares \`mod x;\` inside an inline module or fn body, which is not followed).`)
     }
     const fromTarget = new Map<string, Set<string>>()
     const reachedByAny = new Set<string>()

@@ -4,7 +4,7 @@ import { existsSync, realpathSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import process from 'node:process'
 import { runExtraction } from './ast-grep.js'
-import { checkFilenames, dartFilenames, typescriptFilenames } from './check-filenames.js'
+import { dartFilenames, inspectFilenames, typescriptFilenames } from './check-filenames.js'
 import { checkHelpers, dartHelpers, jvmHelpers, typescriptHelpers } from './check-helpers.js'
 import { checkRust } from './check-rust.js'
 import { checkTestPaths } from './check-test-paths.js'
@@ -63,10 +63,12 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const dartUnits = DART_LAYOUT.units(files, base, root)
   const dartParts = new Set(dart.filter(m => m.ruleId === 'part-of').map(m => m.file))
 
+  const tsNames = inspectFilenames(ts, typescriptFilenames(tsUnits))
+  const dartNames = inspectFilenames(dart, dartFilenames(dartUnits, dartParts))
   const findings: Finding[] = [
     ...checkTestPaths(files, TEST_LAYOUTS, base, root),
-    ...checkFilenames(ts, typescriptFilenames(tsUnits)),
-    ...checkFilenames(dart, dartFilenames(dartUnits, dartParts)),
+    ...tsNames.findings,
+    ...dartNames.findings,
     ...checkHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),
     ...checkHelpers(dartHelpers(DART_LAYOUT, dartUnits, dart, fileSet)),
     ...checkHelpers(jvmHelpers(KOTLIN_LAYOUT, KOTLIN_LAYOUT.units(files, base, root), kotlin, files, root)),
@@ -76,5 +78,5 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   findings.push(...rustResult.findings)
 
   findings.sort((a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.slug.localeCompare(b.slug))
-  return { root, findings, notices: rustResult.notices }
+  return { root, findings, notices: [...tsNames.notices, ...dartNames.notices, ...rustResult.notices] }
 }
