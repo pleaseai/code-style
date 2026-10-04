@@ -19,9 +19,20 @@
     "pleaseai"
   ],
   "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
     "./sgconfig.yml": "./sgconfig.yml"
   },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "bin": {
+    "please-code-org": "./dist/cli.mjs"
+  },
   "files": [
+    "dist",
+    "extract",
     "rules",
     "sgconfig.yml"
   ],
@@ -29,9 +40,16 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "test": "ast-grep test"
+    "build": "tsdown",
+    "test": "bun test && ast-grep test"
   },
   "dependencies": {
     "@ast-grep/cli": "0.45.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.12",
+    "@types/node": "^25.6.0",
+    "tsdown": "^0.22.1",
+    "typescript": "^6.0.2"
   }
 }

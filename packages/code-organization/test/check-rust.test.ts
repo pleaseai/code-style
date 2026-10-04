@@ -1,0 +1,121 @@
+import type { CargoMetadataProvider } from '../src/types.js'
+import { spawnSync } from 'node:child_process'
+import process from 'node:process'
+import { describe, expect, test } from 'bun:test'
+import { CargoUnavailableError } from '../src/errors.js'
+import { cargoStub, checkFixture } from './test-utils/fixture.js'
+
+const CARGO = { 'Cargo.toml': '[package]\nname = "fixture"\nversion = "0.1.0"\nedition = "2021"\n' }
+
+/** Stub provider: the package at the fixture root with the given targets. */
+function stub(targets: Array<[string, string]>): (root: string) => { cargoMetadata: CargoMetadataProvider } {
+  return root => ({ cargoMetadata: () => cargoStub(root, '', targets) })
+}
+
+function kinds(result: ReturnType<typeof checkFixture>): string[] {
+  return result.findings.map(f => `${f.kind} ${f.file}`).sort()
+}
+
+describe('rust integration tests', () => {
+  test('reports a nested tests/ file that is neither a target nor reached by mod', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'pub mod commands;',
+      'src/commands.rs': '',
+      'tests/commands/session_context.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(kinds(result)).toEqual(['undiscovered-integration-test tests/commands/session_context.rs'])
+  })
+
+  test('a private helper loaded with `mod support;` from one target is not reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/foo.rs': 'mod support;\n#[test]\nfn works() {}',
+      'tests/support/mod.rs': 'pub fn setup() {}',
+    }, stub([['lib', 'src/lib.rs'], ['test', 'tests/foo.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
+  test('a helper module outside tests/common/ shared by two targets is a helper-location finding', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/a.rs': 'mod support;',
+      'tests/b.rs': '#[path = "support/mod.rs"]\nmod support;',
+      'tests/support/mod.rs': 'pub fn setup() {}',
+      'tests/c.rs': 'mod common;',
+      'tests/d.rs': 'mod common;',
+      'tests/common/mod.rs': 'pub fn shared() {}',
+    }, stub([['lib', 'src/lib.rs'], ['test', 'tests/a.rs'], ['test', 'tests/b.rs'], ['test', 'tests/c.rs'], ['test', 'tests/d.rs']]))
+    expect(result.findings).toEqual([expect.objectContaining({
+      slug: 'test-helpers-in-dedicated-location',
+      kind: 'shared-helper-outside-location',
+      file: 'tests/support/mod.rs',
+    })])
+  })
+
+  test('tests/common/ and submodules of a tests/<name>/main.rs target are never reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/common/unused.rs': '',
+      'tests/cli/main.rs': 'mod run;',
+      'tests/cli/run.rs': '',
+      'tests/cli/leftover.rs': '',
+      'tests/fixtures/data.json': '{}',
+    }, stub([['lib', 'src/lib.rs'], ['test', 'tests/cli/main.rs']]))
+    expect(result.findings).toEqual([])
+  })
+})
+
+describe('rust unit-test split files', () => {
+  test('follows `#[cfg(test)] mod tests;` and `#[path]` declarations, whatever the file name', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'mod parser;\n#[cfg(test)]\n#[path = "lib_checks.rs"]\nmod checks;',
+      'src/parser.rs': '#[cfg(test)]\nmod tests;',
+      'src/parser/tests.rs': '#[test]\nfn parses() {}',
+      'src/lib_checks.rs': '#[test]\nfn checks() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
+  test('reports a #[test] file that no mod declaration reaches', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'mod parser;',
+      'src/parser.rs': '',
+      'src/parser_tests.rs': '#[test]\nfn parses() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(kinds(result)).toEqual(['unreachable-unit-test src/parser_tests.rs'])
+  })
+})
+
+describe('rust without cargo', () => {
+  test('skips Rust with a visible notice instead of passing silently', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/commands/session_context.rs': '',
+    }, { cargoMetadata: () => { throw new CargoUnavailableError('cargo: command not found') } })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([expect.stringContaining('cargo is not available')])
+  })
+})
+
+const cargo = process.env.CARGO ?? 'cargo'
+const hasCargo = spawnSync(cargo, ['--version']).status === 0
+
+describe('rust with real cargo metadata', () => {
+  test.skipIf(!hasCargo)('autotests discovery matches cargo: tests/<dir>/<file>.rs without [[test]] is reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/session.rs': '#[test]\nfn ok() {}',
+      'tests/commands/session_context.rs': '#[test]\nfn lost() {}',
+    })
+    expect(result.notices).toEqual([])
+    expect(kinds(result)).toEqual(['undiscovered-integration-test tests/commands/session_context.rs'])
+  })
+})
