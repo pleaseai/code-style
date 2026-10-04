@@ -138,6 +138,29 @@ describe('rust unit-test split files', () => {
     }, stub([['lib', 'src/lib.rs']]))
     expect(result.findings).toEqual([])
   })
+
+  test('an unrelated nested `mod x;` withholds only its subtree, with a notice, and orphan tests are still reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'pub mod outer { mod child; }',
+      'src/outer/child.rs': '#[test]\nfn works() {}',
+      'tests/lost/case.rs': '#[test]\nfn lost() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(kinds(result)).toEqual(['undiscovered-integration-test tests/lost/case.rs'])
+    expect(result.notices).toEqual([expect.stringContaining('src/ (from src/lib.rs)')])
+  })
+
+  test('an unreachable #[test] file outside the withheld subtree is still reported', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'mod outer;',
+      'src/outer.rs': 'pub mod inner { mod child; }',
+      'src/outer/inner/child.rs': '#[test]\nfn works() {}',
+      'src/stray_tests.rs': '#[test]\nfn stray() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(kinds(result)).toEqual(['unreachable-unit-test src/stray_tests.rs'])
+    expect(result.notices).toEqual([expect.stringContaining('src/outer/ (from src/outer.rs)')])
+  })
 })
 
 describe('rust without cargo', () => {

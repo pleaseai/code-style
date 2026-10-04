@@ -134,6 +134,18 @@ function reachable(entry: string, decls: Map<string, ModDecl[]>, fileSet: Set<st
 }
 
 /**
+ * Directory whose files a `mod x;` nested in an inline module or fn body of
+ * `file` could load: the file's own directory for a crate root, `mod.rs` or
+ * `#[path]`-loaded file, `<stem>/` for a plain `foo.rs`.
+ */
+function nestedModDir(file: string, isRoot: boolean, pathLoaded: Set<string>): string {
+  const dir = posix.dirname(file) === '.' ? '' : posix.dirname(file)
+  return isRoot || pathLoaded.has(file) || posix.basename(file) === 'mod.rs'
+    ? dir
+    : joinPath(dir, posix.basename(file, '.rs'))
+}
+
+/**
  * Rust layer-3 checks (ADR-0022 §3):
  * - `tests/**.rs` files Cargo never compiles (not a test target, not reached
  *   by `mod` from one), excluding `tests/common/` and submodules of a
@@ -171,9 +183,14 @@ export function checkRust(
   const decls = new Map<string, ModDecl[]>()
   const unitTestFiles = new Set<string>()
   const nestedDeclFiles = new Set<string>()
+  const pathLoaded = new Set<string>()
   for (const m of matches) {
     if (m.ruleId === 'mod-decl') {
       decls.set(m.file, [...(decls.get(m.file) ?? []), { name: m.text, path: m.vars.PATH }])
+      if (m.vars.PATH != null) {
+        const dir = posix.dirname(m.file) === '.' ? '' : posix.dirname(m.file)
+        pathLoaded.add(posix.normalize(joinPath(dir, m.vars.PATH)))
+      }
     }
     else if (m.ruleId === 'mod-decl-nested') {
       nestedDeclFiles.add(m.file)
@@ -194,8 +211,15 @@ export function checkRust(
     const nestedDirs = manifestDirs.filter(d => d !== pkg.dir && isUnder(d, pkg.dir))
     const owned = (f: string): boolean => isUnder(f, pkg.dir) && !nestedDirs.some(d => isUnder(f, d))
     const roots = new Set(pkg.roots)
-    // `mod x;` inside an inline module or fn body is not followed, so reachability is only a lower bound.
-    const reachabilityKnown = ![...nestedDeclFiles].some(owned)
+    // `mod x;` inside an inline module or fn body is not followed: withhold judgement only for the subtree it could load from.
+    const unknownDirs = [...nestedDeclFiles]
+      .filter(owned)
+      .map(f => ({ file: f, dir: nestedModDir(f, roots.has(f), pathLoaded) }))
+    const reachabilityUnknown = (f: string): boolean => unknownDirs.some(u => isUnder(f, u.dir))
+    if (unknownDirs.length > 0) {
+      const where = unknownDirs.map(u => `${u.dir === '' ? '.' : u.dir}/ (from ${u.file})`).sort().join(', ')
+      loaded.notices.push(`Rust: crate ${pkg.dir === '' ? '.' : pkg.dir} declares \`mod x;\` inside an inline module or fn body, which is not followed; skipped test-reachability checks for ${where}.`)
+    }
     const fromTarget = new Map<string, Set<string>>()
     const reachedByAny = new Set<string>()
     for (const root of pkg.roots) {
@@ -224,7 +248,7 @@ export function checkRust(
       if (isUnder(file, testsDir)) {
         const inner = relativeTo(file, testsDir).split('/')
         const inTargetDir = inner.length > 1 && fileSet.has(joinPath(testsDir, inner[0] ?? '', 'main.rs'))
-        if (reachabilityKnown && !roots.has(file) && !reachedByAny.has(file) && !isUnder(file, commonDir) && !inTargetDir) {
+        if (!reachabilityUnknown(file) && !roots.has(file) && !reachedByAny.has(file) && !isUnder(file, commonDir) && !inTargetDir) {
           findings.push({
             slug: 'test-path-derivable-from-source',
             kind: 'undiscovered-integration-test',
@@ -235,7 +259,7 @@ export function checkRust(
           })
         }
       }
-      else if (reachabilityKnown && unitTestFiles.has(file) && !roots.has(file) && !reachedByAny.has(file)) {
+      else if (!reachabilityUnknown(file) && unitTestFiles.has(file) && !roots.has(file) && !reachedByAny.has(file)) {
         findings.push({
           slug: 'test-path-derivable-from-source',
           kind: 'unreachable-unit-test',
