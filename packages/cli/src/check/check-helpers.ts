@@ -94,9 +94,18 @@ function resolveRelative(importer: string, spec: string, fileSet: Set<string>, e
     return undefined
   }
   const base = posix.normalize(posix.join(posix.dirname(importer), spec))
-  // `./helpers.js` written for ESM resolution may point at `helpers.ts`.
-  const stripped = base.replace(/\.[cm]?js$/, '')
-  const options = [base, ...exts.map(e => `${stripped}${e}`), ...exts.map(e => `${stripped}/index${e}`)]
+  // `./helpers.js` written for ESM resolution may point at `helpers.ts`; the
+  // runtime suffix maps to its own source flavor (`.mjs` → `.mts`, `.cjs` → `.cts`).
+  const jsMatch = /\.(?:[cm]?js|jsx)$/.exec(base)
+  const stripped = jsMatch == null ? base : base.slice(0, jsMatch.index)
+  const jsToSource: Record<string, string[]> = {
+    '.js': ['.ts', '.tsx'],
+    '.jsx': ['.tsx'],
+    '.mjs': ['.mts'],
+    '.cjs': ['.cts'],
+  }
+  const mapped = jsMatch == null ? [] : (jsToSource[jsMatch[0]] ?? []).map(e => `${stripped}${e}`)
+  const options = [base, ...mapped, ...exts.map(e => `${base}${e}`), ...exts.map(e => `${base}/index${e}`)]
   return options.find(o => fileSet.has(o))
 }
 

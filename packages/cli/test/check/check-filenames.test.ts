@@ -38,6 +38,16 @@ describe('code-filename-matches-primary-symbol (TypeScript)', () => {
       'test/test-utils/fixture.ts': 'export function createFixture() {}',
     }, SLUG)).toEqual([])
   })
+  test('framework route files and ambient/aliased-default exports are not mismatches', () => {
+    expect(findingsFor({
+      ...PKG,
+      'app/api/users/route.ts': 'export function GET() {}',
+      'src/middleware.ts': 'export function handle() {}',
+      'src/routes/+server.ts': 'export function GET() {}',
+      'src/ambient.ts': 'export function foo() {}\nexport declare const version: string;',
+      'src/aliased.ts': 'export function foo() {}\nexport { foo as default }',
+    }, SLUG)).toEqual([])
+  })
 })
 
 describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
@@ -107,6 +117,16 @@ describe('code-filename-matches-primary-symbol (Dart)', () => {
       'lib/errors.dart': 'class AuthException implements Exception {}',
       'lib/model.g.dart': 'class Generated {}',
       'lib/part_a.dart': 'part of \'model.dart\';\nclass Other {}',
+    }, SLUG)).toEqual([])
+  })
+
+  test('Dart entrypoints under bin/, tool/, example/ and web/ are exempt', () => {
+    expect(findingsFor({
+      ...PUBSPEC,
+      'bin/my_cli.dart': 'void main() {}',
+      'tool/gen.dart': 'void main() {}',
+      'example/demo.dart': 'void main() {}',
+      'web/app.dart': 'void main() {}',
     }, SLUG)).toEqual([])
   })
 })

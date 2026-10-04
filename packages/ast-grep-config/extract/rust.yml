@@ -38,7 +38,9 @@ rule:
                   regex: ^path$
               - has:
                   field: value
-                  kind: string_literal
+                  any:
+                    - kind: string_literal
+                    - kind: raw_string_literal
                   has:
                     kind: string_content
                     pattern: $PATH

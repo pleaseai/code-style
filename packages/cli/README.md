@@ -103,8 +103,9 @@ What it checks:
 - **`code-filename-matches-primary-symbol`** (TypeScript, Dart): a file with
   exactly one public symbol is named after it, compared in kebab-case
   (TypeScript) or snake_case (Dart). `errors.ts`/`errors.dart`, `index.ts`,
-  config files, test files, `part of` files, and generated Dart files are
-  exempt. Kotlin and Java are covered by ktlint `standard:filename` and javac.
+  config files, test files, `part of` files, generated Dart files, framework
+  route files (`route.ts`, `middleware.ts`, SvelteKit `+*.ts`), and Dart
+  entrypoints under `bin/`, `tool/`, `example/` and `web/` are exempt. Kotlin and Java are covered by ktlint `standard:filename` and javac.
 - **`test-path-derivable-from-source`**:
   - TypeScript: `src/foo/bar.ts` ↔ `test/foo/bar.test.ts` (or `tests/`,
     `.spec.ts`). With one source root the root name is dropped; with several

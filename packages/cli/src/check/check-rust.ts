@@ -182,12 +182,17 @@ export function checkRust(
       unitTestFiles.add(m.file)
     }
   }
+  const manifestDirs = files
+    .filter(f => posix.basename(f) === 'Cargo.toml')
+    .map(f => posix.dirname(f))
+    .map(d => (d === '.' ? '' : d))
   const findings: Finding[] = []
   for (const pkg of loaded.packages) {
     const testsDir = joinPath(pkg.dir, 'tests')
     const commonDir = joinPath(testsDir, 'common')
-    const nestedPackages = loaded.packages.filter(p => p !== pkg && isUnder(p.dir, pkg.dir) && p.dir !== pkg.dir)
-    const owned = (f: string): boolean => isUnder(f, pkg.dir) && !nestedPackages.some(p => isUnder(f, p.dir))
+    // Every listed Cargo.toml deeper than this package is a boundary, even when its metadata failed to load.
+    const nestedDirs = manifestDirs.filter(d => d !== pkg.dir && isUnder(d, pkg.dir))
+    const owned = (f: string): boolean => isUnder(f, pkg.dir) && !nestedDirs.some(d => isUnder(f, d))
     const roots = new Set(pkg.roots)
     // `mod x;` inside an inline module or fn body is not followed, so reachability is only a lower bound.
     const reachabilityKnown = ![...nestedDeclFiles].some(owned)

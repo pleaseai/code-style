@@ -48,9 +48,10 @@ export function typescriptFilenames(units: Unit[]): FilenameLanguage {
         return null
       }
       const stem = name.replace(TS_SOURCE, '')
-      // Test files, package entry points, config files, and the designated
-      // error file (ADR-0022 §1) are not named after a symbol.
-      if (/\.(?:test|spec)$/.test(stem) || stem === 'index' || stem === 'errors' || /\.config(?:\.|$)/.test(stem)) {
+      // Test files, package entry points, config files, the designated error
+      // file (ADR-0022 §1), and framework-dictated route files (Next.js
+      // `route`/`middleware`, SvelteKit `+server`) are not named after a symbol.
+      if (/\.(?:test|spec)$/.test(stem) || stem === 'index' || stem === 'errors' || stem === 'route' || stem === 'middleware' || stem.startsWith('+') || /\.config(?:\.|$)/.test(stem)) {
         return null
       }
       return stem
@@ -71,7 +72,8 @@ export function dartFilenames(units: Unit[], partFiles: Set<string>): FilenameLa
         return null
       }
       const rel = unit == null ? file : relativeTo(file, unit.dir)
-      if (/^(?:integration_test|test_driver)\//.test(rel)) {
+      // Test drivers and Dart entrypoint directories (`dart run <pkg>:<tool>`).
+      if (/^(?:integration_test|test_driver|bin|tool|example|web)\//.test(rel)) {
         return null
       }
       const stem = name.slice(0, -'.dart'.length)

@@ -92,6 +92,34 @@ describe('rust unit-test split files', () => {
     expect(result.findings).toEqual([])
   })
 
+  test('follows a raw-string `#[path = r"…"]` to the real file', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '#[cfg(test)]\n#[path = r"renamed.rs"]\nmod checks;',
+      'src/checks.rs': '',
+      'src/renamed.rs': '#[test]\nfn checks() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
+  test('a crate whose metadata failed is a package boundary for its parent', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'fixtures/broken/Cargo.toml': '[package]\nname = "broken"\n',
+      'fixtures/broken/src/lib.rs': '#[test]\nfn t() {}',
+    }, {
+      cargoMetadata: (dir) => {
+        if (dir.endsWith('broken')) {
+          throw new Error('bad manifest')
+        }
+        return cargoStub(dir, '', [['lib', 'src/lib.rs']])
+      },
+    })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([expect.stringContaining('skipped that crate')])
+  })
+
   test('reports a #[test] file that no mod declaration reaches', () => {
     const result = checkFixture({
       ...CARGO,

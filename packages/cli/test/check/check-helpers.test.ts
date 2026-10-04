@@ -16,6 +16,17 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
     expect(findings[0]?.message).toContain('test/test-utils/')
   })
 
+  test('resolves `.mjs` imports to `.mts` even when a same-named `.ts` exists', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'test/support.ts': 'export function mockUser() {}',
+      'test/support.mts': 'export function mockUser() {}',
+      'test/user.test.ts': 'import { mockUser } from \'./support.mjs\'',
+      'test/order.test.ts': 'import { mockUser } from \'./support.mjs\'',
+    }, SLUG)
+    expect(findings.map(f => f.file)).toEqual(['test/support.mts'])
+  })
+
   test('points the message at the test root the helper lives in', () => {
     const findings = findingsFor({
       ...PKG,
