@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { applyAgentsMd, applyCodeOrganization, findTool } from './appliers.js'
+import { applyAgentsMd, applyCodeOrganization, findTool } from '../src/appliers.js'
 
 let dir: string
 
