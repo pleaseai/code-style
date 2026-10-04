@@ -26,6 +26,15 @@ jobs:
       - name: Build packages
         run: bun run build
 
+      # Package tests via turbo (packages/* only, so docs is not rebuilt):
+      # bun test for the CLI and code-organization, plus code-organization's
+      # ast-grep rule tests. The runner's cargo enables the real
+      # `cargo metadata` test. ast-grep resolves from
+      # node_modules/.bin (root trustedDependencies runs @ast-grep/cli's
+      # postinstall, which links the native binary).
+      - name: Test
+        run: bun run test
+
       - name: Cache ESLint
         uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:

@@ -26,6 +26,7 @@
     "build": "turbo run build",
     "lint": "eslint . --cache",
     "lint:fix": "eslint . --fix --cache",
+    "test": "turbo run test --filter=./packages/*",
     "release": "turbo run build",
     "docs:dev": "cd docs && bun run dev",
     "docs:build": "cd docs && bun run build",
