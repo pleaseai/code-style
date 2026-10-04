@@ -1,0 +1,45 @@
+packages/ast-grep-config/extract/dart.yml
+  s_79262c7689b9bc::t_7c7eb394f3c6f6 101-109
+packages/ast-grep-config/extract/rust.yml
+  s_79262c7689b9bc::t_e7f32cb933dbe3 67-141
+packages/ast-grep-config/extract/tsx.yml
+  s_79262c7689b9bc::t_4af4863d3fec24 102-104,146,169-176,215-240,257-282
+packages/ast-grep-config/extract/typescript.yml
+  s_79262c7689b9bc::t_62ad524b5a39e0 102-104,146,169-176,215-240,257-282
+packages/cli/src/check/check-filenames.ts
+  s_79262c7689b9bc::t_decc64057ae159 5,66,118
+packages/cli/src/check/check-helpers.ts
+  s_79262c7689b9bc::t_2d24f72684e160 139-147,150-151
+packages/cli/src/check/check-rust.ts
+  s_79262c7689b9bc::t_661249c2994327 187,189-191,200-202,220,223
+packages/cli/src/check/list-files.ts
+  s_79262c7689b9bc::t_63aa700df2ee2e 49-50
+packages/cli/src/check/naming.ts
+  s_79262c7689b9bc::t_f34c4392802cbf 26-30
+packages/cli/test/check/check-filenames.test.ts
+  s_79262c7689b9bc::t_bdf3e2c7becdd2 24-31,91-98,139-145
+packages/cli/test/check/check-helpers.test.ts
+  s_79262c7689b9bc::t_b6b14d92d85969 19-28
+packages/cli/test/check/check-rust.test.ts
+  s_79262c7689b9bc::t_0403f89b609613 166-197
+packages/cli/test/check/list-files.test.ts
+  s_79262c7689b9bc::t_cbc98424e74d19 1-30
+packages/cli/test/check/naming.test.ts
+  s_79262c7689b9bc::t_bfce43968c477c 2,27-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1d1f92f7ca1b13195a496b3de473f260f80fc3e3",
+  "prompts": {},
+  "sessions": {
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
