@@ -38,7 +38,7 @@ export function typescriptFilenames(units: Unit[]): FilenameLanguage {
   return {
     language: 'typescript',
     nameRules: ['export-name'],
-    opaqueRules: ['export-destructure'],
+    opaqueRules: ['export-destructure', 'export-opaque'],
     normalize: toKebabCase,
     isPublic: () => true,
     units,

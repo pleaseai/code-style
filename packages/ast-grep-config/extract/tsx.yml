@@ -128,6 +128,23 @@ rule:
         inside:
           kind: program
 ---
+# Re-exports (`export { a } from`, `export * from`, `export * as ns from`) and
+# default exports add public symbols that export-name does not enumerate, so
+# the file reads as "unknown symbols" like export-destructure.
+id: export-opaque
+language: tsx
+severity: hint
+message: re-export or default export
+rule:
+  kind: export_statement
+  inside:
+    kind: program
+  any:
+    - has:
+        field: source
+        kind: string
+    - regex: ^export\s+default\b
+---
 id: helper-candidate
 language: tsx
 severity: hint

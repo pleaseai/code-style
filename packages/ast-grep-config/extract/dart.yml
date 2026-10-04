@@ -77,6 +77,21 @@ rule:
         field: uri
         pattern: $SRC
 ---
+id: import-hide
+language: dart
+severity: hint
+message: hidden name
+rule:
+  kind: identifier
+  inside:
+    kind: combinator
+    regex: ^hide\b
+    inside:
+      kind: import_specification
+      has:
+        field: uri
+        pattern: $SRC
+---
 id: part-of
 language: dart
 severity: hint

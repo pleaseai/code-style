@@ -22,11 +22,22 @@ const EXTENSIONS: Record<ExtractLanguage, RegExp> = {
   rust: /\.rs$/,
 }
 
-/** Matches in `fileSet` only: ast-grep's own walker does not know about ignored directories. */
+/** Paths per ast-grep invocation, kept well under OS argv limits. */
+const BATCH_SIZE = 200
+
+/**
+ * Matches in the listed files of `language`. The files are passed to ast-grep
+ * explicitly: its own directory walker skips hidden directories and
+ * gitignore-matched paths (listed tracked files included) and descends
+ * `node_modules` outside a git work tree. Explicit paths bypass that filtering.
+ */
 function extract(root: string, files: string[], fileSet: Set<string>, language: ExtractLanguage): ExtractMatch[] {
-  return files.some(f => EXTENSIONS[language].test(f))
-    ? runExtraction(root, language).filter(m => fileSet.has(m.file))
-    : []
+  const paths = files.filter(f => EXTENSIONS[language].test(f)).map(f => (f.startsWith('-') ? `./${f}` : f))
+  const out: ExtractMatch[] = []
+  for (let i = 0; i < paths.length; i += BATCH_SIZE) {
+    out.push(...runExtraction(root, language, paths.slice(i, i + BATCH_SIZE)).filter(m => fileSet.has(m.file)))
+  }
+  return out
 }
 
 /**

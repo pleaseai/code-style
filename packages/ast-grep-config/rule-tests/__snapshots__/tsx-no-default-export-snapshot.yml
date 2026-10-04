@@ -76,3 +76,21 @@ snapshots:
       style: secondary
       start: 7
       end: 45
+  export { default } from './button':
+    labels:
+    - source: export { default } from './button'
+      style: primary
+      start: 0
+      end: 34
+    - source: default
+      style: secondary
+      start: 9
+      end: 16
+    - source: default
+      style: secondary
+      start: 9
+      end: 16
+    - source: '{ default }'
+      style: secondary
+      start: 7
+      end: 18

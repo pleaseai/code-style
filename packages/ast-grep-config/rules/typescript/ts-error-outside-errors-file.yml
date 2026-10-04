@@ -35,6 +35,8 @@ rule:
               regex: (Error|Exception)$
 ignores:
   - '**/errors.ts'
+  - '**/errors.mts'
+  - '**/errors.cts'
   - '**/*.d.ts'
   - '**/*.d.mts'
   - '**/*.d.cts'

@@ -24,6 +24,19 @@ rule:
           has:
             field: alias
             regex: ^default$
+    # export { default } from './x' (re-exported without an alias)
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          all:
+            - has:
+                field: name
+                regex: ^default$
+            - not:
+                has:
+                  field: alias
+                  kind: identifier
 # Files whose shape a framework dictates (ADR-0022 §2: "framework convention
 # files are allowlisted"). Paths are matched relative to the scan root, so every
 # glob starts with `**/` to work in monorepo packages too.

@@ -1,5 +1,6 @@
 id: tsx-no-default-export
 valid:
+  - export { default as Button } from './button'
   - export function createUser() {}
   - export const MAX_RETRIES = 3
   - export class UserService {}
@@ -14,3 +15,4 @@ invalid:
   - export default defineConfig({})
   - export { createUser as default }
   - export { createUser, MAX_RETRIES as default }
+  - export { default } from './button'

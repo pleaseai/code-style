@@ -44,6 +44,14 @@ function isTestSide(file: string, lang: HelperLanguage, roots: (unit: Unit) => s
   return unit != null && roots(unit).some(root => isUnder(relativeTo(file, unit.dir), root))
 }
 
+/** The designated helper dir under the candidate's own test root, else the first one. */
+function suggestedDir(lang: HelperLanguage, unit: Unit, file: string): string {
+  const dirs = lang.layout.helperDirs(unit)
+  const rel = relativeTo(file, unit.dir)
+  const own = dirs.find(d => isUnder(rel, posix.dirname(d))) ?? dirs[0]
+  return `${joinPath(unit.dir, own)}/`
+}
+
 /**
  * `test-helpers-in-dedicated-location`: a helper candidate declared outside
  * the designated location is reported only when two or more test files import
@@ -61,7 +69,7 @@ export function checkHelpers(lang: HelperLanguage): Finding[] {
       continue
     }
     const unit = unitOf(candidate.file, lang.units)
-    const target = unit == null ? '' : lang.layout.helperDirs(unit).map(d => `${joinPath(unit.dir, d)}/`)[0]
+    const target = unit == null ? '' : suggestedDir(lang, unit, candidate.file)
     findings.push({
       slug: SLUG,
       kind: 'shared-helper-outside-location',
@@ -146,7 +154,14 @@ export function dartHelpers(
       shown.set(key, (shown.get(key) ?? new Set()).add(m.text))
     }
   }
-  const imports = new Map<string, Array<{ importer: string, names: Set<string> | null }>>()
+  const hidden = new Map<string, Set<string>>()
+  for (const m of matches) {
+    if (m.ruleId === 'import-hide') {
+      const key = `${m.file}\0${m.vars.SRC ?? ''}`
+      hidden.set(key, (hidden.get(key) ?? new Set()).add(m.text))
+    }
+  }
+  const imports = new Map<string, Array<{ importer: string, names: Set<string> | null, hides: Set<string> }>>()
   for (const m of matches) {
     if (m.ruleId !== 'import-uri' || !layout.isTestFile(m.file)) {
       continue
@@ -159,11 +174,12 @@ export function dartHelpers(
       continue
     }
     const list = imports.get(target) ?? []
-    list.push({ importer: m.file, names: shown.get(`${m.file}\0${m.text}`) ?? null })
+    const key = `${m.file}\0${m.text}`
+    list.push({ importer: m.file, names: shown.get(key) ?? null, hides: hidden.get(key) ?? new Set() })
     imports.set(target, list)
   }
   lang.importers = c => new Set(
-    (imports.get(c.file) ?? []).filter(i => i.names == null || i.names.has(c.name)).map(i => i.importer),
+    (imports.get(c.file) ?? []).filter(i => (i.names == null || i.names.has(c.name)) && !i.hides.has(c.name)).map(i => i.importer),
   )
   return lang
 }

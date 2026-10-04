@@ -16,6 +16,16 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
     expect(findings[0]?.message).toContain('test/test-utils/')
   })
 
+  test('points the message at the test root the helper lives in', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'tests/helpers.ts': 'export function mockUser() {}',
+      'tests/user.test.ts': 'import { mockUser } from \'./helpers\'',
+      'tests/order.test.ts': 'import { mockUser } from \'./helpers\'',
+    }, SLUG)
+    expect(findings[0]?.message).toContain('tests/test-utils/')
+  })
+
   test('counts namespace imports as importing every helper', () => {
     expect(findingsFor({
       ...PKG,
@@ -54,6 +64,18 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
       'test/b_test.dart': 'import \'../test/support/mocks.dart\' show mockClient;',
     }, SLUG)
     expect(findings.map(f => `${f.file}:${f.line}`)).toEqual(['test/support/mocks.dart:2'])
+  })
+
+  test('dart: a hide list removes the helper from that importer', () => {
+    const findings = findingsFor({
+      'pubspec.yaml': 'name: app',
+      'lib/a.dart': '',
+      'lib/b.dart': '',
+      'test/support/mocks.dart': 'class MockClient {}',
+      'test/a_test.dart': 'import \'support/mocks.dart\' hide MockClient;',
+      'test/b_test.dart': 'import \'support/mocks.dart\' hide MockClient;',
+    }, SLUG)
+    expect(findings).toEqual([])
   })
 
   test('dart: test/helpers/ is the designated location', () => {

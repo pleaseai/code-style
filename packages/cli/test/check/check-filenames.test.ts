@@ -60,6 +60,21 @@ describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
     }, SLUG)).toEqual([])
   })
 
+  test('re-exports and default exports make the symbol set unknown, so the file is not checked', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/api.ts': 'export function createClient() {}\nexport * from \'./types\'',
+      'src/named.ts': 'export function good() {}\nexport { other } from \'./other\'',
+      'src/ns.ts': 'export function good() {}\nexport * as ns from \'./other\'',
+      'server/api/foo.ts': 'export default defineEventHandler(() => 1)\nexport const schema = 1',
+    }, SLUG)).toEqual([])
+  })
+
+  test('files under hidden directories are scanned', () => {
+    const findings = findingsFor({ ...PKG, 'src/.hidden/mixed.ts': 'export function good() {}' }, SLUG)
+    expect(findings.map(f => f.file)).toEqual(['src/.hidden/mixed.ts'])
+  })
+
   test('declaration files of every module flavor are exempt', () => {
     expect(findingsFor({
       ...PKG,
