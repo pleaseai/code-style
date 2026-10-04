@@ -62,7 +62,7 @@ export function resolveAstGrepBinary(): string {
 
 /** Runs `extract/<language>.yml` over `root` and returns every match. */
 export function runExtraction(root: string, language: ExtractLanguage, paths: string[] = ['.']): ExtractMatch[] {
-  const ruleFile = join(PACKAGE_ROOT, 'extract', `${language}.yml`)
+  const ruleFile = join(dirname(require.resolve('@pleaseai/ast-grep-config/package.json')), 'extract', `${language}.yml`)
   const bin = resolveAstGrepBinary()
   const res = spawnSync(bin, ['scan', '--rule', ruleFile, '--json=stream', ...paths], {
     cwd: root,

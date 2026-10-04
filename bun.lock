@@ -23,6 +23,19 @@
         "wrangler": "^4.0.0",
       },
     },
+    "packages/ast-grep-config": {
+      "name": "@pleaseai/ast-grep-config",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@ast-grep/cli": "0.45.3",
+        "@types/bun": "^1.3.12",
+        "@types/node": "^25.6.0",
+        "typescript": "^6.0.2",
+      },
+      "peerDependencies": {
+        "@ast-grep/cli": "^0.45.3",
+      },
+    },
     "packages/cli": {
       "name": "@pleaseai/code-style",
       "version": "0.0.3",
@@ -48,6 +61,7 @@
       },
       "dependencies": {
         "@ast-grep/cli": "0.45.3",
+        "@pleaseai/ast-grep-config": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "^1.3.12",
@@ -640,6 +654,10 @@
     "@pkgjs/parseargs": ["@pkgjs/parseargs@0.11.0", "", {}, "sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg=="],
 
     "@pkgr/core": ["@pkgr/core@0.2.9", "", {}, "sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA=="],
+
+    "@pleaseai/ast-grep-config": ["@pleaseai/ast-grep-config@workspace:packages/ast-grep-config"],
+
+    "@pleaseai/code-organization": ["@pleaseai/code-organization@workspace:packages/code-organization"],
 
     "@pleaseai/code-style": ["@pleaseai/code-style@workspace:packages/cli"],
 

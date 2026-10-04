@@ -1,0 +1,43 @@
+id: tsx-error-outside-errors-file
+language: tsx
+severity: warning
+message: >-
+  [code-error-types-in-dedicated-module] Error class declared outside the
+  module's errors.ts. Move it there. Fix guide:
+  node_modules/@pleaseai/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.md
+note: >-
+  Move the class into `errors.ts` next to this file's module (create it if
+  missing), export it by name, and import it from there.
+url: https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.md
+rule:
+  any:
+    - kind: class_declaration
+    - kind: abstract_class_declaration
+  has:
+    kind: class_heritage
+    has:
+      kind: extends_clause
+      any:
+        # Direct or indirect inheritance named like an error: `extends Error`,
+        # `extends TypeError`, `extends errors.AppError`.
+        - has:
+            field: value
+            regex: ^([\w$]+\.)*[\w$]*(Error|Exception)$
+        # No type information: a class *named* like an error that extends
+        # anything is treated as an error type (ADR-0022 §3).
+        - inside:
+            any:
+              - kind: class_declaration
+              - kind: abstract_class_declaration
+            stopBy: end
+            has:
+              field: name
+              regex: (Error|Exception)$
+ignores:
+  - '**/errors.ts'
+  - '**/errors.tsx'
+  - '**/*.d.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.tsx'
+  - '**/test/**'
+  - '**/tests/**'

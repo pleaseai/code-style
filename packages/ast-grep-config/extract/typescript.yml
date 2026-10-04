@@ -1,0 +1,146 @@
+# Layer-3 extraction rules (ADR-0022 §3) for typescript. Run by `please-style check`
+# with `ast-grep scan -r`; never part of the consumer-facing rule set.
+# Every rule matches a *name node*, so the match text is the symbol name.
+id: export-name
+language: typescript
+severity: hint
+message: exported symbol
+rule:
+  any:
+    # export function|class|interface|type|enum <name>
+    - all:
+        - any:
+            - kind: identifier
+            - kind: type_identifier
+        - inside:
+            field: name
+            any:
+              - kind: function_declaration
+              - kind: generator_function_declaration
+              - kind: class_declaration
+              - kind: abstract_class_declaration
+              - kind: interface_declaration
+              - kind: type_alias_declaration
+              - kind: enum_declaration
+              - kind: function_signature
+            inside:
+              any:
+                - kind: export_statement
+                  not:
+                    has:
+                      regex: ^default$
+                - kind: ambient_declaration
+                  inside:
+                    kind: export_statement
+    # export const|let <name> = …
+    - all:
+        - kind: identifier
+        - inside:
+            field: name
+            kind: variable_declarator
+            inside:
+              any:
+                - kind: lexical_declaration
+                - kind: variable_declaration
+              inside:
+                kind: export_statement
+    # export { local as <name> } / export { <name> } (local exports only)
+    - all:
+        - kind: identifier
+        - not:
+            regex: ^default$
+        - any:
+            - inside:
+                field: alias
+                kind: export_specifier
+                inside:
+                  kind: export_clause
+                  inside:
+                    kind: export_statement
+                    not:
+                      has:
+                        field: source
+                        kind: string
+            - inside:
+                field: name
+                kind: export_specifier
+                not:
+                  has:
+                    field: alias
+                    kind: identifier
+                inside:
+                  kind: export_clause
+                  inside:
+                    kind: export_statement
+                    not:
+                      has:
+                        field: source
+                        kind: string
+---
+id: helper-candidate
+language: typescript
+severity: hint
+message: test helper candidate
+rule:
+  all:
+    - any:
+        - kind: identifier
+        - kind: type_identifier
+    - regex: ^([cC]reateMock|[mM]ock|[fF]ake|[sS]tub)([A-Z0-9_$]|$)
+    - any:
+        - inside:
+            field: name
+            any:
+              - kind: function_declaration
+              - kind: generator_function_declaration
+              - kind: class_declaration
+            inside:
+              any:
+                - kind: program
+                - kind: export_statement
+                  inside:
+                    kind: program
+        - inside:
+            field: name
+            kind: variable_declarator
+            inside:
+              any:
+                - kind: lexical_declaration
+                - kind: variable_declaration
+              inside:
+                any:
+                  - kind: program
+                  - kind: export_statement
+                    inside:
+                      kind: program
+---
+id: import-name
+language: typescript
+severity: hint
+message: imported name
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: import_specifier
+    inside:
+      stopBy: end
+      kind: import_statement
+      has:
+        field: source
+        pattern: $SRC
+---
+id: import-namespace
+language: typescript
+severity: hint
+message: namespace import
+rule:
+  kind: identifier
+  inside:
+    kind: namespace_import
+    inside:
+      stopBy: end
+      kind: import_statement
+      has:
+        field: source
+        pattern: $SRC
