@@ -125,7 +125,7 @@ will be overwritten.
 - Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
   (\`src/foo/bar.ts\` → \`test/foo/bar.test.ts\`); no \`import.meta.vitest\` in-source tests
 - Code organization (named exports, file names, error files, test paths, shared helpers):
-  \`node_modules/@pleaseai/code-organization/README.md\`; check with \`please-code-org check\`
+  \`node_modules/@pleaseai/ast-grep-config/README.md\`; check with \`ast-grep scan\` and \`please-style check\`
 - Conventional Commits for all commit messages
 
 For the full rules (what an AI coding assistant needs to know before writing code),
@@ -154,18 +154,18 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   return result
 }
 
-// --- code-organization ------------------------------------------------------
+// --- ast-grep ---------------------------------------------------------------
 
-const CODE_ORGANIZATION_RULES = 'node_modules/@pleaseai/code-organization/rules'
+const AST_GREP_RULES = 'node_modules/@pleaseai/ast-grep-config/rules'
 
-const SGCONFIG_TEMPLATE = `# ast-grep config — managed by @pleaseai/code-style (code-organization).
-# Run \`ast-grep scan\` for the structural rules and \`please-code-org check\`
+const SGCONFIG_TEMPLATE = `# ast-grep config — managed by @pleaseai/code-style (ast-grep).
+# Run \`ast-grep scan\` for the structural rules and \`please-style check\`
 # for file-name and test-path rules. Every rule is a warning.
 ruleDirs:
-  - ${CODE_ORGANIZATION_RULES}
+  - ${AST_GREP_RULES}
 `
 
-export async function applyCodeOrganization(ctx: ToolContext): Promise<ToolApplyResult> {
+export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, 'sgconfig.yml')
   const label = 'sgconfig.yml'
@@ -177,7 +177,7 @@ export async function applyCodeOrganization(ctx: ToolContext): Promise<ToolApply
     return result
   }
 
-  if (existing.includes(CODE_ORGANIZATION_RULES)) {
+  if (existing.includes(AST_GREP_RULES)) {
     // Already points at the rules — keep the user's other settings.
     return result
   }
@@ -220,13 +220,14 @@ export const TOOLS: Tool[] = [
     apply: applyAgentsMd,
   },
   {
-    id: 'code-organization',
-    label: '@pleaseai/code-organization (sgconfig.yml + please-code-org)',
-    // @ast-grep/cli is listed explicitly: pnpm (and npm in some layouts) only
-    // link bins of direct dependencies, and `npx ast-grep` would otherwise
-    // fetch an unrelated package.
-    packages: ['@pleaseai/code-organization', '@ast-grep/cli'],
-    apply: applyCodeOrganization,
+    id: 'ast-grep',
+    label: '@pleaseai/ast-grep-config (sgconfig.yml + please-style check)',
+    // @ast-grep/cli is a peer of the rules package and an optional peer of
+    // this CLI: installing it as a direct dependency links the `ast-grep` bin
+    // (pnpm, and npm in some layouts, only link bins of direct dependencies)
+    // and lets `please-style check` resolve it from the project.
+    packages: ['@pleaseai/ast-grep-config', '@ast-grep/cli'],
+    apply: applyAstGrep,
   },
 ]
 

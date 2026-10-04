@@ -13,8 +13,8 @@
     "packages/cli": {
       "package-name": "@pleaseai/code-style"
     },
-    "packages/code-organization": {
-      "package-name": "@pleaseai/code-organization"
+    "packages/ast-grep-config": {
+      "package-name": "@pleaseai/ast-grep-config"
     }
   }
 }

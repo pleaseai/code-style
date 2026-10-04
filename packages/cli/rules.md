@@ -26,7 +26,7 @@ code, so generated output passes lint on the first try.
   Default exports are only for files whose shape a framework dictates (config
   files, Nuxt 4 `app/pages/`/`app/layouts/`/`app/middleware/`/`app/plugins/`, Nitro
   `server/api/`/`routes/`, Storybook stories). The `ts-no-default-export`
-  rule of `@pleaseai/code-organization` lists the exact paths.
+  rule of `@pleaseai/ast-grep-config` lists the exact paths.
 
 ## TypeScript
 
@@ -75,9 +75,10 @@ code, so generated output passes lint on the first try.
 - Not every source file needs a test. These rules say where a test goes, not
   whether it must exist.
 
-These are the `@pleaseai/code-organization` rules (ADR-0022). Check them with
-`ast-grep scan` (structural rules) and `please-code-org check` (file names and
-test paths); each warning links to a README that explains the fix.
+These are the ADR-0022 code-organization rules. Check them with `ast-grep scan`
+(structural rules from `@pleaseai/ast-grep-config`) and `please-style check`
+(file names and test paths); each warning links to a README that explains the
+fix.
 
 ## JSON & `package.json`
 

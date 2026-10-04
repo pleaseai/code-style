@@ -35,7 +35,7 @@ export type ToolId
     | 'prettier-config'
     | 'editorconfig'
     | 'agents-md'
-    | 'code-organization'
+    | 'ast-grep'
 
 export const EMPTY_RESULT: ToolApplyResult = {
   created: [],

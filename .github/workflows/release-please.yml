@@ -26,7 +26,7 @@ jobs:
       eslint-config-released: ${{ steps.release.outputs['packages/eslint-config--release_created'] }}
       prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
       code-style-released: ${{ steps.release.outputs['packages/cli--release_created'] }}
-      code-organization-released: ${{ steps.release.outputs['packages/code-organization--release_created'] }}
+      ast-grep-config-released: ${{ steps.release.outputs['packages/ast-grep-config--release_created'] }}
     steps:
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -123,14 +123,15 @@ jobs:
             npm publish pleaseai-code-style-*.tgz --provenance --access public
           fi
 
-      - name: Publish @pleaseai/code-organization
-        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-organization-released == 'true') }}
-        working-directory: packages/code-organization
+      # No build step: the package ships YAML rules and READMEs as-is.
+      - name: Publish @pleaseai/ast-grep-config
+        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.ast-grep-config-released == 'true') }}
+        working-directory: packages/ast-grep-config
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if npm view "@pleaseai/code-organization@$VERSION" version 2>/dev/null; then
-            echo "⚠ @pleaseai/code-organization@$VERSION already published, skipping"
+          if npm view "@pleaseai/ast-grep-config@$VERSION" version 2>/dev/null; then
+            echo "⚠ @pleaseai/ast-grep-config@$VERSION already published, skipping"
           else
             bun pm pack
-            npm publish pleaseai-code-organization-*.tgz --provenance --access public
+            npm publish pleaseai-ast-grep-config-*.tgz --provenance --access public
           fi

@@ -17,7 +17,7 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 | `@pleaseai/eslint-config` | `packages/eslint-config` | tsdown |
 | `@pleaseai/prettier-config` | `packages/perttier-config` | none (JSON only) |
 | `@pleaseai/editorconfig` | `packages/editorconfig` | none (static file) |
-| `@pleaseai/code-organization` | `packages/code-organization` | tsdown (+ ast-grep rules in `rules/`) |
+| `@pleaseai/ast-grep-config` | `packages/ast-grep-config` | none (ast-grep YAML rules) |
 
 ## Commands
 
@@ -31,7 +31,8 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 - `packages/eslint-config` wraps `@antfu/eslint-config` with PleaseAI defaults (2-space indent, single quotes, no semi)
 - `packages/eslint-config/src/package-json.ts` exports `eslint-plugin-package-json` configs
 - Root `eslint.config.ts` dogfoods `@pleaseai/eslint-config`
-- `packages/code-organization` enforces ADR-0022 (engineering-standards): ast-grep rules in `rules/<lang>/<id>.yml` (each with a sibling `<id>.md` README, rule tests in `rule-tests/`), layer-3 extraction rules in `extract/` (never in `ruleDirs`), and the `please-code-org check` path checker in `src/`. Tests live in `test/` mirroring `src/` (the package dogfoods its own rule); run `bun run test` in the package (bun test + `ast-grep test`)
+- `packages/ast-grep-config` holds the ADR-0022 (engineering-standards) layer-2 ast-grep rules in `rules/<lang>/<id>.yml` (each with a sibling `<id>.md` README, rule tests in `rule-tests/`) and the layer-3 extraction rules in `extract/` (never in `ruleDirs`); `@ast-grep/cli` is a peer. Run `bun run test` in the package (`ast-grep test` + the e2e sgconfig test)
+- `packages/cli/src/check/` is the `please-style check` path checker (layer 3). It resolves `@ast-grep/cli` and `@pleaseai/ast-grep-config` from the checked project first, then from the CLI's own install; both are optional peers of `@pleaseai/code-style`, never `dependencies` (that would make every `init` download ast-grep). Tests live in `packages/cli/test/` mirroring `src/`, shared helpers in `test/test-utils/` (the CLI dogfoods its own rule)
 
 ## Code Style
 

@@ -27,8 +27,9 @@ jobs:
         run: bun run build
 
       # Package tests via turbo (packages/* only, so docs is not rebuilt):
-      # bun test for the CLI and code-organization, plus code-organization's
-      # ast-grep rule tests. The runner's cargo enables the real
+      # bun test for the CLI (including `please-style check`) and
+      # ast-grep-config, plus ast-grep-config's ast-grep rule tests. The
+      # runner's cargo enables the real
       # `cargo metadata` test. ast-grep resolves from
       # node_modules/.bin (root trustedDependencies runs @ast-grep/cli's
       # postinstall, which links the native binary).
