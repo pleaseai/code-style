@@ -12,6 +12,9 @@
     },
     "packages/cli": {
       "package-name": "@pleaseai/code-style"
+    },
+    "packages/code-organization": {
+      "package-name": "@pleaseai/code-organization"
     }
   }
 }

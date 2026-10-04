@@ -19,6 +19,9 @@
       "docs"
     ]
   },
+  "trustedDependencies": [
+    "@ast-grep/cli"
+  ],
   "scripts": {
     "build": "turbo run build",
     "lint": "eslint . --cache",
