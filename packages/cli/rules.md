@@ -24,7 +24,7 @@ code, so generated output passes lint on the first try.
   within each group.
 - Use **named exports** so one name search finds the definition and every use.
   Default exports are only for files whose shape a framework dictates (config
-  files, Nuxt `pages/`/`layouts/`/`middleware/`/`plugins/`, Nitro
+  files, Nuxt 4 `app/pages/`/`app/layouts/`/`app/middleware/`/`app/plugins/`, Nitro
   `server/api/`/`routes/`, Storybook stories). The `ts-no-default-export`
   rule of `@pleaseai/code-organization` lists the exact paths.
 

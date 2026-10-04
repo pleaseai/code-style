@@ -78,9 +78,12 @@ Each rule has a README next to it with the reason, a wrong and a right
 example, and the steps to fix a violation. The warning message names the slug
 and the README path, so an agent can fix the violation from the message alone.
 
-Files whose shape a framework dictates (config files, Nuxt `pages/` and
-`layouts/`, Nitro `server/api/`, Storybook stories, and so on) are excluded
-through each rule's `ignores` list.
+Files whose shape a framework dictates (config files, Nuxt 4 `app/pages/` and
+`app/layouts/`, Nitro `server/api/`, Storybook stories, and so on) are excluded
+through each rule's `ignores` list. Nuxt 3 root layouts (`pages/` without
+`app/`) are not; the
+[`ts-no-default-export` README](./rules/typescript/ts-no-default-export.md#nuxt-3-layouts-no-app-directory)
+shows how to scope the rule for them.
 
 ## Layer 3: path checker
 

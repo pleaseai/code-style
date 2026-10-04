@@ -41,12 +41,8 @@ ignores:
   - '**/app/plugins/**'
   - '**/app/app.config.ts'
   - '**/app/router.options.ts'
-  # Nuxt 3 (srcDir = project root)
-  - '**/pages/**'
-  - '**/layouts/**'
-  - '**/middleware/**'
-  - '**/plugins/**'
-  - '**/app.config.ts'
+  # Nuxt 3 root layouts (no app/) are deliberately absent: bare globs such as
+  # '**/plugins/**' would exempt every directory with that name. See the README.
   # Nitro (server/)
   - '**/server/api/**'
   - '**/server/routes/**'

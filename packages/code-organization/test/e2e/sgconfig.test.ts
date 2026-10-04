@@ -23,7 +23,10 @@ const PROJECT = {
   'app/pages/index.ts': 'export default definePageMeta({})',
   'app/app.config.ts': 'export default defineAppConfig({})',
   'server/api/users.get.ts': 'export default defineEventHandler(() => [])',
+  // Nuxt 3 root layout: not allowlisted (a bare `plugins/` glob would hide
+  // every directory with that name).
   'pages/about.ts': 'export default {}',
+  'packages/core/plugins/loader.ts': 'export default function load() {}',
   'src/button.stories.tsx': 'export default { title: "Button" }',
   'src/card.tsx': 'export default function Card() { return <div /> }',
   '.vitepress/config.mts': 'export default {}',
@@ -42,6 +45,8 @@ const EXPECTED = [
   'crate/src/lib.rs:1 rust-no-glob-reexport',
   'crate/src/lib.rs:2 rust-error-outside-error-file',
   'lib/auth/token_store.dart:1 dart-error-outside-errors-file',
+  'packages/core/plugins/loader.ts:1 ts-no-default-export',
+  'pages/about.ts:1 ts-no-default-export',
   'src/card.tsx:1 tsx-no-default-export',
   'src/main/java/com/acme/BException.java:1 java-error-outside-error-package',
   'src/main/kotlin/com/acme/Billing.kt:1 kotlin-error-outside-errors-file',
@@ -75,5 +80,14 @@ describe('consumer wiring of the layer-2 rules', () => {
     const rules = relative(fixture.root, `${PACKAGE}rules`)
     writeFileSync(join(fixture.root, 'sgconfig.yml'), `ruleDirs:\n  - ${rules}\n`)
     expect(scan(fixture.root, [])).toEqual(EXPECTED)
+  })
+
+  test('the documented Nuxt 3 workaround scopes the default-export rule without suppressions', () => {
+    const fixture = createFixture(PROJECT)
+    cleanup = fixture.cleanup
+    const config = ['-c', `${PACKAGE}sgconfig.yml`]
+    const rest = scan(fixture.root, [...config, '--off=ts-no-default-export'])
+    const scoped = scan(fixture.root, [...config, '--filter', '^ts-no-default-export$', '--globs', '!pages/**'])
+    expect([...rest, ...scoped].sort()).toEqual(EXPECTED.filter(e => e !== 'pages/about.ts:1 ts-no-default-export'))
   })
 })

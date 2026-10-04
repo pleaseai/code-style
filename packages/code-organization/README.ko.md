@@ -77,8 +77,12 @@ bunx ast-grep scan -c node_modules/@pleaseai/code-organization/sgconfig.yml
 단계를 적어 두었습니다(영문). 경고 메시지에 slug와 README 경로가 들어 있어
 에이전트가 메시지만 보고도 위반을 고칠 수 있습니다.
 
-프레임워크가 형태를 정하는 파일(설정 파일, Nuxt `pages/`·`layouts/`, Nitro
-`server/api/`, Storybook story 등)은 각 규칙의 `ignores` 목록으로 제외합니다.
+프레임워크가 형태를 정하는 파일(설정 파일, Nuxt 4 `app/pages/`·`app/layouts/`,
+Nitro `server/api/`, Storybook story 등)은 각 규칙의 `ignores` 목록으로
+제외합니다. `app/` 없이 루트에 `pages/`를 두는 Nuxt 3 구조는 제외하지 않습니다.
+이 경우 규칙 범위를 좁히는 방법은
+[`ts-no-default-export` README](./rules/typescript/ts-no-default-export.md#nuxt-3-layouts-no-app-directory)를
+참고하세요.
 
 ## 3층: 경로 검사기
 
