@@ -1,0 +1,49 @@
+packages/cli/src/check/check-filenames.ts
+  s_79262c7689b9bc::t_ec905ecb31bb15 14-15,41,47,94,107
+packages/cli/test/check/check-filenames.test.ts
+  s_79262c7689b9bc::t_c06006c8e3c24b 43-72
+packages/cli/src/check/check-helpers.ts
+  s_79262c7689b9bc::t_0d9e8ee0bfcb36 203-204,206-208
+packages/cli/test/check/check-helpers.test.ts
+  s_79262c7689b9bc::t_31a0c7fe70afc1 83-92
+packages/cli/src/check/ast-grep.ts
+  s_79262c7689b9bc::t_7c5068fafa2099 109
+packages/ast-grep-config/extract/typescript.yml
+  s_79262c7689b9bc::t_158d99369c9796 29-30,37-56,69-70,84-85,101-102,108-130
+packages/cli/test/check/ast-grep.test.ts
+  s_79262c7689b9bc::t_1544278b4d359b 3,5,36-58
+packages/ast-grep-config/extract/tsx.yml
+  s_79262c7689b9bc::t_ad34fabe419877 29-30,37-56,69-70,84-85,101-102,108-130
+packages/cli/src/check/check-code-organization.ts
+  s_79262c7689b9bc::t_b31d6396cb9f16 25-29,45-49
+packages/ast-grep-config/extract/rust.yml
+  s_79262c7689b9bc::t_8a021deaeec4f1 6-8,48-64
+packages/ast-grep-config/rules/typescript/ts-error-outside-errors-file.yml
+  s_79262c7689b9bc::t_f898d67dddcfa9 39-40
+packages/ast-grep-config/extract/sgconfig.yml
+  s_79262c7689b9bc::t_0673411b0c8106 1-4
+packages/ast-grep-config/rules/typescript/ts-no-default-export.yml
+  s_79262c7689b9bc::t_e16947e1b99f29 32-33
+packages/cli/test/check/check-rust.test.ts
+  s_79262c7689b9bc::t_0df7cf4dc045a9 58-68,104-112
+packages/cli/src/check/check-rust.ts
+  s_79262c7689b9bc::t_796b755bc606b8 173,178-180,192-193,208-218,222,233
+.please/docs/review/rejected-findings.jsonl
+  s_79262c7689b9bc::t_5bb95a6fb0fe9f 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ba22e830892bd2c595aa9202dc03430c902ef449",
+  "prompts": {},
+  "sessions": {
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
