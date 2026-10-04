@@ -1,0 +1,56 @@
+id: java-error-outside-error-package
+snapshots:
+  class Timeout extends AppException {}:
+    labels:
+    - source: class Timeout extends AppException {}
+      style: primary
+      start: 0
+      end: 37
+    - source: extends AppException
+      style: secondary
+      start: 14
+      end: 34
+  public class Fatal extends Throwable {}:
+    labels:
+    - source: public class Fatal extends Throwable {}
+      style: primary
+      start: 0
+      end: 39
+    - source: extends Throwable
+      style: secondary
+      start: 19
+      end: 36
+  public class PaymentError extends Base {}:
+    labels:
+    - source: public class PaymentError extends Base {}
+      style: primary
+      start: 0
+      end: 41
+    - source: PaymentError
+      style: secondary
+      start: 13
+      end: 25
+    - source: extends Base
+      style: secondary
+      start: 26
+      end: 38
+  public class UserNotFoundException extends RuntimeException {}:
+    labels:
+    - source: public class UserNotFoundException extends RuntimeException {}
+      style: primary
+      start: 0
+      end: 62
+    - source: extends RuntimeException
+      style: secondary
+      start: 35
+      end: 59
+  public class Wrapped extends java.lang.IllegalStateException {}:
+    labels:
+    - source: public class Wrapped extends java.lang.IllegalStateException {}
+      style: primary
+      start: 0
+      end: 63
+    - source: extends java.lang.IllegalStateException
+      style: secondary
+      start: 21
+      end: 60

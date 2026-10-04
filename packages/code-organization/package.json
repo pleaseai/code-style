@@ -1,0 +1,37 @@
+{
+  "name": "@pleaseai/code-organization",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "ast-grep rules and a path checker that keep code agent-navigable (greppable symbols, predictable file and test locations)",
+  "author": "PleaseAI",
+  "license": "MIT",
+  "homepage": "https://github.com/pleaseai/code-style/tree/main/packages/code-organization#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pleaseai/code-style.git",
+    "directory": "packages/code-organization"
+  },
+  "keywords": [
+    "ast-grep",
+    "lint",
+    "code-organization",
+    "agents",
+    "pleaseai"
+  ],
+  "exports": {
+    "./sgconfig.yml": "./sgconfig.yml"
+  },
+  "files": [
+    "rules",
+    "sgconfig.yml"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "ast-grep test"
+  },
+  "dependencies": {
+    "@ast-grep/cli": "0.45.3"
+  }
+}

@@ -1,0 +1,16 @@
+id: ts-no-default-export
+valid:
+  - export function createUser() {}
+  - export const MAX_RETRIES = 3
+  - export class UserService {}
+  - export { createUser, MAX_RETRIES }
+  - export { createUser as makeUser }
+  - export type { User } from './user'
+  - const defaultValue = 1
+invalid:
+  - export default function createUser() {}
+  - export default class UserService {}
+  - "export default { name: 'config' }"
+  - export default defineConfig({})
+  - export { createUser as default }
+  - export { createUser, MAX_RETRIES as default }

@@ -1,0 +1,10 @@
+id: rust-no-glob-reexport
+valid:
+  - pub use crate::model::{User, Account};
+  - use super::*;
+  - use std::collections::*;
+  - pub use self::user::User;
+invalid:
+  - pub use crate::model::*;
+  - pub(crate) use self::internal::*;
+  - pub use crate::model::{User, nested::*};

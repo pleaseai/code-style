@@ -1,0 +1,13 @@
+# ast-grep project config for @pleaseai/code-organization (ADR-0022, layer 2).
+#
+# Consumers can scan with this file directly:
+#   ast-grep scan -c node_modules/@pleaseai/code-organization/sgconfig.yml
+# or point their own sgconfig.yml `ruleDirs` at
+# `node_modules/@pleaseai/code-organization/rules`.
+#
+# `extract/` holds the layer-3 extraction rules the path checker runs; it is
+# deliberately not listed in `ruleDirs` so it never reaches consumer output.
+ruleDirs:
+  - rules
+testConfigs:
+  - testDir: rule-tests

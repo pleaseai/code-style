@@ -1,0 +1,20 @@
+id: tsx-no-in-source-test
+language: tsx
+severity: warning
+message: >-
+  [test-path-derivable-from-source] In-source test block. Move the tests to a
+  test file under the package's test/ (or tests/) root. Fix guide:
+  node_modules/@pleaseai/code-organization/rules/tsx/tsx-no-in-source-test.md
+note: >-
+  Move the body of `if (import.meta.vitest)` into `test/<path>.test.tsx`
+  mirroring this file's path, import what it tests by name, then delete the
+  block (and the `includeSource`/`define` settings if nothing else uses them).
+url: https://github.com/pleaseai/code-style/blob/main/packages/code-organization/rules/tsx/tsx-no-in-source-test.md
+rule:
+  kind: if_statement
+  has:
+    field: condition
+    has:
+      stopBy: end
+      kind: member_expression
+      regex: ^import\.meta\.vitest$

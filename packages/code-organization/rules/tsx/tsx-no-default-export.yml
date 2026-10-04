@@ -1,0 +1,55 @@
+id: tsx-no-default-export
+language: tsx
+severity: warning
+message: >-
+  [code-greppable-public-symbols] Default export hides the symbol's name from
+  grep. Export a named declaration instead. Fix guide:
+  node_modules/@pleaseai/code-organization/rules/tsx/tsx-no-default-export.md
+note: >-
+  Replace `export default` with a named export (`export function foo`,
+  `export const foo`, `export class Foo`) and change importers to
+  `import { foo } from '…'`. Framework entry files are already exempt.
+url: https://github.com/pleaseai/code-style/blob/main/packages/code-organization/rules/tsx/tsx-no-default-export.md
+rule:
+  kind: export_statement
+  any:
+    # export default <declaration | expression>
+    - has:
+        regex: ^default$
+    # export { foo as default }
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          has:
+            field: alias
+            regex: ^default$
+# Files whose shape a framework dictates (ADR-0022 §2: "framework convention
+# files are allowlisted"). Paths are matched relative to the scan root, so every
+# glob starts with `**/` to work in monorepo packages too.
+ignores:
+  - '**/*.d.ts'
+  - '**/*.config.tsx'
+  - '**/*.config.*.tsx'
+  - '**/*.stories.tsx'
+  - '**/.vitepress/**'
+  - '**/.storybook/**'
+  # Nuxt 4 (srcDir = app/)
+  - '**/app/pages/**'
+  - '**/app/layouts/**'
+  - '**/app/middleware/**'
+  - '**/app/plugins/**'
+  - '**/app/app.config.ts'
+  - '**/app/router.options.ts'
+  # Nuxt 3 (srcDir = project root)
+  - '**/pages/**'
+  - '**/layouts/**'
+  - '**/middleware/**'
+  - '**/plugins/**'
+  - '**/app.config.ts'
+  # Nitro (server/)
+  - '**/server/api/**'
+  - '**/server/routes/**'
+  - '**/server/middleware/**'
+  - '**/server/plugins/**'
+  - '**/server/tasks/**'

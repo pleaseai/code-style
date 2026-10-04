@@ -1,0 +1,12 @@
+id: dart-error-outside-errors-file
+valid:
+  - class UserRepository {}
+  - class Cache extends Base {}
+  - class ErrorView extends StatelessWidget {}
+  - 'void main() { throw StateError("x"); }'
+invalid:
+  - class NotFoundException implements Exception {}
+  - 'class InvalidToken implements Exception { final String message; InvalidToken(this.message); }'
+  - class ParseError extends Error {}
+  - class Timeout extends AppException {}
+  - 'final class QuotaExceeded extends DomainError { QuotaExceeded() : super(); }'
