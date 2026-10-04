@@ -142,9 +142,9 @@ rule:
               inside:
                 kind: program
 ---
-# Re-exports (`export { a } from`, `export * from`, `export * as ns from`) and
-# default and string-named exports add public symbols that export-name does not enumerate, so
-# the file reads as "unknown symbols" like export-destructure.
+# Re-exports (`export { a } from`, `export * from`, `export * as ns from`),
+# `export import a = b.c`, and default and string-named exports add public
+# symbols that export-name does not enumerate, so the file reads as "unknown symbols" like export-destructure.
 id: export-opaque
 language: tsx
 severity: hint
@@ -157,6 +157,10 @@ rule:
     - has:
         field: source
         kind: string
+    # `export import a = b.c`: an exported alias that export-name does not enumerate.
+    - has:
+        field: declaration
+        kind: import_alias
     - regex: ^export\s+default\b
     # `export { foo as default }` / `export { default }`
     - has:

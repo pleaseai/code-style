@@ -137,3 +137,26 @@ describe('test-path-derivable-from-source (Dart, Kotlin, Java)', () => {
     expect(files(findings)).toEqual(['src/test/java/com/acme/other/InvoiceTest.java'])
   })
 })
+
+describe('test files outside any package', () => {
+  test('are reported as one aggregated notice per language, never as findings', () => {
+    const result = checkFixture({
+      'b.test.ts': '',
+      'a.test.ts': '',
+      'tool/FooTest.kt': '',
+      'app/foo_test.dart': '',
+      'lib/helper.ts': '',
+    })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([
+      'TypeScript: test-path check skipped 2 test file(s) outside any package (no package.json above them): a.test.ts, b.test.ts',
+      'Dart: test-path check skipped 1 test file(s) outside any package (no pubspec.yaml above them): app/foo_test.dart',
+      'Kotlin: test-path check skipped 1 test file(s) outside any package (not under a Gradle src/<set>/kotlin source set): tool/FooTest.kt',
+    ])
+  })
+
+  test('a test file inside a package yields no such notice', () => {
+    const result = checkFixture({ ...PKG, 'src/x.ts': '', 'test/x.test.ts': '' })
+    expect(result.notices).toEqual([])
+  })
+})

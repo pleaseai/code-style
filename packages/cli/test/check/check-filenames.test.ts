@@ -170,6 +170,14 @@ describe('unsupported-syntax notices', () => {
     ])
   })
 
+  test('`export import a = b.c` is opaque: no finding, notice with the re-export reason', () => {
+    const result = checkFixture({ ...PKG, 'src/loader.ts': 'export function foo() {}\nexport import a = b.c' })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([
+      'TypeScript: filename check skipped 1 file(s) whose exports cannot be enumerated (re-export): src/loader.ts',
+    ])
+  })
+
   test('a Dart export directive yields a notice', () => {
     const result = checkFixture({ ...PUBSPEC, 'lib/barrel.dart': 'export \'src/a.dart\';\nclass Widget {}' })
     expect(result.notices).toEqual(['Dart: filename check skipped 1 file(s) whose exports cannot be enumerated (re-export): lib/barrel.dart'])

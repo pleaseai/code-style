@@ -7,7 +7,7 @@ import { runExtraction } from './ast-grep.js'
 import { dartFilenames, inspectFilenames, typescriptFilenames } from './check-filenames.js'
 import { checkHelpers, dartHelpers, jvmHelpers, typescriptHelpers } from './check-helpers.js'
 import { checkRust } from './check-rust.js'
-import { checkTestPaths } from './check-test-paths.js'
+import { inspectTestPaths } from './check-test-paths.js'
 import { CONFIG_FILE, readConfigFile } from './config.js'
 import { ConfigError } from './errors.js'
 import { DART_LAYOUT, JAVA_LAYOUT, KOTLIN_LAYOUT, TEST_LAYOUTS, TYPESCRIPT_LAYOUT } from './layouts.js'
@@ -65,8 +65,9 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
 
   const tsNames = inspectFilenames(ts, typescriptFilenames(tsUnits))
   const dartNames = inspectFilenames(dart, dartFilenames(dartUnits, dartParts))
+  const testPaths = inspectTestPaths(files, TEST_LAYOUTS, base, root)
   const findings: Finding[] = [
-    ...checkTestPaths(files, TEST_LAYOUTS, base, root),
+    ...testPaths.findings,
     ...tsNames.findings,
     ...dartNames.findings,
     ...checkHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),
@@ -78,5 +79,5 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   findings.push(...rustResult.findings)
 
   findings.sort((a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.slug.localeCompare(b.slug))
-  return { root, findings, notices: [...tsNames.notices, ...dartNames.notices, ...rustResult.notices] }
+  return { root, findings, notices: [...testPaths.notices, ...tsNames.notices, ...dartNames.notices, ...rustResult.notices] }
 }

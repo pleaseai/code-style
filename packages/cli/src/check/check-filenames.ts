@@ -17,7 +17,7 @@ function opaqueReason(m: ExtractMatch): OpaqueReason {
   if (m.ruleId === 'export-destructure') {
     return 'destructured export'
   }
-  if (m.ruleId === 'export-directive' || /\bfrom\s*['"`]/.test(m.text)) {
+  if (m.ruleId === 'export-directive' || /\bfrom\s*['"`]/.test(m.text) || /^export\s+import\b/.test(m.text)) {
     return 're-export'
   }
   return /^export\s+default\b|\bas\s+default\b|\{\s*default\b/.test(m.text) ? 'default export' : 'string-literal export name'

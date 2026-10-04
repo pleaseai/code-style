@@ -6,6 +6,19 @@ import { isUnder, joinPath, relativeTo, unitOf } from './layouts.js'
 
 const SLUG = 'test-path-derivable-from-source'
 
+/** Maximum example paths listed in one notice. */
+const NOTICE_EXAMPLES = 3
+
+const LANGUAGE_LABEL: Record<TestLayout['language'], string> = { typescript: 'TypeScript', dart: 'Dart', kotlin: 'Kotlin', java: 'Java' }
+
+/** What marks a unit (package or module) of each layout, for the "outside any package" notice. */
+const UNIT_MARKER: Record<TestLayout['language'], string> = {
+  typescript: 'no package.json above them',
+  dart: 'no pubspec.yaml above them',
+  kotlin: 'not under a Gradle src/<set>/kotlin source set',
+  java: 'not under a Gradle src/<set>/java source set',
+}
+
 /** Source paths a test under `inner` (path below the test root) may target. */
 function candidateSources(inner: string, unit: Unit, layout: TestLayout): string[] {
   const segments = inner.split('/')
@@ -67,19 +80,32 @@ export function checkTestPaths(
   base: CodeOrganizationConfig,
   rootDir: string,
 ): Finding[] {
+  return inspectTestPaths(files, layouts, base, rootDir).findings
+}
+
+/**
+ * Like `checkTestPaths`, plus one aggregated notice per language for the test
+ * files that belong to no package or module and so are not checked.
+ */
+export function inspectTestPaths(
+  files: string[],
+  layouts: readonly TestLayout[],
+  base: CodeOrganizationConfig,
+  rootDir: string,
+): { findings: Finding[], notices: string[] } {
   const fileSet = new Set(files)
   const findings: Finding[] = []
+  const notices: string[] = []
   for (const layout of layouts) {
     const units = layout.units(files, base, rootDir)
-    if (units.length === 0) {
-      continue
-    }
+    const unitless: string[] = []
     for (const file of files) {
       if (!layout.isTestFile(file)) {
         continue
       }
       const unit = unitOf(file, units)
       if (unit == null) {
+        unitless.push(file)
         continue
       }
       const rel = relativeTo(file, unit.dir)
@@ -118,6 +144,10 @@ export function checkTestPaths(
         message: `No source file matches this test's path (expected ${describeExpected(candidates, unit, layout)}). Move the test to mirror the path of the source it tests; a test with no single source file belongs under ${joinPath(unit.dir, testRoot)}/e2e/.`,
       })
     }
+    if (unitless.length > 0) {
+      const examples = unitless.sort().slice(0, NOTICE_EXAMPLES).join(', ')
+      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${examples}${unitless.length > NOTICE_EXAMPLES ? ', …' : ''}`)
+    }
   }
-  return findings
+  return { findings, notices }
 }
