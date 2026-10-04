@@ -41,6 +41,24 @@ The `init` command:
 | prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (copied from `node_modules`) |
 | agents-md | — | `AGENTS.md` (marker-managed block) |
+| code-organization | `@pleaseai/code-organization`, `@ast-grep/cli` | `sgconfig.yml` |
+
+## Code organization checks
+
+Selecting **code-organization** installs
+[`@pleaseai/code-organization`](../code-organization) and writes an
+`sgconfig.yml` that points ast-grep at its rules. Two commands check a
+project; both only warn by default:
+
+```bash
+bunx ast-grep scan              # default exports, error-file placement, in-source tests, …
+bunx please-code-org check      # file names, test paths, shared test helpers
+bunx please-code-org check --strict   # exit 1 on any finding (for CI once clean)
+```
+
+Every warning names the rule's slug and links to a README with the fix. See
+the [package README](../code-organization/README.md) for the full rule list
+and the optional `code-organization.json` config.
 
 ## `AGENTS.md` block
 

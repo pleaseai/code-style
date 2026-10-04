@@ -154,6 +154,44 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   return result
 }
 
+// --- code-organization ------------------------------------------------------
+
+const CODE_ORGANIZATION_RULES = 'node_modules/@pleaseai/code-organization/rules'
+
+const SGCONFIG_TEMPLATE = `# ast-grep config — managed by @pleaseai/code-style (code-organization).
+# Run \`ast-grep scan\` for the structural rules and \`please-code-org check\`
+# for file-name and test-path rules. Every rule is a warning.
+ruleDirs:
+  - ${CODE_ORGANIZATION_RULES}
+`
+
+export async function applyCodeOrganization(ctx: ToolContext): Promise<ToolApplyResult> {
+  const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
+  const target = joinPath(ctx.cwd, 'sgconfig.yml')
+  const label = 'sgconfig.yml'
+  const existing = readFileOrNull(target)
+
+  if (existing == null) {
+    writeFileSync(target, SGCONFIG_TEMPLATE)
+    result.created.push(label)
+    return result
+  }
+
+  if (existing.includes(CODE_ORGANIZATION_RULES)) {
+    // Already points at the rules — keep the user's other settings.
+    return result
+  }
+
+  const ok = await confirmOverwrite(label, ctx.autoAccept)
+  if (!ok) {
+    result.skipped.push(label)
+    return result
+  }
+  writeFileSync(target, SGCONFIG_TEMPLATE)
+  result.updated.push(label)
+  return result
+}
+
 // --- Registry ---------------------------------------------------------------
 
 export const TOOLS: Tool[] = [
@@ -180,6 +218,15 @@ export const TOOLS: Tool[] = [
     label: 'AGENTS.md (AI coding rules block)',
     packages: [],
     apply: applyAgentsMd,
+  },
+  {
+    id: 'code-organization',
+    label: '@pleaseai/code-organization (sgconfig.yml + please-code-org)',
+    // @ast-grep/cli is listed explicitly: pnpm (and npm in some layouts) only
+    // link bins of direct dependencies, and `npx ast-grep` would otherwise
+    // fetch an unrelated package.
+    packages: ['@pleaseai/code-organization', '@ast-grep/cli'],
+    apply: applyCodeOrganization,
   },
 ]
 

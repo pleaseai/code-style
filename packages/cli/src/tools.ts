@@ -35,6 +35,7 @@ export type ToolId
     | 'prettier-config'
     | 'editorconfig'
     | 'agents-md'
+    | 'code-organization'
 
 export const EMPTY_RESULT: ToolApplyResult = {
   created: [],

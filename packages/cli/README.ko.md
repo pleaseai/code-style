@@ -40,6 +40,24 @@ bunx @pleaseai/code-style doctor  # 현재 프로젝트 상태 확인
 | prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (`node_modules`에서 복사) |
 | agents-md | — | `AGENTS.md` (마커로 관리되는 블록) |
+| code-organization | `@pleaseai/code-organization`, `@ast-grep/cli` | `sgconfig.yml` |
+
+## 코드 배치 검사
+
+**code-organization**을 선택하면
+[`@pleaseai/code-organization`](../code-organization)을 설치하고, ast-grep이 그
+규칙을 쓰도록 `sgconfig.yml`을 작성합니다. 프로젝트는 아래 두 명령으로
+검사하며, 둘 다 기본으로는 경고만 합니다.
+
+```bash
+bunx ast-grep scan              # default export, 에러 파일 위치, in-source 테스트 등
+bunx please-code-org check      # 파일 이름, 테스트 경로, 공유 테스트 헬퍼
+bunx please-code-org check --strict   # 발견 사항이 있으면 exit 1 (위반을 없앤 뒤 CI용)
+```
+
+모든 경고는 규칙의 slug와 수정 방법을 적은 README 경로를 함께 보여 줍니다.
+전체 규칙 목록과 선택 설정 파일 `code-organization.json`은
+[패키지 README](../code-organization/README.ko.md)를 참고하세요.
 
 ## `AGENTS.md` 블록
 

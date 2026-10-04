@@ -161,6 +161,7 @@ export function runDoctor(opts: CommandOptions): void {
     'eslint.config.mjs',
     '.editorconfig',
     'AGENTS.md',
+    'sgconfig.yml',
   ]
   for (const f of files) {
     const exists = existsSync(resolve(opts.cwd, f))
