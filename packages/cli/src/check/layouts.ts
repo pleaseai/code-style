@@ -135,7 +135,7 @@ export const TYPESCRIPT_LAYOUT: TestLayout = {
   },
   isTestFile: path => TS_TEST.test(path),
   sourceStem: fileName => fileName.replace(TS_TEST, ''),
-  sourceExtensions: ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.vue'],
+  sourceExtensions: ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.vue', '.svelte', '.astro'],
   allowIndex: true,
   helperDirs: unit => unit.testRoots.map(r => `${r}/test-utils`),
   // e2e tests have no source counterpart wherever they live (ADR-0022 §1).

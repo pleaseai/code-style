@@ -4,12 +4,12 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, realpathSync } from 'node:fs'
 import { join, posix, relative } from 'node:path'
 import process from 'node:process'
+import { exampleList } from './check-test-paths.js'
 import { CargoUnavailableError } from './errors.js'
 import { isUnder, joinPath, relativeTo } from './layouts.js'
 
-const NOTICE_EXAMPLES = 3
 /** Subdirectories of `tests/` conventionally holding inputs a test target loads at runtime (trybuild, compiletest, fixtures). */
-const RUNTIME_FIXTURE_DIRS = new Set(['ui', 'compile-fail', 'compile-pass', 'fixtures'])
+const RUNTIME_FIXTURE_DIRS = new Set(['ui', 'compile-fail', 'compile-pass', 'fixtures', 'testdata', 'test-data', 'test_data'])
 
 interface ModDecl {
   name: string
@@ -43,8 +43,11 @@ export function cargoMetadataFromCli(dir: string): CargoMetadata {
     encoding: 'utf-8',
     maxBuffer: 256 * 1024 * 1024,
   })
+  if (res.error != null) {
+    throw new Error(res.error.message)
+  }
   if (res.status !== 0) {
-    throw new Error(res.stderr.trim().split('\n').at(-1) ?? `exit ${res.status}`)
+    throw new Error((res.stderr ?? '').trim().split('\n').at(-1) || `exit ${res.status ?? res.signal}`)
   }
   return JSON.parse(res.stdout) as CargoMetadata
 }
@@ -210,7 +213,7 @@ export function checkRust(
   const pathLoaded = new Set<string>()
   const nestedPathFiles = new Set<string>()
   const macroModFiles = new Set<string>()
-  const includeFiles = new Map<string, 'dir' | 'package'>()
+  const includeFiles = new Set<string>()
   for (const m of matches) {
     if (m.ruleId === 'mod-decl' || m.ruleId === 'mod-decl-cfg-path') {
       // `mod r#async;` loads `async.rs`. `mod-decl-cfg-path` matches the attribute (one per conditional `path`), so the module name is `$NAME`.
@@ -230,10 +233,9 @@ export function checkRust(
     else if (m.ruleId === 'macro-mod-decl') {
       macroModFiles.add(m.file)
     }
-    else if (m.ruleId === 'include-macro') {
-      // `include!("gen.rs")` (a plain relative path) stays within the including file's directory; anything else may reach the whole crate.
-      const literal = /^[\w:]*include\s*!\s*[([{]\s*"([^"\\]*)"\s*[)\]}]/.exec(m.text)?.[1]
-      includeFiles.set(m.file, literal != null && !literal.startsWith('/') && !literal.split('/').includes('..') ? 'dir' : 'package')
+    else if (m.ruleId === 'include-macro' || m.ruleId === 'macro-include') {
+      // An included file can declare modules anywhere in the crate (`#[path = "../x.rs"]`), so any `include!` withholds the whole package.
+      includeFiles.add(m.file)
     }
     else if (m.ruleId === 'test-attr') {
       unitTestFiles.add(m.file)
@@ -245,6 +247,7 @@ export function checkRust(
     .map(d => (d === '.' ? '' : d))
   const findings: Finding[] = []
   const runtimeLoadable = new Set<string>()
+  const fixtureUnitTests = new Set<string>()
   for (const pkg of loaded.packages) {
     const testsDir = joinPath(pkg.dir, 'tests')
     const commonDir = joinPath(testsDir, 'common')
@@ -260,7 +263,7 @@ export function checkRust(
     // `include!` and `mod x;` in macro bodies load files without a `mod` item: withhold the subtree (or the crate) they can reach.
     const loadDirs = [
       ...[...macroModFiles].filter(owned).map(f => ({ file: f, dir: pkg.dir })),
-      ...[...includeFiles].filter(([f]) => owned(f)).map(([f, scope]) => ({ file: f, dir: scope === 'package' ? pkg.dir : (posix.dirname(f) === '.' ? '' : posix.dirname(f)) })),
+      ...[...includeFiles].filter(owned).map(f => ({ file: f, dir: pkg.dir })),
     ]
     const reachabilityUnknown = (f: string): boolean => unknownDirs.some(u => isUnder(f, u.dir)) || loadDirs.some(u => isUnder(f, u.dir))
     if (loadDirs.length > 0) {
@@ -318,6 +321,12 @@ export function checkRust(
         }
       }
       else if (!reachabilityUnknown(file) && unitTestFiles.has(file) && !roots.has(file) && !reachedByAny.has(file)) {
+        literals ??= literalSegments(rootDir, pkg)
+        const dirSegments = relativeTo(file, pkg.dir).split('/').slice(0, -1)
+        if (dirSegments.some(seg => RUNTIME_FIXTURE_DIRS.has(seg) || literals!.has(seg))) {
+          fixtureUnitTests.add(file)
+          continue
+        }
         findings.push({
           slug: 'test-path-derivable-from-source',
           kind: 'unreachable-unit-test',
@@ -330,8 +339,10 @@ export function checkRust(
     }
   }
   if (runtimeLoadable.size > 0) {
-    const paths = [...runtimeLoadable].sort()
-    loaded.notices.push(`Rust: undiscovered-integration-test check skipped ${paths.length} file(s) in tests/ subdirectories a test target may load at runtime (trybuild/compiletest fixtures, or a directory named in a string literal of a tests/*.rs target): ${paths.slice(0, NOTICE_EXAMPLES).join(', ')}${paths.length > NOTICE_EXAMPLES ? ', …' : ''}`)
+    loaded.notices.push(`Rust: undiscovered-integration-test check skipped ${runtimeLoadable.size} file(s) in tests/ subdirectories a test target may load at runtime (trybuild/compiletest fixtures, or a directory named in a string literal of a tests/*.rs target): ${exampleList(runtimeLoadable)}`)
+  }
+  if (fixtureUnitTests.size > 0) {
+    loaded.notices.push(`Rust: unreachable-unit-test check skipped ${fixtureUnitTests.size} file(s) under fixture directories (a fixtures/ui/testdata-style directory, or one named in a string literal of a tests/*.rs target) that a test may load at runtime: ${exampleList(fixtureUnitTests)}`)
   }
   return { findings, notices: loaded.notices }
 }

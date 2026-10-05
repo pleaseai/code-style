@@ -4,7 +4,7 @@ import { existsSync, realpathSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import process from 'node:process'
 import { runExtraction } from './ast-grep.js'
-import { dartFilenames, inspectFilenames, typescriptFilenames } from './check-filenames.js'
+import { dartFilenames, generatedDartFiles, inspectFilenames, typescriptFilenames } from './check-filenames.js'
 import { dartHelpers, inspectHelpers, jvmHelpers, typescriptHelpers } from './check-helpers.js'
 import { checkRust } from './check-rust.js'
 import { inspectTestPaths } from './check-test-paths.js'
@@ -66,7 +66,7 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const dartParts = new Set(dart.filter(m => m.ruleId === 'part-of').map(m => m.file))
 
   const tsNames = inspectFilenames(ts, typescriptFilenames(tsUnits))
-  const dartNames = inspectFilenames(dart, dartFilenames(dartUnits, dartParts))
+  const dartNames = inspectFilenames(dart, dartFilenames(dartUnits, new Set([...dartParts, ...generatedDartFiles(root, new Set(dart.map(m => m.file)))])))
   const testPaths = inspectTestPaths(files, TEST_LAYOUTS, base, root)
   const helpers = [
     inspectHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),

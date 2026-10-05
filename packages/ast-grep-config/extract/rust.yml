@@ -172,6 +172,20 @@ rule:
       kind: token_tree
       stopBy: end
 ---
+# `include!` written inside a token tree (a `macro_rules!` body or a macro
+# invocation): not a `macro_invocation` node, so include-macro does not see it.
+id: macro-include
+language: rust
+severity: hint
+message: include! invocation inside a macro body
+rule:
+  kind: token_tree
+  regex: \binclude\s*!
+  not:
+    inside:
+      kind: token_tree
+      stopBy: end
+---
 id: test-attr
 language: rust
 severity: hint

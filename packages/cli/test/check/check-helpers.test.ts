@@ -256,6 +256,37 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     expect(findings).toEqual([])
   })
 
+  const jvmHelperFixture = (a: string, b: string): Record<string, string> => ({
+    'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',
+    'src/test/kotlin/support/Support.kt': 'package support\nfun mockUser() = 1',
+    'src/test/kotlin/com/acme/ATest.kt': a,
+    'src/test/kotlin/com/acme/BTest.kt': b,
+  })
+
+  test('an explicit import does not credit a file that declares the imported name itself', () => {
+    const findings = findingsFor(jvmHelperFixture(
+      'package com.acme\nimport support.mockUser\nfun mockUser() = 1',
+      'package com.acme\nimport support.mockUser as mu\nfun mu() = 1',
+    ), SLUG)
+    expect(findings).toEqual([])
+  })
+
+  test('a qualified member call of another type is not a use of the top-level helper', () => {
+    const findings = findingsFor(jvmHelperFixture(
+      'package support\nclass ATest { val u = Fixtures.mockUser() }',
+      'package support\nclass BTest { val u = Fixtures.mockUser() }',
+    ), SLUG)
+    expect(findings).toEqual([])
+  })
+
+  test('a comment or string mention is not a use of the helper', () => {
+    const findings = findingsFor(jvmHelperFixture(
+      'package support\n// TODO: replace with mockUser\nclass ATest',
+      'package support\nclass BTest { val s = "mockUser" }',
+    ), SLUG)
+    expect(findings).toEqual([])
+  })
+
   test('a colocated helper imported from tests/ is directed to that package\'s tests/test-utils/', () => {
     const findings = findingsFor({
       ...PKG,

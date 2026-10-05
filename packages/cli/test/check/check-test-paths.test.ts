@@ -24,6 +24,16 @@ describe('test-path-derivable-from-source (TypeScript)', () => {
     expect(findings).toEqual([])
   })
 
+  test('a test of a .svelte or .astro component is not an orphan', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/lib/Counter.svelte': '<script></script>',
+      'src/lib/Card.astro': '---\n---',
+      'test/lib/Counter.test.ts': '',
+      'test/lib/Card.test.ts': '',
+    }, SLUG)).toEqual([])
+  })
+
   test('accepts tests/ as the test root', () => {
     expect(findingsFor({ ...PKG, 'src/x.ts': '', 'tests/x.test.ts': '' }, SLUG)).toEqual([])
   })

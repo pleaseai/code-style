@@ -114,8 +114,9 @@ rule:
   kind: part_of_directive
 ---
 # `part 'other.dart';`: the part file's declarations belong to this library, so
-# its symbol set is unknown. Generated parts (`part 'x.g.dart'`, `x.freezed.dart`:
-# an extra dot in the file name) declare private helpers and are not matched.
+# its symbol set is unknown. Parts of the known generator suffixes (`x.g.dart`,
+# `x.freezed.dart`) declare private helpers and are not matched; any other part,
+# including a handwritten `x.custom.dart`, is.
 id: part-directive
 language: dart
 severity: hint
@@ -125,7 +126,7 @@ rule:
   not:
     has:
       field: uri
-      regex: \.[A-Za-z0-9_]+\.dart['"]$
+      regex: \.(g|freezed)\.dart['"]$
 ---
 # `export 'other.dart';` re-exports public symbols that top-level-name does not
 # enumerate, so the file reads as "unknown symbols" in the filename check.

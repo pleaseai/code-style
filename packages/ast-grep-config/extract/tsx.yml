@@ -340,35 +340,44 @@ rule:
         field: source
         pattern: $SRC
 ---
-# Every local binding an import introduces (`import a`, `import { a }`, `import { x as a }`, `import * as a`, `import a = require('…')`).
+# Every local binding an import introduces (`import a = Ns.b`, `import a`, `import { a }`, `import { x as a }`, `import * as a`, `import a = require('…')`).
 # `export { a }` of such a binding is a re-export, not a local symbol.
 id: import-binding
 language: tsx
 severity: hint
 message: imported local binding
 rule:
-  kind: identifier
   any:
-    - inside:
-        kind: import_clause
-    - inside:
-        kind: namespace_import
-    # `import x = require('./foo')`
-    - inside:
-        kind: import_require_clause
-    - inside:
-        field: alias
-        kind: import_specifier
-    - all:
+    - kind: identifier
+      any:
         - inside:
-            field: name
+            kind: import_clause
+        - inside:
+            kind: namespace_import
+        # `import x = require('./foo')`
+        - inside:
+            kind: import_require_clause
+        - inside:
+            field: alias
             kind: import_specifier
-        - not:
-            inside:
-              kind: import_specifier
-              has:
-                field: alias
-                kind: identifier
-  inside:
-    stopBy: end
-    kind: import_statement
+        - all:
+            - inside:
+                field: name
+                kind: import_specifier
+            - not:
+                inside:
+                  kind: import_specifier
+                  has:
+                    field: alias
+                    kind: identifier
+      inside:
+        stopBy: end
+        kind: import_statement
+    # `import Baz = Foo.Bar` (an `import_alias`, not an import_statement); `export import` is export-opaque's.
+    - kind: identifier
+      nthChild: 1
+      inside:
+        kind: import_alias
+        not:
+          inside:
+            kind: export_statement

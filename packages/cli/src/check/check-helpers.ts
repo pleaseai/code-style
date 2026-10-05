@@ -307,6 +307,34 @@ function declaresName(text: string, name: string, file: string): boolean {
   return new RegExp(`(?<![\\w.])(?!(?:return|new|throw|throws|else|case|yield|assert|extends|implements|instanceof)\\b)[A-Za-z_][\\w.]*(?:<[^;(){}]*>)?(?:\\[\\])*\\s+${id}\\s*(?:=|;|\\(|,|\\)|:)`).test(text)
 }
 
+const NON_CODE = /"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g
+
+/** Drops comments and string literals so a name inside them is not read as a use; Kotlin string templates keep their embedded expressions. */
+function stripNonCode(text: string, file: string): string {
+  const kotlin = /\.kts?$/.test(file)
+  return text.replace(NON_CODE, (m) => {
+    if (kotlin && m.startsWith('"')) {
+      return ` ${[...m.matchAll(/\$\{([^}]*)\}|\$(\w+)/g)].map(t => t[1] ?? t[2]).join(' ')} `
+    }
+    return ' '
+  })
+}
+
+/** Whether `text` uses `name` unqualified, or qualified only by one of `qualifiers` (a member of another type is a different symbol). */
+function usesName(text: string, name: string, qualifiers: string[]): boolean {
+  const word = new RegExp(`(?<![\\w$])${name.replace(/\$/g, '\\$')}\\b`, 'g')
+  for (const m of text.matchAll(word)) {
+    const before = text.slice(0, m.index)
+    if (!before.endsWith('.') && !/\w::$/.test(before)) {
+      return true
+    }
+    if (qualifiers.some(q => before.endsWith(`${q}.`) && !/[\w$.]$/.test(before.slice(0, -q.length - 1)))) {
+      return true
+    }
+  }
+  return false
+}
+
 export function jvmHelpers(
   layout: TestLayout,
   units: Unit[],
@@ -323,13 +351,29 @@ export function jvmHelpers(
     .map(m => ({ file: m.file, line: m.line, name: m.text }))
   const packageOf = new Map<string, string>()
   const importsOf = new Map<string, string[]>()
+  // `file\0spec` → the local name of an `import spec as alias`.
+  const aliasOf = new Map<string, string>()
+  const textCache = new Map<string, string>()
+  const codeOf = (file: string): string => {
+    let text = textCache.get(file)
+    if (text == null) {
+      text = stripNonCode(readFileSync(join(rootDir, file), 'utf-8'), file).replace(/^\s*(?:import|package)\b.*$/gm, '')
+      textCache.set(file, text)
+    }
+    return text
+  }
   for (const m of [...matches, ...(sibling?.matches ?? [])]) {
     if (m.ruleId === 'package') {
       packageOf.set(m.file, m.text)
     }
     else if (m.ruleId === 'import') {
-      const spec = m.text.replace(/^import\s+(?:static\s+)?/, '').replace(/;\s*$/, '').replace(/\s+as\s+\w+$/, '').trim()
+      const bare = m.text.replace(/^import\s+(?:static\s+)?/, '').replace(/;\s*$/, '').trim()
+      const spec = bare.replace(/\s+as\s+\w+$/, '')
       importsOf.set(m.file, [...(importsOf.get(m.file) ?? []), spec])
+      const alias = /\s+as\s+(\w+)$/.exec(bare)?.[1]
+      if (alias != null) {
+        aliasOf.set(`${m.file}\0${spec}`, alias)
+      }
     }
   }
   // file → simple name → FQN of its explicit (non-wildcard) imports; an explicit import shadows same-package and wildcard names.
@@ -338,7 +382,7 @@ export function jvmHelpers(
     const bound = new Map<string, string>()
     for (const spec of specs) {
       if (!spec.endsWith('.*')) {
-        bound.set(spec.slice(spec.lastIndexOf('.') + 1), spec)
+        bound.set(aliasOf.get(`${file}\0${spec}`) ?? spec.slice(spec.lastIndexOf('.') + 1), spec)
       }
     }
     bindingsOf.set(file, bound)
@@ -348,11 +392,11 @@ export function jvmHelpers(
   lang.importers = (c) => {
     const pkg = packageOf.get(c.file) ?? ''
     const fqn = pkg === '' ? c.name : `${pkg}.${c.name}`
-    const word = new RegExp(`\\b${c.name.replace(/\$/g, '\\$')}\\b`)
     const out = new Set<string>()
     // Another module can declare the same fully qualified name; only the owning module's tests use this helper.
     const owner = unitOf(c.file, units)?.dir
     const facadeFqn = kotlinFacade(c.file, pkg, rootDir)
+    const qualifiers = [pkg, facadeFqn].filter((q): q is string => q != null && q !== '')
     for (const file of testFiles) {
       if (unitOf(file, allUnits)?.dir !== owner) {
         continue
@@ -366,11 +410,16 @@ export function jvmHelpers(
         if (shadowed) {
           return false
         }
-        const text = readFileSync(join(rootDir, file), 'utf-8').replace(/^\s*(?:import|package)\b.*$/gm, '')
-        return word.test(text) && !declaresName(text, c.name, file)
+        const text = codeOf(file)
+        return usesName(text, c.name, qualifiers) && !declaresName(text, c.name, file)
       }
-      if (specs.some(s => s === fqn || s.startsWith(`${fqn}.`) || (facadeFqn != null && s === `${facadeFqn}.${c.name}`))) {
-        out.add(file)
+      const explicit = specs.find(s => s === fqn || s.startsWith(`${fqn}.`) || (facadeFqn != null && s === `${facadeFqn}.${c.name}`))
+      if (explicit != null) {
+        // A file declaring the imported local name itself does not use the helper.
+        const local = aliasOf.get(`${file}\0${explicit}`) ?? explicit.slice(explicit.lastIndexOf('.') + 1)
+        if (!declaresName(codeOf(file), local, file)) {
+          out.add(file)
+        }
       }
       // A wildcard import brings in every name of the package (or facade): the file must still mention the helper.
       else if (specs.some(s => (pkg !== '' && s === `${pkg}.*`) || (facadeFqn != null && s === `${facadeFqn}.*`)) && mentions()) {

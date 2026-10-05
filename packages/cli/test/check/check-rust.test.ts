@@ -1,7 +1,11 @@
 import type { CargoMetadataProvider } from '../../src/check/types.js'
 import { spawnSync } from 'node:child_process'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import process from 'node:process'
 import { describe, expect, test } from 'bun:test'
+import { cargoMetadataFromCli } from '../../src/check/check-rust.js'
 import { CargoUnavailableError } from '../../src/check/errors.js'
 import { cargoStub, checkFixture } from '../test-utils/fixture.js'
 
@@ -33,6 +37,38 @@ describe('rust include! and macro-loaded modules', () => {
       ...CARGO,
       'src/lib.rs': 'include!(concat!(env!("OUT_DIR"), "/x.rs"));',
       'tests/sub/helper.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices.join('\n')).toContain('include!')
+  })
+})
+
+describe('rust include! reachability scope', () => {
+  test('a literal include! whose included file declares a module outside its directory withholds the whole crate', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'include!("gen.rs");',
+      'src/gen.rs': '#[path = "../tests/case.rs"]\nmod case;',
+      'tests/case.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices.join('\n')).toContain('include!')
+  })
+
+  test('a local include! after a non-literal one does not narrow the withholding', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'include!(concat!(env!("OUT_DIR"), "/extra.rs"));\ninclude!("local.rs");',
+      'tests/sub/helper.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
+  test('include! written inside a macro body withholds the including crate', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'macro_rules! m { () => { include!("generated.rs"); } }\nm!();',
+      'src/generated.rs': '#[test]\nfn generated() {}',
     }, stub([['lib', 'src/lib.rs']]))
     expect(result.findings).toEqual([])
     expect(result.notices.join('\n')).toContain('include!')
@@ -254,6 +290,17 @@ describe('rust module path edge cases', () => {
     expect(result.notices[0]).toContain('tests/cases/ok.rs, tests/ui/bad.rs')
   })
 
+  test('a #[test] file under a fixture directory outside tests/ is withheld with an aggregated notice', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'test-data/sample.rs': '#[test]\nfn t() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([expect.stringContaining('unreachable-unit-test check skipped 1 file(s)')])
+    expect(result.notices[0]).toContain('test-data/sample.rs')
+  })
+
   test('`mod r#async;` loads async.rs', () => {
     const result = checkFixture({
       ...CARGO,
@@ -273,6 +320,33 @@ describe('rust without cargo', () => {
     }, { cargoMetadata: () => { throw new CargoUnavailableError('cargo: command not found') } })
     expect(result.findings).toEqual([])
     expect(result.notices).toEqual([expect.stringContaining('cargo is not available')])
+  })
+})
+
+describe('cargoMetadataFromCli failures', () => {
+  test.skipIf(process.platform === 'win32')('a failing cargo with empty stderr reports its exit status', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fake-cargo-'))
+    const fake = join(dir, 'cargo')
+    writeFileSync(fake, '#!/bin/sh\n[ "$1" = "--version" ] && exit 0\nexit 3\n', { mode: 0o755 })
+    const saved = process.env.CARGO
+    process.env.CARGO = fake
+    let message = ''
+    try {
+      cargoMetadataFromCli(dir)
+    }
+    catch (err) {
+      message = err instanceof Error ? err.message : String(err)
+    }
+    finally {
+      if (saved === undefined) {
+        delete process.env.CARGO
+      }
+      else {
+        process.env.CARGO = saved
+      }
+      rmSync(dir, { recursive: true, force: true })
+    }
+    expect(message).toBe('exit 3')
   })
 })
 

@@ -27,4 +27,17 @@ describe('listFiles', () => {
       fixture.cleanup()
     }
   })
+
+  test('skips third-party vendor/ and Pods/ directories, tracked or not', () => {
+    const fixture = createFixture({ 'src/a.ts': '', 'vendor/lib/thing.ts': '', 'ios/Pods/Dep/dep.swift': '' })
+    try {
+      expect(listFiles(fixture.root)).toEqual(['src/a.ts'])
+      git(fixture.root, 'init', '-q', '-b', 'main')
+      git(fixture.root, 'add', '-f', '.')
+      expect(listFiles(fixture.root)).toEqual(['src/a.ts'])
+    }
+    finally {
+      fixture.cleanup()
+    }
+  })
 })

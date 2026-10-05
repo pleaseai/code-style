@@ -2,6 +2,9 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
+/** Third-party source directories skipped everywhere, tracked or not. */
+const IGNORED_THIRD_PARTY = new Set(['vendor', 'Pods'])
+
 /** Directories never walked when the root is not a git work tree. */
 const IGNORED_DIRS = new Set([
   '.git',
@@ -18,6 +21,7 @@ const IGNORED_DIRS = new Set([
   '.idea',
   '.turbo',
   '.cache',
+  ...IGNORED_THIRD_PARTY,
 ])
 
 function walk(root: string, dir: string, out: string[]): void {
@@ -47,7 +51,7 @@ export function listFiles(root: string): string[] {
   if (git.status === 0) {
     // `--cached` still lists tracked files deleted from the work tree.
     // An unmerged path is listed once per index stage.
-    return [...new Set(git.stdout.split('\0'))].filter(f => f !== '' && existsSync(join(root, f))).sort()
+    return [...new Set(git.stdout.split('\0'))].filter(f => f !== '' && !f.split('/').slice(0, -1).some(seg => IGNORED_THIRD_PARTY.has(seg)) && existsSync(join(root, f))).sort()
   }
   const out: string[] = []
   walk(root, root, out)
