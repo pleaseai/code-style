@@ -191,6 +191,41 @@ ruleDirs:
   - ${AST_GREP_RULES}
 `
 
+function normalizeRuleDir(entry: string): string {
+  return entry.trim().replace(/^(['"])(.*)\1$/, '$2').replace(/^\.\//, '').replace(/\/$/, '')
+}
+
+/**
+ * Whether the parsed `ruleDirs` of an sgconfig.yml lists the shipped rules.
+ * Comments are ignored; a block list and a single-line flow list are read.
+ * Anything else (multi-line flow list, odd structure) counts as not listed so
+ * the caller falls through to the overwrite confirmation.
+ */
+function listsAstGrepRules(yaml: string): boolean {
+  const lines = yaml.split(/\r?\n/).map(l => l.replace(/(^|\s)#.*$/, ''))
+  const start = lines.findIndex(l => l.startsWith('ruleDirs:'))
+  if (start === -1) {
+    return false
+  }
+  const inline = lines[start]!.slice('ruleDirs:'.length).trim()
+  let entries: string[] = []
+  if (inline.startsWith('[')) {
+    entries = inline.endsWith(']') ? inline.slice(1, -1).split(',') : []
+  }
+  else if (inline === '') {
+    for (const line of lines.slice(start + 1)) {
+      const item = /^\s*-\s+(\S.*)$/.exec(line)
+      if (item != null) {
+        entries.push(item[1]!)
+      }
+      else if (line.trim() !== '') {
+        break
+      }
+    }
+  }
+  return entries.some(e => normalizeRuleDir(e) === AST_GREP_RULES)
+}
+
 export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, 'sgconfig.yml')
@@ -203,8 +238,8 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
     return result
   }
 
-  if (existing.includes(AST_GREP_RULES)) {
-    // Already points at the rules — keep the user's other settings.
+  if (listsAstGrepRules(existing)) {
+    // Already lists the rules in `ruleDirs` — keep the user's other settings.
     return result
   }
 

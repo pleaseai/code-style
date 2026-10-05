@@ -91,10 +91,10 @@ bunx @pleaseai/code-style check --strict   # exit 1 on any finding
 
 | Flag | Description |
 | --- | --- |
-| `[path]` | Directory to check (default: the current directory) |
+| `[path]` | Directory to check (default: the current directory). Findings are limited to it, but packages are discovered from the enclosing project: the outermost marker (`package.json`, `pubspec.yaml`, `Cargo.toml`, Gradle or Maven file) up to the git top-level (outside git, the nearest marker below the home directory), so `check src/` still knows the test root. Finding paths stay relative to `[path]`; message paths and notice examples are relative to the project root |
 | `--json` | Print the result as JSON (`root`, `findings`, `notices`) |
 | `--strict` | Exit 1 when there is any finding (default: warn only) |
-| `--config <file>` | Config file (default: `<path>/code-organization.json`) |
+| `--config <file>` | Config file (default: `code-organization.json` in the enclosing project root, which is `<path>` when no marker is found above it) |
 | `--help`, `-h` | Print the `check` usage |
 
 | Exit code | Meaning |

@@ -36,6 +36,11 @@
   "peerDependencies": {
     "@ast-grep/cli": "^0.45.3"
   },
+  "peerDependenciesMeta": {
+    "@ast-grep/cli": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@ast-grep/cli": "0.45.3",
     "@types/bun": "^1.3.12",

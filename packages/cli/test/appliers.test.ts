@@ -38,6 +38,29 @@ describe('ast-grep tool', () => {
     expect(readFileSync(join(dir, 'sgconfig.yml'), 'utf-8')).toBe(custom)
   })
 
+  test('accepts the rules listed in a flow-style ruleDirs', async () => {
+    const custom = 'ruleDirs: [rules, "node_modules/@pleaseai/ast-grep-config/rules"]\n'
+    writeFileSync(join(dir, 'sgconfig.yml'), custom)
+    const result = await applyAstGrep({ cwd: dir, autoAccept: false })
+    expect(result).toEqual({ created: [], updated: [], skipped: [] })
+    expect(readFileSync(join(dir, 'sgconfig.yml'), 'utf-8')).toBe(custom)
+  })
+
+  test('accepts the rules listed in a zero-indent block ruleDirs', async () => {
+    const custom = 'ruleDirs:\n- rules\n- node_modules/@pleaseai/ast-grep-config/rules\nutilDirs:\n- utils\n'
+    writeFileSync(join(dir, 'sgconfig.yml'), custom)
+    const result = await applyAstGrep({ cwd: dir, autoAccept: true })
+    expect(result).toEqual({ created: [], updated: [], skipped: [] })
+    expect(readFileSync(join(dir, 'sgconfig.yml'), 'utf-8')).toBe(custom)
+  })
+
+  test('does not treat a commented-out rules path as enabled', async () => {
+    writeFileSync(join(dir, 'sgconfig.yml'), 'ruleDirs: []\n# - node_modules/@pleaseai/ast-grep-config/rules\n')
+    const result = await applyAstGrep({ cwd: dir, autoAccept: true })
+    expect(result.updated).toEqual(['sgconfig.yml'])
+    expect(readFileSync(join(dir, 'sgconfig.yml'), 'utf-8')).toContain('ruleDirs:\n  - node_modules/@pleaseai/ast-grep-config/rules\n')
+  })
+
   test('overwrites a different sgconfig.yml when overwrites are accepted', async () => {
     writeFileSync(join(dir, 'sgconfig.yml'), 'ruleDirs:\n  - rules\n')
     const result = await applyAstGrep({ cwd: dir, autoAccept: true })

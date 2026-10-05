@@ -12,6 +12,7 @@ import { CONFIG_FILE, readConfigFile } from './config.js'
 import { ConfigError } from './errors.js'
 import { DART_LAYOUT, JAVA_LAYOUT, KOTLIN_LAYOUT, TEST_LAYOUTS, TYPESCRIPT_LAYOUT } from './layouts.js'
 import { listFiles } from './list-files.js'
+import { findScanRoot, scopeResult } from './scan-root.js'
 
 const EXTENSIONS: Record<ExtractLanguage, RegExp> = {
   typescript: /\.(?:ts|mts|cts)$/,
@@ -31,33 +32,37 @@ const BATCH_SIZE = 200
  * gitignore-matched paths (listed tracked files included) and descends
  * `node_modules` outside a git work tree. Explicit paths bypass that filtering.
  */
-function extract(root: string, files: string[], fileSet: Set<string>, language: ExtractLanguage): ExtractMatch[] {
+function extract(root: string, files: string[], fileSet: Set<string>, language: ExtractLanguage, anchorRoots: string[]): ExtractMatch[] {
   const paths = files.filter(f => EXTENSIONS[language].test(f)).map(f => (f.startsWith('-') ? `./${f}` : f))
   const out: ExtractMatch[] = []
   for (let i = 0; i < paths.length; i += BATCH_SIZE) {
-    out.push(...runExtraction(root, language, paths.slice(i, i + BATCH_SIZE)).filter(m => fileSet.has(m.file)))
+    out.push(...runExtraction(root, language, paths.slice(i, i + BATCH_SIZE), anchorRoots).filter(m => fileSet.has(m.file)))
   }
   return out
 }
 
 /**
- * Runs the ADR-0022 layer-3 path checker over `options.root`. Never throws for
- * findings — every finding is a warning; callers decide the exit code.
+ * Runs the ADR-0022 layer-3 path checker over `options.root`. Packages are
+ * discovered from the enclosing project (see `findScanRoot`); only findings
+ * below `options.root` are returned. Never throws for findings — every finding is a warning; callers decide the exit code.
  */
 export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
-  const root = realpathSync(resolve(options.root ?? process.cwd()))
+  const requested = realpathSync(resolve(options.root ?? process.cwd()))
+  const root = findScanRoot(requested)
   if (options.configPath != null && !existsSync(options.configPath)) {
     throw new ConfigError(`config file not found: ${options.configPath}`)
   }
   const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath != null }
   const files = listFiles(root)
   const fileSet = new Set(files)
+  // The requested directory's own install (a monorepo package's ast-grep) wins over the scan root's.
+  const anchorRoots = [...new Set([requested, root])]
 
-  const ts = [...extract(root, files, fileSet, 'typescript'), ...extract(root, files, fileSet, 'tsx')]
-  const dart = extract(root, files, fileSet, 'dart')
-  const kotlin = extract(root, files, fileSet, 'kotlin')
-  const java = extract(root, files, fileSet, 'java')
-  const rust = extract(root, files, fileSet, 'rust')
+  const ts = [...extract(root, files, fileSet, 'typescript', anchorRoots), ...extract(root, files, fileSet, 'tsx', anchorRoots)]
+  const dart = extract(root, files, fileSet, 'dart', anchorRoots)
+  const kotlin = extract(root, files, fileSet, 'kotlin', anchorRoots)
+  const java = extract(root, files, fileSet, 'java', anchorRoots)
+  const rust = extract(root, files, fileSet, 'rust', anchorRoots)
 
   const tsUnits = TYPESCRIPT_LAYOUT.units(files, base, root)
   const dartUnits = DART_LAYOUT.units(files, base, root)
@@ -84,5 +89,6 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   findings.push(...rustResult.findings)
 
   findings.sort((a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.slug.localeCompare(b.slug))
-  return { root, findings, notices: [...testPaths.notices, ...tsNames.notices, ...dartNames.notices, ...helpers.flatMap(h => h.notices), ...rustResult.notices] }
+  const notices = [...testPaths.notices, ...tsNames.notices, ...dartNames.notices, ...helpers.flatMap(h => h.notices), ...rustResult.notices]
+  return scopeResult({ root, findings, notices }, root, requested)
 }

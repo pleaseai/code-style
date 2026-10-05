@@ -41,15 +41,16 @@ export function findingsFor(
   return checkFixture(files, options).findings.filter(f => f.slug === slug)
 }
 
-/** Runs the checker on a fixture tree and cleans it up afterwards. */
+/** Runs the checker on a fixture tree (or on its `subdir`) and cleans it up afterwards. */
 export function checkFixture(
   files: Record<string, string>,
   options: Omit<CheckOptions, 'root'> | ((root: string) => Omit<CheckOptions, 'root'>) = {},
+  subdir = '',
 ): CheckResult {
   const fixture = createFixture(files)
   try {
     const opts = typeof options === 'function' ? options(fixture.root) : options
-    return checkCodeOrganization({ ...opts, root: fixture.root })
+    return checkCodeOrganization({ ...opts, root: join(fixture.root, subdir) })
   }
   finally {
     fixture.cleanup()

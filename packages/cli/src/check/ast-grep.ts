@@ -41,11 +41,11 @@ export interface Toolchain {
 }
 
 /**
- * Resolution anchors for `root`: the checked project first (its own pinned
- * ast-grep version wins), then this CLI's install as a fallback.
+ * Resolution anchors for `roots`: the checked project first, in the given order
+ * (its own pinned ast-grep version wins), then this CLI's install as a fallback.
  */
-export function resolutionAnchors(root: string): string[] {
-  return [join(root, 'package.json'), fileURLToPath(import.meta.url)]
+export function resolutionAnchors(...roots: string[]): string[] {
+  return [...roots.map(root => join(root, 'package.json')), fileURLToPath(import.meta.url)]
 }
 
 function packageDir(name: string, anchor: string): string | null {
@@ -113,9 +113,12 @@ export function resolveToolchain(anchors: string[]): Toolchain {
   return { bin, extractDir: join(configDir, 'extract') }
 }
 
-/** Runs `extract/<language>.yml` over `root` and returns every match. */
-export function runExtraction(root: string, language: ExtractLanguage, paths: string[] = ['.']): ExtractMatch[] {
-  const { bin, extractDir } = resolveToolchain(resolutionAnchors(root))
+/**
+ * Runs `extract/<language>.yml` over `root` and returns every match. The
+ * toolchain resolves from `anchorRoots` (default: `root`) before this CLI's install.
+ */
+export function runExtraction(root: string, language: ExtractLanguage, paths: string[] = ['.'], anchorRoots: string[] = [root]): ExtractMatch[] {
+  const { bin, extractDir } = resolveToolchain(resolutionAnchors(...anchorRoots))
   const ruleFile = join(extractDir, `${language}.yml`)
   const res = spawnSync(bin, ['scan', '-c', join(extractDir, 'sgconfig.yml'), '--rule', ruleFile, '--json=stream', ...paths], {
     cwd: root,

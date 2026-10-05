@@ -35,6 +35,9 @@
       "peerDependencies": {
         "@ast-grep/cli": "^0.45.3",
       },
+      "optionalPeers": [
+        "@ast-grep/cli",
+      ],
     },
     "packages/cli": {
       "name": "@pleaseai/code-style",
