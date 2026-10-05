@@ -145,10 +145,20 @@ export function typescriptHelpers(
       aliases.set(m.file, byLocal)
     }
   }
+  // file → names it exports under (`export-name` also covers `export { local }` and aliases)
+  const exported = new Map<string, Set<string>>()
+  for (const m of matches) {
+    if (m.ruleId === 'export-name') {
+      exported.set(m.file, (exported.get(m.file) ?? new Set<string>()).add(m.text))
+    }
+  }
   lang.importers = (c) => {
     const byName = imports.get(c.file)
-    const exportedAs = [c.name, ...(aliases.get(c.file)?.get(c.name) ?? [])]
-    return new Set([...exportedAs.flatMap(n => [...(byName?.get(n) ?? [])]), ...(byName?.get('*') ?? [])])
+    const aliased = aliases.get(c.file)?.get(c.name) ?? []
+    const exportedAs = [c.name, ...aliased]
+    // A namespace import only sees exports; the candidate extraction also lists private declarations.
+    const isExported = aliased.length > 0 || (exported.get(c.file)?.has(c.name) ?? false)
+    return new Set([...exportedAs.flatMap(n => [...(byName?.get(n) ?? [])]), ...(isExported ? [...(byName?.get('*') ?? [])] : [])])
   }
   return lang
 }
@@ -163,7 +173,7 @@ export function dartHelpers(
 ): HelperLanguage {
   const lang: HelperLanguage = { language: 'dart', layout, units, candidates: [], importers: () => new Set() }
   lang.candidates = matches
-    .filter(m => m.ruleId === 'top-level-name' && HELPER_NAME.test(m.text) && isTestSide(m.file, lang, u => u.testRoots))
+    .filter(m => (m.ruleId === 'top-level-name' || m.ruleId === 'top-level-type-alias') && HELPER_NAME.test(m.text) && isTestSide(m.file, lang, u => u.testRoots))
     .map(m => ({ file: m.file, line: m.line, name: m.text }))
   // `show` lists per (importer, uri text); an import without `show` imports everything.
   const shown = new Map<string, Set<string>>()

@@ -185,6 +185,30 @@ describe('rust module path edge cases', () => {
     expect(result.findings).toEqual([])
   })
 
+  test('`#[cfg_attr(test, path = r"…")] mod tests;` reaches the raw-string path file', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '#[cfg_attr(test, path = r"checks.rs")]\nmod tests;',
+      'src/checks.rs': '#[test]\nfn works() {}',
+      'src/tests.rs': '',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
+  test('tests/ui and other runtime-loaded fixture dirs are withheld with an aggregated notice', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/compiletest.rs': 'fn main() { t.compile_fail("tests/ui/*.rs"); t.pass("tests/cases/*.rs"); }',
+      'tests/ui/bad.rs': 'fn main() {}',
+      'tests/cases/ok.rs': 'fn main() {}',
+      'tests/lost/case.rs': '#[test]\nfn lost() {}',
+    }, stub([['lib', 'src/lib.rs'], ['test', 'tests/compiletest.rs']]))
+    expect(kinds(result)).toEqual(['undiscovered-integration-test tests/lost/case.rs'])
+    expect(result.notices).toEqual([expect.stringContaining('skipped 2 file(s) in tests/ subdirectories a test target may load at runtime')])
+    expect(result.notices[0]).toContain('tests/cases/ok.rs, tests/ui/bad.rs')
+  })
+
   test('`mod r#async;` loads async.rs', () => {
     const result = checkFixture({
       ...CARGO,

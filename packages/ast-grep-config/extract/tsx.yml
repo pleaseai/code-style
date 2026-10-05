@@ -161,7 +161,9 @@ rule:
     - has:
         field: declaration
         kind: import_alias
-    - regex: ^export\s+default\b
+    - has:
+        regex: ^default$
+        stopBy: neighbor
     # `export { foo as default }` / `export { default }`
     - has:
         kind: export_clause
@@ -196,6 +198,7 @@ rule:
               - kind: function_declaration
               - kind: generator_function_declaration
               - kind: class_declaration
+              - kind: abstract_class_declaration
             inside:
               any:
                 - kind: program
@@ -257,32 +260,6 @@ rule:
       has:
         field: source
         pattern: $SRC
----
-# `export { local as exported }` (local exports only): the match is the local
-# name, `$ALIAS` the name importers see.
-id: export-local-alias
-language: tsx
-severity: hint
-message: aliased local export
-rule:
-  kind: identifier
-  inside:
-    field: name
-    kind: export_specifier
-    has:
-      field: alias
-      kind: identifier
-      pattern: $ALIAS
-    inside:
-      kind: export_clause
-      inside:
-        kind: export_statement
-        inside:
-          kind: program
-        not:
-          has:
-            field: source
-            kind: string
 ---
 id: import-namespace
 language: tsx

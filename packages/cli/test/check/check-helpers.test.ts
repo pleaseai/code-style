@@ -74,6 +74,27 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
   })
 })
 
+describe('test-helpers-in-dedicated-location (TypeScript regressions)', () => {
+  test('a namespace import does not credit a private helper declaration', () => {
+    expect(findingsFor({
+      ...PKG,
+      'test/helpers.ts': 'function mockPrivate() {}\nexport const unrelated = 1',
+      'test/user.test.ts': 'import * as helpers from \'./helpers\'',
+      'test/order.test.ts': 'import * as helpers from \'./helpers\'',
+    }, SLUG)).toEqual([])
+  })
+
+  test('an exported abstract class helper imported by two tests is reported', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'test/support.ts': 'export abstract class MockThing {}',
+      'test/user.test.ts': 'import { MockThing } from \'./support\'',
+      'test/order.test.ts': 'import { MockThing } from \'./support\'',
+    }, SLUG)
+    expect(findings).toEqual([expect.objectContaining({ file: 'test/support.ts', line: 1 })])
+  })
+})
+
 describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
   test('dart: a test/ library outside test/helpers/ imported by two tests is reported; show lists are honored', () => {
     const findings = findingsFor({
@@ -85,6 +106,17 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
       'test/b_test.dart': 'import \'../test/support/mocks.dart\' show mockClient;',
     }, SLUG)
     expect(findings.map(f => `${f.file}:${f.line}`)).toEqual(['test/support/mocks.dart:2'])
+  })
+
+  test('dart: a top-level typedef counts as a helper', () => {
+    const findings = findingsFor({
+      'pubspec.yaml': 'name: app',
+      'lib/a.dart': '',
+      'test/support.dart': 'typedef MockFactory = Object Function();',
+      'test/a_test.dart': 'import \'support.dart\';',
+      'test/b_test.dart': 'import \'support.dart\';',
+    }, SLUG)
+    expect(findings.map(f => `${f.file}:${f.line}`)).toEqual(['test/support.dart:1'])
   })
 
   test('dart: a hide list removes the helper from that importer', () => {

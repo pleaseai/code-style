@@ -1,11 +1,15 @@
 import type { ExtractMatch } from './ast-grep.js'
 import type { CargoMetadata, CargoMetadataProvider, Finding } from './types.js'
 import { spawnSync } from 'node:child_process'
-import { realpathSync } from 'node:fs'
+import { readFileSync, realpathSync } from 'node:fs'
 import { join, posix, relative } from 'node:path'
 import process from 'node:process'
 import { CargoUnavailableError } from './errors.js'
 import { isUnder, joinPath, relativeTo } from './layouts.js'
+
+const NOTICE_EXAMPLES = 3
+/** Subdirectories of `tests/` conventionally holding inputs a test target loads at runtime (trybuild, compiletest, fixtures). */
+const RUNTIME_FIXTURE_DIRS = new Set(['ui', 'compile-fail', 'compile-pass', 'fixtures'])
 
 interface ModDecl {
   name: string
@@ -145,6 +149,26 @@ function nestedModDir(file: string, isRoot: boolean, pathLoaded: Set<string>): s
     : joinPath(dir, posix.basename(file, '.rs'))
 }
 
+/** Path segments of every string literal in the package's `tests/*.rs` test targets. */
+function literalSegments(rootDir: string, pkg: RustPackage): Set<string> {
+  const out = new Set<string>()
+  for (const root of pkg.testRoots) {
+    let text: string
+    try {
+      text = readFileSync(join(rootDir, root), 'utf-8')
+    }
+    catch {
+      continue
+    }
+    for (const lit of text.matchAll(/"([^"\n]*)"/g)) {
+      for (const seg of (lit[1] ?? '').split('/')) {
+        out.add(seg)
+      }
+    }
+  }
+  return out
+}
+
 /**
  * Rust layer-3 checks (ADR-0022 §3):
  * - `tests/**.rs` files Cargo never compiles (not a test target, not reached
@@ -209,6 +233,7 @@ export function checkRust(
     .map(f => posix.dirname(f))
     .map(d => (d === '.' ? '' : d))
   const findings: Finding[] = []
+  const runtimeLoadable = new Set<string>()
   for (const pkg of loaded.packages) {
     const testsDir = joinPath(pkg.dir, 'tests')
     const commonDir = joinPath(testsDir, 'common')
@@ -236,6 +261,7 @@ export function checkRust(
         }
       }
     }
+    let literals: Set<string> | undefined
     for (const file of rustFiles) {
       if (!owned(file)) {
         continue
@@ -255,6 +281,12 @@ export function checkRust(
         const inner = relativeTo(file, testsDir).split('/')
         const inTargetDir = inner.length > 1 && fileSet.has(joinPath(testsDir, inner[0] ?? '', 'main.rs'))
         if (!reachabilityUnknown(file) && !roots.has(file) && !reachedByAny.has(file) && !isUnder(file, commonDir) && !inTargetDir) {
+          const sub = inner.length > 1 ? inner[0] ?? '' : ''
+          literals ??= literalSegments(rootDir, pkg)
+          if (sub !== '' && (RUNTIME_FIXTURE_DIRS.has(sub) || literals.has(sub))) {
+            runtimeLoadable.add(file)
+            continue
+          }
           findings.push({
             slug: 'test-path-derivable-from-source',
             kind: 'undiscovered-integration-test',
@@ -276,6 +308,10 @@ export function checkRust(
         })
       }
     }
+  }
+  if (runtimeLoadable.size > 0) {
+    const paths = [...runtimeLoadable].sort()
+    loaded.notices.push(`Rust: undiscovered-integration-test check skipped ${paths.length} file(s) in tests/ subdirectories a test target may load at runtime (trybuild/compiletest fixtures, or a directory named in a string literal of a tests/*.rs target): ${paths.slice(0, NOTICE_EXAMPLES).join(', ')}${paths.length > NOTICE_EXAMPLES ? ', …' : ''}`)
   }
   return { findings, notices: loaded.notices }
 }

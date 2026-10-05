@@ -47,7 +47,6 @@ severity: hint
 message: top-level typedef
 rule:
   kind: type_identifier
-  nthChild: 1
   inside:
     kind: type_alias
     inside:

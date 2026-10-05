@@ -231,6 +231,7 @@ Rust module resolution (to find test files Cargo never compiles):
 | The same, carrying `#[path]` or `#[cfg_attr(…, path = …)]` | It can load a file anywhere in the crate, so reachability checks are **skipped for the whole crate, with a notice** |
 | A crate whose `cargo metadata` fails | **Skipped with a notice**; its directory is still a boundary for the parent crate |
 | `cargo` missing | Rust **skipped with a notice** |
+| A file under `tests/<subdir>/` that no target reaches, where `<subdir>` is `ui`, `compile-fail`, `compile-pass` or `fixtures`, or a path segment of a string literal in a `tests/*.rs` target (trybuild/compiletest inputs such as `t.compile_fail("tests/ui/*.rs")`) | A test target may load it at runtime, so `undiscovered-integration-test` is **withheld with an aggregated notice** (count and up to three sorted example paths) |
 
 #### `test-helpers-in-dedicated-location`
 

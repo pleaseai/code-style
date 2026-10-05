@@ -88,6 +88,13 @@ describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
     }, SLUG)).toEqual([])
   })
 
+  test('a default export with a comment between `export` and `default` still withholds judgement', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/foo.ts': 'export /* c */ default function foo() {}\nexport const bar = 1',
+    }, SLUG)).toEqual([])
+  })
+
   test('string-literal export aliases make the symbol set unknown, so the file is not checked', () => {
     expect(findingsFor({
       ...PKG,
@@ -125,6 +132,12 @@ describe('code-filename-matches-primary-symbol (Dart)', () => {
     const findings = findingsFor({ ...PUBSPEC, 'lib/repo.dart': 'class UserRepository {}' }, SLUG)
     expect(findings).toEqual([expect.objectContaining({ language: 'dart', file: 'lib/repo.dart', line: 1 })])
     expect(findings[0]?.message).toContain('user_repository.dart')
+  })
+
+  test('a legacy function typedef is extracted by its name', () => {
+    const findings = findingsFor({ ...PUBSPEC, 'lib/other.dart': 'typedef void Callback(int value);\nclass Widget {}' }, SLUG)
+    expect(findings).toEqual([])
+    expect(findingsFor({ ...PUBSPEC, 'lib/callback.dart': 'typedef void Callback(int value);' }, SLUG)).toEqual([])
   })
 
   test('errors.dart, part files and generated files are exempt', () => {
