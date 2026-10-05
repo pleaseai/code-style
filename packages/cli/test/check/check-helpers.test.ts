@@ -84,6 +84,26 @@ describe('test-helpers-in-dedicated-location (TypeScript regressions)', () => {
     }, SLUG)).toEqual([])
   })
 
+  test('a private declaration is not credited by imports of an unrelated export of the same name', () => {
+    expect(findingsFor({
+      ...PKG,
+      'test/helpers.ts': 'class MockThing {}\nclass Other {}\nexport { Other as MockThing }',
+      'test/user.test.ts': 'import { MockThing } from \'./helpers\'',
+      'test/order.test.ts': 'import * as h from \'./helpers\'',
+      'test/extra.test.ts': 'import { MockThing } from \'./helpers\'',
+    }, SLUG)).toEqual([])
+  })
+
+  test('files inside a fixture project are neither helpers nor importers', () => {
+    expect(findingsFor({
+      ...PKG,
+      'test/fixtures/proj/package.json': '{}',
+      'test/fixtures/proj/src/api.ts': 'export function mockApi() {}',
+      'test/fixtures/proj/test/a.test.ts': 'import { mockApi } from \'../src/api\'',
+      'test/fixtures/proj/test/b.test.ts': 'import { mockApi } from \'../src/api\'',
+    }, SLUG)).toEqual([])
+  })
+
   test.each(['ts', 'tsx'])('an exported abstract class helper imported by two tests is reported (.%s)', (ext) => {
     const findings = findingsFor({
       ...PKG,
@@ -202,6 +222,35 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
       ...tests.map(t => [`${name}/src/test/kotlin/com/acme/${t}Test.kt`, `package com.acme\nclass ${t}Test { val c = FakeClock() }`]),
     ])
     expect(findingsFor({ ...module('a', ['One']), ...module('b', ['Two']) }, SLUG)).toEqual([])
+  })
+
+  test('dart: a fixture project under test/ is neither helper nor importer', () => {
+    expect(findingsFor({
+      'pubspec.yaml': 'name: app',
+      'lib/a.dart': '',
+      'test/fixtures/proj/pubspec.yaml': 'name: proj',
+      'test/fixtures/proj/test/mocks.dart': 'class MockClient {}',
+      'test/fixtures/proj/test/a_test.dart': 'import \'mocks.dart\';',
+      'test/fixtures/proj/test/b_test.dart': 'import \'mocks.dart\';',
+    }, SLUG)).toEqual([])
+  })
+
+  test('mixed module: Kotlin tests importing a Java helper, and Java tests importing a Kotlin helper, are counted', () => {
+    const main = { 'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme', 'src/main/java/com/acme/Payment.java': 'package com.acme;' }
+    const javaHelper = findingsFor({
+      ...main,
+      'src/test/java/com/acme/support/MockClock.java': 'package com.acme.support;\npublic class MockClock {}',
+      'src/test/kotlin/com/acme/InvoiceTest.kt': 'package com.acme\nimport com.acme.support.MockClock',
+      'src/test/kotlin/com/acme/PaymentTest.kt': 'package com.acme\nimport com.acme.support.MockClock',
+    }, SLUG)
+    expect(javaHelper.map(f => f.file)).toEqual(['src/test/java/com/acme/support/MockClock.java'])
+    const kotlinHelper = findingsFor({
+      ...main,
+      'src/test/kotlin/com/acme/support/FakeClock.kt': 'package com.acme.support\nclass FakeClock',
+      'src/test/java/com/acme/InvoiceTest.java': 'package com.acme;\nimport com.acme.support.FakeClock;',
+      'src/test/java/com/acme/PaymentTest.java': 'package com.acme;\nimport com.acme.support.FakeClock;',
+    }, SLUG)
+    expect(kotlinHelper.map(f => f.file)).toEqual(['src/test/kotlin/com/acme/support/FakeClock.kt'])
   })
 
   test('java: an imported helper used by two tests is reported', () => {

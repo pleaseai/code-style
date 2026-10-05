@@ -135,6 +135,19 @@ describe('test-path-derivable-from-source (TypeScript)', () => {
     expect(result.notices).toContain('TypeScript: test-path check skipped 2 test file(s) inside fixture projects (a package.json under a test root): test/fixtures/basic/baz.spec.ts, test/fixtures/basic/test/bar.test.ts')
   })
 
+  test('a pubspec.yaml under the enclosing test root is a Dart fixture: its tests are skipped with a notice', () => {
+    const result = checkFixture({
+      'pubspec.yaml': 'name: app',
+      'lib/app.dart': 'class App {}',
+      'test/app_test.dart': '',
+      'test/fixtures/proj/pubspec.yaml': 'name: proj',
+      'test/fixtures/proj/lib/thing.dart': 'class Other {}',
+      'test/fixtures/proj/test/zzz_test.dart': '',
+    })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toContain('Dart: test-path check skipped 1 test file(s) inside fixture projects (a pubspec.yaml under a test root): test/fixtures/proj/test/zzz_test.dart')
+  })
+
   test('config cannot opt out of the shape', () => {
     expect(() => checkFixture({ ...PKG, 'code-organization.json': JSON.stringify({ colocatedTests: true }) })).toThrow(ConfigError)
     expect(() => checkFixture({ ...PKG, 'code-organization.json': JSON.stringify({ sourceRoots: ['../outside'] }) })).toThrow(ConfigError)

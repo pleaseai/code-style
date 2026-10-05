@@ -74,6 +74,32 @@ function withConfig(rootDir: string, dir: string, base: CodeOrganizationConfig):
   return packageConfig(base, join(rootDir, dir))
 }
 
+/**
+ * A project marker (`package.json`, `pubspec.yaml`) under an enclosing unit's
+ * test root is test data (a fixture project), not a unit: `kept` are the unit
+ * dirs, `fixtures` maps each owner to its fixture dirs relative to it.
+ */
+function splitFixtureProjects(markerDirs: string[], testRoots: string[]): { kept: string[], fixtures: Map<string, string[]> } {
+  const kept: string[] = []
+  const fixtures = new Map<string, string[]>()
+  for (const dir of [...markerDirs].sort((a, b) => a.length - b.length)) {
+    const owner = kept.find(k => dir !== k && isUnder(dir, k) && testRoots.some(root => isUnder(relativeTo(dir, k), root)))
+    if (owner == null) {
+      kept.push(dir)
+    }
+    else {
+      fixtures.set(owner, [...(fixtures.get(owner) ?? []), relativeTo(dir, owner)])
+    }
+  }
+  return { kept, fixtures }
+}
+
+/** Is `file` inside a fixture project of its owning unit? */
+export function inFixtureProject(file: string, units: Unit[]): boolean {
+  const unit = unitOf(file, units)
+  return unit?.fixtureDirs?.some(dir => isUnder(relativeTo(file, unit.dir), dir)) === true
+}
+
 // --- TypeScript -------------------------------------------------------------
 
 const TS_TEST = /\.(?:test|spec)\.[cm]?[jt]sx?$/
@@ -86,19 +112,7 @@ const NUXT_ROOTS = ['app', 'server', 'shared']
 export const TYPESCRIPT_LAYOUT: TestLayout = {
   language: 'typescript',
   units(files, base, rootDir) {
-    const dirs = files.filter(f => baseName(f) === 'package.json').map(dirOf).sort((a, b) => a.length - b.length)
-    // A `package.json` under an enclosing unit's test root is test data (a fixture project), not a unit.
-    const kept: string[] = []
-    const fixtures = new Map<string, string[]>()
-    for (const dir of dirs) {
-      const owner = kept.find(k => dir !== k && isUnder(dir, k) && TS_TEST_ROOTS.some(root => isUnder(relativeTo(dir, k), root)))
-      if (owner == null) {
-        kept.push(dir)
-      }
-      else {
-        fixtures.set(owner, [...(fixtures.get(owner) ?? []), relativeTo(dir, owner)])
-      }
-    }
+    const { kept, fixtures } = splitFixtureProjects(files.filter(f => baseName(f) === 'package.json').map(dirOf), TS_TEST_ROOTS)
     return kept.map((dir) => {
       const isNuxt = files.some(f => dirOf(f) === dir && NUXT_CONFIG.test(baseName(f)))
       const config = withConfig(rootDir, dir, base)
@@ -129,12 +143,14 @@ const DART_TEST = /_test\.dart$/
 export const DART_LAYOUT: TestLayout = {
   language: 'dart',
   units(files, base, rootDir) {
-    return files.filter(f => baseName(f) === 'pubspec.yaml').map(dirOf).map(dir => ({
+    const { kept, fixtures } = splitFixtureProjects(files.filter(f => baseName(f) === 'pubspec.yaml').map(dirOf), ['test'])
+    return kept.map(dir => ({
       dir,
       testRoots: ['test'],
       sourceRoots: ['lib'],
       keepRootName: false,
       envSegments: withConfig(rootDir, dir, base).envSegments,
+      fixtureDirs: fixtures.get(dir),
     }))
   },
   isTestFile: path => DART_TEST.test(path),

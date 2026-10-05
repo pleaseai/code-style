@@ -69,6 +69,12 @@ describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
     expect(findings[0]?.message).toContain('billing.ts')
   })
 
+  test.each(['ts', 'tsx'])('a dotted namespace counts as its outermost name (.%s)', (ext) => {
+    expect(findingsFor({ ...PKG, [`src/foo.${ext}`]: 'export namespace Foo.Bar { export class A {} }' }, SLUG)).toEqual([])
+    const findings = findingsFor({ ...PKG, [`src/run.${ext}`]: 'export namespace Foo.Bar.Baz {}\nexport function run() {}\nnamespace Hidden.X {}' }, SLUG)
+    expect(findings).toEqual([])
+  })
+
   test('destructured exports make the symbol set unknown, so the file is not checked', () => {
     expect(findingsFor({
       ...PKG,

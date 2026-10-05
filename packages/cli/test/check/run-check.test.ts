@@ -41,6 +41,7 @@ describe('please-style check', () => {
     const own = run(ORPHAN, ['check', '--help'])
     expect(own.status).toBe(0)
     expect(own.stdout).toContain('please-style check [path] [options]')
+    expect(own.stdout).toContain('2 usage or config error, or a dependency that cannot be resolved')
     const global = run(ORPHAN, ['--help'])
     expect(global.status).toBe(0)
     expect(global.stdout).toMatch(/^ {2}check {6}/m)

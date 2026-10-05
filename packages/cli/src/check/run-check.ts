@@ -7,7 +7,7 @@ import { formatText } from './format-text.js'
 /**
  * `please-style check [path] [--json] [--strict] [--config <file>]`. Takes the
  * arguments after `check` and returns the exit code: 0 ok or warnings only,
- * 1 findings with `--strict`, 2 usage or config error.
+ * 1 findings with `--strict`, 2 usage or config error or an unresolvable dependency.
  */
 export function runCheck(argv: string[], version: () => string): number {
   const usage = t('checkUsage')

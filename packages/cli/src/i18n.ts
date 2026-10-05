@@ -79,7 +79,7 @@ Options:
   --help, -h         Show this message
   --version, -v      Print version
 
-Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config error.
+Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config error, or a dependency that cannot be resolved.
 `,
   },
   ko: {
@@ -132,7 +132,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
   --help, -h         이 메시지 표시
   --version, -v      버전 출력
 
-종료 코드: 0 정상 또는 경고만, 1 --strict에서 발견 사항 있음, 2 사용법 또는 설정 오류.
+종료 코드: 0 정상 또는 경고만, 1 --strict에서 발견 사항 있음, 2 사용법 또는 설정 오류, 또는 해석할 수 없는 의존성.
 `,
   },
 }

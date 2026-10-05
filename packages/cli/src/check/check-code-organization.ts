@@ -61,6 +61,8 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
 
   const tsUnits = TYPESCRIPT_LAYOUT.units(files, base, root)
   const dartUnits = DART_LAYOUT.units(files, base, root)
+  const kotlinUnits = KOTLIN_LAYOUT.units(files, base, root)
+  const javaUnits = JAVA_LAYOUT.units(files, base, root)
   const dartParts = new Set(dart.filter(m => m.ruleId === 'part-of').map(m => m.file))
 
   const tsNames = inspectFilenames(ts, typescriptFilenames(tsUnits))
@@ -69,8 +71,8 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const helpers = [
     inspectHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),
     inspectHelpers(dartHelpers(DART_LAYOUT, dartUnits, dart, fileSet)),
-    inspectHelpers(jvmHelpers(KOTLIN_LAYOUT, KOTLIN_LAYOUT.units(files, base, root), kotlin, files, root)),
-    inspectHelpers(jvmHelpers(JAVA_LAYOUT, JAVA_LAYOUT.units(files, base, root), java, files, root)),
+    inspectHelpers(jvmHelpers(KOTLIN_LAYOUT, kotlinUnits, kotlin, files, root, { layout: JAVA_LAYOUT, units: javaUnits, matches: java })),
+    inspectHelpers(jvmHelpers(JAVA_LAYOUT, javaUnits, java, files, root, { layout: KOTLIN_LAYOUT, units: kotlinUnits, matches: kotlin })),
   ]
   const findings: Finding[] = [
     ...testPaths.findings,

@@ -4,7 +4,7 @@ import type { Finding, Language } from './types.js'
 import { readFileSync } from 'node:fs'
 import { join, posix } from 'node:path'
 import { exampleList, LANGUAGE_LABEL, UNIT_MARKER } from './check-test-paths.js'
-import { isUnder, joinPath, relativeTo, unitOf } from './layouts.js'
+import { inFixtureProject, isUnder, joinPath, relativeTo, unitOf } from './layouts.js'
 
 const SLUG = 'test-helpers-in-dedicated-location'
 
@@ -79,10 +79,11 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
   const notices: string[] = []
   const unitless: string[] = []
   for (const candidate of lang.candidates) {
-    if (inDesignatedLocation(candidate.file, lang)) {
+    // A fixture project's files are test data: neither helpers nor importers.
+    if (inDesignatedLocation(candidate.file, lang) || inFixtureProject(candidate.file, lang.units)) {
       continue
     }
-    const importers = lang.importers(candidate)
+    const importers = new Set([...lang.importers(candidate)].filter(f => !inFixtureProject(f, lang.units)))
     importers.delete(candidate.file)
     if (importers.size < 2) {
       continue
@@ -185,11 +186,13 @@ export function typescriptHelpers(
   }
   lang.importers = (c) => {
     const byName = imports.get(c.file)
+    // Names the declaration is public under: its own (when exported directly, not just as another's alias) plus `export { local as alias }`.
     const aliased = aliases.get(c.file)?.get(c.name) ?? []
-    const exportedAs = [c.name, ...aliased]
+    const takenByAlias = [...(aliases.get(c.file)?.values() ?? [])].some(names => names.includes(c.name))
+    const direct = (exported.get(c.file)?.has(c.name) ?? false) && !takenByAlias
+    const publicNames = [...(direct ? [c.name] : []), ...aliased]
     // A namespace import only sees exports; the candidate extraction also lists private declarations.
-    const isExported = aliased.length > 0 || (exported.get(c.file)?.has(c.name) ?? false)
-    return new Set([...exportedAs.flatMap(n => [...(byName?.get(n) ?? [])]), ...(isExported ? [...(byName?.get('*') ?? [])] : [])])
+    return new Set([...publicNames.flatMap(n => [...(byName?.get(n) ?? [])]), ...(publicNames.length > 0 ? [...(byName?.get('*') ?? [])] : [])])
   }
   return lang
 }
@@ -262,12 +265,20 @@ export function dartHelpers(
 
 // --- Kotlin / Java ----------------------------------------------------------
 
+/** The other JVM language of a mixed Kotlin/Java module: its tests may import this language's helpers. */
+export interface JvmSibling {
+  layout: TestLayout
+  units: Unit[]
+  matches: ExtractMatch[]
+}
+
 export function jvmHelpers(
   layout: TestLayout,
   units: Unit[],
   matches: ExtractMatch[],
   files: string[],
   rootDir: string,
+  sibling?: JvmSibling,
 ): HelperLanguage {
   const language = layout.language as 'kotlin' | 'java'
   const lang: HelperLanguage = { language, layout, units, candidates: [], importers: () => new Set() }
@@ -277,7 +288,7 @@ export function jvmHelpers(
     .map(m => ({ file: m.file, line: m.line, name: m.text }))
   const packageOf = new Map<string, string>()
   const importsOf = new Map<string, string[]>()
-  for (const m of matches) {
+  for (const m of [...matches, ...(sibling?.matches ?? [])]) {
     if (m.ruleId === 'package') {
       packageOf.set(m.file, m.text)
     }
@@ -286,16 +297,17 @@ export function jvmHelpers(
       importsOf.set(m.file, [...(importsOf.get(m.file) ?? []), spec])
     }
   }
-  const testFiles = files.filter(f => layout.isTestFile(f))
+  const testFiles = files.filter(f => layout.isTestFile(f) || sibling?.layout.isTestFile(f) === true)
+  const allUnits = [...units, ...(sibling?.units ?? [])]
   lang.importers = (c) => {
     const pkg = packageOf.get(c.file) ?? ''
     const fqn = pkg === '' ? c.name : `${pkg}.${c.name}`
     const word = new RegExp(`\\b${c.name.replace(/\$/g, '\\$')}\\b`)
     const out = new Set<string>()
     // Another module can declare the same fully qualified name; only the owning module's tests use this helper.
-    const owner = unitOf(c.file, units)
+    const owner = unitOf(c.file, units)?.dir
     for (const file of testFiles) {
-      if (unitOf(file, units) !== owner) {
+      if (unitOf(file, allUnits)?.dir !== owner) {
         continue
       }
       const specs = importsOf.get(file) ?? []

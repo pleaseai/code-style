@@ -54,6 +54,30 @@ rule:
                     kind: export_statement
                     inside:
                       kind: program
+    # export namespace Foo.Bar { … } (dotted: the outermost name `Foo` is the public one)
+    - all:
+        - kind: identifier
+        - inside:
+            kind: nested_identifier
+            stopBy:
+              not:
+                any:
+                  - kind: member_expression
+                  - kind: nested_identifier
+            inside:
+              any:
+                - kind: internal_module
+                - kind: module
+              inside:
+                any:
+                  - kind: export_statement
+                    inside:
+                      kind: program
+                  - kind: ambient_declaration
+                    inside:
+                      kind: export_statement
+                      inside:
+                        kind: program
     # export const|let <name> = …
     - all:
         - kind: identifier

@@ -160,7 +160,7 @@ export function inspectTestPaths(
       notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${exampleList(unitless)}`)
     }
     if (inFixtures.length > 0) {
-      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${inFixtures.length} test file(s) inside fixture projects (a package.json under a test root): ${exampleList(inFixtures)}`)
+      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${inFixtures.length} test file(s) inside fixture projects (a ${layout.language === 'dart' ? 'pubspec.yaml' : 'package.json'} under a test root): ${exampleList(inFixtures)}`)
     }
   }
   return { findings, notices }

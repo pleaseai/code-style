@@ -154,7 +154,7 @@ Checked files: TypeScript `.ts`/`.mts`/`.cts`/`.tsx` and Dart `.dart` (plain
 
 | Language | Counts as a public symbol |
 | --- | --- |
-| TypeScript, TSX | `export` of a `function`, generator function, `class`, `abstract class`, `interface`, `type`, `enum`, function overload signature, `namespace`/`module` (the namespace, not its members), `const`/`let`/`var` binding; the same with `export declare`; `export { local }` and `export { local as name }` without a `from` clause |
+| TypeScript, TSX | `export` of a `function`, generator function, `class`, `abstract class`, `interface`, `type`, `enum`, function overload signature, `namespace`/`module` (the namespace, not its members; for a dotted `namespace Foo.Bar` the outermost name `Foo`), `const`/`let`/`var` binding; the same with `export declare`; `export { local }` and `export { local as name }` without a `from` clause |
 | Dart | Non-underscore `class`, `mixin`, `enum`, named `extension`, function, getter, setter, `typedef`, and top-level variable (`var`, `final`, `const`) |
 
 A file is judged only when it has exactly one such symbol. Several symbols, or
@@ -213,9 +213,12 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
   the enclosing package, and its own test files are skipped by this check with
   an aggregated notice); Nuxt projects (a `nuxt.config.*` next to it) use `app/`,
   `server/` and `shared/` as source roots.
-- Dart packages are directories with a `pubspec.yaml`; tests are `*_test.dart`
-  and sources live in `lib/`. `integration_test/` and `test_driver/` are not
-  reported as outside the test root.
+- Dart packages are directories with a `pubspec.yaml` (one that lies under an
+  enclosing package's `test/` is a fixture project, like in TypeScript: its test
+  files are skipped with an aggregated notice and its files are neither helper
+  candidates nor importers); tests are `*_test.dart` and sources live in
+  `lib/`. `integration_test/` and `test_driver/` are not reported as outside
+  the test root.
 - Kotlin and Java modules are directories that contain `src/main|test|testFixtures/<lang>/`;
   tests are `*Test.kt`/`*Test.java`. A test may target a source in either main
   source set: `src/main/kotlin/…` (`.kt`, `.java`) or `src/main/java/…` (`.java`, `.kt`).
@@ -257,9 +260,9 @@ only in its own file):
 
 | Language | Import forms followed |
 | --- | --- |
-| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export). Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under both names |
+| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export). Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
 | Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice** |
-| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*`, `import static …` (an `as` alias is ignored), and same-package test files that mention the name as a word. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name |
+| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*`, `import static …` (an `as` alias is ignored), and same-package test files that mention the name as a word. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
 
 #### Not supported
 
