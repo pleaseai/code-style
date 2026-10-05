@@ -56,6 +56,17 @@ describe('test-path-derivable-from-source (TypeScript)', () => {
     expect(files(findings)).toEqual(['test/unit/utils/x.test.ts'])
   })
 
+  test('a Nuxt package without app/ mirrors root-level source dirs (Nuxt 3, srcDir ".")', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'nuxt.config.ts': 'export default defineNuxtConfig({})',
+      'composables/use-x.ts': '',
+      'test/unit/composables/use-x.test.ts': '',
+      'test/unit/composables/missing.test.ts': '',
+    }, SLUG)
+    expect(files(findings)).toEqual(['test/unit/composables/missing.test.ts'])
+  })
+
   test('tests under the e2e segment are not derived, and e2e tests outside the root are not reported', () => {
     expect(findingsFor({ ...PKG, 'src/a.ts': '', 'test/e2e/login.spec.ts': '', 'e2e/checkout.spec.ts': '' }, SLUG)).toEqual([])
   })

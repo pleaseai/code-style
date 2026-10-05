@@ -232,6 +232,41 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     }, SLUG)).toEqual([])
   })
 
+  test.each([
+    ['kotlin', 'kt', 'kotlin', 'package com.acme\nimport com.acme.support.*\nimport com.acme.real.MockClock\nclass ATest { val c = MockClock() }', 'class MockClock'],
+    ['java', 'java', 'java', 'package com.acme;\nimport com.acme.support.*;\nimport com.acme.real.MockClock;\nclass ATest { Object c = new MockClock(); }', 'public class MockClock {}'],
+  ])('%s: an explicit import of another FQN shadows a wildcard-imported helper of the same name', (_name, ext, dir, test, decl) => {
+    const semi = ext === 'java' ? ';' : ''
+    const findings = findingsFor({
+      [`src/main/${dir}/com/acme/Invoice.${ext}`]: `package com.acme${semi}`,
+      [`src/test/${dir}/com/acme/support/MockClock.${ext}`]: `package com.acme.support${semi}\n${decl}`,
+      [`src/test/${dir}/com/acme/ATest.${ext}`]: test,
+      [`src/test/${dir}/com/acme/BTest.${ext}`]: test.replace('ATest', 'BTest'),
+    }, SLUG)
+    expect(findings).toEqual([])
+  })
+
+  test('a same-package file that declares the helper name itself does not import it', () => {
+    const findings = findingsFor({
+      'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',
+      'src/test/kotlin/com/acme/SvcTest.kt': 'package com.acme\nfun mockClock() = 1',
+      'src/test/kotlin/com/acme/ATest.kt': 'package com.acme\nclass ATest { private val mockClock = mockk<Clock>() }',
+      'src/test/kotlin/com/acme/BTest.kt': 'package com.acme\nclass BTest { private val mockClock = mockk<Clock>() }',
+    }, SLUG)
+    expect(findings).toEqual([])
+  })
+
+  test('a colocated helper imported from tests/ is directed to that package\'s tests/test-utils/', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'src/mock-user.test.ts': 'export function mockUser() {}',
+      'tests/a.test.ts': 'import { mockUser } from \'../src/mock-user.test\'',
+      'tests/b.test.ts': 'import { mockUser } from \'../src/mock-user.test\'',
+    }, SLUG)
+    expect(findings[0]?.message).toContain('tests/test-utils/')
+    expect(findings[0]?.message).not.toContain('test/test-utils')
+  })
+
   test('kotlin: a same-package helper used by two tests is reported unless it is in src/testFixtures/', () => {
     const tests = {
       'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',

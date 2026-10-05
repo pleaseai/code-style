@@ -29,3 +29,4 @@ ignores:
   - '**/error/**'
   - '**/src/test/**'
   - '**/src/testFixtures/**'
+  - '**/src/androidTest/**'

@@ -53,6 +53,7 @@ const PROJECT = {
   'src/main/kotlin/com/acme/Errors.kt': 'class A : RuntimeException()',
   'src/main/kotlin/com/acme/Billing.kt': 'class B : RuntimeException()',
   'src/main/java/com/acme/error/AException.java': 'public class AException extends RuntimeException {}',
+  'src/androidTest/java/com/acme/CException.java': 'public class CException extends RuntimeException {}',
   'src/main/java/com/acme/BException.java': 'public class BException extends RuntimeException {}',
   'crate/src/error.rs': 'pub enum Error { Io }',
   'crate/src/lib.rs': 'pub use crate::model::*;\npub struct ParseError;',

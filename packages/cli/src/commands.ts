@@ -115,7 +115,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   }
 
   // 2. Apply each tool's side-effects.
-  const ctx: ToolContext = { cwd: opts.cwd, autoAccept: opts.autoAccept }
+  const ctx: ToolContext = { cwd: opts.cwd, autoAccept: opts.autoAccept, selectedToolIds: selectedTools.map(tool => tool.id) }
   const results: ToolApplyResult[] = []
   for (const tool of selectedTools) {
     results.push(await tool.apply(ctx))
@@ -130,7 +130,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
 export async function runUpdate(opts: CommandOptions): Promise<void> {
   assertProjectRoot(opts.cwd)
   intro(t('appTitle'))
-  const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true })
+  const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true, selectedToolIds: [] })
   reportResults(result)
   log.success(t('agentsBlockUpdated'))
   outro(t('done'))

@@ -113,6 +113,20 @@ message: part file
 rule:
   kind: part_of_directive
 ---
+# `part 'other.dart';`: the part file's declarations belong to this library, so
+# its symbol set is unknown. Generated parts (`part 'x.g.dart'`, `x.freezed.dart`:
+# an extra dot in the file name) declare private helpers and are not matched.
+id: part-directive
+language: dart
+severity: hint
+message: library with parts
+rule:
+  kind: part_directive
+  not:
+    has:
+      field: uri
+      regex: \.[A-Za-z0-9_]+\.dart['"]$
+---
 # `export 'other.dart';` re-exports public symbols that top-level-name does not
 # enumerate, so the file reads as "unknown symbols" in the filename check.
 id: export-directive

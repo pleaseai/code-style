@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, writeFileSync } from 'node:fs'
 import { resolve as joinPath } from 'node:path'
 import { confirm, isCancel } from '@clack/prompts'
 import {
+  isPackageInstalled,
   readFileOrNull,
   readPackageJson,
   upsertMarkerBlock,
@@ -124,19 +125,44 @@ will be overwritten.
 - File size target: ≤ 500 lines
 - Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
   (\`src/foo/bar.ts\` → \`test/foo/bar.test.ts\`); no \`import.meta.vitest\` in-source tests
-- Code organization (named exports, file names, error files, test paths, shared helpers):
-  \`node_modules/@pleaseai/ast-grep-config/README.md\`; check with \`ast-grep scan\` and \`please-style check\`
 - Conventional Commits for all commit messages
 
 For the full rules (what an AI coding assistant needs to know before writing code),
 read \`node_modules/@pleaseai/code-style/rules.md\`.`
+
+const AGENTS_CODE_ORGANIZATION = `- Code organization (named exports, file names, error files, test paths, shared helpers):
+  \`node_modules/@pleaseai/ast-grep-config/README.md\`; check with \`ast-grep scan\` and \`please-style check\`
+`
+
+/**
+ * The code-organization pointer needs the ast-grep tooling: include it when
+ * `ast-grep` is among the selected tools or the project already depends on
+ * `@ast-grep/cli`. Without selection info (`selectedToolIds` unset) it is kept.
+ */
+function wantsCodeOrganization(ctx: ToolContext): boolean {
+  if (ctx.selectedToolIds == null || ctx.selectedToolIds.includes('ast-grep')) {
+    return true
+  }
+  try {
+    return isPackageInstalled(readPackageJson(ctx.cwd), '@ast-grep/cli')
+  }
+  catch {
+    return false
+  }
+}
+
+function agentsBody(ctx: ToolContext): string {
+  return wantsCodeOrganization(ctx)
+    ? AGENTS_BODY.replace('- Conventional', `${AGENTS_CODE_ORGANIZATION}- Conventional`)
+    : AGENTS_BODY
+}
 
 export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, 'AGENTS.md')
   const label = 'AGENTS.md'
   const existing = readFileOrNull(target)
-  const next = upsertMarkerBlock(existing, AGENTS_BODY)
+  const next = upsertMarkerBlock(existing, agentsBody(ctx))
 
   if (existing == null) {
     writeFileSync(target, next)

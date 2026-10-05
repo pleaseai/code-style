@@ -209,6 +209,8 @@ export function checkRust(
   const nestedDeclFiles = new Set<string>()
   const pathLoaded = new Set<string>()
   const nestedPathFiles = new Set<string>()
+  const macroModFiles = new Set<string>()
+  const includeFiles = new Map<string, 'dir' | 'package'>()
   for (const m of matches) {
     if (m.ruleId === 'mod-decl' || m.ruleId === 'mod-decl-cfg-path') {
       // `mod r#async;` loads `async.rs`. `mod-decl-cfg-path` matches the attribute (one per conditional `path`), so the module name is `$NAME`.
@@ -224,6 +226,14 @@ export function checkRust(
     }
     else if (m.ruleId === 'mod-decl-nested-path') {
       nestedPathFiles.add(m.file)
+    }
+    else if (m.ruleId === 'macro-mod-decl') {
+      macroModFiles.add(m.file)
+    }
+    else if (m.ruleId === 'include-macro') {
+      // `include!("gen.rs")` (a plain relative path) stays within the including file's directory; anything else may reach the whole crate.
+      const literal = /^[\w:]*include\s*!\s*[([{]\s*"([^"\\]*)"\s*[)\]}]/.exec(m.text)?.[1]
+      includeFiles.set(m.file, literal != null && !literal.startsWith('/') && !literal.split('/').includes('..') ? 'dir' : 'package')
     }
     else if (m.ruleId === 'test-attr') {
       unitTestFiles.add(m.file)
@@ -247,7 +257,16 @@ export function checkRust(
     const unknownDirs = [...nestedDeclFiles]
       .filter(owned)
       .map(f => ({ file: f, dir: nestedPathFiles.has(f) ? pkg.dir : nestedModDir(f, roots.has(f), pathLoaded) }))
-    const reachabilityUnknown = (f: string): boolean => unknownDirs.some(u => isUnder(f, u.dir))
+    // `include!` and `mod x;` in macro bodies load files without a `mod` item: withhold the subtree (or the crate) they can reach.
+    const loadDirs = [
+      ...[...macroModFiles].filter(owned).map(f => ({ file: f, dir: pkg.dir })),
+      ...[...includeFiles].filter(([f]) => owned(f)).map(([f, scope]) => ({ file: f, dir: scope === 'package' ? pkg.dir : (posix.dirname(f) === '.' ? '' : posix.dirname(f)) })),
+    ]
+    const reachabilityUnknown = (f: string): boolean => unknownDirs.some(u => isUnder(f, u.dir)) || loadDirs.some(u => isUnder(f, u.dir))
+    if (loadDirs.length > 0) {
+      const where = [...new Set(loadDirs.map(u => `${u.dir === '' ? '.' : u.dir}/ (from ${u.file})`))].sort().join(', ')
+      loaded.notices.push(`Rust: test-reachability check skipped for ${where} (crate ${pkg.dir === '' ? '.' : pkg.dir} uses \`include!\` or a macro body containing \`mod x;\`, which loads files without a followed \`mod\` item).`)
+    }
     if (unknownDirs.length > 0) {
       const where = unknownDirs.map(u => `${u.dir === '' ? '.' : u.dir}/ (from ${u.file})`).sort().join(', ')
       loaded.notices.push(`Rust: test-reachability check skipped for ${where} (crate ${pkg.dir === '' ? '.' : pkg.dir} declares \`mod x;\` inside an inline module or fn body, which is not followed).`)

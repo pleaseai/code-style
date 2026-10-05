@@ -12,6 +12,8 @@ export interface ToolContext {
   cwd: string
   /** If true, skip interactive confirmations (CI / --yes mode). */
   autoAccept: boolean
+  /** Tools chosen in this run; unset when the caller has no selection (the code-organization pointer is then kept). */
+  selectedToolIds?: ToolId[]
 }
 
 export interface ToolApplyResult {

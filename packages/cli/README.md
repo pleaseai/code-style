@@ -109,12 +109,13 @@ What it checks:
   exactly one public symbol is named after it, compared in kebab-case
   (TypeScript) or snake_case (Dart). `errors.ts`/`errors.dart`, `index.ts`,
   config files, test files, `part of` files, generated Dart files, framework
-  route files (`route.ts`, `middleware.ts`, SvelteKit `+*.ts`), and Dart
+  route files (`route.ts`, `middleware.ts`, `instrumentation.ts`, SvelteKit `+*.ts`), and Dart
   entrypoints under `bin/`, `tool/`, `example/` and `web/` are exempt. Kotlin and Java are covered by ktlint `standard:filename` and javac.
 - **`test-path-derivable-from-source`**:
   - TypeScript: `src/foo/bar.ts` ↔ `test/foo/bar.test.ts` (or `tests/`,
     `.spec.ts`). With one source root the root name is dropped; with several
-    (Nuxt 4: `app/`, `server/`, `shared/`) it is kept:
+    (Nuxt 4: `app/`, `server/`, `shared/`; a Nuxt package without `app/` also
+    accepts paths mirrored from the package root) it is kept:
     `server/utils/db.ts` ↔ `test/unit/server/utils/db.test.ts`.
   - Dart: `lib/a/b.dart` ↔ `test/a/b_test.dart`.
   - Kotlin/Java: `src/main/kotlin/…/Foo.kt` ↔ `src/test/kotlin/…/FooTest.kt`
@@ -170,6 +171,7 @@ their exports cannot be enumerated):
 | TypeScript, TSX | `export const { a } = obj`, `export const [a] = arr` | `destructured export` |
 | TypeScript, TSX | `export { x as "string name" }` | `string-literal export name` |
 | Dart | `export 'other.dart';` | `re-export` |
+| Dart | `part 'other.dart';` (generated `*.g.dart`/`*.freezed.dart` parts excluded) | `library with parts` |
 
 The notice is aggregated per language, with the count and up to three sorted
 example paths:
@@ -189,7 +191,7 @@ no extracted name and is not judged.
 Exempt **by convention** (no finding, no notice):
 
 - TypeScript: `*.d.ts`, `*.test.*`/`*.spec.*`, `index.*`, `errors.*`,
-  `route.*`, `middleware.*`, `+*` files, `*.config.*`, and anything under the
+  `route.*`, `middleware.*`, `instrumentation.*`, `instrumentation-client.*`, `+*` files, `*.config.*`, and anything under the
   package's test root (`test/`, `tests/`).
 - Dart: `part of` files, files under `integration_test/`, `test_driver/`,
   `bin/`, `tool/`, `example/`, `web/` or the test root, `*_test.dart`,
@@ -212,7 +214,9 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
   is a fixture project: test data, not a package. Its files stay test-side of
   the enclosing package, and its own test files are skipped by this check with
   an aggregated notice); Nuxt projects (a `nuxt.config.*` next to it) use `app/`,
-  `server/` and `shared/` as source roots.
+  `server/` and `shared/` as source roots. Without an `app/` directory (Nuxt 3, or
+  `srcDir: '.'`) the package root is a source root too, so `composables/use-x.ts`
+  ↔ `test/unit/composables/use-x.test.ts`.
 - Dart packages are directories with a `pubspec.yaml` (one that lies under an
   enclosing package's `test/` is a fixture project, like in TypeScript: its test
   files are skipped with an aggregated notice and its files are neither helper
@@ -262,7 +266,7 @@ only in its own file):
 | --- | --- |
 | TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export), `import x from` (the `default` export). `export default function` or `export default class` of a helper is public under `default`, so default and namespace imports credit it. Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
 | Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice** |
-| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*` (the importing file must also mention the name as a word), `import static …` (an `as` alias is ignored; a Kotlin top-level function is also followed through its file facade, `import static pkg.<File>Kt.name` / `pkg.<File>Kt.*`, or the `@file:JvmName("…")` value), and same-package test files that mention the name as a word. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
+| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*` (the importing file must also mention the name as a word outside its import lines, and an explicit import of the same simple name from another package shadows it), `import static …` (an `as` alias is ignored; a Kotlin top-level function is also followed through its file facade, `import static pkg.<File>Kt.name` / `pkg.<File>Kt.*`, or the `@file:JvmName("…")` value), and same-package test files that mention the name as a word. A file that declares the name itself (`val`/`var`/`fun`/`class`, a typed parameter, or a Java field, local or method) does not count. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
 
 #### Not supported
 
@@ -281,8 +285,12 @@ notice, and each can hide a finding:
 - TypeScript exports: CommonJS (`module.exports`) is not recognized as symbols;
   JavaScript files are not read at all. Dart declarations not listed in the
   table above (for example `extension type`) are not counted either.
-- Rust: only literal `mod` items are read. Modules generated by macros, `include!`
-  and `#[path]` on an inline `mod x { … }` are not seen.
+- Rust: only literal `mod` items are read. `#[path]` on an inline
+  `mod x { … }` is not seen. A crate that uses `include!` or writes `mod x;`
+  inside a macro body (`macro_rules!`, `cfg_if!`, …) withholds the
+  test-reachability judgement with a notice: for the including file's
+  directory when `include!` names a plain relative path, otherwise for the
+  whole crate.
 - Kotlin and Java file names are not checked here (ktlint `standard:filename`
   and javac cover them).
 - Kotlin under `src/<set>/java`: Gradle allows Kotlin sources there, but

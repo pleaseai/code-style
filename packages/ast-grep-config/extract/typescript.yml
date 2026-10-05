@@ -340,7 +340,7 @@ rule:
         field: source
         pattern: $SRC
 ---
-# Every local binding an import introduces (`import a`, `import { a }`, `import { x as a }`, `import * as a`).
+# Every local binding an import introduces (`import a`, `import { a }`, `import { x as a }`, `import * as a`, `import a = require('…')`).
 # `export { a }` of such a binding is a re-export, not a local symbol.
 id: import-binding
 language: typescript
@@ -353,6 +353,9 @@ rule:
         kind: import_clause
     - inside:
         kind: namespace_import
+    # `import x = require('./foo')`
+    - inside:
+        kind: import_require_clause
     - inside:
         field: alias
         kind: import_specifier

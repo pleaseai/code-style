@@ -9,13 +9,16 @@ const SLUG = 'code-filename-matches-primary-symbol'
 const LANGUAGE_LABEL: Record<FilenameLanguage['language'], string> = { typescript: 'TypeScript', dart: 'Dart' }
 
 /** Display order of the reasons in a notice. */
-const OPAQUE_REASONS = ['re-export', 'default export', 'destructured export', 'string-literal export name'] as const
+const OPAQUE_REASONS = ['re-export', 'library with parts', 'default export', 'destructured export', 'string-literal export name'] as const
 type OpaqueReason = typeof OPAQUE_REASONS[number]
 
 /** Why an opaque-rule match makes the file's exports impossible to enumerate. */
 function opaqueReason(m: ExtractMatch): OpaqueReason {
   if (m.ruleId === 'export-destructure') {
     return 'destructured export'
+  }
+  if (m.ruleId === 'part-directive') {
+    return 'library with parts'
   }
   if (m.ruleId === 'export-directive' || /\bfrom\s*['"`]/.test(m.text) || /^export\s+import\b/.test(m.text)) {
     return 're-export'
@@ -67,8 +70,8 @@ export function typescriptFilenames(units: Unit[]): FilenameLanguage {
       const stem = name.replace(TS_SOURCE, '')
       // Test files, package entry points, config files, the designated error
       // file (ADR-0022 §1), and framework-dictated route files (Next.js
-      // `route`/`middleware`, SvelteKit `+server`) are not named after a symbol.
-      if (/\.(?:test|spec)$/.test(stem) || stem === 'index' || stem === 'errors' || stem === 'route' || stem === 'middleware' || stem.startsWith('+') || /\.config(?:\.|$)/.test(stem)) {
+      // `route`/`middleware`/`instrumentation`, SvelteKit `+server`) are not named after a symbol.
+      if (/\.(?:test|spec)$/.test(stem) || stem === 'index' || stem === 'errors' || stem === 'route' || stem === 'middleware' || stem === 'instrumentation' || stem === 'instrumentation-client' || stem.startsWith('+') || /\.config(?:\.|$)/.test(stem)) {
         return null
       }
       return stem
@@ -80,7 +83,7 @@ export function dartFilenames(units: Unit[], partFiles: Set<string>): FilenameLa
   return {
     language: 'dart',
     nameRules: ['top-level-name', 'top-level-type-alias'],
-    opaqueRules: ['export-directive'],
+    opaqueRules: ['export-directive', 'part-directive'],
     normalize: toSnakeCase,
     isPublic: name => !name.startsWith('_'),
     units,
@@ -131,6 +134,12 @@ export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage
   }
   // `export { x }` of a name the file imports re-exports it; it is not a local symbol.
   const imported = new Set(matches.filter(m => m.ruleId === 'import-binding').map(m => `${m.file}\0${m.text}`))
+  // `export { Foo as Bar }` where `Foo` is imported: export-name sees the alias `Bar`, so resolve the local name.
+  for (const m of matches) {
+    if (m.ruleId === 'export-local-alias' && imported.has(`${m.file}\0${m.text}`)) {
+      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add('re-export'))
+    }
+  }
   for (const m of matches) {
     if (!lang.nameRules.includes(m.ruleId) || !lang.isPublic(m.text)) {
       continue

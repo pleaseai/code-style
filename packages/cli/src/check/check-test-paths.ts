@@ -42,7 +42,7 @@ function candidateSources(inner: string, unit: Unit, layout: TestLayout, withAlt
     const rel = reading.join('/')
     if (unit.keepRootName) {
       // Several roots: the root name is part of the test path.
-      if (unit.sourceRoots.some(root => isUnder(rel, root) && rel !== root)) {
+      if (unit.rootMirror === true || unit.sourceRoots.some(root => isUnder(rel, root) && rel !== root)) {
         bases.push(joinPath(unit.dir, rel))
       }
     }

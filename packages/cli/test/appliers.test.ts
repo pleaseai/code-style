@@ -59,4 +59,19 @@ describe('AGENTS.md rules block', () => {
     expect(body).toContain('node_modules/@pleaseai/ast-grep-config/README.md')
     expect(body).toContain('please-style check')
   })
+
+  test('omits the ast-grep pointer unless ast-grep is selected or already a dependency', async () => {
+    await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: ['agents-md'] })
+    const bare = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+    expect(bare).not.toContain('please-style check')
+    expect(bare).not.toContain('ast-grep-config')
+    expect(bare).toContain('- Conventional Commits')
+
+    await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: ['agents-md', 'ast-grep'] })
+    expect(readFileSync(join(dir, 'AGENTS.md'), 'utf-8')).toContain('please-style check')
+
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ devDependencies: { '@ast-grep/cli': '^0.45.3' } }))
+    await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: [] })
+    expect(readFileSync(join(dir, 'AGENTS.md'), 'utf-8')).toContain('please-style check')
+  })
 })

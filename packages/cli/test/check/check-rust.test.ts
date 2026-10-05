@@ -16,6 +16,29 @@ function kinds(result: ReturnType<typeof checkFixture>): string[] {
   return result.findings.map(f => `${f.kind} ${f.file}`).sort()
 }
 
+describe('rust include! and macro-loaded modules', () => {
+  test('files loaded by include! or by `mod x;` inside a macro body are withheld with a notice', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'include!("gen.rs");\nmacro_rules! m { () => { mod viamacro; } }\nm!();',
+      'src/gen.rs': '#[test]\nfn generated() {}',
+      'src/viamacro.rs': '#[test]\nfn via_macro() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices.join('\n')).toContain('include!')
+  })
+
+  test('a non-literal include! withholds the whole crate, including tests/', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'include!(concat!(env!("OUT_DIR"), "/x.rs"));',
+      'tests/sub/helper.rs': '#[test]\nfn works() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices.join('\n')).toContain('include!')
+  })
+})
+
 describe('rust integration tests', () => {
   test('reports a nested tests/ file that is neither a target nor reached by mod', () => {
     const result = checkFixture({

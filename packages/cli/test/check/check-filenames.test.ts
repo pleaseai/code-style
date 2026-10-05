@@ -57,6 +57,44 @@ describe('code-filename-matches-primary-symbol (TypeScript)', () => {
     expect(result.notices.join('\n')).toContain('re-export')
   })
 
+  test.each(['ts', 'tsx'])('`export { Foo as Bar }` of an imported binding is a re-export, not a local symbol (.%s)', (ext) => {
+    const result = checkFixture({
+      ...PKG,
+      'src/foo.ts': 'export function foo() {}',
+      [`src/loader.${ext}`]: 'import { foo } from \'./foo\'\nexport { foo as bar }',
+    })
+    expect(result.findings.filter(f => f.slug === SLUG)).toEqual([])
+    expect(result.notices.join('\n')).toContain(`src/loader.${ext}`)
+  })
+
+  test.each(['ts', 'tsx'])('`export { x }` of an `import x = require()` binding is a re-export (.%s)', (ext) => {
+    const result = checkFixture({
+      ...PKG,
+      [`src/loader.${ext}`]: 'import x = require(\'./foo\')\nexport { x }',
+    })
+    expect(result.findings.filter(f => f.slug === SLUG)).toEqual([])
+    expect(result.notices.join('\n')).toContain(`src/loader.${ext}`)
+  })
+
+  test('a Dart library with parts has an unknown symbol set, but generated parts do not count', () => {
+    const result = checkFixture({
+      'pubspec.yaml': 'name: demo',
+      'lib/library.dart': 'part \'extra.dart\';\nclass Alpha {}',
+      'lib/extra.dart': 'part of \'library.dart\';\nclass Beta {}',
+      'lib/model.dart': 'part \'model.g.dart\';\nclass Gamma {}',
+    })
+    expect(result.findings.filter(f => f.slug === SLUG).map(f => f.file)).toEqual(['lib/model.dart'])
+    expect(result.notices).toContain('Dart: filename check skipped 1 file(s) whose exports cannot be enumerated (library with parts): lib/library.dart')
+  })
+
+  test('Next.js instrumentation files are framework-dictated and exempt', () => {
+    expect(findingsFor({
+      ...PKG,
+      'src/instrumentation.ts': 'export function register() {}',
+      'src/instrumentation-client.ts': 'export function onRouterTransitionStart() {}',
+    }, SLUG)).toEqual([])
+  })
+
   test('framework route files and ambient/aliased-default exports are not mismatches', () => {
     expect(findingsFor({
       ...PKG,

@@ -18,6 +18,8 @@ export interface Unit {
   alternateSourceRoots?: string[]
   /** With several source roots the root name stays in the test path (ADR-0022 §3). */
   keepRootName: boolean
+  /** Nuxt 3 / `srcDir: '.'`: the mirrored test path may also start directly at the package root (`composables/`, `utils/`). */
+  rootMirror?: boolean
   /** Allowed environment segments directly under a test root. */
   envSegments: string[]
   /** Fixture projects (a `package.json` under a test root) relative to `dir`; their test files are test data. */
@@ -116,12 +118,16 @@ export const TYPESCRIPT_LAYOUT: TestLayout = {
     return kept.map((dir) => {
       const isNuxt = files.some(f => dirOf(f) === dir && NUXT_CONFIG.test(baseName(f)))
       const config = withConfig(rootDir, dir, base)
+      // Nuxt 4 puts app code under `app/`; without it (Nuxt 3, or `srcDir: '.'`) it sits at the package root.
+      const hasApp = files.some(f => isUnder(f, joinPath(dir, 'app')))
+      const rootMirror = isNuxt && !hasApp
       const sourceRoots = [...new Set([...(isNuxt ? NUXT_ROOTS : DEFAULT_TS_ROOTS), ...config.sourceRoots])]
       return {
         dir,
         testRoots: TS_TEST_ROOTS,
         sourceRoots,
         keepRootName: sourceRoots.length > 1,
+        rootMirror,
         envSegments: config.envSegments,
         fixtureDirs: fixtures.get(dir),
       }

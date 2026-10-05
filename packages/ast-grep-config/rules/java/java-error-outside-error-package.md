@@ -64,4 +64,4 @@ public class InvoiceNotFoundException extends RuntimeException {
 ## Exempt files
 
 Files under any `error/` directory and test source sets (`src/test/`,
-`src/testFixtures/`) are ignored.
+`src/testFixtures/`, `src/androidTest/`) are ignored.

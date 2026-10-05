@@ -52,12 +52,18 @@ function isTestSide(file: string, lang: HelperLanguage, roots: (unit: Unit) => s
   return unit != null && roots(unit).some(root => isUnder(relativeTo(file, unit.dir), root))
 }
 
-/** The designated helper dir under the candidate's own test root, else the first one. */
-function suggestedDir(lang: HelperLanguage, unit: Unit, file: string): string {
+/**
+ * The designated helper dir under the candidate's own test root; else the one
+ * under the test root holding the importers; else every helper dir (the caller
+ * names them all).
+ */
+function suggestedDirs(lang: HelperLanguage, unit: Unit, file: string, importers: Set<string>): string[] {
   const dirs = lang.layout.helperDirs(unit)
-  const rel = relativeTo(file, unit.dir)
-  const own = dirs.find(d => isUnder(rel, posix.dirname(d))) ?? dirs[0]
-  return `${joinPath(unit.dir, own)}/`
+  const rootOf = (d: string): string => posix.dirname(d)
+  const own = dirs.filter(d => isUnder(relativeTo(file, unit.dir), rootOf(d)))
+  const used = dirs.filter(d => [...importers].some(f => unitOf(f, lang.units) === unit && isUnder(relativeTo(f, unit.dir), rootOf(d))))
+  const picked = own.length > 0 ? own.slice(0, 1) : used.length > 0 ? used : dirs
+  return picked.map(d => `${joinPath(unit.dir, d)}/`)
 }
 
 /**
@@ -93,7 +99,8 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
       unitless.push(candidate.file)
       continue
     }
-    const target = suggestedDir(lang, unit, candidate.file)
+    const targets = suggestedDirs(lang, unit, candidate.file, importers)
+    const target = targets.join(' or ')
     findings.push({
       slug: SLUG,
       kind: 'shared-helper-outside-location',
@@ -101,7 +108,7 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
       language: lang.language,
       file: candidate.file,
       line: candidate.line,
-      message: `Shared test helper \`${candidate.name}\` is imported by ${importers.size} test files (${[...importers].sort().slice(0, 3).join(', ')}) but declared outside ${target}. Move it there.`,
+      message: `Shared test helper \`${candidate.name}\` is imported by ${importers.size} test files (${[...importers].sort().slice(0, 3).join(', ')}) but declared outside ${target}. Move it ${targets.length > 1 ? 'to one of them' : 'there'}.`,
     })
   }
   const label = LANGUAGE_LABEL[lang.language]
@@ -290,6 +297,16 @@ function kotlinFacade(file: string, pkg: string, rootDir: string): string | unde
   return pkg === '' ? facade : `${pkg}.${facade}`
 }
 
+/** Whether `text` declares its own `name` (field, local, parameter, function or type), which shadows any helper of that name. */
+function declaresName(text: string, name: string, file: string): boolean {
+  const id = name.replace(/\$/g, '\\$')
+  if (/\.kts?$/.test(file)) {
+    return new RegExp(`\\b(?:val|var|fun|class|object|interface|typealias)\\s+(?:<[^>]*>\\s*)?(?:[\\w.]+\\.)?${id}\\b|(?<![\\w.])${id}\\s*:\\s*[\\w(]`).test(text)
+  }
+  // Java: `Type name` followed by an initializer, terminator, parameter delimiter or `(`; statements such as `return name;` are references.
+  return new RegExp(`(?<![\\w.])(?!(?:return|new|throw|throws|else|case|yield|assert|extends|implements|instanceof)\\b)[A-Za-z_][\\w.]*(?:<[^;(){}]*>)?(?:\\[\\])*\\s+${id}\\s*(?:=|;|\\(|,|\\)|:)`).test(text)
+}
+
 export function jvmHelpers(
   layout: TestLayout,
   units: Unit[],
@@ -315,6 +332,17 @@ export function jvmHelpers(
       importsOf.set(m.file, [...(importsOf.get(m.file) ?? []), spec])
     }
   }
+  // file → simple name → FQN of its explicit (non-wildcard) imports; an explicit import shadows same-package and wildcard names.
+  const bindingsOf = new Map<string, Map<string, string>>()
+  for (const [file, specs] of importsOf) {
+    const bound = new Map<string, string>()
+    for (const spec of specs) {
+      if (!spec.endsWith('.*')) {
+        bound.set(spec.slice(spec.lastIndexOf('.') + 1), spec)
+      }
+    }
+    bindingsOf.set(file, bound)
+  }
   const testFiles = files.filter(f => layout.isTestFile(f) || sibling?.layout.isTestFile(f) === true)
   const allUnits = [...units, ...(sibling?.units ?? [])]
   lang.importers = (c) => {
@@ -330,7 +358,17 @@ export function jvmHelpers(
         continue
       }
       const specs = importsOf.get(file) ?? []
-      const mentions = (): boolean => word.test(readFileSync(join(rootDir, file), 'utf-8'))
+      const bound = bindingsOf.get(file)?.get(c.name)
+      // An explicit import binding the name to another FQN shadows wildcard and same-package candidates.
+      const shadowed = bound != null && bound !== fqn && !(facadeFqn != null && bound === `${facadeFqn}.${c.name}`)
+      // A reference outside import lines, in a file that does not declare the name itself.
+      const mentions = (): boolean => {
+        if (shadowed) {
+          return false
+        }
+        const text = readFileSync(join(rootDir, file), 'utf-8').replace(/^\s*(?:import|package)\b.*$/gm, '')
+        return word.test(text) && !declaresName(text, c.name, file)
+      }
       if (specs.some(s => s === fqn || s.startsWith(`${fqn}.`) || (facadeFqn != null && s === `${facadeFqn}.${c.name}`))) {
         out.add(file)
       }
