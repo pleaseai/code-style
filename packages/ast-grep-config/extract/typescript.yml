@@ -299,3 +299,73 @@ rule:
       has:
         field: source
         pattern: $SRC
+---
+# `export default function|class <name>`: the local declaration is public under `default`.
+id: export-default-local
+language: typescript
+severity: hint
+message: default-exported local declaration
+rule:
+  any:
+    - kind: identifier
+    - kind: type_identifier
+  inside:
+    field: name
+    any:
+      - kind: function_declaration
+      - kind: generator_function_declaration
+      - kind: class_declaration
+      - kind: abstract_class_declaration
+    inside:
+      kind: export_statement
+      inside:
+        kind: program
+      has:
+        regex: ^default$
+        stopBy: neighbor
+---
+# `import foo from '…'`: importers see the module's `default` export.
+id: import-default
+language: typescript
+severity: hint
+message: default import
+rule:
+  kind: identifier
+  inside:
+    kind: import_clause
+    inside:
+      stopBy: end
+      kind: import_statement
+      has:
+        field: source
+        pattern: $SRC
+---
+# Every local binding an import introduces (`import a`, `import { a }`, `import { x as a }`, `import * as a`).
+# `export { a }` of such a binding is a re-export, not a local symbol.
+id: import-binding
+language: typescript
+severity: hint
+message: imported local binding
+rule:
+  kind: identifier
+  any:
+    - inside:
+        kind: import_clause
+    - inside:
+        kind: namespace_import
+    - inside:
+        field: alias
+        kind: import_specifier
+    - all:
+        - inside:
+            field: name
+            kind: import_specifier
+        - not:
+            inside:
+              kind: import_specifier
+              has:
+                field: alias
+                kind: identifier
+  inside:
+    stopBy: end
+    kind: import_statement

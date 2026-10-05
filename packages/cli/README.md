@@ -154,7 +154,7 @@ Checked files: TypeScript `.ts`/`.mts`/`.cts`/`.tsx` and Dart `.dart` (plain
 
 | Language | Counts as a public symbol |
 | --- | --- |
-| TypeScript, TSX | `export` of a `function`, generator function, `class`, `abstract class`, `interface`, `type`, `enum`, function overload signature, `namespace`/`module` (the namespace, not its members; for a dotted `namespace Foo.Bar` the outermost name `Foo`), `const`/`let`/`var` binding; the same with `export declare`; `export { local }` and `export { local as name }` without a `from` clause |
+| TypeScript, TSX | `export` of a `function`, generator function, `class`, `abstract class`, `interface`, `type`, `enum`, function overload signature, `namespace`/`module` (the namespace, not its members; for a dotted `namespace Foo.Bar` the outermost name `Foo`), `const`/`let`/`var` binding; the same with `export declare`; `export { local }` and `export { local as name }` without a `from` clause, where `local` is declared in the file (a binding the file imports, as in `import { foo } from './foo'; export { foo }`, is a re-export) |
 | Dart | Non-underscore `class`, `mixin`, `enum`, named `extension`, function, getter, setter, `typedef`, and top-level variable (`var`, `final`, `const`) |
 
 A file is judged only when it has exactly one such symbol. Several symbols, or
@@ -165,7 +165,7 @@ their exports cannot be enumerated):
 
 | Language | Skipped form | Reason in the notice |
 | --- | --- | --- |
-| TypeScript, TSX | `export { a } from '…'`, `export * from '…'`, `export * as ns from '…'`, `export import a = b.c` | `re-export` |
+| TypeScript, TSX | `export { a } from '…'`, `export * from '…'`, `export * as ns from '…'`, `export import a = b.c`, `export { a }` of an imported binding | `re-export` |
 | TypeScript, TSX | `export default …`, `export { x as default }`, `export { default }` | `default export` |
 | TypeScript, TSX | `export const { a } = obj`, `export const [a] = arr` | `destructured export` |
 | TypeScript, TSX | `export { x as "string name" }` | `string-literal export name` |
@@ -260,9 +260,9 @@ only in its own file):
 
 | Language | Import forms followed |
 | --- | --- |
-| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export). Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
+| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export), `import x from` (the `default` export). `export default function` or `export default class` of a helper is public under `default`, so default and namespace imports credit it. Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
 | Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice** |
-| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*`, `import static …` (an `as` alias is ignored), and same-package test files that mention the name as a word. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
+| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*` (the importing file must also mention the name as a word), `import static …` (an `as` alias is ignored; a Kotlin top-level function is also followed through its file facade, `import static pkg.<File>Kt.name` / `pkg.<File>Kt.*`, or the `@file:JvmName("…")` value), and same-package test files that mention the name as a word. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
 
 #### Not supported
 

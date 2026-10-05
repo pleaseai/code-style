@@ -80,6 +80,18 @@ describe('rust integration tests', () => {
   })
 })
 
+describe('rust unregistered tests/<name>/main.rs', () => {
+  test('a main.rs that is not a registered test target does not exempt its directory', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/cli/main.rs': 'mod run;',
+      'tests/cli/run.rs': '',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(kinds(result)).toContain('undiscovered-integration-test tests/cli/run.rs')
+  })
+})
+
 describe('rust unit-test split files', () => {
   test('follows `#[cfg(test)] mod tests;` and `#[path]` declarations, whatever the file name', () => {
     const result = checkFixture({

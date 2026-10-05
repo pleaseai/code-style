@@ -167,6 +167,37 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     expect(findings).toEqual([])
   })
 
+  test.each(['ts', 'tsx'])('a default-exported helper is credited through default and namespace imports (.%s)', (ext) => {
+    const findings = findingsFor({
+      ...PKG,
+      [`test/support.${ext}`]: 'export default function mockUser() {}',
+      'test/user.test.ts': 'import mockUser from \'./support\'',
+      'test/order.test.ts': 'import * as support from \'./support\'\nsupport.default()',
+    }, SLUG)
+    expect(findings).toEqual([expect.objectContaining({ file: `test/support.${ext}`, line: 1 })])
+  })
+
+  test('java static imports through a Kotlin file facade credit the helper', () => {
+    const findings = findingsFor({
+      'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',
+      'src/test/kotlin/com/acme/support/Support.kt': 'package com.acme.support\nfun mockClock() = 1',
+      'src/test/kotlin/com/acme/support/Named.kt': '@file:JvmName("Clocks")\npackage com.acme.support\nfun mockTimer() = 1',
+      'src/test/java/com/acme/AJavaTest.java': 'package com.acme;\nimport static com.acme.support.SupportKt.mockClock;\nimport static com.acme.support.Clocks.mockTimer;\nclass AJavaTest {}',
+      'src/test/java/com/acme/BJavaTest.java': 'package com.acme;\nimport static com.acme.support.SupportKt.mockClock;\nimport static com.acme.support.Clocks.mockTimer;\nclass BJavaTest {}',
+    }, SLUG)
+    expect(findings.map(f => f.file).sort()).toEqual(['src/test/kotlin/com/acme/support/Named.kt', 'src/test/kotlin/com/acme/support/Support.kt'])
+  })
+
+  test('a JVM wildcard importer that never mentions the helper is not counted', () => {
+    const findings = findingsFor({
+      'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',
+      'src/test/kotlin/com/acme/support/Support.kt': 'package com.acme.support\nclass MockClock',
+      'src/test/kotlin/com/acme/ATest.kt': 'package com.acme\nimport com.acme.support.*\nclass ATest { val c = MockClock() }',
+      'src/test/kotlin/com/acme/BTest.kt': 'package com.acme\nimport com.acme.support.*\nclass BTest',
+    }, SLUG)
+    expect(findings).toEqual([])
+  })
+
   test('dart: a top-level typedef counts as a helper', () => {
     const findings = findingsFor({
       'pubspec.yaml': 'name: app',
@@ -259,7 +290,7 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
       'src/main/java/com/acme/Payment.java': 'package com.acme;',
       'src/test/java/com/acme/support/FakeGateway.java': 'package com.acme.support;\npublic class FakeGateway {}',
       'src/test/java/com/acme/InvoiceTest.java': 'package com.acme;\nimport com.acme.support.FakeGateway;\nclass InvoiceTest {}',
-      'src/test/java/com/acme/PaymentTest.java': 'package com.acme;\nimport com.acme.support.*;\nclass PaymentTest {}',
+      'src/test/java/com/acme/PaymentTest.java': 'package com.acme;\nimport com.acme.support.*;\nclass PaymentTest { Object g = new FakeGateway(); }',
     }, SLUG)
     expect(findings.map(f => f.file)).toEqual(['src/test/java/com/acme/support/FakeGateway.java'])
   })

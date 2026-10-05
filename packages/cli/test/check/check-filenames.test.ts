@@ -46,6 +46,17 @@ describe('code-filename-matches-primary-symbol (TypeScript)', () => {
       'test/test-utils/fixture.ts': 'export function createFixture() {}',
     }, SLUG)).toEqual([])
   })
+  test.each(['ts', 'tsx'])('`export { x }` of an imported binding is a re-export, not a local symbol (.%s)', (ext) => {
+    const result = checkFixture({
+      ...PKG,
+      'src/foo.ts': 'export function foo() {}',
+      [`src/bar.${ext}`]: 'import { foo } from \'./foo\'\nexport { foo }',
+      'src/baz.ts': 'import def from \'./foo\'\nimport * as ns from \'./foo\'\nimport { a as renamed } from \'./foo\'\nexport { renamed }',
+    })
+    expect(result.findings.filter(f => f.slug === SLUG)).toEqual([])
+    expect(result.notices.join('\n')).toContain('re-export')
+  })
+
   test('framework route files and ambient/aliased-default exports are not mismatches', () => {
     expect(findingsFor({
       ...PKG,

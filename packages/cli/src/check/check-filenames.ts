@@ -129,8 +129,14 @@ export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage
       opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add(opaqueReason(m)))
     }
   }
+  // `export { x }` of a name the file imports re-exports it; it is not a local symbol.
+  const imported = new Set(matches.filter(m => m.ruleId === 'import-binding').map(m => `${m.file}\0${m.text}`))
   for (const m of matches) {
     if (!lang.nameRules.includes(m.ruleId) || !lang.isPublic(m.text)) {
+      continue
+    }
+    if (imported.has(`${m.file}\0${m.text}`)) {
+      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add('re-export'))
       continue
     }
     const names = byFile.get(m.file) ?? new Map<string, number>()

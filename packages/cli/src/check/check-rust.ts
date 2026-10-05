@@ -280,7 +280,7 @@ export function checkRust(
       }
       if (isUnder(file, testsDir)) {
         const inner = relativeTo(file, testsDir).split('/')
-        const inTargetDir = inner.length > 1 && fileSet.has(joinPath(testsDir, inner[0] ?? '', 'main.rs'))
+        const inTargetDir = inner.length > 1 && pkg.testRoots.includes(joinPath(testsDir, inner[0] ?? '', 'main.rs'))
         if (!reachabilityUnknown(file) && !roots.has(file) && !reachedByAny.has(file) && !isUnder(file, commonDir) && !inTargetDir) {
           const sub = inner.length > 1 ? inner[0] ?? '' : ''
           literals ??= literalSegments(rootDir, pkg)

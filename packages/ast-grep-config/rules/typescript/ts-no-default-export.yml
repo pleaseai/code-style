@@ -8,7 +8,7 @@ message: >-
 note: >-
   Replace `export default` with a named export (`export function foo`,
   `export const foo`, `export class Foo`) and change importers to
-  `import { foo } from '…'`. Framework entry files are already exempt.
+  `import { foo } from '…'`. Nuxt 4, Nitro, Storybook and VitePress entry files are exempt; for other frameworks, scope the scan (see the README).
 url: https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/typescript/ts-no-default-export.md
 rule:
   kind: export_statement

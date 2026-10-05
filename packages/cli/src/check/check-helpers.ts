@@ -154,14 +154,14 @@ export function typescriptHelpers(
   // target file → name (or `*` for a namespace import) → importing test files
   const imports = new Map<string, Map<string, Set<string>>>()
   for (const m of matches) {
-    if ((m.ruleId !== 'import-name' && m.ruleId !== 'import-namespace') || !layout.isTestFile(m.file)) {
+    if ((m.ruleId !== 'import-name' && m.ruleId !== 'import-namespace' && m.ruleId !== 'import-default') || !layout.isTestFile(m.file)) {
       continue
     }
     const target = resolveRelative(m.file, unquote(m.vars.SRC ?? ''), fileSet, layout.sourceExtensions)
     if (target == null) {
       continue
     }
-    const name = m.ruleId === 'import-namespace' ? '*' : m.text
+    const name = m.ruleId === 'import-namespace' ? '*' : m.ruleId === 'import-default' ? 'default' : m.text
     const byName = imports.get(target) ?? new Map<string, Set<string>>()
     const set = byName.get(name) ?? new Set<string>()
     set.add(m.file)
@@ -184,13 +184,20 @@ export function typescriptHelpers(
       exported.set(m.file, (exported.get(m.file) ?? new Set<string>()).add(m.text))
     }
   }
+  // file → local declarations exported as `export default function|class <name>` (public under `default`)
+  const defaults = new Map<string, Set<string>>()
+  for (const m of matches) {
+    if (m.ruleId === 'export-default-local') {
+      defaults.set(m.file, (defaults.get(m.file) ?? new Set<string>()).add(m.text))
+    }
+  }
   lang.importers = (c) => {
     const byName = imports.get(c.file)
     // Names the declaration is public under: its own (when exported directly, not just as another's alias) plus `export { local as alias }`.
     const aliased = aliases.get(c.file)?.get(c.name) ?? []
     const takenByAlias = [...(aliases.get(c.file)?.values() ?? [])].some(names => names.includes(c.name))
     const direct = (exported.get(c.file)?.has(c.name) ?? false) && !takenByAlias
-    const publicNames = [...(direct ? [c.name] : []), ...aliased]
+    const publicNames = [...(direct ? [c.name] : []), ...aliased, ...(defaults.get(c.file)?.has(c.name) === true ? ['default'] : [])]
     // A namespace import only sees exports; the candidate extraction also lists private declarations.
     return new Set([...publicNames.flatMap(n => [...(byName?.get(n) ?? [])]), ...(publicNames.length > 0 ? [...(byName?.get('*') ?? [])] : [])])
   }
@@ -272,6 +279,17 @@ export interface JvmSibling {
   matches: ExtractMatch[]
 }
 
+/** Java-visible file facade of a Kotlin file's top-level members: `@file:JvmName("X")`, else `<File>Kt`. */
+function kotlinFacade(file: string, pkg: string, rootDir: string): string | undefined {
+  if (!file.endsWith('.kt')) {
+    return undefined
+  }
+  const named = /@file:\s*JvmName\(\s*"([^"]+)"\s*\)/.exec(readFileSync(join(rootDir, file), 'utf-8'))?.[1]
+  const stem = posix.basename(file, '.kt').replace(/\W/g, '_')
+  const facade = named ?? `${stem.charAt(0).toUpperCase()}${stem.slice(1)}Kt`
+  return pkg === '' ? facade : `${pkg}.${facade}`
+}
+
 export function jvmHelpers(
   layout: TestLayout,
   units: Unit[],
@@ -306,16 +324,22 @@ export function jvmHelpers(
     const out = new Set<string>()
     // Another module can declare the same fully qualified name; only the owning module's tests use this helper.
     const owner = unitOf(c.file, units)?.dir
+    const facadeFqn = kotlinFacade(c.file, pkg, rootDir)
     for (const file of testFiles) {
       if (unitOf(file, allUnits)?.dir !== owner) {
         continue
       }
       const specs = importsOf.get(file) ?? []
-      if (specs.some(s => s === fqn || s.startsWith(`${fqn}.`) || (pkg !== '' && s === `${pkg}.*`))) {
+      const mentions = (): boolean => word.test(readFileSync(join(rootDir, file), 'utf-8'))
+      if (specs.some(s => s === fqn || s.startsWith(`${fqn}.`) || (facadeFqn != null && s === `${facadeFqn}.${c.name}`))) {
+        out.add(file)
+      }
+      // A wildcard import brings in every name of the package (or facade): the file must still mention the helper.
+      else if (specs.some(s => (pkg !== '' && s === `${pkg}.*`) || (facadeFqn != null && s === `${facadeFqn}.*`)) && mentions()) {
         out.add(file)
       }
       // Same package: Kotlin and Java use the name without an import.
-      else if ((packageOf.get(file) ?? '') === pkg && word.test(readFileSync(join(rootDir, file), 'utf-8'))) {
+      else if ((packageOf.get(file) ?? '') === pkg && mentions()) {
         out.add(file)
       }
     }
