@@ -113,6 +113,7 @@ jobs:
 
       # No build step: the package ships YAML rules and READMEs as-is.
       - name: Publish @pleaseai/ast-grep-config
+        id: publish-ast-grep-config
         if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.ast-grep-config-released == 'true') }}
         working-directory: packages/ast-grep-config
         run: |
@@ -125,9 +126,11 @@ jobs:
           fi
 
       # Published after @pleaseai/ast-grep-config: the CLI pins that package as a
-      # regular dependency, so it must already be on the registry.
+      # regular dependency, so it must already be on the registry. A failed
+      # ast-grep-config publish skips this step rather than ship an
+      # uninstallable CLI; a skipped one (not released) does not.
       - name: Publish @pleaseai/code-style
-        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true') }}
+        if: ${{ !cancelled() && steps.publish-ast-grep-config.outcome != 'failure' && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true') }}
         working-directory: packages/cli
         run: |
           VERSION=$(node -p "require('./package.json').version")
