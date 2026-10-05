@@ -105,6 +105,7 @@ export function inspectTestPaths(
   for (const layout of layouts) {
     const units = layout.units(files, base, rootDir)
     const unitless: string[] = []
+    const inFixtures: string[] = []
     for (const file of files) {
       if (!layout.isTestFile(file)) {
         continue
@@ -115,6 +116,11 @@ export function inspectTestPaths(
         continue
       }
       const rel = relativeTo(file, unit.dir)
+      // A fixture project's tests are inputs to the enclosing package's tests, not tests of its sources.
+      if (unit.fixtureDirs?.some(dir => isUnder(rel, dir)) === true) {
+        inFixtures.push(file)
+        continue
+      }
       const testRoot = unit.testRoots.find(root => isUnder(rel, root) && rel !== root)
       if (testRoot == null) {
         if (layout.reportOutsideRoot(rel)) {
@@ -152,6 +158,9 @@ export function inspectTestPaths(
     }
     if (unitless.length > 0) {
       notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${exampleList(unitless)}`)
+    }
+    if (inFixtures.length > 0) {
+      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${inFixtures.length} test file(s) inside fixture projects (a package.json under a test root): ${exampleList(inFixtures)}`)
     }
   }
   return { findings, notices }

@@ -121,6 +121,20 @@ describe('test-path-derivable-from-source (TypeScript)', () => {
     expect(findings).toEqual([])
   })
 
+  test('test files inside a fixture project are skipped with a notice, not reported as orphans', () => {
+    const result = checkFixture({
+      ...PKG,
+      'src/a.ts': '',
+      'test/a.test.ts': '',
+      'test/fixtures/basic/package.json': '{}',
+      'test/fixtures/basic/test/bar.test.ts': '',
+      'test/fixtures/basic/baz.spec.ts': '',
+      'test/orphan.test.ts': '',
+    })
+    expect(files(result.findings.filter(f => f.slug === SLUG))).toEqual(['test/orphan.test.ts'])
+    expect(result.notices).toContain('TypeScript: test-path check skipped 2 test file(s) inside fixture projects (a package.json under a test root): test/fixtures/basic/baz.spec.ts, test/fixtures/basic/test/bar.test.ts')
+  })
+
   test('config cannot opt out of the shape', () => {
     expect(() => checkFixture({ ...PKG, 'code-organization.json': JSON.stringify({ colocatedTests: true }) })).toThrow(ConfigError)
     expect(() => checkFixture({ ...PKG, 'code-organization.json': JSON.stringify({ sourceRoots: ['../outside'] }) })).toThrow(ConfigError)

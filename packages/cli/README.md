@@ -209,8 +209,9 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
   `.cts`, `.js`, `.jsx`, `.mjs` or `.cjs` extension. The source may be any of
   those plus `.vue`, or `<stem>/index.<ext>`. Packages are directories with a
   `package.json` (one that lies under an enclosing package's `test/` or `tests/`
-  is test data, not a package, and its files stay test-side of the enclosing
-  package); Nuxt projects (a `nuxt.config.*` next to it) use `app/`,
+  is a fixture project: test data, not a package. Its files stay test-side of
+  the enclosing package, and its own test files are skipped by this check with
+  an aggregated notice); Nuxt projects (a `nuxt.config.*` next to it) use `app/`,
   `server/` and `shared/` as source roots.
 - Dart packages are directories with a `pubspec.yaml`; tests are `*_test.dart`
   and sources live in `lib/`. `integration_test/` and `test_driver/` are not

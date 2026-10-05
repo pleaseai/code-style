@@ -20,6 +20,8 @@ export interface Unit {
   keepRootName: boolean
   /** Allowed environment segments directly under a test root. */
   envSegments: string[]
+  /** Fixture projects (a `package.json` under a test root) relative to `dir`; their test files are test data. */
+  fixtureDirs?: string[]
 }
 
 /**
@@ -87,10 +89,14 @@ export const TYPESCRIPT_LAYOUT: TestLayout = {
     const dirs = files.filter(f => baseName(f) === 'package.json').map(dirOf).sort((a, b) => a.length - b.length)
     // A `package.json` under an enclosing unit's test root is test data (a fixture project), not a unit.
     const kept: string[] = []
+    const fixtures = new Map<string, string[]>()
     for (const dir of dirs) {
-      const inFixtures = kept.some(k => dir !== k && isUnder(dir, k) && TS_TEST_ROOTS.some(root => isUnder(relativeTo(dir, k), root)))
-      if (!inFixtures) {
+      const owner = kept.find(k => dir !== k && isUnder(dir, k) && TS_TEST_ROOTS.some(root => isUnder(relativeTo(dir, k), root)))
+      if (owner == null) {
         kept.push(dir)
+      }
+      else {
+        fixtures.set(owner, [...(fixtures.get(owner) ?? []), relativeTo(dir, owner)])
       }
     }
     return kept.map((dir) => {
@@ -103,6 +109,7 @@ export const TYPESCRIPT_LAYOUT: TestLayout = {
         sourceRoots,
         keepRootName: sourceRoots.length > 1,
         envSegments: config.envSegments,
+        fixtureDirs: fixtures.get(dir),
       }
     })
   },
