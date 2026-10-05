@@ -394,6 +394,28 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     }
   })
 
+  test('explicit importers whose source cannot be read are withheld with a notice, not credited', () => {
+    const fixture = createFixture({})
+    try {
+      const support = 'src/test/kotlin/com/acme/support/Support.kt'
+      const tests = ['src/test/kotlin/com/acme/ATest.kt', 'src/test/kotlin/com/acme/BTest.kt']
+      const files = ['src/main/kotlin/com/acme/Invoice.kt', support, ...tests]
+      const match = (ruleId: string, file: string, text: string): ExtractMatch => ({ ruleId, file, line: 1, text, vars: {} })
+      const matches = [
+        match('helper-candidate', support, 'mockUser'),
+        match('package', support, 'com.acme.support'),
+        ...tests.flatMap(t => [match('package', t, 'com.acme'), match('import', t, 'import com.acme.support.mockUser')]),
+      ]
+      const units = KOTLIN_LAYOUT.units(files, { sourceRoots: [], envSegments: [] }, fixture.root)
+      const result = inspectHelpers(jvmHelpers(KOTLIN_LAYOUT, units, matches, files, fixture.root))
+      expect(result.findings).toEqual([])
+      expect(result.notices).toEqual([expect.stringContaining('withheld judgement for 2 test file(s) with source that could not be read')])
+    }
+    finally {
+      fixture.cleanup()
+    }
+  })
+
   test('java: an imported helper used by two tests is reported', () => {
     const findings = findingsFor({
       'src/main/java/com/acme/Invoice.java': 'package com.acme;',

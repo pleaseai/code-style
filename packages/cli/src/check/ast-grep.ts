@@ -114,6 +114,20 @@ export function resolveToolchain(anchors: string[]): Toolchain {
 }
 
 /**
+ * One `--json=stream` line. A line that is not JSON means the output cannot be
+ * trusted to be complete, and skipping it could drop a match and turn into a
+ * wrong finding, so it fails the run with the offending line.
+ */
+function parseMatchLine(line: string): RawMatch {
+  try {
+    return JSON.parse(line) as RawMatch
+  }
+  catch {
+    throw new AstGrepError(`unexpected ast-grep output (not a JSON match): ${line.length > 200 ? `${line.slice(0, 200)}…` : line}`)
+  }
+}
+
+/**
  * Runs `extract/<language>.yml` over `root` and returns every match. The
  * toolchain resolves from `anchorRoots` (default: `root`) before this CLI's install.
  */
@@ -136,7 +150,7 @@ export function runExtraction(root: string, language: ExtractLanguage, paths: st
     if (line.trim() === '') {
       continue
     }
-    const raw = JSON.parse(line) as RawMatch
+    const raw = parseMatchLine(line)
     const vars: Record<string, string> = {}
     for (const [name, value] of Object.entries(raw.metaVariables?.single ?? {})) {
       vars[name] = value.text

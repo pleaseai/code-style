@@ -36,9 +36,8 @@ function gitTopLevel(dir: string): string | null {
   }
 }
 
-/** The home directory with symlinks resolved, comparable with the realpath'd requested directory. */
-function canonicalHome(): string {
-  const home = homedir()
+/** `home` with symlinks resolved, comparable with the realpath'd requested directory. */
+function canonicalHome(home: string): string {
   try {
     return realpathSync(home)
   }
@@ -55,11 +54,12 @@ function canonicalHome(): string {
  * workspaces resolve as when checking from the top; outside git it is the
  * nearest marker below the home directory and the filesystem root, so a stray
  * `~/package.json` is never adopted (and the home directory never walked).
- * With no marker found, the requested directory itself.
+ * With no marker found, the requested directory itself. `homeDir` defaults to
+ * the user's home directory.
  */
-export function findScanRoot(requested: string): string {
+export function findScanRoot(requested: string, homeDir: string = homedir()): string {
   const top = gitTopLevel(requested)
-  const home = canonicalHome()
+  const home = canonicalHome(homeDir)
   let found: string | null = null
   for (let dir = requested; ; dir = dirname(dir)) {
     if (top == null && dir !== requested && (dir === home || dirname(dir) === dir)) {

@@ -1,10 +1,11 @@
 import type { CheckResult } from '../../src/check/types.js'
 import { spawnSync } from 'node:child_process'
+import { symlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import { checkCodeOrganization } from '../../src/check/check-code-organization.js'
 import { ConfigError } from '../../src/check/errors.js'
-import { scopeResult } from '../../src/check/scan-root.js'
+import { findScanRoot, scopeResult } from '../../src/check/scan-root.js'
 import { checkFixture, createFixture } from '../test-utils/fixture.js'
 
 const PACKAGE = {
@@ -89,6 +90,23 @@ describe('scan root', () => {
     }
     expect(checkInGit(files, 'packages/a').findings).toEqual([expect.objectContaining({ kind: 'orphan-test', file: 'test/y.test.ts' })])
     expect(() => checkInGit(files, '')).toThrow(ConfigError)
+  })
+})
+
+describe('findScanRoot home bound', () => {
+  test('outside git, a marker in a symlinked home directory is never adopted', () => {
+    const fixture = createFixture({ 'home/package.json': '{}', 'home/project/src/a.ts': '' })
+    try {
+      // The home path goes through a symlink; the requested directory is a real path.
+      symlinkSync(join(fixture.root, 'home'), join(fixture.root, 'link'))
+      const requested = join(fixture.root, 'home/project')
+      expect(findScanRoot(requested, join(fixture.root, 'link'))).toBe(requested)
+      // Without a home bound in the way, the nearest marker is adopted.
+      expect(findScanRoot(requested, join(fixture.root, 'elsewhere'))).toBe(join(fixture.root, 'home'))
+    }
+    finally {
+      fixture.cleanup()
+    }
   })
 })
 

@@ -286,13 +286,13 @@ export interface JvmSibling {
   matches: ExtractMatch[]
 }
 
-/** A file's text, or `''` when it cannot be read (deleted or unreadable since listing): it then shows no name, so nothing is credited. */
-function readOrEmpty(rootDir: string, file: string): string {
+/** A file's text, or `null` when it cannot be read (deleted or unreadable since listing). */
+function readSource(rootDir: string, file: string): string | null {
   try {
     return readFileSync(join(rootDir, file), 'utf-8')
   }
   catch {
-    return ''
+    return null
   }
 }
 
@@ -301,7 +301,7 @@ function kotlinFacade(file: string, pkg: string, rootDir: string): string | unde
   if (!file.endsWith('.kt')) {
     return undefined
   }
-  const named = /@file:\s*JvmName\(\s*"([^"]+)"\s*\)/.exec(readOrEmpty(rootDir, file))?.[1]
+  const named = /@file:\s*JvmName\(\s*"([^"]+)"\s*\)/.exec(readSource(rootDir, file) ?? '')?.[1]
   const stem = posix.basename(file, '.kt').replace(/\W/g, '_')
   const facade = named ?? `${stem.charAt(0).toUpperCase()}${stem.slice(1)}Kt`
   return pkg === '' ? facade : `${pkg}.${facade}`
@@ -363,12 +363,18 @@ export function jvmHelpers(
   const importsOf = new Map<string, string[]>()
   // `file\0spec` → the local name of an `import spec as alias`.
   const aliasOf = new Map<string, string>()
-  const textCache = new Map<string, string>()
-  const codeOf = (file: string): string => {
-    let text = textCache.get(file)
+  // An importer whose source cannot be read is never credited; it is withheld with a notice.
+  const unreadable = new Set<string>()
+  lang.withheld = { files: unreadable, reason: 'source that could not be read (deleted or unreadable since listing)' }
+  const textCache = new Map<string, string | null>()
+  const codeOf = (file: string): string | null => {
+    if (!textCache.has(file)) {
+      const source = readSource(rootDir, file)
+      textCache.set(file, source == null ? null : stripNonCode(source, file).replace(/^\s*(?:import|package)\b.*$/gm, ''))
+    }
+    const text = textCache.get(file) ?? null
     if (text == null) {
-      text = stripNonCode(readOrEmpty(rootDir, file), file).replace(/^\s*(?:import|package)\b.*$/gm, '')
-      textCache.set(file, text)
+      unreadable.add(file)
     }
     return text
   }
@@ -421,13 +427,14 @@ export function jvmHelpers(
           return false
         }
         const text = codeOf(file)
-        return usesName(text, c.name, qualifiers) && !declaresName(text, c.name, file)
+        return text != null && usesName(text, c.name, qualifiers) && !declaresName(text, c.name, file)
       }
       const explicit = specs.find(s => s === fqn || s.startsWith(`${fqn}.`) || (facadeFqn != null && s === `${facadeFqn}.${c.name}`))
       if (explicit != null) {
         // A file declaring the imported local name itself does not use the helper.
         const local = aliasOf.get(`${file}\0${explicit}`) ?? explicit.slice(explicit.lastIndexOf('.') + 1)
-        if (!declaresName(codeOf(file), local, file)) {
+        const text = codeOf(file)
+        if (text != null && !declaresName(text, local, file)) {
           out.add(file)
         }
       }

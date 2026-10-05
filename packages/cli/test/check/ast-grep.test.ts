@@ -1,9 +1,10 @@
+import { chmodSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, test } from 'bun:test'
 import { resolutionAnchors, resolveToolchain, runExtraction } from '../../src/check/ast-grep.js'
-import { MissingDependencyError } from '../../src/check/errors.js'
+import { AstGrepError, MissingDependencyError } from '../../src/check/errors.js'
 import { checkFixture, createFixture } from '../test-utils/fixture.js'
 
 let cleanup = (): void => {}
@@ -53,6 +54,20 @@ describe('resolveToolchain', () => {
 })
 
 describe('runExtraction', () => {
+  test.skipIf(process.platform === 'win32')('fails with an AstGrepError naming a non-JSON output line instead of dropping it', () => {
+    const fixture = createFixture({
+      'package.json': '{}',
+      'node_modules/@ast-grep/cli/package.json': '{"name":"@ast-grep/cli"}',
+      'node_modules/@ast-grep/cli/postinstall.js': 'exports.resolveBinaryPath = () => null',
+      [`node_modules/@ast-grep/cli/${SHIM}`]: '#!/bin/sh\necho "warning: not a match"\n',
+      'src/zed.ts': 'export function Zed() {}',
+    })
+    cleanup = fixture.cleanup
+    chmodSync(join(fixture.root, 'node_modules/@ast-grep/cli', SHIM), 0o755)
+    expect(() => runExtraction(fixture.root, 'typescript')).toThrow(AstGrepError)
+    expect(() => runExtraction(fixture.root, 'typescript')).toThrow('warning: not a match')
+  })
+
   test('ignores the checked project\'s sgconfig.yml', () => {
     const fixture = createFixture({
       'package.json': '{}',

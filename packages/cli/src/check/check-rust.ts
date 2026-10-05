@@ -172,7 +172,8 @@ function literalSegments(rootDir: string, pkg: RustPackage): Set<string> {
     catch {
       continue
     }
-    for (const lit of text.matchAll(/"([^"\n]*)"/g)) {
+    // Escaped quotes (`"say \"hi\""`) stay inside the literal, so later literals keep their pairing.
+    for (const lit of text.matchAll(/"((?:[^"\\\n]|\\.)*)"/g)) {
       for (const seg of (lit[1] ?? '').split('/')) {
         out.add(seg)
       }

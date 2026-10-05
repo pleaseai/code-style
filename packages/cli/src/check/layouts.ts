@@ -74,9 +74,10 @@ function onScopePath(dir: string, scope: string | undefined): boolean {
 }
 
 function withConfig(rootDir: string, dir: string, base: CodeOrganizationConfig): CodeOrganizationConfig {
-  // `--config` replaces the root file instead of merging with it. Units off the
-  // requested path keep the base: their findings are scoped out anyway.
-  if ((dir === '' && base.explicit === true) || !onScopePath(dir, base.scope)) {
+  // The base already holds the root's config (`--config` replaces the root file,
+  // otherwise it is the root file). Units off the requested path keep the base:
+  // their findings are scoped out anyway.
+  if (dir === '' || !onScopePath(dir, base.scope)) {
     return base
   }
   return packageConfig(base, join(rootDir, dir))
