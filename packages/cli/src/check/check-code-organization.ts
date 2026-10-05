@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path'
 import process from 'node:process'
 import { runExtraction } from './ast-grep.js'
 import { dartFilenames, inspectFilenames, typescriptFilenames } from './check-filenames.js'
-import { checkHelpers, dartHelpers, jvmHelpers, typescriptHelpers } from './check-helpers.js'
+import { dartHelpers, inspectHelpers, jvmHelpers, typescriptHelpers } from './check-helpers.js'
 import { checkRust } from './check-rust.js'
 import { inspectTestPaths } from './check-test-paths.js'
 import { CONFIG_FILE, readConfigFile } from './config.js'
@@ -49,7 +49,7 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   if (options.configPath != null && !existsSync(options.configPath)) {
     throw new ConfigError(`config file not found: ${options.configPath}`)
   }
-  const base = readConfigFile(options.configPath ?? join(root, CONFIG_FILE))
+  const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath != null }
   const files = listFiles(root)
   const fileSet = new Set(files)
 
@@ -66,18 +66,21 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const tsNames = inspectFilenames(ts, typescriptFilenames(tsUnits))
   const dartNames = inspectFilenames(dart, dartFilenames(dartUnits, dartParts))
   const testPaths = inspectTestPaths(files, TEST_LAYOUTS, base, root)
+  const helpers = [
+    inspectHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),
+    inspectHelpers(dartHelpers(DART_LAYOUT, dartUnits, dart, fileSet)),
+    inspectHelpers(jvmHelpers(KOTLIN_LAYOUT, KOTLIN_LAYOUT.units(files, base, root), kotlin, files, root)),
+    inspectHelpers(jvmHelpers(JAVA_LAYOUT, JAVA_LAYOUT.units(files, base, root), java, files, root)),
+  ]
   const findings: Finding[] = [
     ...testPaths.findings,
     ...tsNames.findings,
     ...dartNames.findings,
-    ...checkHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),
-    ...checkHelpers(dartHelpers(DART_LAYOUT, dartUnits, dart, fileSet)),
-    ...checkHelpers(jvmHelpers(KOTLIN_LAYOUT, KOTLIN_LAYOUT.units(files, base, root), kotlin, files, root)),
-    ...checkHelpers(jvmHelpers(JAVA_LAYOUT, JAVA_LAYOUT.units(files, base, root), java, files, root)),
+    ...helpers.flatMap(h => h.findings),
   ]
   const rustResult = checkRust(root, files, rust, options.cargoMetadata)
   findings.push(...rustResult.findings)
 
   findings.sort((a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.slug.localeCompare(b.slug))
-  return { root, findings, notices: [...testPaths.notices, ...tsNames.notices, ...dartNames.notices, ...rustResult.notices] }
+  return { root, findings, notices: [...testPaths.notices, ...tsNames.notices, ...dartNames.notices, ...helpers.flatMap(h => h.notices), ...rustResult.notices] }
 }

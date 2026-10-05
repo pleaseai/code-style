@@ -35,6 +35,8 @@ const PROJECT = {
   'src/errors.ts': 'export class NotFoundError extends Error {}',
   'src/sum.ts': 'export const sum = 1\nif (import.meta.vitest) { run() }',
   'test/sum.test.ts': 'class TestOnlyError extends Error {}',
+  'src/foo.test.mts': 'export class FooError extends Error {}',
+  'src/foo.spec.cts': 'export class FooError extends Error {}',
   'vite.config.ts': 'export default defineConfig({})',
   'app/pages/index.ts': 'export default definePageMeta({})',
   'app/app.config.ts': 'export default defineAppConfig({})',

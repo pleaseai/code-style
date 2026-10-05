@@ -76,6 +76,21 @@ rule:
         field: uri
         pattern: $SRC
 ---
+# One match per `show` combinator. An import with several (`show A show B`)
+# filters the namespace successively, so the checker cannot union the names.
+id: import-show-combinator
+language: dart
+severity: hint
+message: show combinator
+rule:
+  kind: combinator
+  regex: ^show\b
+  inside:
+    kind: import_specification
+    has:
+      field: uri
+      pattern: $SRC
+---
 id: import-hide
 language: dart
 severity: hint

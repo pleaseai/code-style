@@ -24,6 +24,8 @@ export const E2E_SEGMENTS: readonly string[] = ['e2e']
 export interface CodeOrganizationConfig {
   sourceRoots: string[]
   envSegments: string[]
+  /** Set when the base came from `--config`: the root `code-organization.json` is then not read. */
+  explicit?: boolean
 }
 
 const ALLOWED_KEYS = new Set(['$schema', 'sourceRoots', 'envSegments'])

@@ -195,6 +195,16 @@ describe('rust module path edge cases', () => {
     expect(result.findings).toEqual([])
   })
 
+  test('several `#[cfg_attr(…, path = "…")]` attributes on one `mod` each reach their own file', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '#[cfg_attr(unix, path = "unix.rs")]\n#[cfg_attr(windows, path = "windows.rs")]\nmod platform;',
+      'src/unix.rs': '#[test]\nfn on_unix() {}',
+      'src/windows.rs': '#[test]\nfn on_windows() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+  })
+
   test('tests/ui and other runtime-loaded fixture dirs are withheld with an aggregated notice', () => {
     const result = checkFixture({
       ...CARGO,

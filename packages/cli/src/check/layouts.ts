@@ -14,6 +14,8 @@ export interface Unit {
   testRoots: string[]
   /** Source roots relative to `dir`. */
   sourceRoots: string[]
+  /** Further roots a test's source may live in, used only to match candidates (never named in a message). */
+  alternateSourceRoots?: string[]
   /** With several source roots the root name stays in the test path (ADR-0022 §3). */
   keepRootName: boolean
   /** Allowed environment segments directly under a test root. */
@@ -63,6 +65,10 @@ function baseName(path: string): string {
 }
 
 function withConfig(rootDir: string, dir: string, base: CodeOrganizationConfig): CodeOrganizationConfig {
+  // `--config` replaces the root file instead of merging with it.
+  if (dir === '' && base.explicit === true) {
+    return base
+  }
   return packageConfig(base, join(rootDir, dir))
 }
 
@@ -72,19 +78,28 @@ const TS_TEST = /\.(?:test|spec)\.[cm]?[jt]sx?$/
 const NUXT_CONFIG = /^nuxt\.config\.[cm]?[jt]s$/
 /** Default source roots: `src/`, or Nuxt 4's `app/` (srcDir), `server/`, `shared/`. */
 const DEFAULT_TS_ROOTS = ['src']
+const TS_TEST_ROOTS = ['test', 'tests']
 const NUXT_ROOTS = ['app', 'server', 'shared']
 
 export const TYPESCRIPT_LAYOUT: TestLayout = {
   language: 'typescript',
   units(files, base, rootDir) {
-    const dirs = files.filter(f => baseName(f) === 'package.json').map(dirOf)
-    return dirs.map((dir) => {
+    const dirs = files.filter(f => baseName(f) === 'package.json').map(dirOf).sort((a, b) => a.length - b.length)
+    // A `package.json` under an enclosing unit's test root is test data (a fixture project), not a unit.
+    const kept: string[] = []
+    for (const dir of dirs) {
+      const inFixtures = kept.some(k => dir !== k && isUnder(dir, k) && TS_TEST_ROOTS.some(root => isUnder(relativeTo(dir, k), root)))
+      if (!inFixtures) {
+        kept.push(dir)
+      }
+    }
+    return kept.map((dir) => {
       const isNuxt = files.some(f => dirOf(f) === dir && NUXT_CONFIG.test(baseName(f)))
       const config = withConfig(rootDir, dir, base)
       const sourceRoots = [...new Set([...(isNuxt ? NUXT_ROOTS : DEFAULT_TS_ROOTS), ...config.sourceRoots])]
       return {
         dir,
-        testRoots: ['test', 'tests'],
+        testRoots: TS_TEST_ROOTS,
         sourceRoots,
         keepRootName: sourceRoots.length > 1,
         envSegments: config.envSegments,
@@ -127,6 +142,9 @@ export const DART_LAYOUT: TestLayout = {
 // --- Kotlin / Java (Gradle / Maven) -----------------------------------------
 
 function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayout {
+  // Gradle/Maven modules mix both languages: a test may target a source in the sibling-language main set.
+  const sibling = language === 'kotlin' ? 'java' : 'kotlin'
+  const siblingExt = ext === '.kt' ? '.java' : '.kt'
   const test = new RegExp(`.Test\\${ext}$`)
   const sourceSet = new RegExp(`^(?:(.*)/)?src/(?:main|test|testFixtures)/${language}/`)
   return {
@@ -143,13 +161,14 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
         dir,
         testRoots: [`src/test/${language}`],
         sourceRoots: [`src/main/${language}`],
+        alternateSourceRoots: [`src/main/${sibling}`],
         keepRootName: false,
         envSegments: withConfig(rootDir, dir, base).envSegments,
       }))
     },
     isTestFile: path => test.test(path),
     sourceStem: fileName => fileName.slice(0, -`Test${ext}`.length),
-    sourceExtensions: [ext],
+    sourceExtensions: [ext, siblingExt],
     allowIndex: false,
     helperDirs: () => ['src/testFixtures'],
     // Only a test class inside production sources is misplaced; other source

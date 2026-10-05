@@ -96,15 +96,42 @@ rule:
 ---
 # `#[cfg_attr(<predicate>, path = "…")] mod x;`: the declaration loads the
 # `path` file under that predicate and `x.rs` otherwise, so both are possible
-# targets. Reported in addition to the plain `mod-decl` of the same node.
+# targets. Anchored on the attribute (not the module name) so a module with
+# several conditional path attributes yields one match each, with the module
+# name as $NAME. Reported in addition to the plain `mod-decl` of the same node.
 id: mod-decl-cfg-path
 language: rust
 severity: hint
 message: module declaration with a conditional path attribute
 rule:
-  kind: identifier
-  inside:
-    field: name
+  kind: attribute_item
+  has:
+    kind: attribute
+    all:
+      - has:
+          kind: identifier
+          regex: ^cfg_attr$
+      - has:
+          kind: token_tree
+          has:
+            any:
+              - kind: string_literal
+              - kind: raw_string_literal
+            follows:
+              regex: ^=$
+              follows:
+                kind: identifier
+                regex: ^path$
+            has:
+              kind: string_content
+              pattern: $PATH
+  precedes:
+    stopBy:
+      not:
+        any:
+          - kind: attribute_item
+          - kind: line_comment
+          - kind: block_comment
     kind: mod_item
     not:
       has:
@@ -112,34 +139,10 @@ rule:
         kind: declaration_list
     inside:
       kind: source_file
-    follows:
-      stopBy:
-        not:
-          any:
-            - kind: attribute_item
-            - kind: line_comment
-            - kind: block_comment
-      kind: attribute_item
-      has:
-        kind: attribute
-        all:
-          - has:
-              kind: identifier
-              regex: ^cfg_attr$
-          - has:
-              kind: token_tree
-              has:
-                any:
-                  - kind: string_literal
-                  - kind: raw_string_literal
-                follows:
-                  regex: ^=$
-                  follows:
-                    kind: identifier
-                    regex: ^path$
-                has:
-                  kind: string_content
-                  pattern: $PATH
+    has:
+      field: name
+      kind: identifier
+      pattern: $NAME
 ---
 id: test-attr
 language: rust

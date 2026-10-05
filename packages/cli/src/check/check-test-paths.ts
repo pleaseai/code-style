@@ -9,18 +9,24 @@ const SLUG = 'test-path-derivable-from-source'
 /** Maximum example paths listed in one notice. */
 const NOTICE_EXAMPLES = 3
 
-const LANGUAGE_LABEL: Record<TestLayout['language'], string> = { typescript: 'TypeScript', dart: 'Dart', kotlin: 'Kotlin', java: 'Java' }
+export const LANGUAGE_LABEL: Record<TestLayout['language'], string> = { typescript: 'TypeScript', dart: 'Dart', kotlin: 'Kotlin', java: 'Java' }
 
 /** What marks a unit (package or module) of each layout, for the "outside any package" notice. */
-const UNIT_MARKER: Record<TestLayout['language'], string> = {
+export const UNIT_MARKER: Record<TestLayout['language'], string> = {
   typescript: 'no package.json above them',
   dart: 'no pubspec.yaml above them',
   kotlin: 'not under a Gradle src/<set>/kotlin source set',
   java: 'not under a Gradle src/<set>/java source set',
 }
 
+/** `a, b, c, …`: up to three sorted example paths for an aggregated notice. */
+export function exampleList(paths: Iterable<string>): string {
+  const sorted = [...paths].sort()
+  return `${sorted.slice(0, NOTICE_EXAMPLES).join(', ')}${sorted.length > NOTICE_EXAMPLES ? ', …' : ''}`
+}
+
 /** Source paths a test under `inner` (path below the test root) may target. */
-function candidateSources(inner: string, unit: Unit, layout: TestLayout): string[] {
+function candidateSources(inner: string, unit: Unit, layout: TestLayout, withAlternates = true): string[] {
   const segments = inner.split('/')
   const stem = layout.sourceStem(segments.at(-1) ?? '')
   const mirror = [...segments.slice(0, -1), stem]
@@ -41,7 +47,7 @@ function candidateSources(inner: string, unit: Unit, layout: TestLayout): string
       }
     }
     else {
-      for (const root of unit.sourceRoots) {
+      for (const root of [...unit.sourceRoots, ...(withAlternates ? unit.alternateSourceRoots ?? [] : [])]) {
         bases.push(joinPath(unit.dir, root, rel))
       }
     }
@@ -131,8 +137,8 @@ export function inspectTestPaths(
       if (inner.includes('/') && E2E_SEGMENTS.includes(first)) {
         continue
       }
-      const candidates = candidateSources(inner, unit, layout)
-      if (candidates.some(c => fileSet.has(c))) {
+      const candidates = candidateSources(inner, unit, layout, false)
+      if (candidates.some(c => fileSet.has(c)) || candidateSources(inner, unit, layout).some(c => fileSet.has(c))) {
         continue
       }
       findings.push({
@@ -145,8 +151,7 @@ export function inspectTestPaths(
       })
     }
     if (unitless.length > 0) {
-      const examples = unitless.sort().slice(0, NOTICE_EXAMPLES).join(', ')
-      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${examples}${unitless.length > NOTICE_EXAMPLES ? ', …' : ''}`)
+      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${exampleList(unitless)}`)
     }
   }
   return { findings, notices }

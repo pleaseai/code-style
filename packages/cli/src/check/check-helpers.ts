@@ -3,6 +3,7 @@ import type { TestLayout, Unit } from './layouts.js'
 import type { Finding, Language } from './types.js'
 import { readFileSync } from 'node:fs'
 import { join, posix } from 'node:path'
+import { exampleList, LANGUAGE_LABEL, UNIT_MARKER } from './check-test-paths.js'
 import { isUnder, joinPath, relativeTo, unitOf } from './layouts.js'
 
 const SLUG = 'test-helpers-in-dedicated-location'
@@ -25,6 +26,13 @@ export interface HelperLanguage {
   candidates: Candidate[]
   /** Test files that import `candidate` (resolved the language's way). */
   importers: (candidate: Candidate) => Set<string>
+  /** Test files with an import form the language's resolution cannot decide (withheld, with a notice). */
+  withheld?: { files: Set<string>, reason: string }
+}
+
+export interface HelperResult {
+  findings: Finding[]
+  notices: string[]
 }
 
 function inDesignatedLocation(file: string, lang: HelperLanguage): boolean {
@@ -58,7 +66,18 @@ function suggestedDir(lang: HelperLanguage, unit: Unit, file: string): string {
  * it. A helper used by a single test file is local and never reported.
  */
 export function checkHelpers(lang: HelperLanguage): Finding[] {
+  return inspectHelpers(lang).findings
+}
+
+/**
+ * Like `checkHelpers`, plus aggregated notices for what was withheld: shared
+ * helpers that belong to no package or module (no unit to suggest a location
+ * in) and test files whose imports of a library cannot be evaluated.
+ */
+export function inspectHelpers(lang: HelperLanguage): HelperResult {
   const findings: Finding[] = []
+  const notices: string[] = []
+  const unitless: string[] = []
   for (const candidate of lang.candidates) {
     if (inDesignatedLocation(candidate.file, lang)) {
       continue
@@ -69,7 +88,11 @@ export function checkHelpers(lang: HelperLanguage): Finding[] {
       continue
     }
     const unit = unitOf(candidate.file, lang.units)
-    const target = unit == null ? '' : suggestedDir(lang, unit, candidate.file)
+    if (unit == null) {
+      unitless.push(candidate.file)
+      continue
+    }
+    const target = suggestedDir(lang, unit, candidate.file)
     findings.push({
       slug: SLUG,
       kind: 'shared-helper-outside-location',
@@ -80,7 +103,15 @@ export function checkHelpers(lang: HelperLanguage): Finding[] {
       message: `Shared test helper \`${candidate.name}\` is imported by ${importers.size} test files (${[...importers].sort().slice(0, 3).join(', ')}) but declared outside ${target}. Move it there.`,
     })
   }
-  return findings
+  const label = LANGUAGE_LABEL[lang.language]
+  if (unitless.length > 0) {
+    const files = [...new Set(unitless)]
+    notices.push(`${label}: helper check skipped ${files.length} shared helper file(s) outside any package (${UNIT_MARKER[lang.language]}): ${exampleList(files)}`)
+  }
+  if (lang.withheld != null && lang.withheld.files.size > 0) {
+    notices.push(`${label}: helper check withheld judgement for ${lang.withheld.files.size} test file(s) with ${lang.withheld.reason}: ${exampleList(lang.withheld.files)}`)
+  }
+  return { findings, notices }
 }
 
 // --- TypeScript -------------------------------------------------------------
@@ -175,21 +206,33 @@ export function dartHelpers(
   lang.candidates = matches
     .filter(m => (m.ruleId === 'top-level-name' || m.ruleId === 'top-level-type-alias') && HELPER_NAME.test(m.text) && isTestSide(m.file, lang, u => u.testRoots))
     .map(m => ({ file: m.file, line: m.line, name: m.text }))
-  // `show` lists per (importer, uri text); an import without `show` imports everything.
+  // `show`/`hide` lists per (importer, uri text); an import without `show` imports everything.
   const shown = new Map<string, Set<string>>()
+  const hidden = new Map<string, Set<string>>()
+  const showCombinators = new Map<string, number>()
+  const uriCount = new Map<string, number>()
+  const keyOf = (m: ExtractMatch): string => `${m.file}\0${m.vars.SRC ?? ''}`
   for (const m of matches) {
     if (m.ruleId === 'import-show') {
-      const key = `${m.file}\0${m.vars.SRC ?? ''}`
-      shown.set(key, (shown.get(key) ?? new Set()).add(m.text))
+      shown.set(keyOf(m), (shown.get(keyOf(m)) ?? new Set()).add(m.text))
+    }
+    else if (m.ruleId === 'import-hide') {
+      hidden.set(keyOf(m), (hidden.get(keyOf(m)) ?? new Set()).add(m.text))
+    }
+    else if (m.ruleId === 'import-show-combinator') {
+      showCombinators.set(keyOf(m), (showCombinators.get(keyOf(m)) ?? 0) + 1)
+    }
+    else if (m.ruleId === 'import-uri') {
+      const key = `${m.file}\0${m.text}`
+      uriCount.set(key, (uriCount.get(key) ?? 0) + 1)
     }
   }
-  const hidden = new Map<string, Set<string>>()
-  for (const m of matches) {
-    if (m.ruleId === 'import-hide') {
-      const key = `${m.file}\0${m.vars.SRC ?? ''}`
-      hidden.set(key, (hidden.get(key) ?? new Set()).add(m.text))
-    }
-  }
+  // Extraction keeps no per-import identity, so a library imported more than once with combinators,
+  // or an import with successive `show` clauses (which intersect), cannot be evaluated: withhold it.
+  const withheld = new Set<string>()
+  const ambiguous = (key: string): boolean =>
+    (showCombinators.get(key) ?? 0) > 1 || ((uriCount.get(key) ?? 0) > 1 && (shown.has(key) || hidden.has(key)))
+  lang.withheld = { files: withheld, reason: 'repeated imports of one library with show/hide, or successive `show` clauses' }
   const imports = new Map<string, Array<{ importer: string, names: Set<string> | null, hides: Set<string> }>>()
   for (const m of matches) {
     if (m.ruleId !== 'import-uri' || !layout.isTestFile(m.file)) {
@@ -202,8 +245,12 @@ export function dartHelpers(
     if (target == null) {
       continue
     }
-    const list = imports.get(target) ?? []
     const key = `${m.file}\0${m.text}`
+    if (ambiguous(key)) {
+      withheld.add(m.file)
+      continue
+    }
+    const list = imports.get(target) ?? []
     list.push({ importer: m.file, names: shown.get(key) ?? null, hides: hidden.get(key) ?? new Set() })
     imports.set(target, list)
   }

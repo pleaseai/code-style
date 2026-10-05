@@ -211,8 +211,9 @@ export function checkRust(
   const nestedPathFiles = new Set<string>()
   for (const m of matches) {
     if (m.ruleId === 'mod-decl' || m.ruleId === 'mod-decl-cfg-path') {
-      // `mod r#async;` loads `async.rs`.
-      decls.set(m.file, [...(decls.get(m.file) ?? []), { name: m.text.replace(/^r#/, ''), path: m.vars.PATH }])
+      // `mod r#async;` loads `async.rs`. `mod-decl-cfg-path` matches the attribute (one per conditional `path`), so the module name is `$NAME`.
+      const name = m.ruleId === 'mod-decl-cfg-path' ? (m.vars.NAME ?? '') : m.text
+      decls.set(m.file, [...(decls.get(m.file) ?? []), { name: name.replace(/^r#/, ''), path: m.vars.PATH }])
       if (m.vars.PATH != null) {
         const dir = posix.dirname(m.file) === '.' ? '' : posix.dirname(m.file)
         pathLoaded.add(posix.normalize(joinPath(dir, m.vars.PATH)))

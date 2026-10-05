@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import { ConfigError } from '../../src/check/errors.js'
 import { checkFixture, findingsFor } from '../test-utils/fixture.js'
@@ -92,6 +95,32 @@ describe('test-path-derivable-from-source (TypeScript)', () => {
     expect(files(findings)).toEqual(['test/a.test.ts'])
   })
 
+  test('--config replaces the root code-organization.json: an invalid root file is not read', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'code-org-config-'))
+    try {
+      const configPath = join(dir, 'custom.json')
+      writeFileSync(configPath, JSON.stringify({ envSegments: ['integration'] }))
+      const result = () => checkFixture({ ...PKG, 'code-organization.json': '{', 'src/a.ts': '', 'test/a.test.ts': '' }, { configPath })
+      expect(result).not.toThrow()
+      expect(() => checkFixture({ ...PKG, 'code-organization.json': '{' })).toThrow(ConfigError)
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('a package.json under the enclosing test root is a fixture, not a unit', () => {
+    const findings = findingsFor({
+      ...PKG,
+      'src/a.ts': '',
+      'test/a.test.ts': '',
+      'src/fixtures/basic/foo.ts': '',
+      'test/fixtures/basic/package.json': '{}',
+      'test/fixtures/basic/foo.test.ts': '',
+    }, SLUG)
+    expect(findings).toEqual([])
+  })
+
   test('config cannot opt out of the shape', () => {
     expect(() => checkFixture({ ...PKG, 'code-organization.json': JSON.stringify({ colocatedTests: true }) })).toThrow(ConfigError)
     expect(() => checkFixture({ ...PKG, 'code-organization.json': JSON.stringify({ sourceRoots: ['../outside'] }) })).toThrow(ConfigError)
@@ -126,6 +155,17 @@ describe('test-path-derivable-from-source (Dart, Kotlin, Java)', () => {
       ['test-outside-root', 'app/src/main/kotlin/com/acme/RefundTest.kt'],
       ['orphan-test', 'app/src/test/kotlin/com/acme/PaymentTest.kt'],
     ])
+  })
+
+  test('kotlin: a test may target a Java source in the module\'s src/main/java, and vice versa', () => {
+    const findings = findingsFor({
+      'src/main/java/com/x/Foo.java': '',
+      'src/main/kotlin/com/x/Bar.kt': '',
+      'src/test/kotlin/com/x/FooTest.kt': '',
+      'src/test/java/com/x/BarTest.java': '',
+      'src/test/kotlin/com/x/MissingTest.kt': '',
+    }, SLUG)
+    expect(files(findings)).toEqual(['src/test/kotlin/com/x/MissingTest.kt'])
   })
 
   test('java: src/main/java mirrors to src/test/java with Test.java', () => {

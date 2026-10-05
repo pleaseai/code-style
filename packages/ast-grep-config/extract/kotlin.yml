@@ -4,6 +4,8 @@ id: helper-candidate
 language: kotlin
 severity: hint
 message: test helper candidate
+# Top-level `private` declarations are visible only inside their own file, so
+# they can never be shared and are not candidates.
 rule:
   regex: ^([cC]reateMock|[mM]ock|[fF]ake|[sS]tub)([A-Z0-9_]|$)
   any:
@@ -14,11 +16,23 @@ rule:
           - kind: object_declaration
         inside:
           kind: source_file
+        not:
+          has:
+            kind: modifiers
+            has:
+              kind: visibility_modifier
+              regex: ^private$
     - kind: simple_identifier
       inside:
         kind: function_declaration
         inside:
           kind: source_file
+        not:
+          has:
+            kind: modifiers
+            has:
+              kind: visibility_modifier
+              regex: ^private$
 ---
 id: import
 language: kotlin

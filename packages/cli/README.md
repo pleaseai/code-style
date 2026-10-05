@@ -208,13 +208,16 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
 - TypeScript test files are `*.test.*`/`*.spec.*` with a `.ts`, `.tsx`, `.mts`,
   `.cts`, `.js`, `.jsx`, `.mjs` or `.cjs` extension. The source may be any of
   those plus `.vue`, or `<stem>/index.<ext>`. Packages are directories with a
-  `package.json`; Nuxt projects (a `nuxt.config.*` next to it) use `app/`,
+  `package.json` (one that lies under an enclosing package's `test/` or `tests/`
+  is test data, not a package, and its files stay test-side of the enclosing
+  package); Nuxt projects (a `nuxt.config.*` next to it) use `app/`,
   `server/` and `shared/` as source roots.
 - Dart packages are directories with a `pubspec.yaml`; tests are `*_test.dart`
   and sources live in `lib/`. `integration_test/` and `test_driver/` are not
   reported as outside the test root.
 - Kotlin and Java modules are directories that contain `src/main|test|testFixtures/<lang>/`;
-  tests are `*Test.kt`/`*Test.java`.
+  tests are `*Test.kt`/`*Test.java`. A test may target a source in either main
+  source set: `src/main/kotlin/…` (`.kt`, `.java`) or `src/main/java/…` (`.java`, `.kt`).
 - Test files that belong to no package or module (no enclosing `package.json`,
   `pubspec.yaml` or `src/<set>/<lang>/` directory) are not checked. This is
   reported as a notice, aggregated per language with the count and up to three
@@ -230,7 +233,7 @@ Rust module resolution (to find test files Cargo never compiles):
 | --- | --- |
 | `mod x;` | Loads `x.rs` or `x/mod.rs` next to the declaring file; from a plain `foo.rs` the base directory is `foo/`, from a crate root or `mod.rs` it is the file's directory |
 | `#[path = "…"] mod x;` | Resolved relative to the declaring file's directory; plain, `r"…"` and `r#"…"#` strings |
-| `#[cfg_attr(…, path = "…")] mod x;` | Both the `path` file and the default `x.rs`/`x/mod.rs` count as possible targets |
+| `#[cfg_attr(…, path = "…")] mod x;` | Both the `path` file and the default `x.rs`/`x/mod.rs` count as possible targets; with several such attributes on one `mod`, every `path` file counts |
 | `mod r#async;` | Loads `async.rs` |
 | `mod x;` inside an inline `mod { … }` or a function body | Not followed. Reachability checks are **skipped for the directory it could load from, with a notice** |
 | The same, carrying `#[path]` or `#[cfg_attr(…, path = …)]` | It can load a file anywhere in the crate, so reachability checks are **skipped for the whole crate, with a notice** |
@@ -246,12 +249,15 @@ function, generator, class or `const`/`let`/`var`; in Dart any top-level name
 from the table above; in Kotlin a class, object or function; in Java a class,
 interface, record or enum. It is reported only when declared on the test side
 and imported by two or more other test files. How imports are
-resolved:
+resolved. A helper declared in a file that belongs to no package or module is
+**withheld with an aggregated notice** (nothing to suggest a location in), and
+a Kotlin `private` top-level declaration is never a candidate (it is visible
+only in its own file):
 
 | Language | Import forms followed |
 | --- | --- |
 | TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export). Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under both names |
-| Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything |
+| Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice** |
 | Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*`, `import static …` (an `as` alias is ignored), and same-package test files that mention the name as a word. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name |
 
 #### Not supported
@@ -276,9 +282,11 @@ notice, and each can hide a finding:
 - Kotlin and Java file names are not checked here (ktlint `standard:filename`
   and javac cover them).
 - Kotlin under `src/<set>/java`: Gradle allows Kotlin sources there, but
-  source-set and test-path mapping treats only `src/<set>/kotlin` as Kotlin
-  (and only `src/<set>/java` as Java, for `.java` files). Kotlin files under
-  `src/<set>/java` are not mapped, so they get no test-path or helper findings.
+  source-set mapping treats only `src/<set>/kotlin` as Kotlin (and only
+  `src/<set>/java` as Java, for `.java` files). Kotlin files under
+  `src/<set>/java` are not mapped, so they get no helper findings and a test
+  there is not checked. Test-path matching does accept either main source set
+  as the target of a test (a `FooTest.kt` finds `src/main/java/…/Foo.java`).
 - `--config <file>` replaces the root `code-organization.json` instead of
   merging with it: when it is given, the root file is not read at all. A
   package's own `code-organization.json` is still merged on top of it.

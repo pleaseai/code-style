@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { findingsFor } from '../test-utils/fixture.js'
+import { checkFixture, findingsFor } from '../test-utils/fixture.js'
 
 const SLUG = 'test-helpers-in-dedicated-location'
 const PKG = { 'package.json': '{}', 'src/user.ts': 'export const user = 1', 'src/order.ts': 'export const order = 1' }
@@ -106,6 +106,45 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
       'test/b_test.dart': 'import \'../test/support/mocks.dart\' show mockClient;',
     }, SLUG)
     expect(findings.map(f => `${f.file}:${f.line}`)).toEqual(['test/support/mocks.dart:2'])
+  })
+
+  test('dart: successive show clauses or repeated imports of one library are withheld with a notice', () => {
+    const base = { 'pubspec.yaml': 'name: app', 'lib/a.dart': '', 'test/support.dart': 'class MockClient {}\nclass Other {}' }
+    const successive = checkFixture({
+      ...base,
+      'test/a_test.dart': 'import \'support.dart\' show MockClient show Other;',
+      'test/b_test.dart': 'import \'support.dart\' show MockClient show Other;',
+    })
+    expect(successive.findings.filter(f => f.slug === SLUG)).toEqual([])
+    expect(successive.notices).toEqual([expect.stringContaining('Dart: helper check withheld judgement for 2 test file(s)')])
+    const repeated = checkFixture({
+      ...base,
+      'test/a_test.dart': 'import \'support.dart\' hide MockClient;\nimport \'support.dart\' show MockClient;',
+      'test/b_test.dart': 'import \'support.dart\';',
+      'test/c_test.dart': 'import \'support.dart\';',
+    })
+    expect(repeated.findings.filter(f => f.slug === SLUG).map(f => f.file)).toEqual(['test/support.dart'])
+    expect(repeated.notices).toEqual([expect.stringContaining('withheld judgement for 1 test file(s)')])
+  })
+
+  test('shared helpers outside any package are withheld with an aggregated notice', () => {
+    const result = checkFixture({
+      'scripts/a.test.ts': 'export function mockUser() {}',
+      'scripts/b.test.ts': 'import { mockUser } from \'./a.test\'',
+      'scripts/c.test.ts': 'import { mockUser } from \'./a.test\'',
+    })
+    expect(result.findings.filter(f => f.slug === SLUG)).toEqual([])
+    expect(result.notices).toContain('TypeScript: helper check skipped 1 shared helper file(s) outside any package (no package.json above them): scripts/a.test.ts')
+  })
+
+  test('kotlin: a private top-level helper is not shared across files', () => {
+    const findings = findingsFor({
+      'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',
+      'src/test/kotlin/com/acme/InvoiceTest.kt': 'package com.acme\nclass InvoiceTest { val c = mockClock() }',
+      'src/test/kotlin/com/acme/PaymentTest.kt': 'package com.acme\nclass PaymentTest { val c = mockClock() }',
+      'src/test/kotlin/com/acme/Support.kt': 'package com.acme\nprivate fun mockClock() = 1\nprivate class FakeBox',
+    }, SLUG)
+    expect(findings).toEqual([])
   })
 
   test('dart: a top-level typedef counts as a helper', () => {
