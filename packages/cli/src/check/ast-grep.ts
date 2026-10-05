@@ -29,8 +29,10 @@ interface RawMatch {
   metaVariables?: { single?: Record<string, { text: string }> }
 }
 
-const MISSING_DEPENDENCIES = 'cannot resolve @pleaseai/ast-grep-config and @ast-grep/cli from the checked project or this CLI. '
-  + 'Install them as devDependencies of the checked project: bun add -D @pleaseai/ast-grep-config @ast-grep/cli'
+const MISSING_BINARY = 'cannot resolve @ast-grep/cli from the checked project or this CLI. '
+  + 'Install it as a devDependency of the checked project: bun add -D @ast-grep/cli'
+const MISSING_CONFIG = 'cannot resolve @pleaseai/ast-grep-config from this CLI or the checked project. '
+  + 'It ships with @pleaseai/code-style; reinstall the CLI'
 
 /** The ast-grep binary and the directory holding the extraction rules. */
 export interface Toolchain {
@@ -40,7 +42,7 @@ export interface Toolchain {
 
 /**
  * Resolution anchors for `root`: the checked project first (its own pinned
- * versions win), then this CLI's install as a fallback.
+ * ast-grep version wins), then this CLI's install as a fallback.
  */
 export function resolutionAnchors(root: string): string[] {
   return [join(root, 'package.json'), fileURLToPath(import.meta.url)]
@@ -92,12 +94,21 @@ function firstResolved(anchors: string[], resolve: (anchor: string) => string | 
   return null
 }
 
-/** Resolves the ast-grep binary and `@pleaseai/ast-grep-config/extract`, trying each anchor in order. */
+/**
+ * Resolves the ast-grep binary and `@pleaseai/ast-grep-config/extract`.
+ * The binary tries `anchors` in order (project first). The extract rules are an
+ * implementation detail of `check` and must match this CLI's code, so they try
+ * the anchors in reverse (this CLI's own copy first); the project's copy only
+ * serves lint `rules/` and is a last-resort fallback here.
+ */
 export function resolveToolchain(anchors: string[]): Toolchain {
   const bin = firstResolved(anchors, astGrepBinary)
-  const configDir = firstResolved(anchors, anchor => packageDir('@pleaseai/ast-grep-config', anchor))
-  if (bin == null || configDir == null) {
-    throw new MissingDependencyError(MISSING_DEPENDENCIES)
+  if (bin == null) {
+    throw new MissingDependencyError(MISSING_BINARY)
+  }
+  const configDir = firstResolved([...anchors].reverse(), anchor => packageDir('@pleaseai/ast-grep-config', anchor))
+  if (configDir == null) {
+    throw new MissingDependencyError(MISSING_CONFIG)
   }
   return { bin, extractDir: join(configDir, 'extract') }
 }

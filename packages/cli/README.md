@@ -68,13 +68,18 @@ the structural rules.
 it covers what ast-grep cannot see (file names, test paths, and which helpers
 are shared). It runs the extraction rules shipped in
 [`@pleaseai/ast-grep-config`](../ast-grep-config) with the `ast-grep` binary
-from `@ast-grep/cli`, and resolves both from the checked project first (falling
-back to the CLI's own install). They are optional peer dependencies of this
-package, so install them in the project — the **ast-grep** tool in `init` does
-this:
+from `@ast-grep/cli`. The extraction rules are an internal detail of `check`
+and must match this CLI's code, so they come from the CLI's own
+`@pleaseai/ast-grep-config` dependency; the checked project's copy is used only
+when the CLI's own cannot be resolved (it exists to provide the lint `rules/`
+that `sgconfig.yml` points at).
+The binary resolves from the checked project first, so the project's pinned
+ast-grep version wins, then falls back to the CLI's own install. `@ast-grep/cli`
+is an optional peer dependency of this package, so install it in the project —
+the **ast-grep** tool in `init` does this:
 
 ```bash
-bun add -D @pleaseai/ast-grep-config @ast-grep/cli
+bun add -D @ast-grep/cli
 ```
 
 ```bash
@@ -96,7 +101,7 @@ bunx @pleaseai/code-style check --strict   # exit 1 on any finding
 | --- | --- |
 | `0` | No findings, or warnings only (the default) |
 | `1` | Findings, with `--strict` |
-| `2` | Usage or config error, or `@pleaseai/ast-grep-config` / `@ast-grep/cli` cannot be resolved |
+| `2` | Usage or config error, or `@ast-grep/cli` cannot be resolved |
 
 What it checks:
 
@@ -270,6 +275,13 @@ notice, and each can hide a finding:
   and `#[path]` on an inline `mod x { … }` are not seen.
 - Kotlin and Java file names are not checked here (ktlint `standard:filename`
   and javac cover them).
+- Kotlin under `src/<set>/java`: Gradle allows Kotlin sources there, but
+  source-set and test-path mapping treats only `src/<set>/kotlin` as Kotlin
+  (and only `src/<set>/java` as Java, for `.java` files). Kotlin files under
+  `src/<set>/java` are not mapped, so they get no test-path or helper findings.
+- `--config <file>` replaces the root `code-organization.json` instead of
+  merging with it: when it is given, the root file is not read at all. A
+  package's own `code-organization.json` is still merged on top of it.
 
 ### Config
 

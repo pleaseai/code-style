@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, test } from 'bun:test'
 import { resolutionAnchors, resolveToolchain, runExtraction } from '../../src/check/ast-grep.js'
 import { MissingDependencyError } from '../../src/check/errors.js'
@@ -8,7 +9,7 @@ let cleanup = (): void => {}
 afterEach(() => cleanup())
 
 describe('resolveToolchain', () => {
-  test('prefers the checked project\'s own @ast-grep/cli and @pleaseai/ast-grep-config', () => {
+  test('prefers the checked project\'s @ast-grep/cli but the CLI\'s own @pleaseai/ast-grep-config extract rules', () => {
     const fixture = createFixture({
       'package.json': '{}',
       'node_modules/@ast-grep/cli/package.json': '{"name":"@ast-grep/cli"}',
@@ -20,17 +21,30 @@ describe('resolveToolchain', () => {
     const modules = join(fixture.root, 'node_modules')
     expect(resolveToolchain(resolutionAnchors(fixture.root))).toEqual({
       bin: join(modules, '@ast-grep/cli/ast-grep'),
-      extractDir: join(modules, '@pleaseai/ast-grep-config/extract'),
+      extractDir: resolveToolchain([fileURLToPath(import.meta.url)]).extractDir,
     })
+    expect(resolveToolchain(resolutionAnchors(fixture.root)).extractDir).not.toStartWith(modules)
   })
 
-  test('falls back to the CLI\'s own install, and names both packages when neither resolves', () => {
+  test('names only @pleaseai/ast-grep-config when the binary resolves but the config does not', () => {
+    const fixture = createFixture({
+      'package.json': '{}',
+      'node_modules/@ast-grep/cli/package.json': '{"name":"@ast-grep/cli"}',
+      'node_modules/@ast-grep/cli/postinstall.js': 'exports.resolveBinaryPath = () => null',
+      'node_modules/@ast-grep/cli/ast-grep': '',
+    })
+    cleanup = fixture.cleanup
+    const anchor = join(fixture.root, 'package.json')
+    expect(() => resolveToolchain([anchor])).toThrow('cannot resolve @pleaseai/ast-grep-config')
+  })
+
+  test('falls back to the CLI\'s own install, and names the project install when no binary resolves', () => {
     const fixture = createFixture({ 'package.json': '{}' })
     cleanup = fixture.cleanup
     expect(resolveToolchain(resolutionAnchors(fixture.root)).extractDir).toEndWith(join('ast-grep-config', 'extract'))
     expect(() => resolveToolchain([join(fixture.root, 'package.json')])).toThrow(MissingDependencyError)
     expect(() => resolveToolchain([join(fixture.root, 'package.json')]))
-      .toThrow('bun add -D @pleaseai/ast-grep-config @ast-grep/cli')
+      .toThrow('bun add -D @ast-grep/cli')
   })
 })
 

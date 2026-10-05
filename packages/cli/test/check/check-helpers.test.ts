@@ -16,14 +16,14 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
     expect(findings[0]?.message).toContain('test/test-utils/')
   })
 
-  test('a helper exported under an alias is matched by the alias its importers use', () => {
+  test.each(['ts', 'tsx'])('a helper exported under an alias is matched by the alias its importers use (.%s)', (ext) => {
     const findings = findingsFor({
       ...PKG,
-      'test/helpers.ts': 'class FakeClock {}\nexport { FakeClock as MockClock }',
+      [`test/helpers.${ext}`]: 'class FakeClock {}\nexport { FakeClock as MockClock }',
       'test/user.test.ts': 'import { MockClock } from \'./helpers\'',
       'test/order.test.ts': 'import { MockClock } from \'./helpers\'',
     }, SLUG)
-    expect(findings).toEqual([expect.objectContaining({ file: 'test/helpers.ts', line: 1 })])
+    expect(findings).toEqual([expect.objectContaining({ file: `test/helpers.${ext}`, line: 1 })])
   })
 
   test('resolves `.mjs` imports to `.mts` even when a same-named `.ts` exists', () => {
@@ -84,14 +84,14 @@ describe('test-helpers-in-dedicated-location (TypeScript regressions)', () => {
     }, SLUG)).toEqual([])
   })
 
-  test('an exported abstract class helper imported by two tests is reported', () => {
+  test.each(['ts', 'tsx'])('an exported abstract class helper imported by two tests is reported (.%s)', (ext) => {
     const findings = findingsFor({
       ...PKG,
-      'test/support.ts': 'export abstract class MockThing {}',
+      [`test/support.${ext}`]: 'export abstract class MockThing {}',
       'test/user.test.ts': 'import { MockThing } from \'./support\'',
       'test/order.test.ts': 'import { MockThing } from \'./support\'',
     }, SLUG)
-    expect(findings).toEqual([expect.objectContaining({ file: 'test/support.ts', line: 1 })])
+    expect(findings).toEqual([expect.objectContaining({ file: `test/support.${ext}`, line: 1 })])
   })
 })
 

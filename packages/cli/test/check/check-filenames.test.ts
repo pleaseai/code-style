@@ -88,10 +88,10 @@ describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
     }, SLUG)).toEqual([])
   })
 
-  test('a default export with a comment between `export` and `default` still withholds judgement', () => {
+  test.each(['ts', 'tsx'])('a default export with a comment between `export` and `default` still withholds judgement (.%s)', (ext) => {
     expect(findingsFor({
       ...PKG,
-      'src/foo.ts': 'export /* c */ default function foo() {}\nexport const bar = 1',
+      [`src/foo.${ext}`]: 'export /* c */ default function foo() {}\nexport const bar = 1',
     }, SLUG)).toEqual([])
   })
 
