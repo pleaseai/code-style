@@ -36,6 +36,17 @@ function gitTopLevel(dir: string): string | null {
   }
 }
 
+/** The home directory with symlinks resolved, comparable with the realpath'd requested directory. */
+function canonicalHome(): string {
+  const home = homedir()
+  try {
+    return realpathSync(home)
+  }
+  catch {
+    return home
+  }
+}
+
 /**
  * The directory the whole check runs from. Package discovery needs the
  * enclosing project, so a requested subdirectory (`src/`, `test/`) resolves to
@@ -48,7 +59,7 @@ function gitTopLevel(dir: string): string | null {
  */
 export function findScanRoot(requested: string): string {
   const top = gitTopLevel(requested)
-  const home = homedir()
+  const home = canonicalHome()
   let found: string | null = null
   for (let dir = requested; ; dir = dirname(dir)) {
     if (top == null && dir !== requested && (dir === home || dirname(dir) === dir)) {

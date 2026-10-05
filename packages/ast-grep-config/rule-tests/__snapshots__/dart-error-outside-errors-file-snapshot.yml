@@ -56,6 +56,20 @@ snapshots:
       style: secondary
       start: 22
       end: 34
+  class TimeoutError extends Base {}:
+    labels:
+    - source: class TimeoutError extends Base {}
+      style: primary
+      start: 0
+      end: 34
+    - source: TimeoutError
+      style: secondary
+      start: 6
+      end: 18
+    - source: extends Base
+      style: secondary
+      start: 19
+      end: 31
   'final class QuotaExceeded extends DomainError { QuotaExceeded() : super(); }':
     labels:
     - source: 'final class QuotaExceeded extends DomainError { QuotaExceeded() : super(); }'

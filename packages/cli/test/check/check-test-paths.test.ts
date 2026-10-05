@@ -236,7 +236,8 @@ describe('test files outside any package', () => {
       'lib/helper.ts': '',
     })
     expect(result.findings).toEqual([])
-    expect(result.notices).toEqual([
+    // Only this check's notices: the other checks aggregate their own.
+    expect(result.notices.filter(n => n.includes('test-path check'))).toEqual([
       'TypeScript: test-path check skipped 2 test file(s) outside any package (no package.json above them): a.test.ts, b.test.ts',
       'Dart: test-path check skipped 1 test file(s) outside any package (no pubspec.yaml above them): app/foo_test.dart',
       'Kotlin: test-path check skipped 1 test file(s) outside any package (not under a Gradle src/<set>/kotlin source set): tool/FooTest.kt',
@@ -245,6 +246,6 @@ describe('test files outside any package', () => {
 
   test('a test file inside a package yields no such notice', () => {
     const result = checkFixture({ ...PKG, 'src/x.ts': '', 'test/x.test.ts': '' })
-    expect(result.notices).toEqual([])
+    expect(result.notices.filter(n => n.includes('test-path check'))).toEqual([])
   })
 })

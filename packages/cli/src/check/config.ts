@@ -26,6 +26,12 @@ export interface CodeOrganizationConfig {
   envSegments: string[]
   /** Set when the base came from `--config`: the root `code-organization.json` is then not read. */
   explicit?: boolean
+  /**
+   * The requested directory relative to the scan root (`''` checks everything).
+   * Only units on its path (enclosing it or inside it) read their own config
+   * file, so an unrelated sibling package's file cannot fail a scoped check.
+   */
+  scope?: string
 }
 
 const ALLOWED_KEYS = new Set(['$schema', 'sourceRoots', 'envSegments'])
@@ -41,9 +47,10 @@ function readNames(value: unknown, key: string, file: string, allowNested: boole
     if (typeof item !== 'string' || item.trim() === '') {
       throw new ConfigError(`${file}: "${key}" entries must be non-empty strings`)
     }
-    const name = item.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '')
+    const name = item.replace(/\\/g, '/').replace(/\/{2,}/g, '/').replace(/^\.\//, '').replace(/\/+$/, '')
     const segments = name.split('/')
-    if (name.startsWith('/') || segments.includes('..') || segments.includes('.') || name === '') {
+    // A drive-qualified path (`C:/src`, `C:src`) is absolute on Windows.
+    if (name.startsWith('/') || /^[A-Z]:/i.test(name) || segments.includes('..') || segments.includes('.') || name === '') {
       throw new ConfigError(`${file}: "${key}" entry "${item}" must be a relative path inside the package`)
     }
     if (!allowNested && segments.length > 1) {

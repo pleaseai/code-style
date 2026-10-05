@@ -1,5 +1,8 @@
+import type { ExtractMatch } from '../../src/check/ast-grep.js'
 import { describe, expect, test } from 'bun:test'
-import { checkFixture, findingsFor } from '../test-utils/fixture.js'
+import { inspectHelpers, jvmHelpers } from '../../src/check/check-helpers.js'
+import { KOTLIN_LAYOUT } from '../../src/check/layouts.js'
+import { checkFixture, createFixture, findingsFor } from '../test-utils/fixture.js'
 
 const SLUG = 'test-helpers-in-dedicated-location'
 const PKG = { 'package.json': '{}', 'src/user.ts': 'export const user = 1', 'src/order.ts': 'export const order = 1' }
@@ -22,6 +25,16 @@ describe('test-helpers-in-dedicated-location (TypeScript)', () => {
       [`test/helpers.${ext}`]: 'class FakeClock {}\nexport { FakeClock as MockClock }',
       'test/user.test.ts': 'import { MockClock } from \'./helpers\'',
       'test/order.test.ts': 'import { MockClock } from \'./helpers\'',
+    }, SLUG)
+    expect(findings).toEqual([expect.objectContaining({ file: `test/helpers.${ext}`, line: 1 })])
+  })
+
+  test.each(['ts', 'tsx'])('a helper exported as `export default <name>` is credited to default imports (.%s)', (ext) => {
+    const findings = findingsFor({
+      ...PKG,
+      [`test/helpers.${ext}`]: 'const mockUser = () => ({})\nexport default mockUser',
+      'test/user.test.ts': 'import mockUser from \'./helpers\'',
+      'test/order.test.ts': 'import makeUser from \'./helpers\'',
     }, SLUG)
     expect(findings).toEqual([expect.objectContaining({ file: `test/helpers.${ext}`, line: 1 })])
   })
@@ -348,6 +361,37 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
       'src/test/java/com/acme/PaymentTest.java': 'package com.acme;\nimport com.acme.support.FakeClock;',
     }, SLUG)
     expect(kotlinHelper.map(f => f.file)).toEqual(['src/test/kotlin/com/acme/support/FakeClock.kt'])
+  })
+
+  test('java: a wildcard importer that declares its own class of the helper\'s name does not use the helper', () => {
+    const test = 'package com.acme;\nimport com.acme.support.*;\nclass ATest { static class MockClock {} Object c = new MockClock(); }'
+    const findings = findingsFor({
+      'src/main/java/com/acme/Invoice.java': 'package com.acme;',
+      'src/test/java/com/acme/support/MockClock.java': 'package com.acme.support;\npublic class MockClock {}',
+      'src/test/java/com/acme/ATest.java': test,
+      'src/test/java/com/acme/BTest.java': test.replace('ATest', 'BTest'),
+    }, SLUG)
+    expect(findings).toEqual([])
+  })
+
+  test('a test file deleted or unreadable after listing is read as empty instead of aborting the check', () => {
+    const fixture = createFixture({})
+    try {
+      const support = 'src/test/kotlin/com/acme/support/Support.kt'
+      const tests = ['src/test/kotlin/com/acme/ATest.kt', 'src/test/kotlin/com/acme/BTest.kt']
+      const files = ['src/main/kotlin/com/acme/Invoice.kt', support, ...tests]
+      const match = (ruleId: string, file: string, text: string): ExtractMatch => ({ ruleId, file, line: 1, text, vars: {} })
+      const matches = [
+        match('helper-candidate', support, 'mockUser'),
+        match('package', support, 'com.acme.support'),
+        ...tests.flatMap(t => [match('package', t, 'com.acme'), match('import', t, 'import com.acme.support.*')]),
+      ]
+      const units = KOTLIN_LAYOUT.units(files, { sourceRoots: [], envSegments: [] }, fixture.root)
+      expect(inspectHelpers(jvmHelpers(KOTLIN_LAYOUT, units, matches, files, fixture.root)).findings).toEqual([])
+    }
+    finally {
+      fixture.cleanup()
+    }
   })
 
   test('java: an imported helper used by two tests is reported', () => {

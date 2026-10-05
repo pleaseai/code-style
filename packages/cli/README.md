@@ -57,9 +57,11 @@ bunx @pleaseai/code-style check       # file names, test paths, shared test help
 bunx @pleaseai/code-style check --strict   # exit 1 on any finding (for CI once clean)
 ```
 
-Every warning names the rule's slug and links to a README with the fix. See
-the [`@pleaseai/ast-grep-config` README](../ast-grep-config/README.md) for
-the structural rules.
+Every `ast-grep scan` warning names the rule's slug and links to a README
+with the fix. See the
+[`@pleaseai/ast-grep-config` README](../ast-grep-config/README.md) for the
+structural rules. `please-style check` findings name their slug; each check is
+described under [`please-style check`](#please-style-check).
 
 ## `please-style check`
 
@@ -264,15 +266,15 @@ A helper candidate is a top-level declaration named `mock*`, `createMock*`,
 function, generator, class or `const`/`let`/`var`; in Dart any top-level name
 from the table above; in Kotlin a class, object or function; in Java a class,
 interface, record or enum. It is reported only when declared on the test side
-and imported by two or more other test files. How imports are
-resolved. A helper declared in a file that belongs to no package or module is
-**withheld with an aggregated notice** (nothing to suggest a location in), and
-a Kotlin `private` top-level declaration is never a candidate (it is visible
-only in its own file):
+and imported by two or more other test files. A helper declared in a file that
+belongs to no package or module is **withheld with an aggregated notice**
+(nothing to suggest a location in), and a Kotlin `private` top-level
+declaration is never a candidate (it is visible only in its own file). Imports
+are followed per language:
 
 | Language | Import forms followed |
 | --- | --- |
-| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export), `import x from` (the `default` export). `export default function` or `export default class` of a helper is public under `default`, so default and namespace imports credit it. Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
+| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export), `import x from` (the `default` export). `export default function`, `export default class` or `export default <name>` of a helper is public under `default`, so default and namespace imports credit it. Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
 | Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice** |
 | Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*` (the importing file must also mention the name as a word outside its import lines, and an explicit import of the same simple name from another package shadows it), `import static …` (an `as` alias is ignored; a Kotlin top-level function is also followed through its file facade, `import static pkg.<File>Kt.name` / `pkg.<File>Kt.*`, or the `@file:JvmName("…")` value), and same-package test files that mention the name as a word. A file that declares the name itself (`val`/`var`/`fun`/`class`, a typed parameter, or a Java field, local or method) does not count. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
 
@@ -313,9 +315,13 @@ notice, and each can hide a finding:
 
 ### Config
 
-An optional `code-organization.json` in the checked directory (or in any
-package directory, which adds to it) can only **add** names. There is no
-option to move tests next to sources or to turn a check off.
+An optional `code-organization.json` in the enclosing project root (the scan
+root described under `[path]`; the checked directory itself when no project
+marker is found above it), or in any package directory, which adds to it, can
+only **add** names. A check of a subdirectory reads only the package files on
+its path (packages enclosing it or inside it), so a broken file in an
+unrelated sibling package does not fail it. There is no option to move tests
+next to sources or to turn a check off.
 
 ```json
 {

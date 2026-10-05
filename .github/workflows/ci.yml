@@ -26,16 +26,6 @@ jobs:
       - name: Build packages
         run: bun run build
 
-      # Package tests via turbo (packages/* only, so docs is not rebuilt):
-      # bun test for the CLI (including `please-style check`) and
-      # ast-grep-config, plus ast-grep-config's ast-grep rule tests. The
-      # runner's cargo enables the real
-      # `cargo metadata` test. ast-grep resolves from
-      # node_modules/.bin (root trustedDependencies runs @ast-grep/cli's
-      # postinstall, which links the native binary).
-      - name: Test
-        run: bun run test
-
       - name: Cache ESLint
         uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
@@ -46,3 +36,33 @@ jobs:
 
       - name: Lint
         run: bun run lint
+
+  # A separate job so a test failure does not hide lint errors (and vice versa).
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build packages
+        run: bun run build
+
+      # Package tests via turbo (packages/* only, so docs is not rebuilt):
+      # bun test for the CLI (including `please-style check`) and
+      # ast-grep-config, plus ast-grep-config's ast-grep rule tests. The
+      # runner's cargo enables the real
+      # `cargo metadata` test. ast-grep resolves from
+      # node_modules/.bin (root trustedDependencies runs @ast-grep/cli's
+      # postinstall, which links the native binary).
+      - name: Test
+        run: bun run test

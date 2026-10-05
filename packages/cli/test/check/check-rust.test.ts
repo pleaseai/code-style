@@ -32,6 +32,16 @@ describe('rust include! and macro-loaded modules', () => {
     expect(result.notices.join('\n')).toContain('include!')
   })
 
+  test('a macro body declaring `mod $name;` withholds the files the macro can load', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': 'macro_rules! m { ($name:ident) => { mod $name; } }\nm!(viamacro);',
+      'src/viamacro.rs': '#[test]\nfn via_macro() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices.join('\n')).toContain('macro body containing `mod x;`')
+  })
+
   test('a non-literal include! withholds the whole crate, including tests/', () => {
     const result = checkFixture({
       ...CARGO,
@@ -189,6 +199,12 @@ describe('rust unit-test split files', () => {
     })
     expect(result.findings).toEqual([])
     expect(result.notices).toEqual([expect.stringContaining('skipped that crate')])
+  })
+
+  test('a crate whose provider returns no metadata is skipped with a notice', () => {
+    const result = checkFixture({ ...CARGO, 'src/lib.rs': '', 'src/orphan.rs': '#[test]\nfn t() {}' }, { cargoMetadata: () => null })
+    expect(result.findings).toEqual([])
+    expect(result.notices).toEqual([expect.stringContaining('returned no metadata')])
   })
 
   test('reports a #[test] file that no mod declaration reaches', () => {

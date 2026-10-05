@@ -10,6 +10,8 @@ describe('toKebabCase', () => {
     ['user.service', 'user-service'],
     ['v2Api', 'v2-api'],
     ['user-service', 'user-service'],
+    ['checkURLs', 'check-urls'],
+    ['fetchIDsForUser', 'fetch-ids-for-user'],
   ])('%s → %s', (input, expected) => {
     expect(toKebabCase(input)).toBe(expected)
   })
@@ -20,6 +22,7 @@ describe('toSnakeCase', () => {
     ['UserRepository', 'user_repository'],
     ['user_repository', 'user_repository'],
     ['JSONParser', 'json_parser'],
+    ['UserIDs', 'user_ids'],
   ])('%s → %s', (input, expected) => {
     expect(toSnakeCase(input)).toBe(expected)
   })

@@ -33,6 +33,15 @@ const values = command === 'check'
   ? parseArgs({ args: argv.slice(0, commandIndex), strict: false, options: GLOBAL_OPTIONS }).values
   : allValues
 
+// A check option before `check` (`please-style --strict check`) would be dropped silently; reject it.
+const misplaced = command === 'check'
+  ? tokens.find(token => token.kind === 'option' && token.index < commandIndex && !Object.hasOwn(GLOBAL_OPTIONS, token.name))
+  : undefined
+if (misplaced?.kind === 'option') {
+  process.stderr.write(`${t('optionBeforeCheck')(misplaced.rawName)}\n\n${t('checkUsage')}`)
+  process.exit(2)
+}
+
 function readVersion(): string {
   const pkgPath = fileURLToPath(new URL('../package.json', import.meta.url))
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version: string }

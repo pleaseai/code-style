@@ -5,6 +5,8 @@ valid:
   - class ErrorBoundaryState {}
   - export class Formatter extends Base<ErrorLike> {}
   - const e = new Error('boom')
+  # The name check belongs to the class that owns the `extends`, not an enclosing one.
+  - 'class OuterError { m() { class Helper extends Base {} } }'
 invalid:
   - class NotFoundError extends Error {}
   - 'export class ValidationError extends Error { constructor(m: string) { super(m) } }'

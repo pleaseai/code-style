@@ -27,8 +27,8 @@ function opaqueReason(m: ExtractMatch): OpaqueReason {
   if (m.ruleId === 'export-directive' || /\bfrom\s*['"`]/.test(m.text) || /^export\s+import\b/.test(m.text)) {
     return 're-export'
   }
-  // A decorator (`@dec export default class …`) precedes the `export` keyword in the statement text.
-  const text = m.text.replace(/^(?:@[\w.]+(?:\([^)]*\))?\s*)+/, '')
+  // Comments (`export /* c */ default x`) are dropped; a decorator (`@dec export default class …`) precedes the `export` keyword in the statement text.
+  const text = m.text.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ' ').trim().replace(/^(?:@[\w.]+(?:\([^)]*\))?\s*)+/, '')
   return /^export\s+default\b|\bas\s+default\b|\{\s*default\b/.test(text) ? 'default export' : 'string-literal export name'
 }
 

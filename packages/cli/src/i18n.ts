@@ -24,6 +24,7 @@ interface Messages {
   cancelled: string
   unknownCommand: (cmd: string) => string
   unexpectedArguments: (args: string) => string
+  optionBeforeCheck: (option: string) => string
   usage: string
   checkUsage: string
 }
@@ -51,6 +52,7 @@ const messages: Record<Locale, Messages> = {
     cancelled: 'Cancelled.',
     unknownCommand: cmd => `Unknown command: ${cmd}`,
     unexpectedArguments: args => `Unexpected arguments: ${args}`,
+    optionBeforeCheck: option => `${option} is a check option; put it after \`check\` (please-style check ${option})`,
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -104,6 +106,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     cancelled: '취소되었습니다.',
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
     unexpectedArguments: args => `예상하지 못한 인자: ${args}`,
+    optionBeforeCheck: option => `${option}는 check 옵션입니다. \`check\` 뒤에 쓰세요 (please-style check ${option})`,
     usage: `사용법:
   pleaseai-code-style <command> [options]
 
@@ -132,7 +135,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
   --help, -h         이 메시지 표시
   --version, -v      버전 출력
 
-종료 코드: 0 정상 또는 경고만, 1 --strict에서 발견 사항 있음, 2 사용법 또는 설정 오류, 또는 추출이 필요한 파일이 있는데 해석할 수 없는 의존성.
+종료 코드: 0 정상 또는 경고만, 1 --strict에서 발견 사항 있음, 2 사용법 또는 설정 오류, 또는 추출이 필요한 파일이 있는데 의존성을 찾을 수 없음.
 `,
   },
 }

@@ -9,11 +9,12 @@
 
 ## Why
 
-A default export has no name of its own. Every importer picks a local name, so
-the same function can be `createUser` in one file and `makeUser` in another.
-Searching for the symbol's name finds neither its definition nor all of its
-uses. A named export is defined and imported under one name, so one search
-finds everything.
+A default import does not have to use the declaration's name: every importer
+picks its own local name, so the same function can be `createUser` in one file
+and `makeUser` in another, and an anonymous default export has no name at all.
+Searching for the declaration's name misses those import sites. A named import
+must mention the exported name, even when it aliases it, so one search finds
+the definition and every importer.
 
 ## Wrong
 
@@ -64,8 +65,7 @@ import { UserCard } from './user-card'
 
 Files whose shape a framework dictates are ignored by the rule: `*.d.ts`,
 `*.config.tsx` (and `*.config.*.tsx`), `*.stories.tsx`, `.vitepress/**`, `.storybook/**`, Nuxt 4 `app/pages/`, `app/layouts/`,
-`app/middleware/`, `app/plugins/`, `app/app.config.ts`,
-`app/router.options.ts`, and Nitro `server/api/`, `server/routes/`,
+`app/middleware/`, `app/plugins/`, and Nitro `server/api/`, `server/routes/`,
 `server/middleware/`, `server/plugins/`, `server/tasks/`.
 
 ### Nuxt 3 layouts (no `app/` directory)

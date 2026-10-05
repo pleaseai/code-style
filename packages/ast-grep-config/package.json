@@ -24,6 +24,7 @@
   },
   "files": [
     "extract",
+    "rule-tests",
     "rules",
     "sgconfig.yml"
   ],

@@ -68,9 +68,15 @@ function baseName(path: string): string {
   return path.slice(path.lastIndexOf('/') + 1)
 }
 
+/** Is unit `dir` the requested `scope`, one of its ancestors, or inside it? */
+function onScopePath(dir: string, scope: string | undefined): boolean {
+  return scope == null || scope === '' || dir === '' || dir === scope || scope.startsWith(`${dir}/`) || dir.startsWith(`${scope}/`)
+}
+
 function withConfig(rootDir: string, dir: string, base: CodeOrganizationConfig): CodeOrganizationConfig {
-  // `--config` replaces the root file instead of merging with it.
-  if (dir === '' && base.explicit === true) {
+  // `--config` replaces the root file instead of merging with it. Units off the
+  // requested path keep the base: their findings are scoped out anyway.
+  if ((dir === '' && base.explicit === true) || !onScopePath(dir, base.scope)) {
     return base
   }
   return packageConfig(base, join(rootDir, dir))

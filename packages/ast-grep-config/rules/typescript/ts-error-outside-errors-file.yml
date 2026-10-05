@@ -24,15 +24,17 @@ rule:
             field: value
             regex: ^([\w$]+\.)*[\w$]*(Error|Exception)$
         # No type information: a class *named* like an error that extends
-        # anything is treated as an error type (ADR-0022 §3).
+        # anything is treated as an error type (ADR-0022 §3). Only the class
+        # owning this `extends` counts, not an enclosing one.
         - inside:
-            any:
-              - kind: class_declaration
-              - kind: abstract_class_declaration
-            stopBy: end
-            has:
-              field: name
-              regex: (Error|Exception)$
+            kind: class_heritage
+            inside:
+              any:
+                - kind: class_declaration
+                - kind: abstract_class_declaration
+              has:
+                field: name
+                regex: (Error|Exception)$
 ignores:
   - '**/errors.ts'
   - '**/errors.mts'
@@ -44,3 +46,4 @@ ignores:
   - '**/*.spec.{ts,mts,cts}'
   - '**/test/**'
   - '**/tests/**'
+  - '**/__tests__/**'

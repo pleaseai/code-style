@@ -55,9 +55,11 @@ class InvoiceService { /* … */ }
 
 1. Open `Errors.kt` in the same package directory; create it if it does not
    exist, with the same `package` line.
-2. Move the declaration there unchanged. Code in the same package needs no
-   import change; code in other packages keeps importing it by its unchanged
-   fully qualified name.
+2. Move the declaration there. A top-level `private` class is visible only in
+   its own file, so widen it to `internal` (or drop the modifier) when the
+   original file still uses it. Code in the same package needs no import
+   change; code in other packages keeps importing it by its unchanged fully
+   qualified name.
 3. If `Errors.kt` ends up with a single top-level declaration, ktlint
    `standard:filename` asks for the class name instead. Disable that rule for
    `Errors.kt` in `.editorconfig` (`[**/Errors.kt]` →

@@ -18,8 +18,8 @@ describe('readConfigFile', () => {
   })
 
   test('reads additional source roots and env segments, normalizing paths', () => {
-    const file = configFile(JSON.stringify({ sourceRoots: ['./lib/', 'packages/core'], envSegments: ['integration'] }))
-    expect(readConfigFile(file)).toEqual({ sourceRoots: ['lib', 'packages/core'], envSegments: ['integration'] })
+    const file = configFile(JSON.stringify({ sourceRoots: ['./lib/', 'packages/core', 'lib//generated'], envSegments: ['integration'] }))
+    expect(readConfigFile(file)).toEqual({ sourceRoots: ['lib', 'packages/core', 'lib/generated'], envSegments: ['integration'] })
   })
 
   test.each([
@@ -27,6 +27,7 @@ describe('readConfigFile', () => {
     ['non-array values', { sourceRoots: 'src' }],
     ['paths leaving the package', { sourceRoots: ['../src'] }],
     ['absolute paths', { sourceRoots: ['/src'] }],
+    ['drive-qualified paths', { sourceRoots: ['C:\\src'] }],
     ['nested env segments', { envSegments: ['unit/fast'] }],
   ])('rejects %s', (_label, value) => {
     expect(() => readConfigFile(configFile(JSON.stringify(value)))).toThrow(ConfigError)

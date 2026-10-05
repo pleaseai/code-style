@@ -61,7 +61,27 @@ function toRootRelative(rootDir: string, absolute: string): string | null {
     // Keep the path as cargo reported it.
   }
   const rel = relative(rootDir, real).split('\\').join('/')
-  return rel.startsWith('..') || rel.startsWith('/') ? null : rel
+  // On Windows a path on another drive stays absolute (`D:/…`).
+  return rel.startsWith('..') || rel.startsWith('/') || /^[A-Z]:/i.test(rel) ? null : rel
+}
+
+/** `cargo metadata` for the crate in `dir`, or `null` (with a notice) when it fails or returns nothing; a missing `cargo` aborts the Rust check. */
+function metadataFor(provider: CargoMetadataProvider, rootDir: string, dir: string, notices: string[]): CargoMetadata | null {
+  let metadata: CargoMetadata | null
+  try {
+    metadata = provider(join(rootDir, dir))
+  }
+  catch (err) {
+    if (err instanceof CargoUnavailableError) {
+      throw err
+    }
+    notices.push(`Rust: test-path and helper checks skipped that crate (\`cargo metadata\` failed in ${dir}: ${err instanceof Error ? err.message : String(err)}).`)
+    return null
+  }
+  if (metadata == null) {
+    notices.push(`Rust: test-path and helper checks skipped that crate (\`cargo metadata\` returned no metadata in ${dir}).`)
+  }
+  return metadata
 }
 
 function loadPackages(
@@ -76,18 +96,7 @@ function loadPackages(
     if (seen.has(manifest)) {
       continue
     }
-    const dir = posix.dirname(manifest)
-    let metadata: CargoMetadata | null
-    try {
-      metadata = provider(join(rootDir, dir))
-    }
-    catch (err) {
-      if (err instanceof CargoUnavailableError) {
-        throw err
-      }
-      notices.push(`Rust: test-path and helper checks skipped that crate (\`cargo metadata\` failed in ${dir}: ${err instanceof Error ? err.message : String(err)}).`)
-      continue
-    }
+    const metadata = metadataFor(provider, rootDir, posix.dirname(manifest), notices)
     for (const pkg of metadata?.packages ?? []) {
       const manifestRel = toRootRelative(rootDir, pkg.manifest_path)
       if (manifestRel == null || seen.has(manifestRel)) {

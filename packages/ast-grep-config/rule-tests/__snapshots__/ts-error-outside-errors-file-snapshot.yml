@@ -40,6 +40,10 @@ snapshots:
       style: secondary
       start: 38
       end: 50
+    - source: extends Base
+      style: secondary
+      start: 38
+      end: 50
   export class InvoiceNotFound extends errors.AppError {}:
     labels:
     - source: class InvoiceNotFound extends errors.AppError {}
@@ -72,6 +76,10 @@ snapshots:
       style: secondary
       start: 7
       end: 55
+    - source: extends DomainBase
+      style: secondary
+      start: 34
+      end: 52
     - source: extends DomainBase
       style: secondary
       start: 34

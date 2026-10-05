@@ -70,9 +70,13 @@ pub use crate::error::ParseError;
    to the parent (`lib.rs`, `main.rs`, or `<module>.rs`) if it does not exist.
 2. Move the type together with its `impl Display`, `impl Error`, and `From`
    impls into `error.rs`.
-3. Import it where it is used (`use crate::error::ParseError;`). If it is part
-   of the public API, re-export it by name (`pub use crate::error::ParseError;`)
-   — not with a glob (see `rust-no-glob-reexport`).
+3. Import it where it is used, by the path of its `error` module:
+   `use crate::error::ParseError;` for the crate's `src/error.rs`, or
+   `use crate::<module>::error::ParseError;` for `src/<module>/error.rs`. If it
+   is part of the public API, re-export it by name from the module that
+   exposed it before (`pub use crate::error::ParseError;`, or
+   `pub use self::error::ParseError;` inside `<module>`) — not with a glob
+   (see `rust-no-glob-reexport`).
 4. Run `cargo check --all-targets`.
 
 ## Exempt files

@@ -286,12 +286,22 @@ export interface JvmSibling {
   matches: ExtractMatch[]
 }
 
+/** A file's text, or `''` when it cannot be read (deleted or unreadable since listing): it then shows no name, so nothing is credited. */
+function readOrEmpty(rootDir: string, file: string): string {
+  try {
+    return readFileSync(join(rootDir, file), 'utf-8')
+  }
+  catch {
+    return ''
+  }
+}
+
 /** Java-visible file facade of a Kotlin file's top-level members: `@file:JvmName("X")`, else `<File>Kt`. */
 function kotlinFacade(file: string, pkg: string, rootDir: string): string | undefined {
   if (!file.endsWith('.kt')) {
     return undefined
   }
-  const named = /@file:\s*JvmName\(\s*"([^"]+)"\s*\)/.exec(readFileSync(join(rootDir, file), 'utf-8'))?.[1]
+  const named = /@file:\s*JvmName\(\s*"([^"]+)"\s*\)/.exec(readOrEmpty(rootDir, file))?.[1]
   const stem = posix.basename(file, '.kt').replace(/\W/g, '_')
   const facade = named ?? `${stem.charAt(0).toUpperCase()}${stem.slice(1)}Kt`
   return pkg === '' ? facade : `${pkg}.${facade}`
@@ -303,8 +313,8 @@ function declaresName(text: string, name: string, file: string): boolean {
   if (/\.kts?$/.test(file)) {
     return new RegExp(`\\b(?:val|var|fun|class|object|interface|typealias)\\s+(?:<[^>]*>\\s*)?(?:[\\w.]+\\.)?${id}\\b|(?<![\\w.])${id}\\s*:\\s*[\\w(]`).test(text)
   }
-  // Java: `Type name` followed by an initializer, terminator, parameter delimiter or `(`; statements such as `return name;` are references.
-  return new RegExp(`(?<![\\w.])(?!(?:return|new|throw|throws|else|case|yield|assert|extends|implements|instanceof)\\b)[A-Za-z_][\\w.]*(?:<[^;(){}]*>)?(?:\\[\\])*\\s+${id}\\s*(?:=|;|\\(|,|\\)|:)`).test(text)
+  // Java: a type declaration (`class name`), or `Type name` followed by an initializer, terminator, parameter delimiter or `(`; statements such as `return name;` are references.
+  return new RegExp(`\\b(?:class|interface|enum|record)\\s+${id}\\b|(?<![\\w.])(?!(?:return|new|throw|throws|else|case|yield|assert|extends|implements|instanceof)\\b)[A-Za-z_][\\w.]*(?:<[^;(){}]*>)?(?:\\[\\])*\\s+${id}\\s*(?:=|;|\\(|,|\\)|:)`).test(text)
 }
 
 const NON_CODE = /"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g
@@ -357,7 +367,7 @@ export function jvmHelpers(
   const codeOf = (file: string): string => {
     let text = textCache.get(file)
     if (text == null) {
-      text = stripNonCode(readFileSync(join(rootDir, file), 'utf-8'), file).replace(/^\s*(?:import|package)\b.*$/gm, '')
+      text = stripNonCode(readOrEmpty(rootDir, file), file).replace(/^\s*(?:import|package)\b.*$/gm, '')
       textCache.set(file, text)
     }
     return text

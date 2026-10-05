@@ -1,18 +1,22 @@
 import { spawnSync } from 'node:child_process'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { afterEach, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { createFixture } from '../test-utils/fixture.js'
 
 const CLI = fileURLToPath(new URL('../../src/index.ts', import.meta.url))
 
-let cleanup = (): void => {}
-afterEach(() => cleanup())
-
 function run(files: Record<string, string>, args: string[]): { status: number | null, stdout: string, stderr: string } {
   const fixture = createFixture(files)
-  cleanup = fixture.cleanup
-  const res = spawnSync('bun', [CLI, ...args.map(a => a.replace('<root>', fixture.root))], { encoding: 'utf-8' })
-  return { status: res.status, stdout: res.stdout, stderr: res.stderr }
+  try {
+    // English messages whatever the machine's locale.
+    const env = { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8', LC_MESSAGES: 'en_US.UTF-8' }
+    const res = spawnSync('bun', [CLI, ...args.map(a => a.replace('<root>', fixture.root))], { encoding: 'utf-8', env })
+    return { status: res.status, stdout: res.stdout, stderr: res.stderr }
+  }
+  finally {
+    fixture.cleanup()
+  }
 }
 
 const ORPHAN = { 'package.json': '{}', 'src/a.ts': '', 'test/b.test.ts': '' }
@@ -55,5 +59,12 @@ describe('please-style check', () => {
     const bad = run({ ...ORPHAN, 'code-organization.json': '{"colocated":true}' }, ['check', '<root>'])
     expect(bad.status).toBe(2)
     expect(bad.stderr).toContain('unknown key "colocated"')
+  })
+
+  test('exits 2 on a check option placed before `check` instead of dropping it', () => {
+    const res = run(ORPHAN, ['--strict', 'check', '<root>'])
+    expect(res.status).toBe(2)
+    expect(res.stderr).toContain('--strict is a check option')
+    expect(run(ORPHAN, ['--lang', 'en', 'check', '<root>']).status).toBe(0)
   })
 })

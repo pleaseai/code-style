@@ -70,15 +70,18 @@ code, so generated output passes lint on the first try.
   under `test/e2e/`.
 - Never write `*.test.ts` next to the source, and never use Vitest in-source
   tests (`if (import.meta.vitest)`).
-- Helpers shared by two or more test files go in `test/test-utils/`; a helper
-  used by one test file stays in that file.
+- Helpers shared by two or more test files go in the language's designated
+  location: `<test-root>/test-utils/` for TypeScript (`test/test-utils/` or
+  `tests/test-utils/`), `test/helpers/` for Dart, `src/testFixtures/` for
+  Kotlin and Java, and `tests/common/` for Rust. A helper used by one test file
+  stays in that file.
 - Not every source file needs a test. These rules say where a test goes, not
   whether it must exist.
 
 These are the ADR-0022 code-organization rules. Check them with `ast-grep scan`
 (structural rules from `@pleaseai/ast-grep-config`) and `please-style check`
-(file names and test paths); each warning links to a README that explains the
-fix.
+(file names and test paths); each `ast-grep scan` warning links to a README
+that explains the fix.
 
 ## JSON & `package.json`
 

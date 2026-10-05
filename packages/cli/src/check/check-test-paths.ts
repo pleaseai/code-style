@@ -75,20 +75,6 @@ function describeExpected(candidates: string[], unit: Unit, layout: TestLayout):
   return (primary.length > 0 ? primary : candidates).slice(0, 3).join(', ')
 }
 
-/**
- * `test-path-derivable-from-source` for path-derived languages: reports tests
- * whose source cannot be derived (orphans) and tests outside the test root.
- * Sources without tests are never reported.
- */
-export function checkTestPaths(
-  files: string[],
-  layouts: readonly TestLayout[],
-  base: CodeOrganizationConfig,
-  rootDir: string,
-): Finding[] {
-  return inspectTestPaths(files, layouts, base, rootDir).findings
-}
-
 type TestFileOutcome = Finding | 'fixture' | null
 
 function outsideRootFinding(file: string, unit: Unit, layout: TestLayout): Finding {
@@ -152,8 +138,11 @@ function skippedNotices(layout: TestLayout, unitless: string[], inFixtures: stri
 }
 
 /**
- * Like `checkTestPaths`, plus one aggregated notice per language for the test
- * files that belong to no package or module and so are not checked.
+ * `test-path-derivable-from-source` for path-derived languages: reports tests
+ * whose source cannot be derived (orphans) and tests outside the test root.
+ * Sources without tests are never reported. Adds one aggregated notice per
+ * language for the test files that belong to no package or module and so are
+ * not checked.
  */
 export function inspectTestPaths(
   files: string[],

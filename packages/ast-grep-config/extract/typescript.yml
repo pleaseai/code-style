@@ -300,29 +300,40 @@ rule:
         field: source
         pattern: $SRC
 ---
-# `export default function|class <name>`: the local declaration is public under `default`.
+# `export default function|class <name>` and `export default <name>`: the local declaration is public under `default`.
 id: export-default-local
 language: typescript
 severity: hint
 message: default-exported local declaration
 rule:
   any:
-    - kind: identifier
-    - kind: type_identifier
-  inside:
-    field: name
-    any:
-      - kind: function_declaration
-      - kind: generator_function_declaration
-      - kind: class_declaration
-      - kind: abstract_class_declaration
-    inside:
-      kind: export_statement
+    - any:
+        - kind: identifier
+        - kind: type_identifier
       inside:
-        kind: program
-      has:
-        regex: ^default$
-        stopBy: neighbor
+        field: name
+        any:
+          - kind: function_declaration
+          - kind: generator_function_declaration
+          - kind: class_declaration
+          - kind: abstract_class_declaration
+        inside:
+          kind: export_statement
+          inside:
+            kind: program
+          has:
+            regex: ^default$
+            stopBy: neighbor
+    # `const mockUser = …; export default mockUser`
+    - kind: identifier
+      inside:
+        field: value
+        kind: export_statement
+        inside:
+          kind: program
+        has:
+          regex: ^default$
+          stopBy: neighbor
 ---
 # `import foo from '…'`: importers see the module's `default` export.
 id: import-default

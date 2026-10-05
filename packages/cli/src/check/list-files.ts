@@ -1,3 +1,4 @@
+import type { Dirent } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -25,7 +26,15 @@ const IGNORED_DIRS = new Set([
 ])
 
 function walk(root: string, dir: string, out: string[]): void {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+  let entries: Dirent[]
+  try {
+    entries = readdirSync(dir, { withFileTypes: true })
+  }
+  catch {
+    // An unreadable directory (permissions, removed mid-walk) is skipped, not fatal.
+    return
+  }
+  for (const entry of entries) {
     if (entry.isDirectory()) {
       if (!IGNORED_DIRS.has(entry.name)) {
         walk(root, join(dir, entry.name), out)

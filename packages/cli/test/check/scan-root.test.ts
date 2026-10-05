@@ -1,6 +1,11 @@
+import type { CheckResult } from '../../src/check/types.js'
+import { spawnSync } from 'node:child_process'
+import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
+import { checkCodeOrganization } from '../../src/check/check-code-organization.js'
+import { ConfigError } from '../../src/check/errors.js'
 import { scopeResult } from '../../src/check/scan-root.js'
-import { checkFixture } from '../test-utils/fixture.js'
+import { checkFixture, createFixture } from '../test-utils/fixture.js'
 
 const PACKAGE = {
   'package.json': '{}',
@@ -12,6 +17,18 @@ const PACKAGE = {
   'test/test-utils/shared.ts': 'export const shared = 1\n',
   'test/a.test.ts': 'import { shared } from \'./test-utils/shared.js\'\n',
   'test/b.test.ts': 'import { shared } from \'./test-utils/shared.js\'\n',
+}
+
+/** Like `checkFixture`, with the fixture root a git work tree (the scan root is then the outermost marker). */
+function checkInGit(files: Record<string, string>, subdir: string): CheckResult {
+  const fixture = createFixture(files)
+  try {
+    expect(spawnSync('git', ['init', '-q'], { cwd: fixture.root }).status).toBe(0)
+    return checkCodeOrganization({ root: join(fixture.root, subdir) })
+  }
+  finally {
+    fixture.cleanup()
+  }
 }
 
 describe('scan root', () => {
@@ -40,9 +57,38 @@ describe('scan root', () => {
     expect(result.notices.some(n => n.includes('foo.test.ts'))).toBe(true)
   })
 
-  test('the outermost marker wins so a nested package resolves as from the top', () => {
-    const files = { 'package.json': '{}', 'packages/a/package.json': '{}', 'packages/a/src/x.ts': '', 'packages/a/test/x.test.ts': '', 'packages/a/test/y.test.ts': '' }
-    expect(checkFixture(files, {}, 'packages/a/test').findings).toEqual([expect.objectContaining({ kind: 'orphan-test', file: 'y.test.ts' })])
+  // The root config's env segment is applied only when the scan root is the top-level package.
+  const NESTED = {
+    'package.json': '{}',
+    'code-organization.json': '{"envSegments":["integration"]}',
+    'packages/a/package.json': '{}',
+    'packages/a/src/x.ts': '',
+    'packages/a/test/x.test.ts': '',
+    'packages/a/test/integration/x.test.ts': '',
+    'packages/a/test/y.test.ts': '',
+  }
+
+  test('inside git, the outermost marker wins so a nested package resolves as from the top', () => {
+    const result = checkInGit(NESTED, 'packages/a/test')
+    expect(result.findings).toEqual([expect.objectContaining({ kind: 'orphan-test', file: 'y.test.ts' })])
+  })
+
+  test('outside git, the nearest marker is the scan root', () => {
+    const result = checkFixture(NESTED, {}, 'packages/a/test')
+    expect(result.findings.map(f => f.file)).toEqual(['integration/x.test.ts', 'y.test.ts'])
+  })
+
+  test('a scoped check does not read an unrelated sibling package\'s config', () => {
+    const files = {
+      'package.json': '{}',
+      'packages/a/package.json': '{}',
+      'packages/a/src/x.ts': '',
+      'packages/a/test/y.test.ts': '',
+      'packages/b/package.json': '{}',
+      'packages/b/code-organization.json': '{',
+    }
+    expect(checkInGit(files, 'packages/a').findings).toEqual([expect.objectContaining({ kind: 'orphan-test', file: 'test/y.test.ts' })])
+    expect(() => checkInGit(files, '')).toThrow(ConfigError)
   })
 })
 

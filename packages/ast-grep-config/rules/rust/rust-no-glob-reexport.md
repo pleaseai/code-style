@@ -47,8 +47,11 @@ pub use crate::model::{Account, User};
 
 1. List the public items of the glob's target module (`cargo doc --open`, or
    read the module's `pub` items).
-2. Replace `*` with a braced list of the items callers actually use:
-   `pub use crate::model::{Account, User};`.
+2. Replace `*` with a braced list of every item the glob exports today:
+   `pub use crate::model::{Account, User};`. Leave an item out only when
+   removing it from the public API is intentional — downstream crates may use
+   it.
 3. Run `cargo check --all-targets`. Any "unresolved import" or "cannot find"
    error names an item that was reached through the glob; add it to the list.
+   This only covers this crate's own targets, not downstream callers.
 4. For a nested glob (`pub use a::{B, c::*};`), expand only the `*` part.

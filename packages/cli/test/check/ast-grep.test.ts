@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, test } from 'bun:test'
 import { resolutionAnchors, resolveToolchain, runExtraction } from '../../src/check/ast-grep.js'
@@ -8,19 +9,22 @@ import { checkFixture, createFixture } from '../test-utils/fixture.js'
 let cleanup = (): void => {}
 afterEach(() => cleanup())
 
+/** The shim name `astGrepBinary` looks for on this platform. */
+const SHIM = process.platform === 'win32' ? 'ast-grep.exe' : 'ast-grep'
+
 describe('resolveToolchain', () => {
   test('prefers the checked project\'s @ast-grep/cli but the CLI\'s own @pleaseai/ast-grep-config extract rules', () => {
     const fixture = createFixture({
       'package.json': '{}',
       'node_modules/@ast-grep/cli/package.json': '{"name":"@ast-grep/cli"}',
       'node_modules/@ast-grep/cli/postinstall.js': 'exports.resolveBinaryPath = () => null',
-      'node_modules/@ast-grep/cli/ast-grep': '',
+      [`node_modules/@ast-grep/cli/${SHIM}`]: '',
       'node_modules/@pleaseai/ast-grep-config/package.json': '{"name":"@pleaseai/ast-grep-config"}',
     })
     cleanup = fixture.cleanup
     const modules = join(fixture.root, 'node_modules')
     expect(resolveToolchain(resolutionAnchors(fixture.root))).toEqual({
-      bin: join(modules, '@ast-grep/cli/ast-grep'),
+      bin: join(modules, '@ast-grep/cli', SHIM),
       extractDir: resolveToolchain([fileURLToPath(import.meta.url)]).extractDir,
     })
     expect(resolveToolchain(resolutionAnchors(fixture.root)).extractDir).not.toStartWith(modules)
@@ -31,7 +35,7 @@ describe('resolveToolchain', () => {
       'package.json': '{}',
       'node_modules/@ast-grep/cli/package.json': '{"name":"@ast-grep/cli"}',
       'node_modules/@ast-grep/cli/postinstall.js': 'exports.resolveBinaryPath = () => null',
-      'node_modules/@ast-grep/cli/ast-grep': '',
+      [`node_modules/@ast-grep/cli/${SHIM}`]: '',
     })
     cleanup = fixture.cleanup
     const anchor = join(fixture.root, 'package.json')

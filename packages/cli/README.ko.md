@@ -57,9 +57,11 @@ bunx @pleaseai/code-style check       # 파일 이름, 테스트 경로, 공유 
 bunx @pleaseai/code-style check --strict   # 발견 사항이 있으면 exit 1 (위반을 없앤 뒤 CI용)
 ```
 
-모든 경고는 규칙의 slug와 수정 방법을 적은 README 경로를 함께 보여 줍니다.
-구조 규칙은 [`@pleaseai/ast-grep-config` README](../ast-grep-config/README.ko.md)를
-참고하세요.
+`ast-grep scan`의 모든 경고는 규칙의 slug와 수정 방법을 적은 README 경로를
+함께 보여 줍니다. 구조 규칙은
+[`@pleaseai/ast-grep-config` README](../ast-grep-config/README.ko.md)를
+참고하세요. `please-style check`의 발견 사항은 slug를 보여 주며, 각 검사는
+[`please-style check`](#please-style-check)에 설명되어 있습니다.
 
 ## `please-style check`
 
@@ -67,10 +69,14 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 있으면 exit 1 (
 [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md)의
 3층 경로 검사기로, ast-grep이 보지 못하는 것(파일 이름, 테스트 경로, 헬퍼 공유
 여부)을 맡습니다. [`@pleaseai/ast-grep-config`](../ast-grep-config)에 들어 있는
-추출 규칙을 `@ast-grep/cli`의 `ast-grep` 바이너리로 실행하며, 둘 다 검사하는
-프로젝트에서 먼저 찾고 없으면 CLI 자신의 설치에서 찾습니다. 두 패키지는 이
-패키지의 선택적 peer dependency이므로 프로젝트에 설치하세요. `init`의
-**ast-grep** 도구가 설치해 줍니다.
+추출 규칙을 `@ast-grep/cli`의 `ast-grep` 바이너리로 실행합니다. 추출 규칙은
+`check` 내부 구현이라 이 CLI의 코드와 맞아야 하므로, CLI가 일반 의존성으로 가진
+`@pleaseai/ast-grep-config`에서 가져옵니다. 검사하는 프로젝트의 사본은 CLI 쪽을
+찾지 못할 때만 씁니다(프로젝트의 사본은 `sgconfig.yml`이 가리키는 lint
+`rules/`를 위한 것입니다). 바이너리는 검사하는 프로젝트에서 먼저 찾으므로
+프로젝트가 고정한 ast-grep 버전이 우선하고, 없으면 CLI 자신의 설치에서 찾습니다.
+`@ast-grep/cli`는 이 패키지의 선택적 peer dependency이므로 프로젝트에
+설치하세요. `init`의 **ast-grep** 도구가 설치해 줍니다.
 
 ```bash
 bun add -D @pleaseai/ast-grep-config @ast-grep/cli
@@ -88,14 +94,14 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
 | `[path]` | 검사할 디렉터리 (기본값: 현재 디렉터리) |
 | `--json` | 결과를 JSON(`root`, `findings`, `notices`)으로 출력 |
 | `--strict` | 발견 사항이 하나라도 있으면 exit 1 (기본: 경고만) |
-| `--config <file>` | 설정 파일 (기본값: `<path>/code-organization.json`) |
+| `--config <file>` | 설정 파일 (기본값: 둘러싼 프로젝트 루트의 `code-organization.json`, 위쪽에 프로젝트 표지 파일이 없으면 `<path>`의 것) |
 | `--help`, `-h` | `check` 사용법 출력 |
 
 | 종료 코드 | 의미 |
 | --- | --- |
 | `0` | 발견 사항 없음, 또는 경고만 있음(기본) |
 | `1` | `--strict`에서 발견 사항 있음 |
-| `2` | 사용법 오류, 설정 오류, 또는 `@pleaseai/ast-grep-config` / `@ast-grep/cli`를 찾지 못함 |
+| `2` | 사용법 오류, 설정 오류, 또는 추출이 필요한 파일이 있는데 `@ast-grep/cli`를 찾지 못함 (맞는 소스가 없는 트리는 추출이 필요 없음) |
 
 검사 내용은 다음과 같습니다.
 
@@ -133,9 +139,13 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
 
 ### 설정
 
-검사하는 디렉터리(또는 패키지 디렉터리, 루트 설정에 더해짐)에 선택적으로
+둘러싼 프로젝트 루트(`[path]`의 스캔 루트, 위쪽에 프로젝트 표지 파일이 없으면
+검사하는 디렉터리 자체) 또는 패키지 디렉터리(루트 설정에 더해짐)에 선택적으로
 `code-organization.json`을 둘 수 있습니다. 설정은 이름을 **추가**만 할 수
-있습니다. 테스트를 소스 옆에 두거나 검사를 끄는 옵션은 없습니다.
+있습니다. 하위 디렉터리를 검사할 때는 그 경로에 걸친 패키지(그 디렉터리를
+감싸거나 그 안에 있는 패키지)의 설정만 읽으므로, 관계없는 형제 패키지의 설정이
+깨져 있어도 검사가 실패하지 않습니다. 테스트를 소스 옆에 두거나 검사를 끄는
+옵션은 없습니다.
 
 ```json
 {

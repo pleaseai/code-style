@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { dirname, join, relative } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, test } from 'bun:test'
 
@@ -12,10 +13,25 @@ const PACKAGE = fileURLToPath(new URL('../../', import.meta.url))
 
 // The native binary from the @ast-grep/cli devDependency, skipping the JS shim
 // (bun blocks its postinstall by default, and the shim then warns per call).
+// Mirrors `astGrepBinary` in packages/cli/src/check/ast-grep.ts.
 const require = createRequire(import.meta.url)
 const CLI_DIR = dirname(require.resolve('@ast-grep/cli/package.json'))
-const { resolveBinaryPath } = require(join(CLI_DIR, 'postinstall.js')) as { resolveBinaryPath: () => string | null }
-const AST_GREP = resolveBinaryPath() ?? join(CLI_DIR, 'ast-grep')
+
+function astGrepBinary(): string {
+  try {
+    const { resolveBinaryPath } = require(join(CLI_DIR, 'postinstall.js')) as { resolveBinaryPath: () => string | null }
+    const native = resolveBinaryPath()
+    if (native != null && existsSync(native)) {
+      return native
+    }
+  }
+  catch {
+    // Fall through to the shim.
+  }
+  return join(CLI_DIR, process.platform === 'win32' ? 'ast-grep.exe' : 'ast-grep')
+}
+
+const AST_GREP = astGrepBinary()
 
 let cleanup = (): void => {}
 afterEach(() => cleanup())
@@ -37,6 +53,8 @@ const PROJECT = {
   'test/sum.test.ts': 'class TestOnlyError extends Error {}',
   'src/foo.test.mts': 'export class FooError extends Error {}',
   'src/foo.spec.cts': 'export class FooError extends Error {}',
+  'src/__tests__/setup.ts': 'class SetupError extends Error {}',
+  'src/__tests__/render.tsx': 'class RenderError extends Error {}',
   'vite.config.ts': 'export default defineConfig({})',
   'app/pages/index.ts': 'export default definePageMeta({})',
   'app/app.config.ts': 'export default defineAppConfig({})',
@@ -76,11 +94,14 @@ const EXPECTED = [
 
 function scan(cwd: string, args: string[]): string[] {
   const res = spawnSync(AST_GREP, ['scan', ...args, '--json=stream', '.'], { cwd, encoding: 'utf-8' })
+  if (res.error != null || res.status !== 0) {
+    throw new Error(`ast-grep scan failed (${AST_GREP}): ${res.error?.message ?? res.stderr}`)
+  }
   expect(res.status).toBe(0)
   return res.stdout.trim().split('\n').filter(Boolean).map((line) => {
     const m = JSON.parse(line) as { file: string, ruleId: string, severity: string, range: { start: { line: number } } }
     expect(m.severity).toBe('warning')
-    return `${m.file}:${m.range.start.line + 1} ${m.ruleId}`
+    return `${m.file.split('\\').join('/')}:${m.range.start.line + 1} ${m.ruleId}`
   }).sort()
 }
 

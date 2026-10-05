@@ -75,5 +75,5 @@ Error classes are plain TypeScript, so they move to `errors.ts`, not to a
 
 ## Exempt files
 
-`errors.ts`, `errors.tsx`, and test code (`*.test.tsx`, `*.spec.tsx`, anything under
-`test/` or `tests/`) are ignored.
+`errors.ts`, `errors.tsx`, `*.d.ts`, and test code (`*.test.tsx`, `*.spec.tsx`, anything under
+`test/`, `tests/`, or `__tests__/`) are ignored.

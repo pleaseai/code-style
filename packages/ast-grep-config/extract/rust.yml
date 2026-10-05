@@ -159,14 +159,15 @@ rule:
 ---
 # A `mod x;` written inside a token tree (a `macro_rules!` body or a macro
 # invocation such as `cfg_if! { … }`) loads `x.rs` wherever the macro expands,
-# but is not a `mod_item` node, so mod-decl does not see it.
+# but is not a `mod_item` node, so mod-decl does not see it. The name may be a
+# macro metavariable (`mod $name;`), known only at the call site.
 id: macro-mod-decl
 language: rust
 severity: hint
 message: module declaration inside a macro body
 rule:
   kind: token_tree
-  regex: \bmod\s+(r#)?\w+\s*;
+  regex: \bmod\s+(r#|\$)?\w+\s*;
   not:
     inside:
       kind: token_tree

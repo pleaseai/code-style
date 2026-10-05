@@ -1,7 +1,7 @@
 import type { ExtractLanguage, ExtractMatch } from './ast-grep.js'
 import type { CheckOptions, CheckResult, Finding } from './types.js'
 import { existsSync, realpathSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, relative, resolve } from 'node:path'
 import process from 'node:process'
 import { runExtraction } from './ast-grep.js'
 import { dartFilenames, generatedDartFiles, inspectFilenames, typescriptFilenames } from './check-filenames.js'
@@ -52,7 +52,8 @@ export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   if (options.configPath != null && !existsSync(options.configPath)) {
     throw new ConfigError(`config file not found: ${options.configPath}`)
   }
-  const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath != null }
+  const scope = relative(root, requested).split('\\').join('/')
+  const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath != null, scope }
   const files = listFiles(root)
   const fileSet = new Set(files)
   // The requested directory's own install (a monorepo package's ast-grep) wins over the scan root's.

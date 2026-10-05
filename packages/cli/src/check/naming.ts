@@ -3,8 +3,15 @@
  * (ADR-0022 §3: the only language-specific code besides path derivation).
  */
 
+/**
+ * Splits an identifier into lowercase words. A mixed-case acronym (`OAuth`,
+ * `iOS`, `IPv6`) cannot be told apart from two words and splits as written
+ * (`o-auth`); `nameKey` is unaffected because it drops the separators.
+ */
 function words(name: string): string[] {
   return name
+    // A plural acronym is one word: checkURLs → checkURLS, IDs → IDS
+    .replace(/([A-Z]{2,})s(?![a-z])/g, '$1S')
     // fooBar → foo Bar, v2Api → v2 Api
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     // HTTPServer → HTTP Server

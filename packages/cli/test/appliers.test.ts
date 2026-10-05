@@ -83,7 +83,7 @@ describe('AGENTS.md rules block', () => {
     expect(body).toContain('please-style check')
   })
 
-  test('omits the ast-grep pointer unless ast-grep is selected or already a dependency', async () => {
+  test('omits the ast-grep pointer unless ast-grep is selected or both its packages are already dependencies', async () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: ['agents-md'] })
     const bare = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
     expect(bare).not.toContain('please-style check')
@@ -93,7 +93,12 @@ describe('AGENTS.md rules block', () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: ['agents-md', 'ast-grep'] })
     expect(readFileSync(join(dir, 'AGENTS.md'), 'utf-8')).toContain('please-style check')
 
+    // The pointer names the rules package's README, so the binary alone is not enough.
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ devDependencies: { '@ast-grep/cli': '^0.45.3' } }))
+    await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: [] })
+    expect(readFileSync(join(dir, 'AGENTS.md'), 'utf-8')).not.toContain('please-style check')
+
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ devDependencies: { '@ast-grep/cli': '^0.45.3', '@pleaseai/ast-grep-config': '^0.0.1' } }))
     await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: [] })
     expect(readFileSync(join(dir, 'AGENTS.md'), 'utf-8')).toContain('please-style check')
   })

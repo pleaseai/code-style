@@ -137,14 +137,16 @@ const AGENTS_CODE_ORGANIZATION = `- Code organization (named exports, file names
 /**
  * The code-organization pointer needs the ast-grep tooling: include it when
  * `ast-grep` is among the selected tools or the project already depends on
- * `@ast-grep/cli`. Without selection info (`selectedToolIds` unset) it is kept.
+ * both `@ast-grep/cli` and `@pleaseai/ast-grep-config` (the README it points
+ * at). Without selection info (`selectedToolIds` unset) it is kept.
  */
 function wantsCodeOrganization(ctx: ToolContext): boolean {
   if (ctx.selectedToolIds == null || ctx.selectedToolIds.includes('ast-grep')) {
     return true
   }
   try {
-    return isPackageInstalled(readPackageJson(ctx.cwd), '@ast-grep/cli')
+    const pkg = readPackageJson(ctx.cwd)
+    return isPackageInstalled(pkg, '@ast-grep/cli') && isPackageInstalled(pkg, '@pleaseai/ast-grep-config')
   }
   catch {
     return false

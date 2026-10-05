@@ -10,3 +10,5 @@ invalid:
   - class ParseError extends Error {}
   - class Timeout extends AppException {}
   - 'final class QuotaExceeded extends DomainError { QuotaExceeded() : super(); }'
+  # Matched only by its own name: the supertype is not named like an error.
+  - class TimeoutError extends Base {}

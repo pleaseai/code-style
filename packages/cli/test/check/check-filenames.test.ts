@@ -105,6 +105,11 @@ describe('code-filename-matches-primary-symbol (TypeScript)', () => {
     expect(result.notices.join('\n')).toContain('(default export)')
   })
 
+  test('a default export with a comment between `export` and `default` is labelled a default export', () => {
+    const result = checkFixture({ ...PKG, 'src/loader.ts': 'const foo = 1\nexport /* c */ default foo' })
+    expect(result.notices.join('\n')).toContain('(default export)')
+  })
+
   test('a Dart file with a generated-code header is exempt from the name check', () => {
     expect(findingsFor({
       'pubspec.yaml': 'name: demo',
@@ -167,6 +172,10 @@ describe('code-filename-matches-primary-symbol (TypeScript exports)', () => {
 
   test.each(['ts', 'tsx'])('a dotted namespace counts as its outermost name (.%s)', (ext) => {
     expect(findingsFor({ ...PKG, [`src/foo.${ext}`]: 'export namespace Foo.Bar { export class A {} }' }, SLUG)).toEqual([])
+    // Only the outermost name is public: a mismatching one is still judged (inner names would leave the file unjudged).
+    const mismatch = findingsFor({ ...PKG, [`src/foo.${ext}`]: 'export namespace Bar.Baz { export class User {} }' }, SLUG)
+    expect(mismatch.map(f => f.file)).toEqual([`src/foo.${ext}`])
+    expect(mismatch[0]?.message).toContain(`bar.${ext}`)
     const findings = findingsFor({ ...PKG, [`src/run.${ext}`]: 'export namespace Foo.Bar.Baz {}\nexport function run() {}\nnamespace Hidden.X {}' }, SLUG)
     expect(findings).toEqual([])
   })

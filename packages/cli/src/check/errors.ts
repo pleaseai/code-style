@@ -6,7 +6,7 @@ export class ConfigError extends Error {
   }
 }
 
-/** The ast-grep binary is missing or exited with an error. */
+/** The ast-grep binary failed to run or exited with an error (a missing binary is a `MissingDependencyError`). */
 export class AstGrepError extends Error {
   constructor(message: string) {
     super(message)

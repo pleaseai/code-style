@@ -74,5 +74,5 @@ Only the location is checked. `errors.ts` may contain helpers and imports.
 
 ## Exempt files
 
-`errors.ts` (also `errors.mts`, `errors.cts`), `*.d.ts`, and test code (`*.test.{ts,mts,cts}`, `*.spec.{ts,mts,cts}`, anything under
-`test/` or `tests/`) are ignored.
+`errors.ts` (also `errors.mts`, `errors.cts`), `*.d.ts` (also `*.d.mts`, `*.d.cts`), and test code (`*.test.{ts,mts,cts}`, `*.spec.{ts,mts,cts}`, anything under
+`test/`, `tests/`, or `__tests__/`) are ignored.
