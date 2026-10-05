@@ -89,6 +89,68 @@ export function checkTestPaths(
   return inspectTestPaths(files, layouts, base, rootDir).findings
 }
 
+type TestFileOutcome = Finding | 'fixture' | null
+
+function outsideRootFinding(file: string, unit: Unit, layout: TestLayout): Finding {
+  return {
+    slug: SLUG,
+    kind: 'test-outside-root',
+    severity: 'warning',
+    language: layout.language,
+    file,
+    message: `Test file is outside the test root. Move it under ${unit.testRoots.map(r => `${joinPath(unit.dir, r)}/`).join(' or ')}, mirroring the path of the source it tests.`,
+  }
+}
+
+function orphanFinding(file: string, testRoot: string, candidates: string[], unit: Unit, layout: TestLayout): Finding {
+  return {
+    slug: SLUG,
+    kind: 'orphan-test',
+    severity: 'warning',
+    language: layout.language,
+    file,
+    message: `No source file matches this test's path (expected ${describeExpected(candidates, unit, layout)}). Move the test to mirror the path of the source it tests; a test with no single source file belongs under ${joinPath(unit.dir, testRoot)}/e2e/.`,
+  }
+}
+
+/** Classifies one test file of a unit: a finding, `'fixture'` when it belongs to a fixture project, or `null` when it is fine or exempt. */
+function inspectUnitTestFile(file: string, unit: Unit, layout: TestLayout, fileSet: Set<string>): TestFileOutcome {
+  const rel = relativeTo(file, unit.dir)
+  // A fixture project's tests are inputs to the enclosing package's tests, not tests of its sources.
+  if (unit.fixtureDirs?.some(dir => isUnder(rel, dir)) === true) {
+    return 'fixture'
+  }
+  const testRoot = unit.testRoots.find(root => isUnder(rel, root) && rel !== root)
+  if (testRoot == null) {
+    return layout.reportOutsideRoot(rel) ? outsideRootFinding(file, unit, layout) : null
+  }
+  if (layout.helperDirs(unit).some(dir => isUnder(rel, dir))) {
+    return null
+  }
+  const inner = relativeTo(rel, testRoot)
+  const first = inner.split('/')[0] ?? ''
+  if (inner.includes('/') && E2E_SEGMENTS.includes(first)) {
+    return null
+  }
+  const candidates = candidateSources(inner, unit, layout, false)
+  if (candidates.some(c => fileSet.has(c)) || candidateSources(inner, unit, layout).some(c => fileSet.has(c))) {
+    return null
+  }
+  return orphanFinding(file, testRoot, candidates, unit, layout)
+}
+
+/** Aggregated notices for the test files of `layout` that were not checked. */
+function skippedNotices(layout: TestLayout, unitless: string[], inFixtures: string[]): string[] {
+  const notices: string[] = []
+  if (unitless.length > 0) {
+    notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${exampleList(unitless)}`)
+  }
+  if (inFixtures.length > 0) {
+    notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${inFixtures.length} test file(s) inside fixture projects (a ${layout.language === 'dart' ? 'pubspec.yaml' : 'package.json'} under a test root): ${exampleList(inFixtures)}`)
+  }
+  return notices
+}
+
 /**
  * Like `checkTestPaths`, plus one aggregated notice per language for the test
  * files that belong to no package or module and so are not checked.
@@ -111,57 +173,18 @@ export function inspectTestPaths(
         continue
       }
       const unit = unitOf(file, units)
+      const outcome = unit == null ? null : inspectUnitTestFile(file, unit, layout, fileSet)
       if (unit == null) {
         unitless.push(file)
-        continue
       }
-      const rel = relativeTo(file, unit.dir)
-      // A fixture project's tests are inputs to the enclosing package's tests, not tests of its sources.
-      if (unit.fixtureDirs?.some(dir => isUnder(rel, dir)) === true) {
+      else if (outcome === 'fixture') {
         inFixtures.push(file)
-        continue
       }
-      const testRoot = unit.testRoots.find(root => isUnder(rel, root) && rel !== root)
-      if (testRoot == null) {
-        if (layout.reportOutsideRoot(rel)) {
-          findings.push({
-            slug: SLUG,
-            kind: 'test-outside-root',
-            severity: 'warning',
-            language: layout.language,
-            file,
-            message: `Test file is outside the test root. Move it under ${unit.testRoots.map(r => `${joinPath(unit.dir, r)}/`).join(' or ')}, mirroring the path of the source it tests.`,
-          })
-        }
-        continue
+      else if (outcome != null) {
+        findings.push(outcome)
       }
-      if (layout.helperDirs(unit).some(dir => isUnder(rel, dir))) {
-        continue
-      }
-      const inner = relativeTo(rel, testRoot)
-      const first = inner.split('/')[0] ?? ''
-      if (inner.includes('/') && E2E_SEGMENTS.includes(first)) {
-        continue
-      }
-      const candidates = candidateSources(inner, unit, layout, false)
-      if (candidates.some(c => fileSet.has(c)) || candidateSources(inner, unit, layout).some(c => fileSet.has(c))) {
-        continue
-      }
-      findings.push({
-        slug: SLUG,
-        kind: 'orphan-test',
-        severity: 'warning',
-        language: layout.language,
-        file,
-        message: `No source file matches this test's path (expected ${describeExpected(candidates, unit, layout)}). Move the test to mirror the path of the source it tests; a test with no single source file belongs under ${joinPath(unit.dir, testRoot)}/e2e/.`,
-      })
     }
-    if (unitless.length > 0) {
-      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${unitless.length} test file(s) outside any package (${UNIT_MARKER[layout.language]}): ${exampleList(unitless)}`)
-    }
-    if (inFixtures.length > 0) {
-      notices.push(`${LANGUAGE_LABEL[layout.language]}: test-path check skipped ${inFixtures.length} test file(s) inside fixture projects (a ${layout.language === 'dart' ? 'pubspec.yaml' : 'package.json'} under a test root): ${exampleList(inFixtures)}`)
-    }
+    notices.push(...skippedNotices(layout, unitless, inFixtures))
   }
   return { findings, notices }
 }
