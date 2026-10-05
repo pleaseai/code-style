@@ -1,0 +1,43 @@
+packages/ast-grep-config/extract/tsx.yml
+  s_79262c7689b9bc::t_8e989f7d762e82 57-80
+packages/ast-grep-config/extract/typescript.yml
+  s_79262c7689b9bc::t_e8346bf8b42f5d 57-80
+packages/cli/README.md
+  s_79262c7689b9bc::t_35ef6885dd8333 157,216-221,263,265
+packages/cli/src/check/check-code-organization.ts
+  s_79262c7689b9bc::t_0467ee417f8b75 64-65,74-75
+packages/cli/src/check/check-helpers.ts
+  s_79262c7689b9bc::t_9ae79f36c381b5 7,82-83,86,189,191-193,195,268-274,281,291,300-301,308,310
+packages/cli/src/check/check-test-paths.ts
+  s_79262c7689b9bc::t_8d04d8340486b7 163
+packages/cli/src/check/layouts.ts
+  s_79262c7689b9bc::t_17d9bc02bb79c7 77-102,115,146-147,153
+packages/cli/src/check/run-check.ts
+  s_79262c7689b9bc::t_b85df4ef383eb9 10
+packages/cli/src/i18n.ts
+  s_79262c7689b9bc::t_9054ee17525ff1 82,135
+packages/cli/test/check/check-filenames.test.ts
+  s_79262c7689b9bc::t_01af8cde046a22 72-77
+packages/cli/test/check/check-helpers.test.ts
+  s_79262c7689b9bc::t_e9271fc8338687 87-106,227-255
+packages/cli/test/check/check-test-paths.test.ts
+  s_79262c7689b9bc::t_bc6002055c85bb 138-150
+packages/cli/test/check/run-check.test.ts
+  s_79262c7689b9bc::t_ebfd1205523abc 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5d56ef056ae536c1a59b05c06e28dfcaac9641c0",
+  "prompts": {},
+  "sessions": {
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
