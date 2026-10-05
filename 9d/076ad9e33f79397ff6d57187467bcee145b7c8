@@ -1,0 +1,35 @@
+packages/ast-grep-config/extract/rust.yml
+  s_79262c7689b9bc::t_a3be986f31616a 132-134
+packages/ast-grep-config/extract/tsx.yml
+  s_79262c7689b9bc::t_af57f5abf8d7d5 164-166,201
+packages/ast-grep-config/extract/typescript.yml
+  s_79262c7689b9bc::t_df4a0d1dd0bcf6 164-166,201
+packages/cli/README.md
+  s_79262c7689b9bc::t_4dd4e20e45fb3c 234
+packages/cli/src/check/check-helpers.ts
+  s_79262c7689b9bc::t_54cca422c2433d 148-154,157-161,176
+packages/cli/src/check/check-rust.ts
+  s_79262c7689b9bc::t_97292259d8493b 4,10-13,152-171,236,264,284-289,312-315
+packages/cli/test/check/check-filenames.test.ts
+  s_79262c7689b9bc::t_7b767e74dcf7d5 91-97,137-142
+packages/cli/test/check/check-helpers.test.ts
+  s_79262c7689b9bc::t_b9903a532b826f 77-97,111-121
+packages/cli/test/check/check-rust.test.ts
+  s_79262c7689b9bc::t_a49365484791d6 188-211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9d076ad9e33f79397ff6d57187467bcee145b7c8",
+  "prompts": {},
+  "sessions": {
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
