@@ -59,8 +59,8 @@
   "devDependencies": {
     "@ast-grep/cli": "0.45.3",
     "@types/bun": "^1.3.12",
-    "@types/node": "^25.6.0",
-    "tsdown": "^0.22.1",
-    "typescript": "^6.0.2"
+    "@types/node": "^26.4.1",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2"
   }
 }
