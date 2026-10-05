@@ -1,0 +1,106 @@
+id: kotlin-error-outside-errors-file
+snapshots:
+  'class Fatal : Throwable()':
+    labels:
+    - source: 'class Fatal : Throwable()'
+      style: primary
+      start: 0
+      end: 25
+    - source: Throwable
+      style: secondary
+      start: 14
+      end: 23
+    - source: Throwable()
+      style: secondary
+      start: 14
+      end: 25
+    - source: Throwable()
+      style: secondary
+      start: 14
+      end: 25
+  'class PaymentError(msg: String) : Base(msg)':
+    labels:
+    - source: 'class PaymentError(msg: String) : Base(msg)'
+      style: primary
+      start: 0
+      end: 43
+    - source: PaymentError
+      style: secondary
+      start: 6
+      end: 18
+    - source: Base(msg)
+      style: secondary
+      start: 34
+      end: 43
+  'class Timeout : AppException()':
+    labels:
+    - source: 'class Timeout : AppException()'
+      style: primary
+      start: 0
+      end: 30
+    - source: AppException
+      style: secondary
+      start: 16
+      end: 28
+    - source: AppException()
+      style: secondary
+      start: 16
+      end: 30
+    - source: AppException()
+      style: secondary
+      start: 16
+      end: 30
+  'class UserNotFoundException(id: String) : RuntimeException("missing $id")':
+    labels:
+    - source: 'class UserNotFoundException(id: String) : RuntimeException("missing $id")'
+      style: primary
+      start: 0
+      end: 73
+    - source: RuntimeException
+      style: secondary
+      start: 42
+      end: 58
+    - source: RuntimeException("missing $id")
+      style: secondary
+      start: 42
+      end: 73
+    - source: RuntimeException("missing $id")
+      style: secondary
+      start: 42
+      end: 73
+  'class Wrapped : kotlin.IllegalStateException()':
+    labels:
+    - source: 'class Wrapped : kotlin.IllegalStateException()'
+      style: primary
+      start: 0
+      end: 46
+    - source: kotlin.IllegalStateException
+      style: secondary
+      start: 16
+      end: 44
+    - source: kotlin.IllegalStateException()
+      style: secondary
+      start: 16
+      end: 46
+    - source: kotlin.IllegalStateException()
+      style: secondary
+      start: 16
+      end: 46
+  'object Unauthorized : DomainError()':
+    labels:
+    - source: 'object Unauthorized : DomainError()'
+      style: primary
+      start: 0
+      end: 35
+    - source: DomainError
+      style: secondary
+      start: 22
+      end: 33
+    - source: DomainError()
+      style: secondary
+      start: 22
+      end: 35
+    - source: DomainError()
+      style: secondary
+      start: 22
+      end: 35

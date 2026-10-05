@@ -1,6 +1,6 @@
 import process from 'node:process'
 import { afterEach, describe, expect, test } from 'bun:test'
-import { detectLocale, setLocale, t } from './i18n.js'
+import { detectLocale, setLocale, t } from '../src/i18n.js'
 
 describe('detectLocale', () => {
   const originalLang = process.env.LANG

@@ -1,0 +1,394 @@
+# Layer-3 extraction rules (ADR-0022 §3) for typescript. Run by `please-style check`
+# with `ast-grep scan -r`; never part of the consumer-facing rule set.
+# Every rule matches a *name node*, so the match text is the symbol name.
+id: export-name
+language: typescript
+severity: hint
+message: exported symbol
+rule:
+  any:
+    # export function|class|interface|type|enum <name>
+    - all:
+        - any:
+            - kind: identifier
+            - kind: type_identifier
+        - inside:
+            field: name
+            any:
+              - kind: function_declaration
+              - kind: generator_function_declaration
+              - kind: class_declaration
+              - kind: abstract_class_declaration
+              - kind: interface_declaration
+              - kind: type_alias_declaration
+              - kind: enum_declaration
+              - kind: function_signature
+            inside:
+              any:
+                - kind: export_statement
+                  inside:
+                    kind: program
+                  not:
+                    has:
+                      regex: ^default$
+                - kind: ambient_declaration
+                  inside:
+                    kind: export_statement
+                    inside:
+                      kind: program
+    # export namespace|module <name> { … } (the namespace, never its members)
+    - all:
+        - kind: identifier
+        - inside:
+            field: name
+            any:
+              - kind: internal_module
+              - kind: module
+            inside:
+              any:
+                - kind: export_statement
+                  inside:
+                    kind: program
+                - kind: ambient_declaration
+                  inside:
+                    kind: export_statement
+                    inside:
+                      kind: program
+    # export namespace Foo.Bar { … } (dotted: the outermost name `Foo` is the public one)
+    - all:
+        - kind: identifier
+        - inside:
+            kind: nested_identifier
+            stopBy:
+              not:
+                any:
+                  - kind: member_expression
+                  - kind: nested_identifier
+            inside:
+              any:
+                - kind: internal_module
+                - kind: module
+              inside:
+                any:
+                  - kind: export_statement
+                    inside:
+                      kind: program
+                  - kind: ambient_declaration
+                    inside:
+                      kind: export_statement
+                      inside:
+                        kind: program
+    # export const|let <name> = …
+    - all:
+        - kind: identifier
+        - inside:
+            field: name
+            kind: variable_declarator
+            inside:
+              any:
+                - kind: lexical_declaration
+                - kind: variable_declaration
+              inside:
+                any:
+                  - kind: export_statement
+                    inside:
+                      kind: program
+                  - kind: ambient_declaration
+                    inside:
+                      kind: export_statement
+                      inside:
+                        kind: program
+    # export { local as <name> } / export { <name> } (local exports only)
+    - all:
+        - kind: identifier
+        - not:
+            regex: ^default$
+        - any:
+            - inside:
+                field: alias
+                kind: export_specifier
+                inside:
+                  kind: export_clause
+                  inside:
+                    kind: export_statement
+                    inside:
+                      kind: program
+                    not:
+                      has:
+                        field: source
+                        kind: string
+            - inside:
+                field: name
+                kind: export_specifier
+                not:
+                  has:
+                    field: alias
+                    any:
+                      - kind: identifier
+                      - kind: string
+                inside:
+                  kind: export_clause
+                  inside:
+                    kind: export_statement
+                    inside:
+                      kind: program
+                    not:
+                      has:
+                        field: source
+                        kind: string
+---
+# `export const { a } = obj` / `export const [a] = arr`: the bound names are not
+# extracted. The whole pattern is matched so the file reads as "unknown symbols"
+# and is excluded from the exactly-one-public-symbol check.
+id: export-destructure
+language: typescript
+severity: hint
+message: destructured export
+rule:
+  any:
+    - kind: object_pattern
+    - kind: array_pattern
+  inside:
+    field: name
+    kind: variable_declarator
+    inside:
+      any:
+        - kind: lexical_declaration
+        - kind: variable_declaration
+      inside:
+        any:
+          - kind: export_statement
+            inside:
+              kind: program
+          - kind: ambient_declaration
+            inside:
+              kind: export_statement
+              inside:
+                kind: program
+---
+# Re-exports (`export { a } from`, `export * from`, `export * as ns from`),
+# `export import a = b.c`, and default and string-named exports add public
+# symbols that export-name does not enumerate, so the file reads as "unknown symbols" like export-destructure.
+id: export-opaque
+language: typescript
+severity: hint
+message: re-export or default export
+rule:
+  kind: export_statement
+  inside:
+    kind: program
+  any:
+    - has:
+        field: source
+        kind: string
+    # `export import a = b.c`: an exported alias that export-name does not enumerate.
+    - has:
+        field: declaration
+        kind: import_alias
+    - has:
+        regex: ^default$
+        stopBy: neighbor
+    # `export { foo as default }` / `export { default }`
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          has:
+            kind: identifier
+            regex: ^default$
+    # `export { foo as "string name" }` / `export { "string name" as foo }`:
+    # string-literal specifier names are not enumerated by export-name.
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          has:
+            kind: string
+---
+id: helper-candidate
+language: typescript
+severity: hint
+message: test helper candidate
+rule:
+  all:
+    - any:
+        - kind: identifier
+        - kind: type_identifier
+    - regex: ^([cC]reateMock|[mM]ock|[fF]ake|[sS]tub)([A-Z0-9_$]|$)
+    - any:
+        - inside:
+            field: name
+            any:
+              - kind: function_declaration
+              - kind: generator_function_declaration
+              - kind: class_declaration
+              - kind: abstract_class_declaration
+            inside:
+              any:
+                - kind: program
+                - kind: export_statement
+                  inside:
+                    kind: program
+        - inside:
+            field: name
+            kind: variable_declarator
+            inside:
+              any:
+                - kind: lexical_declaration
+                - kind: variable_declaration
+              inside:
+                any:
+                  - kind: program
+                  - kind: export_statement
+                    inside:
+                      kind: program
+---
+# `export { local as exported }` (local exports only): the match is the local
+# name, `$ALIAS` the name importers see.
+id: export-local-alias
+language: typescript
+severity: hint
+message: aliased local export
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: export_specifier
+    has:
+      field: alias
+      kind: identifier
+      pattern: $ALIAS
+    inside:
+      kind: export_clause
+      inside:
+        kind: export_statement
+        inside:
+          kind: program
+        not:
+          has:
+            field: source
+            kind: string
+---
+id: import-name
+language: typescript
+severity: hint
+message: imported name
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: import_specifier
+    inside:
+      stopBy: end
+      kind: import_statement
+      has:
+        field: source
+        pattern: $SRC
+---
+id: import-namespace
+language: typescript
+severity: hint
+message: namespace import
+rule:
+  kind: identifier
+  inside:
+    kind: namespace_import
+    inside:
+      stopBy: end
+      kind: import_statement
+      has:
+        field: source
+        pattern: $SRC
+---
+# `export default function|class <name>` and `export default <name>`: the local declaration is public under `default`.
+id: export-default-local
+language: typescript
+severity: hint
+message: default-exported local declaration
+rule:
+  any:
+    - any:
+        - kind: identifier
+        - kind: type_identifier
+      inside:
+        field: name
+        any:
+          - kind: function_declaration
+          - kind: generator_function_declaration
+          - kind: class_declaration
+          - kind: abstract_class_declaration
+        inside:
+          kind: export_statement
+          inside:
+            kind: program
+          has:
+            regex: ^default$
+            stopBy: neighbor
+    # `const mockUser = …; export default mockUser`
+    - kind: identifier
+      inside:
+        field: value
+        kind: export_statement
+        inside:
+          kind: program
+        has:
+          regex: ^default$
+          stopBy: neighbor
+---
+# `import foo from '…'`: importers see the module's `default` export.
+id: import-default
+language: typescript
+severity: hint
+message: default import
+rule:
+  kind: identifier
+  inside:
+    kind: import_clause
+    inside:
+      stopBy: end
+      kind: import_statement
+      has:
+        field: source
+        pattern: $SRC
+---
+# Every local binding an import introduces (`import a = Ns.b`, `import a`, `import { a }`, `import { x as a }`, `import * as a`, `import a = require('…')`).
+# `export { a }` of such a binding is a re-export, not a local symbol.
+id: import-binding
+language: typescript
+severity: hint
+message: imported local binding
+rule:
+  any:
+    - kind: identifier
+      any:
+        - inside:
+            kind: import_clause
+        - inside:
+            kind: namespace_import
+        # `import x = require('./foo')`
+        - inside:
+            kind: import_require_clause
+        - inside:
+            field: alias
+            kind: import_specifier
+        - all:
+            - inside:
+                field: name
+                kind: import_specifier
+            - not:
+                inside:
+                  kind: import_specifier
+                  has:
+                    field: alias
+                    kind: identifier
+      inside:
+        stopBy: end
+        kind: import_statement
+    # `import Baz = Foo.Bar` (an `import_alias`, not an import_statement); `export import` is export-opaque's.
+    - kind: identifier
+      nthChild: 1
+      inside:
+        kind: import_alias
+        not:
+          inside:
+            kind: export_statement

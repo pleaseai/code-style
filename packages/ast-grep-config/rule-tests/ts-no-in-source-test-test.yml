@@ -1,0 +1,12 @@
+id: ts-no-in-source-test
+valid:
+  - if (import.meta.env.DEV) { log() }
+  - "const isTest = typeof import.meta.vitest !== 'undefined'"
+  - if (process.env.VITEST) { setup() }
+invalid:
+  - |
+    if (import.meta.vitest) {
+      const { it, expect } = import.meta.vitest
+      it('adds', () => expect(add(1, 2)).toBe(3))
+    }
+  - if (import.meta.vitest !== undefined) { run() }

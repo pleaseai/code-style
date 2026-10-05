@@ -1,0 +1,41 @@
+id: kotlin-error-outside-errors-file
+language: kotlin
+severity: warning
+message: >-
+  [code-error-types-in-dedicated-module] Exception type declared outside the
+  package's Errors.kt. Move it there. Fix guide:
+  node_modules/@pleaseai/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md
+note: >-
+  Move the class into `Errors.kt` in the same package directory (create it if
+  missing). Callers in the same package need no import change.
+url: https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md
+rule:
+  all:
+    - any:
+        - kind: class_declaration
+        - kind: object_declaration
+    - any:
+        # `: AppException(msg)`, `: RuntimeException()`, `: Throwable()`
+        - has:
+            kind: delegation_specifier
+            any:
+              - has:
+                  kind: user_type
+                  regex: (Error|Exception|Throwable)(<.*>)?$
+              - has:
+                  kind: constructor_invocation
+                  has:
+                    kind: user_type
+                    regex: (Error|Exception|Throwable)(<.*>)?$
+        # No type information: a class *named* like an error that has a supertype.
+        - all:
+            - has:
+                kind: type_identifier
+                regex: (Error|Exception)$
+            - has:
+                kind: delegation_specifier
+ignores:
+  - '**/Errors.kt'
+  - '**/src/test/**'
+  - '**/src/testFixtures/**'
+  - '**/src/androidTest/**'

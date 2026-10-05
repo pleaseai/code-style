@@ -1,0 +1,4 @@
+# Neutral ast-grep project config for `please-style check`. Passed with `-c` so the
+# checked project's own sgconfig.yml (e.g. `languageGlobs`) cannot change what the
+# extraction rules see. Carries no rules; they are given with `--rule`.
+ruleDirs: []

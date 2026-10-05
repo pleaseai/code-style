@@ -1,0 +1,16 @@
+id: tsx-error-outside-errors-file
+valid:
+  - class UserService {}
+  - class Repo extends BaseRepo {}
+  - class ErrorBoundaryState {}
+  - export class Formatter extends Base<ErrorLike> {}
+  - const e = new Error('boom')
+  # The name check belongs to the class that owns the `extends`, not an enclosing one.
+  - 'class OuterError { m() { class Helper extends Base {} } }'
+invalid:
+  - class NotFoundError extends Error {}
+  - 'export class ValidationError extends Error { constructor(m: string) { super(m) } }'
+  - export class Timeout extends TypeError {}
+  - export class InvoiceNotFound extends errors.AppError {}
+  - export abstract class DomainException extends Base {}
+  - export class PaymentDeclinedError extends DomainBase {}

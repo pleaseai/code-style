@@ -1,0 +1,51 @@
+{
+  "name": "@pleaseai/ast-grep-config",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "ast-grep rules that keep code agent-navigable (greppable symbols, dedicated error files, no in-source tests)",
+  "author": "PleaseAI",
+  "license": "MIT",
+  "homepage": "https://github.com/pleaseai/code-style/tree/main/packages/ast-grep-config#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pleaseai/code-style.git",
+    "directory": "packages/ast-grep-config"
+  },
+  "keywords": [
+    "ast-grep",
+    "lint",
+    "code-organization",
+    "agents",
+    "pleaseai"
+  ],
+  "exports": {
+    "./sgconfig.yml": "./sgconfig.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "extract",
+    "rule-tests",
+    "rules",
+    "sgconfig.yml"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "bun test && ast-grep test"
+  },
+  "peerDependencies": {
+    "@ast-grep/cli": "^0.45.3"
+  },
+  "peerDependenciesMeta": {
+    "@ast-grep/cli": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@ast-grep/cli": "0.45.3",
+    "@types/bun": "^1.3.12",
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.2"
+  }
+}

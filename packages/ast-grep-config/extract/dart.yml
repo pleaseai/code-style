@@ -1,0 +1,138 @@
+# Layer-3 extraction rules (ADR-0022 §3) for Dart. Run by `please-style check`
+# with `ast-grep scan -r`; never part of the consumer-facing rule set.
+# Every rule matches a *name node*, so the match text is the symbol name.
+id: top-level-name
+language: dart
+severity: hint
+message: top-level declaration
+rule:
+  kind: identifier
+  any:
+    - inside:
+        field: name
+        any:
+          - kind: class_declaration
+          - kind: mixin_declaration
+          - kind: enum_declaration
+          - kind: extension_declaration
+        inside:
+          kind: source_file
+    - inside:
+        field: name
+        any:
+          - kind: function_signature
+          - kind: getter_signature
+          - kind: setter_signature
+        inside:
+          any:
+            - kind: function_declaration
+            - kind: getter_declaration
+            - kind: setter_declaration
+          inside:
+            kind: source_file
+    - inside:
+        field: name
+        any:
+          - kind: initialized_identifier
+          - kind: static_final_declaration
+        inside:
+          stopBy: end
+          kind: top_level_variable_declaration
+          inside:
+            kind: source_file
+---
+id: top-level-type-alias
+language: dart
+severity: hint
+message: top-level typedef
+rule:
+  kind: type_identifier
+  inside:
+    kind: type_alias
+    inside:
+      kind: source_file
+---
+id: import-uri
+language: dart
+severity: hint
+message: imported library
+rule:
+  kind: configurable_uri
+  inside:
+    kind: import_specification
+---
+id: import-show
+language: dart
+severity: hint
+message: shown name
+rule:
+  kind: identifier
+  inside:
+    kind: combinator
+    regex: ^show\b
+    inside:
+      kind: import_specification
+      has:
+        field: uri
+        pattern: $SRC
+---
+# One match per `show` combinator. An import with several (`show A show B`)
+# filters the namespace successively, so the checker cannot union the names.
+id: import-show-combinator
+language: dart
+severity: hint
+message: show combinator
+rule:
+  kind: combinator
+  regex: ^show\b
+  inside:
+    kind: import_specification
+    has:
+      field: uri
+      pattern: $SRC
+---
+id: import-hide
+language: dart
+severity: hint
+message: hidden name
+rule:
+  kind: identifier
+  inside:
+    kind: combinator
+    regex: ^hide\b
+    inside:
+      kind: import_specification
+      has:
+        field: uri
+        pattern: $SRC
+---
+id: part-of
+language: dart
+severity: hint
+message: part file
+rule:
+  kind: part_of_directive
+---
+# `part 'other.dart';`: the part file's declarations belong to this library, so
+# its symbol set is unknown. Parts of the known generator suffixes (`x.g.dart`,
+# `x.freezed.dart`) declare private helpers and are not matched; any other part,
+# including a handwritten `x.custom.dart`, is.
+id: part-directive
+language: dart
+severity: hint
+message: library with parts
+rule:
+  kind: part_directive
+  not:
+    has:
+      field: uri
+      regex: \.(g|freezed)\.dart['"]$
+---
+# `export 'other.dart';` re-exports public symbols that top-level-name does not
+# enumerate, so the file reads as "unknown symbols" in the filename check.
+id: export-directive
+language: dart
+severity: hint
+message: re-export
+rule:
+  kind: library_export

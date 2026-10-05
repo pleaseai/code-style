@@ -26,6 +26,7 @@ jobs:
       eslint-config-released: ${{ steps.release.outputs['packages/eslint-config--release_created'] }}
       prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
       code-style-released: ${{ steps.release.outputs['packages/cli--release_created'] }}
+      ast-grep-config-released: ${{ steps.release.outputs['packages/ast-grep-config--release_created'] }}
     steps:
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -110,14 +111,38 @@ jobs:
             npm publish pleaseai-prettier-config-*.tgz --provenance --access public
           fi
 
+      # No build step: the package ships YAML rules and READMEs as-is.
+      - name: Publish @pleaseai/ast-grep-config
+        id: publish-ast-grep-config
+        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.ast-grep-config-released == 'true') }}
+        working-directory: packages/ast-grep-config
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "@pleaseai/ast-grep-config@$VERSION" version 2>/dev/null; then
+            echo "⚠ @pleaseai/ast-grep-config@$VERSION already published, skipping"
+          else
+            bun pm pack
+            npm publish pleaseai-ast-grep-config-*.tgz --provenance --access public
+          fi
+
+      # Published after @pleaseai/ast-grep-config: the CLI pins that package as a
+      # regular dependency, so it must already be on the registry. A failed
+      # ast-grep-config publish skips this step rather than ship an
+      # uninstallable CLI; a skipped one (not released) does not, so the step
+      # also checks the registry: an earlier run's publish may have failed.
       - name: Publish @pleaseai/code-style
-        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true') }}
+        if: ${{ !cancelled() && steps.publish-ast-grep-config.outcome != 'failure' && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.code-style-released == 'true') }}
         working-directory: packages/cli
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if npm view "@pleaseai/code-style@$VERSION" version 2>/dev/null; then
             echo "⚠ @pleaseai/code-style@$VERSION already published, skipping"
           else
+            CONFIG_VERSION=$(node -p "require('../ast-grep-config/package.json').version")
+            if [ -z "$(npm view "@pleaseai/ast-grep-config@$CONFIG_VERSION" version 2>/dev/null)" ]; then
+              echo "::error::@pleaseai/ast-grep-config@$CONFIG_VERSION is not on the registry; not publishing a CLI that depends on it"
+              exit 1
+            fi
             bun pm pack
             npm publish pleaseai-code-style-*.tgz --provenance --access public
           fi

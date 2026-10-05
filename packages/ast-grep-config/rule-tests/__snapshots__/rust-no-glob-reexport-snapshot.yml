@@ -1,0 +1,44 @@
+id: rust-no-glob-reexport
+snapshots:
+  pub use crate::model::*;:
+    labels:
+    - source: pub use crate::model::*;
+      style: primary
+      start: 0
+      end: 24
+    - source: pub
+      style: secondary
+      start: 0
+      end: 3
+    - source: crate::model::*
+      style: secondary
+      start: 8
+      end: 23
+  pub use crate::model::{User, nested::*};:
+    labels:
+    - source: pub use crate::model::{User, nested::*};
+      style: primary
+      start: 0
+      end: 40
+    - source: pub
+      style: secondary
+      start: 0
+      end: 3
+    - source: nested::*
+      style: secondary
+      start: 29
+      end: 38
+  pub(crate) use self::internal::*;:
+    labels:
+    - source: pub(crate) use self::internal::*;
+      style: primary
+      start: 0
+      end: 33
+    - source: pub(crate)
+      style: secondary
+      start: 0
+      end: 10
+    - source: self::internal::*
+      style: secondary
+      start: 15
+      end: 32

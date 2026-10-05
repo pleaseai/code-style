@@ -1,0 +1,95 @@
+import type { ExtractLanguage, ExtractMatch } from './ast-grep.js'
+import type { CheckOptions, CheckResult, Finding } from './types.js'
+import { existsSync, realpathSync } from 'node:fs'
+import { join, relative, resolve } from 'node:path'
+import process from 'node:process'
+import { runExtraction } from './ast-grep.js'
+import { dartFilenames, generatedDartFiles, inspectFilenames, typescriptFilenames } from './check-filenames.js'
+import { dartHelpers, inspectHelpers, jvmHelpers, typescriptHelpers } from './check-helpers.js'
+import { checkRust } from './check-rust.js'
+import { inspectTestPaths } from './check-test-paths.js'
+import { CONFIG_FILE, readConfigFile } from './config.js'
+import { ConfigError } from './errors.js'
+import { DART_LAYOUT, JAVA_LAYOUT, KOTLIN_LAYOUT, TEST_LAYOUTS, TYPESCRIPT_LAYOUT } from './layouts.js'
+import { listFiles } from './list-files.js'
+import { findScanRoot, scopeResult } from './scan-root.js'
+
+const EXTENSIONS: Record<ExtractLanguage, RegExp> = {
+  typescript: /\.(?:ts|mts|cts)$/,
+  tsx: /\.tsx$/,
+  dart: /\.dart$/,
+  kotlin: /\.kts?$/,
+  java: /\.java$/,
+  rust: /\.rs$/,
+}
+
+/** Paths per ast-grep invocation, kept well under OS argv limits. */
+const BATCH_SIZE = 200
+
+/**
+ * Matches in the listed files of `language`. The files are passed to ast-grep
+ * explicitly: its own directory walker skips hidden directories and
+ * gitignore-matched paths (listed tracked files included) and descends
+ * `node_modules` outside a git work tree. Explicit paths bypass that filtering.
+ */
+function extract(root: string, files: string[], fileSet: Set<string>, language: ExtractLanguage, anchorRoots: string[]): ExtractMatch[] {
+  const paths = files.filter(f => EXTENSIONS[language].test(f)).map(f => (f.startsWith('-') ? `./${f}` : f))
+  const out: ExtractMatch[] = []
+  for (let i = 0; i < paths.length; i += BATCH_SIZE) {
+    out.push(...runExtraction(root, language, paths.slice(i, i + BATCH_SIZE), anchorRoots).filter(m => fileSet.has(m.file)))
+  }
+  return out
+}
+
+/**
+ * Runs the ADR-0022 layer-3 path checker over `options.root`. Packages are
+ * discovered from the enclosing project (see `findScanRoot`); only findings
+ * below `options.root` are returned. Never throws for findings — every finding is a warning; callers decide the exit code.
+ */
+export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
+  const requested = realpathSync(resolve(options.root ?? process.cwd()))
+  const root = findScanRoot(requested)
+  if (options.configPath != null && !existsSync(options.configPath)) {
+    throw new ConfigError(`config file not found: ${options.configPath}`)
+  }
+  const scope = relative(root, requested).split('\\').join('/')
+  const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath != null, scope }
+  const files = listFiles(root)
+  const fileSet = new Set(files)
+  // The requested directory's own install (a monorepo package's ast-grep) wins over the scan root's.
+  const anchorRoots = [...new Set([requested, root])]
+
+  const ts = [...extract(root, files, fileSet, 'typescript', anchorRoots), ...extract(root, files, fileSet, 'tsx', anchorRoots)]
+  const dart = extract(root, files, fileSet, 'dart', anchorRoots)
+  const kotlin = extract(root, files, fileSet, 'kotlin', anchorRoots)
+  const java = extract(root, files, fileSet, 'java', anchorRoots)
+  const rust = extract(root, files, fileSet, 'rust', anchorRoots)
+
+  const tsUnits = TYPESCRIPT_LAYOUT.units(files, base, root)
+  const dartUnits = DART_LAYOUT.units(files, base, root)
+  const kotlinUnits = KOTLIN_LAYOUT.units(files, base, root)
+  const javaUnits = JAVA_LAYOUT.units(files, base, root)
+  const dartParts = new Set(dart.filter(m => m.ruleId === 'part-of').map(m => m.file))
+
+  const tsNames = inspectFilenames(ts, typescriptFilenames(tsUnits))
+  const dartNames = inspectFilenames(dart, dartFilenames(dartUnits, new Set([...dartParts, ...generatedDartFiles(root, new Set(dart.map(m => m.file)))])))
+  const testPaths = inspectTestPaths(files, TEST_LAYOUTS, base, root)
+  const helpers = [
+    inspectHelpers(typescriptHelpers(TYPESCRIPT_LAYOUT, tsUnits, ts, fileSet)),
+    inspectHelpers(dartHelpers(DART_LAYOUT, dartUnits, dart, fileSet)),
+    inspectHelpers(jvmHelpers(KOTLIN_LAYOUT, kotlinUnits, kotlin, files, root, { layout: JAVA_LAYOUT, units: javaUnits, matches: java })),
+    inspectHelpers(jvmHelpers(JAVA_LAYOUT, javaUnits, java, files, root, { layout: KOTLIN_LAYOUT, units: kotlinUnits, matches: kotlin })),
+  ]
+  const findings: Finding[] = [
+    ...testPaths.findings,
+    ...tsNames.findings,
+    ...dartNames.findings,
+    ...helpers.flatMap(h => h.findings),
+  ]
+  const rustResult = checkRust(root, files, rust, options.cargoMetadata)
+  findings.push(...rustResult.findings)
+
+  findings.sort((a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.slug.localeCompare(b.slug))
+  const notices = [...testPaths.notices, ...tsNames.notices, ...dartNames.notices, ...helpers.flatMap(h => h.notices), ...rustResult.notices]
+  return scopeResult({ root, findings, notices }, root, requested)
+}

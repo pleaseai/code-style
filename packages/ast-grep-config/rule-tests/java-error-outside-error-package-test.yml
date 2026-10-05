@@ -1,0 +1,14 @@
+id: java-error-outside-error-package
+valid:
+  - public class UserService {}
+  - public class Cache extends Base {}
+  - public class ErrorMessage {}
+  # Named like an error but without a superclass.
+  - public class ItemError {}
+  - 'public class Handler implements ErrorHandler {}'
+invalid:
+  - public class UserNotFoundException extends RuntimeException {}
+  - class Timeout extends AppException {}
+  - public class Fatal extends Throwable {}
+  - public class PaymentError extends Base {}
+  - 'public class Wrapped extends java.lang.IllegalStateException {}'

@@ -2,7 +2,7 @@
   "name": "@pleaseai/code-style",
   "type": "module",
   "version": "0.0.3",
-  "description": "CLI to set up PleaseAI code style (eslint, prettier, editorconfig, AGENTS.md) in any project",
+  "description": "CLI to set up PleaseAI code style (eslint, prettier, editorconfig, ast-grep, AGENTS.md) in any project and check code organization",
   "author": "PleaseAI",
   "license": "MIT",
   "homepage": "https://github.com/pleaseai/code-style#readme",
@@ -17,6 +17,7 @@
     "eslint",
     "prettier",
     "editorconfig",
+    "ast-grep",
     "agents",
     "pleaseai"
   ],
@@ -43,10 +44,20 @@
     "build": "tsdown",
     "test": "bun test"
   },
+  "peerDependencies": {
+    "@ast-grep/cli": "^0.45.3"
+  },
+  "peerDependenciesMeta": {
+    "@ast-grep/cli": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "@clack/prompts": "^1.2.0"
+    "@clack/prompts": "^1.2.0",
+    "@pleaseai/ast-grep-config": "workspace:*"
   },
   "devDependencies": {
+    "@ast-grep/cli": "0.45.3",
     "@types/bun": "^1.3.12",
     "@types/node": "^25.6.0",
     "tsdown": "^0.22.1",
