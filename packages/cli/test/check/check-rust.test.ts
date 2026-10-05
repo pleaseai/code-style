@@ -317,6 +317,17 @@ describe('rust module path edge cases', () => {
     expect(result.notices[0]).toContain('tests/cases/ok.rs')
   })
 
+  test('a raw string ending in a backslash does not hide a later runtime-loaded path', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'tests/compiletest.rs': 'fn main() { let p = r"C:\\"; let q = r#"a "b" \\"#; t.pass("tests/cases/*.rs"); }',
+      'tests/cases/ok.rs': 'fn main() {}',
+    }, stub([['lib', 'src/lib.rs'], ['test', 'tests/compiletest.rs']]))
+    expect(result.findings).toEqual([])
+    expect(result.notices[0]).toContain('tests/cases/ok.rs')
+  })
+
   test('a #[test] file under a fixture directory outside tests/ is withheld with an aggregated notice', () => {
     const result = checkFixture({
       ...CARGO,
