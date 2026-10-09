@@ -1,0 +1,20 @@
+.claude/settings.json
+  s_5f968098c533fd::t_8d811640a0a768 30-32
+  s_5f968098c533fd::t_9e96e792a307a0 8-20,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "512376e4e37f6baee409839671b7748ff6d4a04d",
+  "prompts": {},
+  "sessions": {
+    "s_5f968098c533fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "025af38a-6b50-4915-a685-00db1f693ad3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
