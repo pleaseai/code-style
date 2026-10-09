@@ -1,0 +1,59 @@
+packages/ast-grep-config/extract/dart.yml
+  s_44faff8d837ce3::t_4dbd4f7bd3449e 117-119,129
+packages/ast-grep-config/extract/rust.yml
+  s_44faff8d837ce3::t_e3ee2afbcc7ecf 175-188
+packages/ast-grep-config/extract/tsx.yml
+  s_44faff8d837ce3::t_d17ca1ee510fd6 343,351-352,354-361,363-383
+packages/ast-grep-config/extract/typescript.yml
+  s_44faff8d837ce3::t_ee2560b032be9d 343,351-352,354-361,363-383
+packages/cli/README.md
+  s_79262c7689b9bc::t_4de9c68e182451 104,111-112,135-138,177,179,199-200,203-205,218,256-258,299-301
+packages/cli/src/check/check-code-organization.ts
+  s_44faff8d837ce3::t_3590d2a8ba5237 7,69
+packages/cli/src/check/check-filenames.ts
+  s_79262c7689b9bc::t_47e1ba21a12a3f 4-7,16,30-32,42-43,63-92,100,106,187-189,236
+packages/cli/src/check/check-helpers.ts
+  s_79262c7689b9bc::t_d918ac481c73b6 310-337,354-364,370-371,373-376,385,399,413-414,416-422
+packages/cli/src/check/check-rust.ts
+  s_79262c7689b9bc::t_4fe4487c4ae454 7,12,46-48,50,216,236-238,250,266,324-329,342-345
+packages/cli/src/check/layouts.ts
+  s_44faff8d837ce3::t_ea81b98c54ff95 138
+packages/cli/src/check/list-files.ts
+  s_44faff8d837ce3::t_e759763fe2d621 5-7,24,54
+packages/cli/src/i18n.ts
+  s_79262c7689b9bc::t_37b04bad66d331 82,135
+packages/cli/test/check/check-filenames.test.ts
+  s_79262c7689b9bc::t_51534543b97699 79-125
+packages/cli/test/check/check-helpers.test.ts
+  s_79262c7689b9bc::t_c9c00ad001cc2a 259-289
+packages/cli/test/check/check-rust.test.ts
+  s_79262c7689b9bc::t_77dd2639dd4536 3-5,8,46-77,293-303,326-352
+packages/cli/test/check/check-test-paths.test.ts
+  s_79262c7689b9bc::t_7e217a290ca77e 27-36
+packages/cli/test/check/list-files.test.ts
+  s_79262c7689b9bc::t_6fb2f34a86a5e3 30-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d98e4dd90a047c29d3f9754cce6fa5b3ef6b1348",
+  "prompts": {},
+  "sessions": {
+    "s_44faff8d837ce3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a91ad3b-f15e-4b9d-9962-0fd7dc8fd119",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}

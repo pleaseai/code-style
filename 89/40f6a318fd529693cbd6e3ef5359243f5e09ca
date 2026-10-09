@@ -1,0 +1,171 @@
+.github/workflows/ci.yml
+  s_79262c7689b9bc::t_caca71d62d8606 39-68
+.github/workflows/release-please.yml
+  s_79262c7689b9bc::t_8915e2541430db 131-132,141-145
+docs/content/en/4.cli.md
+  s_79262c7689b9bc::t_a9bd4c6b52d0a5 70,88,90
+docs/content/ko/4.cli.md
+  s_79262c7689b9bc::t_b7cccd0a30c52b 70,88,90
+packages/ast-grep-config/extract/rust.yml
+  s_79262c7689b9bc::t_c11b58deb9d3ce 162-163,170
+packages/ast-grep-config/extract/tsx.yml
+  s_79262c7689b9bc::t_91343ecd8fbb4f 303,310-327,330-336
+packages/ast-grep-config/extract/typescript.yml
+  s_79262c7689b9bc::t_a61148d470de09 303,310-327,330-336
+packages/ast-grep-config/package.json
+  s_79262c7689b9bc::t_10828364046f7e 27
+packages/ast-grep-config/rule-tests/__snapshots__/dart-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_87f000791c8424 59-72
+packages/ast-grep-config/rule-tests/__snapshots__/ts-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_7af82673ba2e5b 43-46,80-83
+packages/ast-grep-config/rule-tests/__snapshots__/tsx-error-outside-errors-file-snapshot.yml
+  s_79262c7689b9bc::t_d5cf36bf0e6038 43-46,80-83
+packages/ast-grep-config/rule-tests/dart-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_d777dca377d230 13-14
+packages/ast-grep-config/rule-tests/java-error-outside-error-package-test.yml
+  s_79262c7689b9bc::t_032ba24162e36f 6-7
+packages/ast-grep-config/rule-tests/ts-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_73af327f73f94d 8-9
+packages/ast-grep-config/rule-tests/tsx-error-outside-errors-file-test.yml
+  s_79262c7689b9bc::t_f8cedea4fe892c 8-9
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md
+  s_79262c7689b9bc::t_f798d5a36e2497 58-62
+packages/ast-grep-config/rules/rust/rust-error-outside-error-file.md
+  s_79262c7689b9bc::t_1fafd0aabbd9c3 73-79
+packages/ast-grep-config/rules/rust/rust-no-glob-reexport.md
+  s_79262c7689b9bc::t_259501ec12d3e0 50-53,56
+packages/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.md
+  s_79262c7689b9bc::t_490d581cf5a77f 78-79
+packages/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.yml
+  s_79262c7689b9bc::t_490eac2d913c02 27-28,30-37,46
+packages/ast-grep-config/rules/tsx/tsx-no-default-export.md
+  s_79262c7689b9bc::t_54d0788a6086ec 12-17,68
+packages/ast-grep-config/rules/typescript/ts-error-outside-errors-file.md
+  s_79262c7689b9bc::t_6cbce198b3c1e0 77-78
+packages/ast-grep-config/rules/typescript/ts-error-outside-errors-file.yml
+  s_79262c7689b9bc::t_8761db4c45ee4a 27-28,30-37,49
+packages/ast-grep-config/rules/typescript/ts-no-default-export.md
+  s_79262c7689b9bc::t_87b68b5d4c4ae0 12-17,63
+packages/ast-grep-config/test/e2e/sgconfig.test.ts
+  s_79262c7689b9bc::t_5669038c745295 2,6,16,19-34,56-57,97-99,104
+packages/cli/README.ko.md
+  s_79262c7689b9bc::t_36489d9af714a8 60-64,72-79,97,104,142-143,145-148
+packages/cli/README.md
+  s_79262c7689b9bc::t_ba439495e948a0 60-64,269-273,277,318-324
+packages/cli/rules.md
+  s_79262c7689b9bc::t_312f0f8849a821 73-77,83-84
+packages/cli/src/appliers.ts
+  s_79262c7689b9bc::t_76f3fe4a1f175b 140-141,148-149
+packages/cli/src/check/check-code-organization.ts
+  s_44faff8d837ce3::t_dbeadb938ea56f 4,55-56
+packages/cli/src/check/check-filenames.ts
+  s_2f33f641d1ac27::t_adf2564995bef8 30-31
+packages/cli/src/check/check-helpers.ts
+  s_c39e01c9731d86::t_b8f88b273692ab 289-298,304,316-317,370
+packages/cli/src/check/check-rust.ts
+  s_44faff8d837ce3::t_05c0f645aadd05 64-84,99
+packages/cli/src/check/check-test-paths.ts
+  s_79262c7689b9bc::t_e60a590b4cdb4b 141-145
+packages/cli/src/check/config.ts
+  s_79262c7689b9bc::t_d507f33beac999 29-34,50,52-53
+packages/cli/src/check/errors.ts
+  s_79262c7689b9bc::t_eaa81ceb41d1cd 9
+packages/cli/src/check/layouts.ts
+  s_79262c7689b9bc::t_ab827d8a8280fd 71-75,77-79
+packages/cli/src/check/list-files.ts
+  s_02f64583270fea::t_3c190f65c34420 1,29-37
+packages/cli/src/check/naming.ts
+  s_e73a9582513ed2::t_b63acac13e4020 6-10,13-14
+packages/cli/src/check/scan-root.ts
+  s_79262c7689b9bc::t_eaec0f40ddd10c 39-49,62
+packages/cli/src/i18n.ts
+  s_79262c7689b9bc::t_c13f126c94f9c4 27,55,109,138
+packages/cli/src/index.ts
+  s_79262c7689b9bc::t_552d45d47959f5 36-44
+packages/cli/test/appliers.test.ts
+  s_79262c7689b9bc::t_a125f2c8799e58 86,96,99-102
+packages/cli/test/check/ast-grep.test.ts
+  s_79262c7689b9bc::t_0036d93d766005 2,12-14,21,27,38
+packages/cli/test/check/check-filenames.test.ts
+  s_79262c7689b9bc::t_d6d76188508268 108-112,175-178
+packages/cli/test/check/check-helpers.test.ts
+  s_79262c7689b9bc::t_fd3f6c73bb4ba4 1,3-5,32-41,366-396
+packages/cli/test/check/check-rust.test.ts
+  s_79262c7689b9bc::t_a5ea571e35055b 35-44,204-209
+packages/cli/test/check/check-test-paths.test.ts
+  s_79262c7689b9bc::t_fa842c4cc7b0ad 239-240,249
+packages/cli/test/check/config.test.ts
+  s_79262c7689b9bc::t_8f6d4653e8db58 21-22,30
+packages/cli/test/check/list-files.test.ts
+  s_193239e7484721::t_adf1c795a02005 1,3-5,10-11,22,25,27-29,49-60
+packages/cli/test/check/naming.test.ts
+  s_e73a9582513ed2::t_8fb95223f0c89a 13-14,25
+packages/cli/test/check/run-check.test.ts
+  s_02f64583270fea::t_9c785b48203d54 2,4,11-19,63-69
+packages/cli/test/check/scan-root.test.ts
+  s_79262c7689b9bc::t_699406e3838b02 1-3,5-6,8,22-33,60-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8940f6a318fd529693cbd6e3ef5359243f5e09ca",
+  "prompts": {},
+  "sessions": {
+    "s_02f64583270fea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a35777e-f23d-4abf-b74a-66c77bf6aad5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_193239e7484721": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "340018e4-1fd1-4b6d-9493-e64c00a13a1a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_2f33f641d1ac27": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "77f7a2ae-2345-48fa-9280-5629f74caf9f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_44faff8d837ce3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a91ad3b-f15e-4b9d-9962-0fd7dc8fd119",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_79262c7689b9bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "931c83b1-71f9-4ba6-abfb-2ac3158fdf98",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_c39e01c9731d86": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ce2b9df-a206-4aa7-972d-a63a38d6ea19",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_e73a9582513ed2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ab4a107-a121-40f1-81bd-a6a9c8142e7a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
