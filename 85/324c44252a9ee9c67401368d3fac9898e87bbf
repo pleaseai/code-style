@@ -1,0 +1,37 @@
+packages/eslint-config/LICENSE
+  s_5f968098c533fd::t_81b54cc2a76f40 1-21
+.gitignore
+  s_5f968098c533fd::t_bdc81b4fb2142b 19-20
+  s_5f968098c533fd::t_81b54cc2a76f40 16-18
+packages/perttier-config/LICENSE
+  s_5f968098c533fd::t_81b54cc2a76f40 1-21
+SECURITY.md
+  s_5f968098c533fd::t_81b54cc2a76f40 6-9
+.husky/pre-commit
+  s_5f968098c533fd::t_81b54cc2a76f40 1
+packages/cli/LICENSE
+  s_5f968098c533fd::t_81b54cc2a76f40 1-21
+CONTRIBUTING.md
+  s_5f968098c533fd::t_81b54cc2a76f40 5
+  s_5f968098c533fd::t_5c877a1a02a2e3 23
+packages/ast-grep-config/LICENSE
+  s_5f968098c533fd::t_81b54cc2a76f40 1-21
+package.json
+  s_5f968098c533fd::t_81b54cc2a76f40 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "85324c44252a9ee9c67401368d3fac9898e87bbf",
+  "prompts": {},
+  "sessions": {
+    "s_5f968098c533fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "025af38a-6b50-4915-a685-00db1f693ad3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
