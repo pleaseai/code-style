@@ -1,7 +1,7 @@
 {
   "name": "@pleaseai/code-style",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CLI to set up PleaseAI code style (eslint, prettier, editorconfig, ast-grep, AGENTS.md) in any project and check code organization",
   "author": "PleaseAI",
   "license": "MIT",

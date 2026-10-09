@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/pleaseai/code-style/compare/code-style-v0.0.3...code-style-v0.0.4) (2026-10-09)
+
+
+### Features
+
+* add @pleaseai/ast-grep-config rules and please-style check path checker ([#36](https://github.com/pleaseai/code-style/issues/36)) ([8aadb75](https://github.com/pleaseai/code-style/commit/8aadb75b8aa478688e66834f8c22cd4d5825844e))
+
 ## [0.0.3](https://github.com/pleaseai/code-style/compare/code-style-v0.0.2...code-style-v0.0.3) (2026-06-01)
 
 

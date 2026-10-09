@@ -1,7 +1,7 @@
 {
   "name": "@pleaseai/ast-grep-config",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ast-grep rules that keep code agent-navigable (greppable symbols, dedicated error files, no in-source tests)",
   "author": "PleaseAI",
   "license": "MIT",
