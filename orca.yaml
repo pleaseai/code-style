@@ -1,0 +1,13 @@
+# orca.yaml — setup script Orca runs when it creates a worktree
+#   $ORCA_ROOT_PATH     — main checkout (copy source)
+#   $ORCA_WORKTREE_PATH — new worktree (copy target)
+# node_modules is not shared: bun workspace links are relative symlinks that would
+# resolve to the main checkout's package sources. `bun install` recreates it instead.
+
+scripts:
+  setup: |
+    set -e
+    mise trust --quiet
+    mise install
+    mise exec -- bunx @pleaseai/worktreeinclude "$ORCA_ROOT_PATH" "$ORCA_WORKTREE_PATH"
+    mise exec -- bun install
