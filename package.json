@@ -40,10 +40,7 @@
     "typescript": "^6.0.2"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --cache --fix"
-    ],
-    "*.{md,mdx,mjs,yml,yaml,css}": [
+    "*.{js,jsx,ts,tsx,md,mdx,mjs,yml,yaml,css}": [
       "eslint --cache --fix"
     ]
   }
