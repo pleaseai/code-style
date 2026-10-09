@@ -12,6 +12,9 @@
     },
     "packages/cli": {
       "package-name": "@pleaseai/code-style"
+    },
+    "packages/ast-grep-config": {
+      "package-name": "@pleaseai/ast-grep-config"
     }
   }
 }

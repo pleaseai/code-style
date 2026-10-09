@@ -1,0 +1,13 @@
+id: kotlin-error-outside-errors-file
+valid:
+  - 'class UserService(private val repo: Repo)'
+  - 'class Cache : Base()'
+  - 'class Mapper : Converter<Result<FooException>>'
+  - 'data class ErrorMessage(val text: String)'
+invalid:
+  - 'class UserNotFoundException(id: String) : RuntimeException("missing $id")'
+  - 'class Timeout : AppException()'
+  - 'class Fatal : Throwable()'
+  - 'object Unauthorized : DomainError()'
+  - 'class PaymentError(msg: String) : Base(msg)'
+  - 'class Wrapped : kotlin.IllegalStateException()'

@@ -1,0 +1,86 @@
+id: dart-error-outside-errors-file
+snapshots:
+  class InvalidToken implements Exception { final String message; InvalidToken(this.message); }:
+    labels:
+    - source: class InvalidToken implements Exception { final String message; InvalidToken(this.message); }
+      style: primary
+      start: 0
+      end: 93
+    - source: Exception
+      style: secondary
+      start: 30
+      end: 39
+    - source: Exception
+      style: secondary
+      start: 30
+      end: 39
+  class NotFoundException implements Exception {}:
+    labels:
+    - source: class NotFoundException implements Exception {}
+      style: primary
+      start: 0
+      end: 47
+    - source: Exception
+      style: secondary
+      start: 35
+      end: 44
+    - source: Exception
+      style: secondary
+      start: 35
+      end: 44
+  class ParseError extends Error {}:
+    labels:
+    - source: class ParseError extends Error {}
+      style: primary
+      start: 0
+      end: 33
+    - source: Error
+      style: secondary
+      start: 25
+      end: 30
+    - source: Error
+      style: secondary
+      start: 25
+      end: 30
+  class Timeout extends AppException {}:
+    labels:
+    - source: class Timeout extends AppException {}
+      style: primary
+      start: 0
+      end: 37
+    - source: AppException
+      style: secondary
+      start: 22
+      end: 34
+    - source: AppException
+      style: secondary
+      start: 22
+      end: 34
+  class TimeoutError extends Base {}:
+    labels:
+    - source: class TimeoutError extends Base {}
+      style: primary
+      start: 0
+      end: 34
+    - source: TimeoutError
+      style: secondary
+      start: 6
+      end: 18
+    - source: extends Base
+      style: secondary
+      start: 19
+      end: 31
+  'final class QuotaExceeded extends DomainError { QuotaExceeded() : super(); }':
+    labels:
+    - source: 'final class QuotaExceeded extends DomainError { QuotaExceeded() : super(); }'
+      style: primary
+      start: 0
+      end: 76
+    - source: DomainError
+      style: secondary
+      start: 34
+      end: 45
+    - source: DomainError
+      style: secondary
+      start: 34
+      end: 45

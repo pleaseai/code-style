@@ -1,0 +1,51 @@
+# Layer-3 extraction rules (ADR-0022 §3) for Kotlin. Run by `please-style
+# check` with `ast-grep scan -r`; never part of the consumer-facing rule set.
+id: helper-candidate
+language: kotlin
+severity: hint
+message: test helper candidate
+# Top-level `private` declarations are visible only inside their own file, so
+# they can never be shared and are not candidates.
+rule:
+  regex: ^([cC]reateMock|[mM]ock|[fF]ake|[sS]tub)([A-Z0-9_]|$)
+  any:
+    - kind: type_identifier
+      inside:
+        any:
+          - kind: class_declaration
+          - kind: object_declaration
+        inside:
+          kind: source_file
+        not:
+          has:
+            kind: modifiers
+            has:
+              kind: visibility_modifier
+              regex: ^private$
+    - kind: simple_identifier
+      inside:
+        kind: function_declaration
+        inside:
+          kind: source_file
+        not:
+          has:
+            kind: modifiers
+            has:
+              kind: visibility_modifier
+              regex: ^private$
+---
+id: import
+language: kotlin
+severity: hint
+message: import
+rule:
+  kind: import_header
+---
+id: package
+language: kotlin
+severity: hint
+message: package
+rule:
+  kind: identifier
+  inside:
+    kind: package_header

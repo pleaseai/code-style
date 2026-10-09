@@ -13,6 +13,7 @@ PleaseAI 프로젝트를 위한 공유 코드 스타일 설정 모노레포 — 
 | [`@pleaseai/eslint-config`](./packages/eslint-config) | PleaseAI 기본값이 적용된 `@antfu/eslint-config` 래퍼 ESLint flat config |
 | [`@pleaseai/prettier-config`](./packages/perttier-config) | 공유 Prettier 설정 (JSON) |
 | [`@pleaseai/editorconfig`](./packages/editorconfig) | 일관된 에디터 설정을 위한 공유 `.editorconfig` |
+| [`@pleaseai/ast-grep-config`](./packages/ast-grep-config) | 에이전트가 탐색하기 쉬운 코드 배치를 위한 ast-grep 규칙 (ADR-0022). 경로 검사기는 `please-style check` |
 
 ## `@pleaseai/eslint-config`
 

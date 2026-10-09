@@ -10,7 +10,7 @@ import {
   readPackageJson,
   upsertMarkerBlock,
   writePackageJson,
-} from './fs-utils.js'
+} from '../src/fs-utils.js'
 
 // ---------------------------------------------------------------------------
 // detectPackageManager

@@ -1,0 +1,196 @@
+# Layer-3 extraction rules (ADR-0022 §3) for Rust. Run by `please-style
+# check` with `ast-grep scan -r`; never part of the consumer-facing rule set.
+#
+# Out-of-line module declarations (`mod name;`), optionally with a preceding
+# `#[path = "…"]` attribute captured as $PATH. Declarations nested in an
+# inline `mod x { … }` block or a function body are not extracted as
+# `mod-decl`; `mod-decl-nested` reports them so the checker knows a crate's
+# module tree cannot be resolved completely.
+id: mod-decl
+language: rust
+severity: hint
+message: module declaration
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: mod_item
+    not:
+      has:
+        field: body
+        kind: declaration_list
+    inside:
+      kind: source_file
+    any:
+      - follows:
+          stopBy:
+            not:
+              any:
+                - kind: attribute_item
+                - kind: line_comment
+                - kind: block_comment
+          kind: attribute_item
+          has:
+            kind: attribute
+            all:
+              - has:
+                  kind: identifier
+                  regex: ^path$
+              - has:
+                  field: value
+                  any:
+                    - kind: string_literal
+                    - kind: raw_string_literal
+                  has:
+                    kind: string_content
+                    pattern: $PATH
+      # No `#[path]`: still a declaration (first branch wins when it matches).
+      - kind: mod_item
+---
+id: mod-decl-nested
+language: rust
+severity: hint
+message: module declaration inside an inline module or function body
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: mod_item
+    not:
+      any:
+        - has:
+            field: body
+            kind: declaration_list
+        - inside:
+            kind: source_file
+---
+# A nested `mod x;` carrying a path attribute (`#[path = "…"]` or
+# `#[cfg_attr(…, path = "…")]`). rustc resolves it relative to the inline
+# module's directory and it can load a file anywhere in the crate, so the
+# checker withholds reachability for the whole crate.
+id: mod-decl-nested-path
+language: rust
+severity: hint
+message: module declaration with a path attribute inside an inline module or function body
+rule:
+  kind: identifier
+  inside:
+    field: name
+    kind: mod_item
+    not:
+      any:
+        - has:
+            field: body
+            kind: declaration_list
+        - inside:
+            kind: source_file
+    follows:
+      stopBy:
+        not:
+          any:
+            - kind: attribute_item
+            - kind: line_comment
+            - kind: block_comment
+      kind: attribute_item
+      regex: \bpath\s*=
+---
+# `#[cfg_attr(<predicate>, path = "…")] mod x;`: the declaration loads the
+# `path` file under that predicate and `x.rs` otherwise, so both are possible
+# targets. Anchored on the attribute (not the module name) so a module with
+# several conditional path attributes yields one match each, with the module
+# name as $NAME. Reported in addition to the plain `mod-decl` of the same node.
+id: mod-decl-cfg-path
+language: rust
+severity: hint
+message: module declaration with a conditional path attribute
+rule:
+  kind: attribute_item
+  has:
+    kind: attribute
+    all:
+      - has:
+          kind: identifier
+          regex: ^cfg_attr$
+      - has:
+          kind: token_tree
+          has:
+            any:
+              - kind: string_literal
+              - kind: raw_string_literal
+            follows:
+              regex: ^=$
+              follows:
+                kind: identifier
+                regex: ^path$
+            has:
+              kind: string_content
+              pattern: $PATH
+  precedes:
+    stopBy:
+      not:
+        any:
+          - kind: attribute_item
+          - kind: line_comment
+          - kind: block_comment
+    kind: mod_item
+    not:
+      has:
+        field: body
+        kind: declaration_list
+    inside:
+      kind: source_file
+    has:
+      field: name
+      kind: identifier
+      pattern: $NAME
+---
+# `include!("gen.rs")` / `include!(concat!(…))`: the included source is spliced
+# into the module, so files it names are loaded without a `mod` item. The
+# checker reads the literal path out of the match text.
+id: include-macro
+language: rust
+severity: hint
+message: include! invocation
+rule:
+  kind: macro_invocation
+  has:
+    field: macro
+    regex: (^|::)include$
+---
+# A `mod x;` written inside a token tree (a `macro_rules!` body or a macro
+# invocation such as `cfg_if! { … }`) loads `x.rs` wherever the macro expands,
+# but is not a `mod_item` node, so mod-decl does not see it. The name may be a
+# macro metavariable (`mod $name;`), known only at the call site.
+id: macro-mod-decl
+language: rust
+severity: hint
+message: module declaration inside a macro body
+rule:
+  kind: token_tree
+  regex: \bmod\s+(r#|\$)?\w+\s*;
+  not:
+    inside:
+      kind: token_tree
+      stopBy: end
+---
+# `include!` written inside a token tree (a `macro_rules!` body or a macro
+# invocation): not a `macro_invocation` node, so include-macro does not see it.
+id: macro-include
+language: rust
+severity: hint
+message: include! invocation inside a macro body
+rule:
+  kind: token_tree
+  regex: \binclude\s*!
+  not:
+    inside:
+      kind: token_tree
+      stopBy: end
+---
+id: test-attr
+language: rust
+severity: hint
+message: test function attribute
+rule:
+  kind: attribute_item
+  regex: ^#\[\s*(\w+::)*test\s*(\(|\])

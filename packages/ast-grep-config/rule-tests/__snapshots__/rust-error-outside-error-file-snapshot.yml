@@ -1,0 +1,68 @@
+id: rust-error-outside-error-file
+snapshots:
+  ? |
+    #[derive(Debug, thiserror::Error)]
+    pub enum Failure { #[error("io")] Io }
+  : labels:
+    - source: 'pub enum Failure { #[error("io")] Io }'
+      style: primary
+      start: 35
+      end: 73
+    - source: '#[derive(Debug, thiserror::Error)]'
+      style: secondary
+      start: 0
+      end: 34
+  ? |
+    /// Something went wrong.
+    #[derive(Debug, Error)]
+    #[non_exhaustive]
+    pub enum Failure { Io }
+  : labels:
+    - source: pub enum Failure { Io }
+      style: primary
+      start: 68
+      end: 91
+    - source: '#[derive(Debug, Error)]'
+      style: secondary
+      start: 26
+      end: 49
+  impl Error for Failure {}:
+    labels:
+    - source: impl Error for Failure {}
+      style: primary
+      start: 0
+      end: 25
+    - source: Error
+      style: secondary
+      start: 5
+      end: 10
+  impl std::error::Error for Failure {}:
+    labels:
+    - source: impl std::error::Error for Failure {}
+      style: primary
+      start: 0
+      end: 37
+    - source: std::error::Error
+      style: secondary
+      start: 5
+      end: 22
+  pub enum Error { Io(std::io::Error) }:
+    labels:
+    - source: pub enum Error { Io(std::io::Error) }
+      style: primary
+      start: 0
+      end: 37
+    - source: Error
+      style: secondary
+      start: 9
+      end: 14
+  'pub struct ParseError { line: usize }':
+    labels:
+    - source: 'pub struct ParseError { line: usize }'
+      style: primary
+      start: 0
+      end: 37
+    - source: ParseError
+      style: secondary
+      start: 11
+      end: 21

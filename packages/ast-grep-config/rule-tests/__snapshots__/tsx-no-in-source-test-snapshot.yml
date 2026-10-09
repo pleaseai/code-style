@@ -1,0 +1,38 @@
+id: tsx-no-in-source-test
+snapshots:
+  if (import.meta.vitest !== undefined) { run() }:
+    labels:
+    - source: if (import.meta.vitest !== undefined) { run() }
+      style: primary
+      start: 0
+      end: 47
+    - source: import.meta.vitest
+      style: secondary
+      start: 4
+      end: 22
+    - source: import.meta.vitest
+      style: secondary
+      start: 4
+      end: 22
+  ? |
+    if (import.meta.vitest) {
+      const { it, expect } = import.meta.vitest
+      it('adds', () => expect(add(1, 2)).toBe(3))
+    }
+  : labels:
+    - source: |-
+        if (import.meta.vitest) {
+          const { it, expect } = import.meta.vitest
+          it('adds', () => expect(add(1, 2)).toBe(3))
+        }
+      style: primary
+      start: 0
+      end: 117
+    - source: import.meta.vitest
+      style: secondary
+      start: 4
+      end: 22
+    - source: import.meta.vitest
+      style: secondary
+      start: 4
+      end: 22

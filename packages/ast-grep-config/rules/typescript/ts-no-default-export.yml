@@ -1,0 +1,66 @@
+id: ts-no-default-export
+language: typescript
+severity: warning
+message: >-
+  [code-greppable-public-symbols] Default export hides the symbol's name from
+  grep. Export a named declaration instead. Fix guide:
+  node_modules/@pleaseai/ast-grep-config/rules/typescript/ts-no-default-export.md
+note: >-
+  Replace `export default` with a named export (`export function foo`,
+  `export const foo`, `export class Foo`) and change importers to
+  `import { foo } from '…'`. Nuxt 4, Nitro, Storybook and VitePress entry files are exempt; for other frameworks, scope the scan (see the README).
+url: https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/typescript/ts-no-default-export.md
+rule:
+  kind: export_statement
+  any:
+    # export default <declaration | expression>
+    - has:
+        regex: ^default$
+    # export { foo as default }
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          has:
+            field: alias
+            regex: ^default$
+    # export { default } from './x' (re-exported without an alias)
+    - has:
+        kind: export_clause
+        has:
+          kind: export_specifier
+          all:
+            - has:
+                field: name
+                regex: ^default$
+            - not:
+                has:
+                  field: alias
+                  kind: identifier
+# Files whose shape a framework dictates (ADR-0022 §2: "framework convention
+# files are allowlisted"). Paths are matched relative to the scan root, so every
+# glob starts with `**/` to work in monorepo packages too.
+ignores:
+  - '**/*.d.ts'
+  - '**/*.d.mts'
+  - '**/*.d.cts'
+  - '**/*.config.{ts,mts,cts}'
+  - '**/*.config.*.{ts,mts,cts}'
+  - '**/*.stories.{ts,mts,cts}'
+  - '**/.vitepress/**'
+  - '**/.storybook/**'
+  # Nuxt 4 (srcDir = app/)
+  - '**/app/pages/**'
+  - '**/app/layouts/**'
+  - '**/app/middleware/**'
+  - '**/app/plugins/**'
+  - '**/app/app.config.ts'
+  - '**/app/router.options.ts'
+  # Nuxt 3 root layouts (no app/) are deliberately absent: bare globs such as
+  # '**/plugins/**' would exempt every directory with that name. See the README.
+  # Nitro (server/)
+  - '**/server/api/**'
+  - '**/server/routes/**'
+  - '**/server/middleware/**'
+  - '**/server/plugins/**'
+  - '**/server/tasks/**'

@@ -1,0 +1,44 @@
+id: rust-error-outside-error-file
+language: rust
+severity: warning
+message: >-
+  [code-error-types-in-dedicated-module] Error type declared outside the
+  crate's error.rs. Move it there. Fix guide:
+  node_modules/@pleaseai/ast-grep-config/rules/rust/rust-error-outside-error-file.md
+note: >-
+  Move the type and its `impl Error`/`Display` blocks into `error.rs` (declare
+  `mod error;` in the parent if missing) and re-export it by name.
+url: https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/rust/rust-error-outside-error-file.md
+rule:
+  any:
+    # `struct ParseError` / `enum Error`
+    - all:
+        - any:
+            - kind: struct_item
+            - kind: enum_item
+        - has:
+            field: name
+            regex: Error$
+    # `#[derive(thiserror::Error)] enum Failure { … }`
+    - all:
+        - any:
+            - kind: struct_item
+            - kind: enum_item
+        - follows:
+            stopBy:
+              not:
+                any:
+                  - kind: attribute_item
+                  - kind: line_comment
+                  - kind: block_comment
+            kind: attribute_item
+            regex: derive\([^)]*\bError\b
+    # `impl std::error::Error for Failure {}`
+    - kind: impl_item
+      has:
+        field: trait
+        regex: ^(::)?((std|core)::)?(error::)?Error$
+ignores:
+  - '**/error.rs'
+  - '**/error/**'
+  - '**/tests/**'
