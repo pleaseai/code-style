@@ -13,3 +13,8 @@ dist/
 
 # please/review runtime state
 .please/state/
+
+# Local environment files
+.env
+.env.*
+!.env.example

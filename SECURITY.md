@@ -3,9 +3,10 @@
 ## Supported Versions
 
 Security fixes are provided for the latest published major version of each
-package in this repository (`@pleaseai/eslint-config`,
-`@pleaseai/prettier-config`, and `@pleaseai/editorconfig`). Older versions may
-receive fixes at the maintainers' discretion.
+package published from this repository (`@pleaseai/eslint-config`,
+`@pleaseai/prettier-config`, `@pleaseai/ast-grep-config`, and
+`@pleaseai/code-style`). Older versions may receive fixes at the maintainers'
+discretion.
 
 | Version | Supported          |
 | ------- | ------------------ |

@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing! This guide covers how to get from a clone to a merged pull request.
 
-By participating, you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md). All documentation, code, comments, and commit messages in this repository are written in **English**.
+By participating, you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md). Code, comments, and commit messages in this repository are written in **English**; the README and docs site also ship Korean translations.
 
 ## Repository layout
 
@@ -20,7 +20,7 @@ The documentation site lives in [`docs/`](./docs) (Docus on Nuxt).
 
 ## Getting started
 
-Tool versions are pinned in `mise.toml`.
+Tool versions are pinned in `mise.toml`. The commands in this guide assume mise is [activated in your shell](https://mise.jdx.dev/getting-started.html#activate-mise); if it is not, prefix each `bun` command with `mise exec --`.
 
 ```bash
 git clone https://github.com/pleaseai/code-style.git

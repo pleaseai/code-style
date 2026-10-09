@@ -44,7 +44,7 @@
     "typescript": "^6.0.2"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,mdx,mjs,yml,yaml,css}": [
+    "*.{js,jsx,ts,tsx,md,mdx,mjs,yml,yaml}": [
       "eslint --cache --fix"
     ]
   }
