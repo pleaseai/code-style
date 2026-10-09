@@ -4,7 +4,7 @@ English | [한국어](./README.ko.md)
 
 A monorepo providing shared code style configurations for PleaseAI projects — for outsourcing, open source, and internal use.
 
-Documentation: <https://code-style.pages.dev>
+See the [code-style documentation site](https://code-style.pages.dev) for full guides.
 
 ## Packages
 
@@ -59,16 +59,8 @@ export default pleaseai(
 
 ## Development
 
-```sh
-bun install
-bun run build   # Build all packages via Turborepo
-bun run lint    # Lint the repo itself (dogfooding)
-```
+To set up the repo, build, and lint locally, follow [Getting started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
 
 ### Releasing
 
-```sh
-bun run changeset   # Create a changeset
-bun run version     # Bump versions
-bun run release     # Build + publish to npm
-```
+[release-please](https://github.com/googleapis/release-please) automates releases from Conventional Commits, and GitHub Actions publishes the packages to npm with provenance.

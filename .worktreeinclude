@@ -1,0 +1,12 @@
+# .worktreeinclude — gitignored files copied into new worktrees
+# .gitignore syntax; only files that match AND are git-ignored get copied.
+# Inline (end-of-line) comments are not supported.
+# node_modules is not listed — `bun install` recreates it.
+
+# Root environment variables
+.env
+.env.local
+.env.*.local
+
+# Claude Code local settings (permissions, env)
+.claude/settings.local.json

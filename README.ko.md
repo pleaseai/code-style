@@ -4,7 +4,7 @@
 
 PleaseAI 프로젝트를 위한 공유 코드 스타일 설정 모노레포 — 외주, 오픈소스, 사내 프로젝트 모두에서 사용합니다.
 
-문서: <https://code-style.pages.dev>
+전체 가이드는 [code-style 문서 사이트](https://code-style.pages.dev)에서 확인하세요.
 
 ## 패키지
 
@@ -59,16 +59,8 @@ export default pleaseai(
 
 ## 개발
 
-```sh
-bun install
-bun run build   # Turborepo를 통해 전체 패키지 빌드
-bun run lint    # 저장소 자체를 린트 (dogfooding)
-```
+로컬에서 저장소를 설정하고 빌드·린트하는 방법은 [CONTRIBUTING.md의 Getting started](./CONTRIBUTING.md#getting-started)(영문)를 따르세요.
 
 ### 릴리즈
 
-```sh
-bun run changeset   # changeset 생성
-bun run version     # 버전 업데이트
-bun run release     # 빌드 후 npm 배포
-```
+릴리스는 Conventional Commits 기반으로 [release-please](https://github.com/googleapis/release-please)가 자동화하며, GitHub Actions가 provenance와 함께 npm에 배포합니다.

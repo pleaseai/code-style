@@ -10,3 +10,11 @@ dist/
 
 # Local Claude Code settings (not committed)
 .claude/settings.local.json
+
+# please/review runtime state
+.please/state/
+
+# Local environment files
+.env
+.env.*
+!.env.example

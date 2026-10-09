@@ -5,46 +5,33 @@
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun install --ignore-scripts"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
-    "claude-code-setup@passionfactory": true,
-    "standards@passionfactory": true,
-    "please@passionfactory": true,
-    "github@passionfactory": true,
-    "bun@passionfactory": true,
-    "context@passionfactory": true,
-    "testing@passionfactory": true,
-    "asana@passionfactory": true,
-    "backend@passionfactory": true,
-    "dev-tools@passionfactory": true,
-    "frontend@passionfactory": true,
-    "genkit@passionfactory": true,
-    "graphql@passionfactory": true,
-    "review@passionfactory": true,
-    "reflexion@passionfactory": false,
-    "research@passionfactory": true,
-    "tidy-first@passionfactory": true,
-    "worktree@passionfactory": true,
     "vitest@pleaseai": true,
     "tsdown@pleaseai": true,
-    "spec-kit@pleaseai": true,
-    "code-review@pleaseai": true,
     "claude-md-management@pleaseai": true,
     "gatekeeper@pleaseai": true,
     "fetch@pleaseai": true,
     "markitdown@pleaseai": true,
-    "typescript-lsp@code-intelligence": true,
-    "eslint-lsp@code-intelligence": true,
-    "ralph-loop@claude-plugins-official": true,
-    "ast-grep@pleaseai": true
+    "code-intelligence-lsp@code-intelligence": true,
+    "ast-grep@pleaseai": true,
+    "modern-web-guidance@pleaseai": true,
+    "turborepo@pleaseai": true,
+    "antfu@pleaseai": true
   },
   "extraKnownMarketplaces": {
-    "passionfactory": {
-      "source": {
-        "source": "github",
-        "repo": "chatbot-pf/engineering-standards"
-      },
-      "autoUpdate": true
-    },
     "pleaseai": {
       "source": {
         "source": "github",
@@ -66,19 +53,5 @@
       },
       "autoUpdate": true
     }
-  },
-  "language": "en",
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun install --ignore-scripts"
-          }
-        ]
-      }
-    ]
   }
 }

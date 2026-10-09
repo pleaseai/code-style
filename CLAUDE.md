@@ -4,6 +4,7 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 
 ## Tech Stack
 
+- Tool versions: mise (`mise.toml` pins node 24 + bun 1.3.14; `mise trust && mise install`)
 - Package manager: bun (>=1.3.14)
 - Build orchestration: Turborepo
 - Module system: ESM only (`"type": "module"`)
