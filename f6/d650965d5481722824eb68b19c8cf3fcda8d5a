@@ -1,0 +1,234 @@
+README.ko.md
+  s_5f968098c533fd::t_648d19c5ef091f 16
+packages/ast-grep-config/rules/typescript/ts-error-outside-errors-file.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-78
+packages/ast-grep-config/extract/kotlin.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-51
+packages/ast-grep-config/extract/typescript.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-394
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-71
+packages/cli/src/check/config.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-101
+packages/cli/src/check/errors.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-31
+packages/ast-grep-config/extract/dart.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-138
+packages/ast-grep-config/rule-tests/ts-no-in-source-test-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-12
+packages/ast-grep-config/rule-tests/tsx-no-in-source-test-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-12
+packages/ast-grep-config/tsconfig.json
+  s_5f968098c533fd::t_648d19c5ef091f 1-15
+packages/cli/test/check/scan-root.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-135
+packages/ast-grep-config/rule-tests/rust-no-glob-reexport-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-10
+packages/ast-grep-config/rule-tests/dart-error-outside-errors-file-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-14
+packages/cli/src/check/format-text.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-15
+packages/ast-grep-config/rule-tests/ts-no-default-export-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-18
+packages/cli/test/check/config.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-48
+packages/ast-grep-config/rule-tests/kotlin-error-outside-errors-file-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-13
+packages/cli/src/check/naming.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-37
+packages/cli/tsconfig.json
+  s_5f968098c533fd::t_648d19c5ef091f 14
+packages/cli/rules.md
+  s_5f968098c533fd::t_648d19c5ef091f 25-29,53-54,56,60-84
+  s_5f968098c533fd::t_18d1c45d18bc66 85
+packages/cli/src/appliers.ts
+  s_5f968098c533fd::t_648d19c5ef091f 6,125-127,133-161,167,185-257,285-293
+  s_5f968098c533fd::t_b20a8994329f26 294
+packages/cli/src/index.ts
+  s_5f968098c533fd::t_648d19c5ef091f 6,10-19,22-23,26-49,57,75-77
+  s_5f968098c533fd::t_9259f5e3312ce3 78
+packages/ast-grep-config/rule-tests/java-error-outside-error-package-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-14
+packages/cli/src/check/check-helpers.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-453
+packages/ast-grep-config/test/e2e/sgconfig.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-133
+packages/cli/test/check/list-files.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-61
+packages/cli/test/check/run-check.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-70
+packages/ast-grep-config/rules/typescript/ts-no-default-export.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-66
+docs/content/ko/4.cli.md
+  s_5f968098c533fd::t_648d19c5ef091f 66-93,102
+packages/ast-grep-config/README.ko.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-97
+packages/ast-grep-config/extract/sgconfig.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-4
+packages/ast-grep-config/rule-tests/ts-error-outside-errors-file-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-16
+packages/ast-grep-config/rules/dart/dart-error-outside-errors-file.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-40
+packages/ast-grep-config/sgconfig.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-13
+packages/ast-grep-config/extract/rust.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-196
+packages/ast-grep-config/rules/typescript/ts-no-in-source-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-20
+packages/ast-grep-config/rules/typescript/ts-error-outside-errors-file.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-49
+packages/ast-grep-config/rules/tsx/tsx-no-default-export.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-62
+packages/cli/README.md
+  s_5f968098c533fd::t_648d19c5ef091f 6-8,22,45-345
+packages/ast-grep-config/rules/tsx/tsx-no-in-source-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-20
+packages/ast-grep-config/rules/java/java-error-outside-error-package.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-67
+packages/ast-grep-config/rules/rust/rust-error-outside-error-file.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-44
+packages/cli/test/appliers.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-105
+packages/cli/src/check/ast-grep.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-167
+packages/cli/src/check/layouts.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-230
+packages/ast-grep-config/rules/tsx/tsx-no-default-export.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-96
+packages/cli/src/check/types.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-62
+packages/cli/src/i18n.ts
+  s_5f968098c533fd::t_648d19c5ef091f 26-27,29,54-55,63,70-85,108-109,117,124-139
+packages/cli/test/check/naming.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-44
+packages/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-46
+packages/ast-grep-config/rules/dart/dart-error-outside-errors-file.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-77
+.github/workflows/ci.yml
+  s_5f968098c533fd::t_648d19c5ef091f 13,25,34-63
+packages/cli/test/check/check-test-paths.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-251
+packages/cli/src/check/list-files.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-68
+packages/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-79
+packages/cli/src/check/check-rust.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-472
+packages/cli/test/fs-utils.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-212
+packages/cli/src/commands.ts
+  s_5f968098c533fd::t_648d19c5ef091f 118,133,164
+packages/ast-grep-config/rule-tests/tsx-error-outside-errors-file-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-16
+README.md
+  s_5f968098c533fd::t_648d19c5ef091f 16
+packages/ast-grep-config/rule-tests/rust-error-outside-error-file-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-21
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-41
+packages/cli/README.ko.md
+  s_5f968098c533fd::t_648d19c5ef091f 6-8,22,45-169
+release-please-config.json
+  s_5f968098c533fd::t_648d19c5ef091f 15-17
+packages/ast-grep-config/rules/rust/rust-no-glob-reexport.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-57
+packages/ast-grep-config/extract/java.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-36
+packages/cli/src/check/run-check.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-62
+packages/cli/src/check/scan-root.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-122
+packages/cli/test/check/check-filenames.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-329
+packages/cli/test/i18n.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-86
+packages/cli/src/check/check-test-paths.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-179
+package.json
+  s_5f968098c533fd::t_648d19c5ef091f 22-24,29
+packages/cli/test/test-utils/fixture.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-58
+packages/cli/package.json
+  s_5f968098c533fd::t_648d19c5ef091f 5,20,47-54,56-57,60
+packages/ast-grep-config/rules/rust/rust-no-glob-reexport.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-21
+packages/ast-grep-config/rules/typescript/ts-no-default-export.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-93
+packages/cli/src/check/check-code-organization.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-95
+packages/cli/test/check/check-helpers.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-429
+.release-please-manifest.json
+  s_5f968098c533fd::t_648d19c5ef091f 4-5
+CLAUDE.md
+  s_5f968098c533fd::t_648d19c5ef091f 21,35-36
+docs/content/en/4.cli.md
+  s_5f968098c533fd::t_648d19c5ef091f 66-93,102
+packages/ast-grep-config/package.json
+  s_5f968098c533fd::t_648d19c5ef091f 1-51
+packages/ast-grep-config/README.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-97
+packages/ast-grep-config/rule-tests/tsx-no-default-export-test.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-18
+packages/ast-grep-config/rules/java/java-error-outside-error-package.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-32
+packages/ast-grep-config/rules/rust/rust-error-outside-error-file.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-85
+.github/workflows/release-please.yml
+  s_5f968098c533fd::t_648d19c5ef091f 29,61,113-131,133,140-144
+packages/ast-grep-config/rules/typescript/ts-no-in-source-test.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-79
+packages/cli/src/check/check-filenames.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-237
+packages/ast-grep-config/extract/tsx.yml
+  s_5f968098c533fd::t_648d19c5ef091f 1-394
+packages/ast-grep-config/rules/tsx/tsx-no-in-source-test.md
+  s_5f968098c533fd::t_648d19c5ef091f 1-79
+packages/cli/src/tools.ts
+  s_5f968098c533fd::t_648d19c5ef091f 15-16,40
+packages/cli/test/check/ast-grep.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-91
+packages/cli/test/check/check-rust.test.ts
+  s_5f968098c533fd::t_648d19c5ef091f 1-405
+bun.lock
+  s_5f968098c533fd::t_7d137aebbdf8df 30-45,55,58,64-69,102-104,126-141,198,200,252,694-695,1328,1330,1632,1634,1638,2862-2863,3058-3059,3094-3095,3398-3399,3410-3411,3660-3665,3682-3687,3898-3903,4032-4037,4078-4079,4092-4093,4118-4119,4126-4127
+packages/ast-grep-config/rule-tests/__snapshots__/dart-error-outside-errors-file-snapshot.yml
+  s_5f968098c533fd::t_27543c44ccfdf2 1-86
+packages/ast-grep-config/rule-tests/__snapshots__/java-error-outside-error-package-snapshot.yml
+  s_5f968098c533fd::t_325862bdad17d5 1-56
+packages/ast-grep-config/rule-tests/__snapshots__/kotlin-error-outside-errors-file-snapshot.yml
+  s_5f968098c533fd::t_bae1fa7823c192 1-106
+packages/ast-grep-config/rule-tests/__snapshots__/rust-error-outside-error-file-snapshot.yml
+  s_5f968098c533fd::t_d8ea593b55e7d7 1-68
+packages/ast-grep-config/rule-tests/__snapshots__/rust-no-glob-reexport-snapshot.yml
+  s_5f968098c533fd::t_6ba39c912f9ee8 1-44
+packages/ast-grep-config/rule-tests/__snapshots__/ts-error-outside-errors-file-snapshot.yml
+  s_5f968098c533fd::t_5014842ed81d94 1-126
+packages/ast-grep-config/rule-tests/__snapshots__/ts-no-default-export-snapshot.yml
+  s_5f968098c533fd::t_dc336fd0553a99 1-96
+packages/ast-grep-config/rule-tests/__snapshots__/ts-no-in-source-test-snapshot.yml
+  s_5f968098c533fd::t_2eef104bb91d6a 1-38
+packages/ast-grep-config/rule-tests/__snapshots__/tsx-error-outside-errors-file-snapshot.yml
+  s_5f968098c533fd::t_fed54268968f5a 1-126
+packages/ast-grep-config/rule-tests/__snapshots__/tsx-no-default-export-snapshot.yml
+  s_5f968098c533fd::t_cc421bed8339fb 1-96
+packages/ast-grep-config/rule-tests/__snapshots__/tsx-no-in-source-test-snapshot.yml
+  s_5f968098c533fd::t_272e67ef5bef8c 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f6d650965d5481722824eb68b19c8cf3fcda8d5a",
+  "prompts": {},
+  "sessions": {
+    "s_5f968098c533fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "025af38a-6b50-4915-a685-00db1f693ad3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
