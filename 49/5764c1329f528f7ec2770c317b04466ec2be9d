@@ -1,0 +1,16 @@
+packages/cli/README.ko.md
+  h_9ee0685e8f5c3a 71-73
+packages/cli/README.md
+  h_9ee0685e8f5c3a 71-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "495764c1329f528f7ec2770c317b04466ec2be9d",
+  "prompts": {},
+  "humans": {
+    "h_9ee0685e8f5c3a": {
+      "author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
