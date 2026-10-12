@@ -1,0 +1,76 @@
+<!-- eslint-disable markdown/no-multiple-h1 -- turbo-managed block below adds its own H1 -->
+
+# @pleaseai/code-style
+
+Monorepo providing shared code style configurations for PleaseAI projects.
+
+## Tech Stack
+
+- Tool versions: mise (`mise.toml` pins node 24 + bun 1.3.14; `mise trust && mise install`)
+- Package manager: bun (>=1.3.14)
+- Build orchestration: Turborepo
+- Module system: ESM only (`"type": "module"`)
+- Node: >=22.0.0
+- TypeScript target: ES2022, moduleResolution: bundler
+
+## Packages
+
+| Package | Path | Build |
+|---------|------|-------|
+| `@pleaseai/code-style` | `packages/cli` | tsdown |
+| `@pleaseai/eslint-config` | `packages/eslint-config` | tsdown |
+| `@pleaseai/prettier-config` | `packages/perttier-config` | none (JSON only) |
+| `@pleaseai/editorconfig` | `packages/editorconfig` | none (static file) |
+| `@pleaseai/ast-grep-config` | `packages/ast-grep-config` | none (ast-grep YAML rules) |
+
+## Commands
+
+- `bun install` - Install dependencies
+- `bun run build` - Build all packages via Turborepo
+- `bun run lint` - Lint repo (dogfoods own eslint-config)
+- `bun run lint:fix` - Lint with auto-fix
+
+## Architecture
+
+- `packages/eslint-config` wraps `@antfu/eslint-config` with PleaseAI defaults (2-space indent, single quotes, no semi)
+- `packages/eslint-config/src/package-json.ts` exports `eslint-plugin-package-json` configs
+- Root `eslint.config.ts` dogfoods `@pleaseai/eslint-config`
+- `packages/ast-grep-config` holds the ADR-0022 (engineering-standards) layer-2 ast-grep rules in `rules/<lang>/<id>.yml` (each with a sibling `<id>.md` README, rule tests in `rule-tests/`) and the layer-3 extraction rules in `extract/` (never in `ruleDirs`); `@ast-grep/cli` is a peer. Run `bun run test` in the package (`ast-grep test` + the e2e sgconfig test)
+- `packages/cli/src/check/` is the `please-style check` path checker (layer 3). It resolves the `@ast-grep/cli` binary from the checked project first, then from the CLI's own install (`src/check/ast-grep.ts`), and the `extract/` rules from the CLI's own `@pleaseai/ast-grep-config` copy first (the project's copy is a last resort). `@pleaseai/ast-grep-config` is a regular `dependency` of the CLI; `@ast-grep/cli` is an optional peer of both packages (never a `dependency`, so installs do not download the native binary), installed explicitly only when the user selects the ast-grep tool. Tests live in `packages/cli/test/` mirroring `src/`, shared helpers in `test/test-utils/` (the CLI dogfoods its own rule)
+
+## Code Style
+
+- Follow @antfu/eslint-config conventions: no semicolons, single quotes, 2-space indent
+- ESM imports only, no CommonJS
+
+## Release
+
+- Uses release-please (Google) for automated versioning and changelogs
+- Config: `release-please-config.json` + `.release-please-manifest.json`
+- Publishing: GitHub Actions workflow publishes to npm on release
+
+## Docs Site
+
+- Located at `docs/` — Docus (Nuxt) deployed to Cloudflare Pages
+- Bun workspace member; build works because of `bunfig.toml` hoisted linker (see Gotchas)
+- Build: `cd docs && bun run build` → outputs to `docs/dist/`
+- Deploy: `cd docs && bun run deploy` (wrangler)
+- ADR: `docs/adr/0001-choose-documentation-framework.md`
+
+## Gotchas
+
+- `packages/perttier-config` directory is intentionally(?) misspelled — do not rename without coordinating release-please config, CI workflows, and npm package name
+- `bunfig.toml` sets `linker = "hoisted"` — required for Docus to build. Bun 1.3.2+ defaults to `isolated` linker in workspaces, which puts Docus's raw `.ts` server files under `.bun/` symlinks where Nitro's `rollup-plugin-inject` chokes on them. Hoisted linker (npm-style flat `node_modules`) avoids this.
+- Docs build requires `mcp: { enabled: false }` in `docs/nuxt.config.ts` — `@nuxtjs/mcp-toolkit` imports `agents/mcp` (Cloudflare Workers AI Agents) which breaks the `cloudflare_pages` preset.
+- Docus `cloudflare_pages` preset outputs to `dist/`, not `.output/public/` — `wrangler.jsonc` `pages_build_output_dir` must match.
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->
