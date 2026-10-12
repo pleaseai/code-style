@@ -1,0 +1,23 @@
+packages/ast-grep-config/test/e2e/sgconfig.test.ts
+  s_7a7f49d8e26c30::t_527466fc3e388b 73-76,91
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.yml
+  s_7a7f49d8e26c30::t_8d0cae53d372c5 41-43
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md
+  s_7a7f49d8e26c30::t_f0f3089f1ed2d2 70-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "06deb0c97c8da10eface3557f5514dfcc80d0795",
+  "prompts": {},
+  "sessions": {
+    "s_7a7f49d8e26c30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7380006b-f322-45b0-8f68-2bbc92c5f771",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
