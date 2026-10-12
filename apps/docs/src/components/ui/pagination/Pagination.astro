@@ -14,11 +14,11 @@ const { prevNext, class: className, ...attrs } = Astro.props;
 const { prev, next } = prevNext;
 const prevHref = prev ? withBase(prev.href, import.meta.env.BASE_URL) : undefined;
 const nextHref = next ? withBase(next.href, import.meta.env.BASE_URL) : undefined;
-const { previous: prevLabel, next: nextLabel } = ui[getLocaleFromPath(stripBase(Astro.url.pathname, import.meta.env.BASE_URL))];
+const { pagination: navLabel, previous: prevLabel, next: nextLabel } = ui[getLocaleFromPath(stripBase(Astro.url.pathname, import.meta.env.BASE_URL))];
 ---
 
 {(prev || next) && (
-  <nav aria-label="Pagination" class={cn("flex items-center justify-between mt-12 pt-6 border-t border-border", className)} {...attrs}>
+  <nav aria-label={navLabel} class={cn("flex items-center justify-between mt-12 pt-6 border-t border-border", className)} {...attrs}>
     {prev ? (
       <a href={prevHref} class="group flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <Icon name="ph:caret-left" class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />

@@ -45,6 +45,7 @@ const t = ui[getLocaleFromPath(stripBase(Astro.url.pathname, import.meta.env.BAS
           data-text-searching={t.searching}
           data-text-no-results={t.noResults}
           data-text-unavailable={t.unavailable}
+          data-text-load-error={t.loadError}
           class="py-8 text-center text-sm text-muted-foreground"
         >
           {t.empty}

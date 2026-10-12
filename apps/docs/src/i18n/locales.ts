@@ -58,6 +58,7 @@ interface UiStrings {
   home: string
   language: string
   aside: Record<'note' | 'tip' | 'caution' | 'danger', string>
+  pagination: string
   previous: string
   next: string
   search: {
@@ -67,6 +68,7 @@ interface UiStrings {
     searching: string
     noResults: string
     unavailable: string
+    loadError: string
     navigate: string
     select: string
     close: string
@@ -82,6 +84,7 @@ export const ui: Record<Locale, UiStrings> = {
     home: 'Home',
     language: 'Language',
     aside: { note: 'Note', tip: 'Tip', caution: 'Caution', danger: 'Danger' },
+    pagination: 'Pagination',
     previous: 'Previous',
     next: 'Next',
     search: {
@@ -91,6 +94,7 @@ export const ui: Record<Locale, UiStrings> = {
       searching: 'Searching…',
       noResults: 'No results found.',
       unavailable: 'Search is temporarily unavailable.',
+      loadError: 'Search could not load. Check your connection and reload the page.',
       navigate: '↑↓ navigate',
       select: '↵ select',
       close: 'Esc close',
@@ -100,6 +104,7 @@ export const ui: Record<Locale, UiStrings> = {
     home: '홈',
     language: '언어',
     aside: { note: '참고', tip: '팁', caution: '주의', danger: '경고' },
+    pagination: '페이지 이동',
     previous: '이전',
     next: '다음',
     search: {
@@ -109,6 +114,7 @@ export const ui: Record<Locale, UiStrings> = {
       searching: '검색 중…',
       noResults: '검색 결과가 없습니다.',
       unavailable: '지금은 검색을 사용할 수 없습니다.',
+      loadError: '검색을 불러오지 못했습니다. 연결을 확인하고 페이지를 새로고침하세요.',
       navigate: '↑↓ 이동',
       select: '↵ 선택',
       close: 'Esc 닫기',
