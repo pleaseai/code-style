@@ -63,6 +63,15 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 있으면 exit 1 (
 참고하세요. `please-style check`의 발견 사항은 slug를 보여 주며, 각 검사는
 [`please-style check`](#please-style-check)에 설명되어 있습니다.
 
+Yarn Plug'n'Play 프로젝트(프로젝트나 상위 워크스페이스 루트에 `.pnp.cjs` 또는
+`.pnp.js` 파일이 있는 경우)에서는 `init`이 `sgconfig.yml`을 작성하지 않고
+경고만 출력합니다. ast-grep은 디렉터리에서 규칙을 읽는데, Plug'n'Play는
+패키지를 `node_modules` 없이 zip 아카이브로 보관하기 때문입니다. 규칙을
+쓰려면 `.yarnrc.yml`에 `nodeLinker: node-modules`를 설정하고 `yarn install`을
+실행한 뒤 `init`을 다시 실행하세요. 프로젝트 자체에
+`node_modules/@pleaseai/ast-grep-config/rules`가 설치되어 있으면 상위 디렉터리가
+Plug'n'Play여도 `sgconfig.yml`을 작성합니다.
+
 ## `please-style check`
 
 `check`는
@@ -128,7 +137,8 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
     `cargo metadata --no-deps --format-version 1`을 읽고 `mod` 선언을 따라가,
     Cargo가 컴파일하지 않는 `tests/**/*.rs` 파일(`tests/common/`과
     `tests/<name>/main.rs` 대상의 하위 모듈은 제외)과 어떤 `mod` 선언도 닿지
-    않는 `#[test]` 파일을 보고합니다. `cargo`가 없으면 알림을 남기고 Rust를
+    않는 `#[test]` 파일(`#[cfg_attr(…, test)]`로 붙인 테스트 속성 포함)을
+    보고합니다. `cargo`가 없으면 알림을 남기고 Rust를
     건너뜁니다.
 - **`test-helpers-in-dedicated-location`**: 지정 위치 밖에서 선언된 헬퍼
   후보(`mock*`, `createMock*`, `fake*`, `stub*`)는 둘 이상의 테스트 파일이
