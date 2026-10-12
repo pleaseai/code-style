@@ -1,0 +1,319 @@
+CLAUDE.md
+  s_7a7f49d8e26c30::t_1105870ea75750 51-58,63-65
+CONTRIBUTING.md
+  s_7a7f49d8e26c30::t_19e881010aa62a 19
+apps/docs/.gitignore
+  s_caf336f5822011::t_5f2956af11f120 1,3-5,7-12,14-17,20-22
+apps/docs/AGENT.md
+  s_caf336f5822011::t_cf610a7767273e 1-140
+apps/docs/CLAUDE.md
+  s_caf336f5822011::t_f6156ac71d39fc 1-3
+apps/docs/astro.config.ts
+  s_caf336f5822011::t_b1aaf8fec14e51 1-117
+apps/docs/nimbus.json
+  s_caf336f5822011::t_572cce029087ef 1-28
+apps/docs/package.json
+  s_caf336f5822011::t_20211d0cd1be6c 4,7-16,19-27,30-36
+apps/docs/public/_redirects
+  s_15072deb6eb871::t_c2fab59897e140 1-3
+apps/docs/src/components.ts
+  s_caf336f5822011::t_33962c3649cb9d 1-33
+apps/docs/src/components/AgentDirective.astro
+  s_caf336f5822011::t_f833ec17edf172 1-29
+apps/docs/src/components/Header.astro
+  s_caf336f5822011::t_31c1d4adf14cb1 1-109
+apps/docs/src/components/LanguageSwitcher.astro
+  s_caf336f5822011::t_54221db5437f90 1-41
+apps/docs/src/components/Render.astro
+  s_caf336f5822011::t_c0130211e0277d 1-119
+apps/docs/src/components/WebMCP.astro
+  s_caf336f5822011::t_4ee75d7d0f0c07 1-25
+apps/docs/src/components/landing/Hero.astro
+  s_caf336f5822011::t_92b62b8554e1b2 1-34
+apps/docs/src/components/landing/Section.astro
+  s_caf336f5822011::t_c60b62cf5e7df8 1-32
+apps/docs/src/components/ui/aside/Aside.astro
+  s_15072deb6eb871::t_34cfb84f3b94bc 1-87
+apps/docs/src/components/ui/aside/index.ts
+  s_caf336f5822011::t_baf28534ab91d3 1
+apps/docs/src/components/ui/badge/Badge.astro
+  s_caf336f5822011::t_9154ac8f6c6dab 1-44
+apps/docs/src/components/ui/badge/index.ts
+  s_caf336f5822011::t_fa1e5322257d49 1
+apps/docs/src/components/ui/banner/Banner.astro
+  s_caf336f5822011::t_72f88f3990451b 1-83
+apps/docs/src/components/ui/banner/banner.client.ts
+  s_caf336f5822011::t_504faa3787b594 1-49
+apps/docs/src/components/ui/banner/index.ts
+  s_caf336f5822011::t_e74fe53c011799 1
+apps/docs/src/components/ui/breadcrumbs/Breadcrumbs.astro
+  s_caf336f5822011::t_e7e3861db0131c 1-93
+apps/docs/src/components/ui/breadcrumbs/index.ts
+  s_caf336f5822011::t_e6d627ba4e1da3 1
+apps/docs/src/components/ui/button/Button.astro
+  s_caf336f5822011::t_7dda479474f5ef 1-69
+apps/docs/src/components/ui/button/index.ts
+  s_caf336f5822011::t_df52f534922a23 1-13
+apps/docs/src/components/ui/button/variants.ts
+  s_caf336f5822011::t_b29502bae28642 1-82
+apps/docs/src/components/ui/card-grid/CardGrid.astro
+  s_caf336f5822011::t_59d46f1009c0a3 1-15
+apps/docs/src/components/ui/card-grid/index.ts
+  s_caf336f5822011::t_272d8e4c024673 1
+apps/docs/src/components/ui/card/Card.astro
+  s_15072deb6eb871::t_a0dce0feb663b0 1-41
+apps/docs/src/components/ui/card/index.ts
+  s_caf336f5822011::t_dbe25e12b3e749 1
+apps/docs/src/components/ui/code-group/CodeGroup.astro
+  s_caf336f5822011::t_3140b6c1c6305e 1-136
+apps/docs/src/components/ui/code-group/code-group.client.ts
+  s_caf336f5822011::t_8444e500e231a7 1-136
+apps/docs/src/components/ui/code-group/index.ts
+  s_caf336f5822011::t_efba7b4f7a3560 1
+apps/docs/src/components/ui/code/Code.astro
+  s_caf336f5822011::t_befabdd3282412 1-36
+apps/docs/src/components/ui/code/index.ts
+  s_caf336f5822011::t_b8ba7b2782fb12 1
+apps/docs/src/components/ui/collapsible/Collapsible.astro
+  s_caf336f5822011::t_8d7300b2ce2cc3 1-25
+apps/docs/src/components/ui/collapsible/CollapsibleContent.astro
+  s_caf336f5822011::t_63c6e6c3c06ca8 1-29
+apps/docs/src/components/ui/collapsible/CollapsibleTrigger.astro
+  s_caf336f5822011::t_83cdd24b3510f3 1-21
+apps/docs/src/components/ui/collapsible/collapsible.client.ts
+  s_caf336f5822011::t_7f8e0ddd0454b0 1-22
+apps/docs/src/components/ui/collapsible/index.ts
+  s_caf336f5822011::t_75d547bdf0f2ef 1-3
+apps/docs/src/components/ui/dialog/Dialog.astro
+  s_caf336f5822011::t_7feddb8020b05a 1-33
+apps/docs/src/components/ui/dialog/DialogClose.astro
+  s_caf336f5822011::t_1ce351d89eaab9 1-25
+apps/docs/src/components/ui/dialog/DialogContent.astro
+  s_caf336f5822011::t_84d97d49b54877 1-21
+apps/docs/src/components/ui/dialog/dialog-close.client.ts
+  s_caf336f5822011::t_7a8430cced2b4c 1-7
+apps/docs/src/components/ui/dialog/dialog.client.ts
+  s_caf336f5822011::t_fb525a3b748232 1-25
+apps/docs/src/components/ui/dialog/index.ts
+  s_caf336f5822011::t_8afcd024995cd3 1-3
+apps/docs/src/components/ui/layer-card/LayerCard.astro
+  s_caf336f5822011::t_4bde4b5c375848 1-34
+apps/docs/src/components/ui/layer-card/LayerCardContent.astro
+  s_caf336f5822011::t_e3bf8ac499da70 1-20
+apps/docs/src/components/ui/layer-card/LayerCardHeader.astro
+  s_caf336f5822011::t_fb47a68e86fb32 1-20
+apps/docs/src/components/ui/layer-card/index.ts
+  s_caf336f5822011::t_e8927a31027d8a 1-3
+apps/docs/src/components/ui/link-button/LinkButton.astro
+  s_caf336f5822011::t_ca18643b12878a 1-76
+apps/docs/src/components/ui/link-button/index.ts
+  s_caf336f5822011::t_11912fa7659030 1
+apps/docs/src/components/ui/package-managers/PackageManagers.astro
+  s_caf336f5822011::t_1ae3c6c2e7ed16 1-130
+apps/docs/src/components/ui/package-managers/index.ts
+  s_caf336f5822011::t_5c5099f5068657 1
+apps/docs/src/components/ui/package-managers/package-managers.client.ts
+  s_caf336f5822011::t_19f6e389f617cb 1-55
+apps/docs/src/components/ui/page-actions/PageActions.astro
+  s_caf336f5822011::t_fb4b55951d209c 1-69
+apps/docs/src/components/ui/page-actions/index.ts
+  s_caf336f5822011::t_61f4ba35ceb0fc 1
+apps/docs/src/components/ui/page-actions/page-actions.client.ts
+  s_caf336f5822011::t_774cc26a9b0b5b 1-54
+apps/docs/src/components/ui/pagination/Pagination.astro
+  s_caf336f5822011::t_75c8465140eb5a 1-39
+apps/docs/src/components/ui/pagination/index.ts
+  s_caf336f5822011::t_1b603137b55ebe 1
+apps/docs/src/components/ui/search/SearchDialog.astro
+  s_caf336f5822011::t_868cba530d502a 1-54
+apps/docs/src/components/ui/search/SearchTrigger.astro
+  s_caf336f5822011::t_4c97afbee90d60 1-22
+apps/docs/src/components/ui/search/index.ts
+  s_caf336f5822011::t_cb7789aea3b132 1-2
+apps/docs/src/components/ui/search/providers/pagefind.ts
+  s_caf336f5822011::t_d95b48f13f5b41 1-86
+apps/docs/src/components/ui/search/search-trigger.client.ts
+  s_caf336f5822011::t_b692cbd09b5919 1-17
+apps/docs/src/components/ui/search/search.client.ts
+  s_caf336f5822011::t_4a3b8bc2b61b3d 1-277
+apps/docs/src/components/ui/sidebar/Sidebar.astro
+  s_caf336f5822011::t_81dc785b7fd530 1-65
+apps/docs/src/components/ui/sidebar/SidebarFilter.astro
+  s_caf336f5822011::t_9ecbe266a3fa1f 1-28
+apps/docs/src/components/ui/sidebar/SidebarGroup.astro
+  s_caf336f5822011::t_e19b64e128fa89 1-102
+apps/docs/src/components/ui/sidebar/SidebarGroupHeader.astro
+  s_caf336f5822011::t_bda6381dd9bfc4 1-42
+apps/docs/src/components/ui/sidebar/SidebarLink.astro
+  s_caf336f5822011::t_21e553f885534d 1-48
+apps/docs/src/components/ui/sidebar/index.ts
+  s_caf336f5822011::t_5e4d70b7c877b1 1-5
+apps/docs/src/components/ui/sidebar/sidebar.client.ts
+  s_caf336f5822011::t_fc3fc92cbc9058 1-257
+apps/docs/src/components/ui/steps/Step.astro
+  s_caf336f5822011::t_3cb848dcf49d9d 1-26
+apps/docs/src/components/ui/steps/Steps.astro
+  s_caf336f5822011::t_ca8b0d81a6d525 1-115
+apps/docs/src/components/ui/steps/index.ts
+  s_caf336f5822011::t_42e72e9b3f8be2 1-2
+apps/docs/src/components/ui/steps/steps.client.ts
+  s_caf336f5822011::t_445f8236d5c897 1-32
+apps/docs/src/components/ui/tabs/TabItem.astro
+  s_caf336f5822011::t_94050dcb47b5f5 1-30
+apps/docs/src/components/ui/tabs/Tabs.astro
+  s_caf336f5822011::t_04d958c2a45bfe 1-36
+apps/docs/src/components/ui/tabs/TabsContent.astro
+  s_caf336f5822011::t_5b5f5c363230c6 1-24
+apps/docs/src/components/ui/tabs/TabsList.astro
+  s_caf336f5822011::t_5c43248b2903f6 1-34
+apps/docs/src/components/ui/tabs/TabsTrigger.astro
+  s_caf336f5822011::t_e669ed9f0aa8ba 1-31
+apps/docs/src/components/ui/tabs/index.ts
+  s_caf336f5822011::t_f52b8db42f886e 1-5
+apps/docs/src/components/ui/tabs/tabs.client.ts
+  s_caf336f5822011::t_8a3c5cbfd6da02 1-109
+apps/docs/src/components/ui/theme-toggle/ThemeToggle.astro
+  s_caf336f5822011::t_2b366c685b2c9f 1-32
+apps/docs/src/components/ui/theme-toggle/index.ts
+  s_caf336f5822011::t_aeb886f9b40271 1
+apps/docs/src/components/ui/theme-toggle/theme-toggle.client.ts
+  s_caf336f5822011::t_6180c4fc6e66a5 1-5,7,9-13,15-24,26-29,31
+apps/docs/src/components/ui/toc/MobileTOC.astro
+  s_caf336f5822011::t_8064f67a77afb5 1-60
+apps/docs/src/components/ui/toc/TOC.astro
+  s_caf336f5822011::t_88420afba61098 1-96
+apps/docs/src/components/ui/toc/index.ts
+  s_caf336f5822011::t_8d34df23b8b01f 1-2
+apps/docs/src/components/ui/toc/mobile-toc.client.ts
+  s_caf336f5822011::t_3c1f328a28373c 1-136
+apps/docs/src/components/ui/toc/toc.client.ts
+  s_caf336f5822011::t_8d485b7134eb6f 1-334
+apps/docs/src/content.config.ts
+  s_caf336f5822011::t_1de6251a454cb0 1-18
+apps/docs/src/content/docs/en/cli.mdx
+  s_caf336f5822011::t_035165e98249f6 2-5,15-17,21,25,28-29,107
+apps/docs/src/content/docs/en/editorconfig.mdx
+  s_caf336f5822011::t_65ccf88bfbf87c 2-5
+apps/docs/src/content/docs/en/eslint-config/advanced.mdx
+  s_caf336f5822011::t_48dd8ed10b2465 2-5,11,21,23,29,69,78,101,116,126
+apps/docs/src/content/docs/en/eslint-config/editor.mdx
+  s_caf336f5822011::t_802eb6a7c1df48 2-5,11,104,116,127-129,134,139,143-144
+apps/docs/src/content/docs/en/eslint-config/frameworks.mdx
+  s_caf336f5822011::t_9b4bedb5789f07 2-5,11,19-21,25,29,32-33,37,45-47,51,55,59-61,63,69,81,89-91,95,99,102-103,107,115-117,121,125,128-129,133,141-143,147,151,154-155,159,167-169,173,177,180-181,185,193-195,199,203,206-207,213
+apps/docs/src/content/docs/en/eslint-config/index.mdx
+  s_caf336f5822011::t_6c7c62234e7818 2-5,22-24,28,32,36-39,41-42,48,60,86,106,125-126,128-129,135,167,179-181,185,189,193-195,197,203,217-241,291
+apps/docs/src/content/docs/en/eslint-config/nuxt.mdx
+  s_caf336f5822011::t_0eb43e2bbe0c4b 2-5,15,25,40,64,66
+apps/docs/src/content/docs/en/eslint-config/package-json.mdx
+  s_caf336f5822011::t_55c89c28e1b867 2-5,11,29
+apps/docs/src/content/docs/en/index.mdx
+  s_caf336f5822011::t_dc670ab78b3c5d 2-10,13-52,56,60,63-64,68-70,74,78,82-84,89-90
+apps/docs/src/content/docs/en/prettier-config.mdx
+  s_caf336f5822011::t_bcc960fa78650f 2-5,11-13,17,21,24-25,31,39,47
+apps/docs/src/content/docs/ko/cli.mdx
+  s_caf336f5822011::t_eb19ceb8facf6c 2-5,15-17,21,25,28-29,107
+apps/docs/src/content/docs/ko/editorconfig.mdx
+  s_caf336f5822011::t_3e71a235f35b7a 2-5
+apps/docs/src/content/docs/ko/eslint-config/advanced.mdx
+  s_caf336f5822011::t_eeb93fd3e0cc88 2-5,11,21,23,29,69,78,101,116,126
+apps/docs/src/content/docs/ko/eslint-config/editor.mdx
+  s_caf336f5822011::t_62dde2d2165481 2-5,11,104,116,127-129,134,139,143-144
+apps/docs/src/content/docs/ko/eslint-config/frameworks.mdx
+  s_caf336f5822011::t_d156341b75e3a6 2-5,11,19-21,25,29,32-33,37,45-47,51,55,59-61,63,69,81,89-91,95,99,102-103,107,115-117,121,125,128-129,133,141-143,147,151,154-155,159,167-169,173,177,180-181,185,193-195,199,203,206-207,213
+apps/docs/src/content/docs/ko/eslint-config/index.mdx
+  s_caf336f5822011::t_55ecbc2ef0f3dc 2-5,22-24,28,32,36-39,41-42,48,60,86,106,125-126,128-129,135,167,179-181,185,189,193-195,197,203,217-241,291
+apps/docs/src/content/docs/ko/eslint-config/nuxt.mdx
+  s_caf336f5822011::t_27c11b5a4bddd5 2-5,15,25,40,64,66
+apps/docs/src/content/docs/ko/eslint-config/package-json.mdx
+  s_caf336f5822011::t_81022c25684c71 2-5,11,29
+apps/docs/src/content/docs/ko/index.mdx
+  s_caf336f5822011::t_022840626a121b 2-10,13-52,56,60,63-64,68-70,74,78,82-84,89-90
+apps/docs/src/content/docs/ko/prettier-config.mdx
+  s_caf336f5822011::t_bfc14306452fca 2-5,11-13,17,21,24-25,31,39,47
+apps/docs/src/i18n/alternates.ts
+  s_caf336f5822011::t_d177dd28ac7e47 1-36
+apps/docs/src/i18n/locales.ts
+  s_caf336f5822011::t_cbbe777a9f7eee 1-61
+apps/docs/src/layouts/BaseLayout.astro
+  s_7a7f49d8e26c30::t_2262b12206370b 1-170
+apps/docs/src/layouts/DocsLayout.astro
+  s_caf336f5822011::t_29dde23846fc16 1-409
+apps/docs/src/lib/cn.ts
+  s_caf336f5822011::t_55560e18f46111 1-8
+apps/docs/src/pages/404.astro
+  s_caf336f5822011::t_1370db42062203 1-36
+apps/docs/src/pages/[...slug].astro
+  s_7a7f49d8e26c30::t_1e761ac4060121 1-84
+apps/docs/src/pages/[...slug]/index.md.ts
+  s_caf336f5822011::t_b1dbd194134708 1-4
+apps/docs/src/pages/[...slug]/index.mdx.ts
+  s_caf336f5822011::t_2d03a2665ca5ab 1-4
+apps/docs/src/pages/[section]/llms.txt.ts
+  s_caf336f5822011::t_751827164c5e38 1-4
+apps/docs/src/pages/llms-full.txt.ts
+  s_caf336f5822011::t_971c8c10e8016c 1-4
+apps/docs/src/pages/llms.txt.ts
+  s_caf336f5822011::t_410cd1c334ccde 1-4
+apps/docs/src/pages/nimbus-api/coordinates.json.ts
+  s_caf336f5822011::t_ddca24f1c4f1d0 1-19
+apps/docs/src/pages/og.png.ts
+  s_caf336f5822011::t_fa8296457b2943 1-17
+apps/docs/src/pages/og/[...slug].ts
+  s_caf336f5822011::t_9c39d878d2280b 1-21
+apps/docs/src/pages/og/_og-card-config.ts
+  s_caf336f5822011::t_0ed6f67f5c13da 1-39
+apps/docs/src/pages/robots.txt.ts
+  s_caf336f5822011::t_c260665de0ce4f 1-22
+apps/docs/src/styles/globals.css
+  s_caf336f5822011::t_e23b1a0d06a565 1-643
+apps/docs/src/styles/prose.css
+  s_caf336f5822011::t_73ec645f42b95f 1-341
+apps/docs/tsconfig.json
+  s_caf336f5822011::t_c4537aadc6d3d2 1-10
+apps/docs/wrangler.jsonc
+  s_caf336f5822011::t_ba3ff15c754b1d 3-4,7
+bun.lock
+  s_caf336f5822011::t_d0fd9aedcc3f54 11,13,20,22,24-32,35-41,142,144,146,148,150,152,154,156,158,160,162,164,166,168,170,172,174-184,186-190,192,196-202,204,206,208,210,212,214,222,224,226,228,230,232,234,236,278,282-295,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,378,380,390,392,396,400,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,436,438,440,442,444,446,448,450,462,474,480,482,484,486,488,490,492,500,516,600,602,604,606,608,610,612,614,616,618,620,634,636,638,640,642,644,646,648,650,652,654,656,658,660,662,686-688,700,702,704,712,716,718,722,724,732,734,736,738,740,742,748,750,762,770,772-774,786-787,792,796,798,800,802,804,810,834,848-849,862,872,874,882,892,894,942-944,948,960,966,974,988,996,1010-1011,1046,1048,1050,1058,1062,1086,1092-1093,1100,1110,1112,1114,1126,1128,1140,1148,1154,1168,1170,1172,1182,1184,1192,1208,1224,1226,1242-1243,1294,1320-1327,1404,1414,1418,1426,1434,1436,1462,1464,1468,1472-1474,1480,1494,1506,1518,1520,1522,1524,1526,1528,1530,1532,1534,1536,1538,1540,1542,1544,1546,1548,1550,1552,1572,1574,1576,1578,1580,1582,1584,1586,1588,1598-1599,1612-1614,1622,1628,1636,1638,1644,1646,1662,1684,1686,1688,1728,1732,1742,1750,1752,1788,1790,1792,1794,1796,1798,1800,1802,1804,1806,1808,1810,1812,1814,1816,1818,1820,1822,1824,1826,1832,1834,1840,1844,1852-1853,1858,1864,1868,1872,1874,1876,1878,1880,1882,1884,1886,1888,1890,1892,1894,1900,1912,1914,1916,1918,1920,1922,1924,1926,1928,1930,1932,1934,1936,1938,1940,1942,1950-1951,1956,1958,1960,1962,1964,1966,1970,1972,1974,1976,1978,1982,1984,1986,1988,1994,1996,1998,2002,2004,2006,2010-2011,2014-2015,2020-2021,2046,2048,2050,2052,2054,2058,2068,2074,2076,2078,2080,2084,2092,2094,2096,2098,2100,2102,2104,2106,2108,2110,2112,2114,2116,2118,2124-2125,2130,2132,2136,2140,2142,2144,2146,2148,2150,2152,2156,2160,2162,2164,2166,2168,2170,2172,2174,2176,2178,2180,2184,2186,2188,2190,2192,2194,2196,2198,2202,2204,2206,2208,2210,2212,2214,2216,2218,2220,2222,2224,2226,2228,2234,2236,2238,2240,2242,2244,2246,2250,2252,2254,2256,2258,2260,2262,2264,2266,2268,2270,2272,2274,2276,2278,2280,2282,2284,2286,2288,2290,2292,2294,2296,2298,2300,2302,2304,2306,2308,2310,2312,2314,2316,2318,2320,2322,2324,2326,2328,2330,2332,2334,2336,2338,2340,2342,2344,2346,2348,2350,2352,2354,2356,2358,2360,2362,2364,2366,2368,2370,2372,2374,2376,2378,2380,2382,2384,2386,2388,2390,2392,2394,2396,2398,2400,2402,2404,2406,2408,2410,2412,2414,2416,2418,2420,2422,2424,2426,2428,2430,2432,2434
+docs/adr/0001-choose-documentation-framework.md
+  s_15072deb6eb871::t_5b8139a26c0d94 5
+docs/adr/0002-workaround-docus-i18n-routing-bug.md
+  s_15072deb6eb871::t_8ec75c791f8567 5
+docs/adr/0003-migrate-docs-to-nimbus.md
+  s_7a7f49d8e26c30::t_9cc92eeb14bc70 1-175
+eslint.config.ts
+  s_caf336f5822011::t_0c7a88742ee4ab 3-18
+package.json
+  s_caf336f5822011::t_f7ff34f3cf4084 19,31-33,40,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "49ac05436aa2824107e30b3f7bcb3d36edc56f6a",
+  "prompts": {},
+  "sessions": {
+    "s_15072deb6eb871": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9793d24-95a9-4b79-88d2-96ca20d74f30",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_7a7f49d8e26c30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7380006b-f322-45b0-8f68-2bbc92c5f771",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_caf336f5822011": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a17b692ed8f903d1c",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
