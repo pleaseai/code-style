@@ -64,7 +64,7 @@ Rules:
 
 | Goal | Action |
 |---|---|
-| New doc page | Create `src/content/docs/<slug>.mdx`. Sidebar picks it up. |
+| New doc page | Create `src/content/docs/en/<slug>.mdx` and `src/content/docs/ko/<slug>.mdx` (every page exists in both locales at the same path). Sidebar picks them up. |
 | New partial | Create `src/content/partials/<slug>.mdx`. Use via `<Render file="<slug>" />`. |
 | UI from registry | `npx @cloudflare/nimbus-docs add <slug>`. Register in `src/components.ts` if used in MDX. |
 | Feature recipe | `npx @cloudflare/nimbus-docs add <feature-slug> --print`. Prints the recipe for you to follow; it changes no files itself. |
@@ -127,7 +127,7 @@ End with `Summary: N errors, N warnings.`
 - **Registry hygiene** — every `src/components/ui/<slug>/` is either MDX-registered or imported in `src/`; transitive deps (`lib/cn.ts`, etc.) exist.
 - **AI surface** — `<AgentDirective />` renders in `BaseLayout.astro`; doc `<head>` has `<link rel="alternate" type="text/markdown" ...>`.
 - **Search** — `data-pagefind-body` is on the docs main wrapper; after a production build, `dist/pagefind/` exists with ≥1 indexed page.
-- **Cloudflare** (if applicable) — `wrangler.jsonc` has `name` and `compatibility_date`. Static output: `assets.directory = "./dist"` and `assets.not_found_handling = "404-page"`. Server output (`@astrojs/cloudflare`): no `assets.directory` or `main`; the adapter writes the deploy config to `dist/server/wrangler.json` at build time, so check that file after a build.
+- **Cloudflare** (if applicable) — `wrangler.jsonc` has `name` and `compatibility_date`. This site deploys static output to Cloudflare Pages: `pages_build_output_dir = "dist"` (no `assets` block). Static output on Workers instead: `assets.directory = "./dist"` and `assets.not_found_handling = "404-page"`. Server output (`@astrojs/cloudflare`): no `assets.directory` or `main`; the adapter writes the deploy config to `dist/server/wrangler.json` at build time, so check that file after a build.
 
 ## Don't
 

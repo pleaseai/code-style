@@ -54,12 +54,12 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 - Checks inside `apps/docs`: `bun run typecheck` (`astro check`), `bun run lint:docs` (Nimbus prose/MDX lint)
 - Content: `apps/docs/src/content/docs/{en,ko}/` (MDX). Every page must exist in both locales at the same path; order pages with `sidebar.order` frontmatter
 - i18n is wired by hand with Astro's i18n routing: `apps/docs/src/i18n/` (locales, UI strings, translation lookup), `<html lang>` + `hreflang` in `BaseLayout.astro`, language switcher in `Header.astro`
-- Nimbus is pre-1.0 — keep its dependencies pinned to exact versions; upgrade with `nimbus-docs migrate` / `outdated` / `diff` (see `apps/docs/AGENT.md`)
+- Nimbus is pre-1.0 — keep its dependencies pinned to exact versions; upgrade from `apps/docs` with `npx @cloudflare/nimbus-docs migrate` / `outdated` / `diff` (see `apps/docs/AGENT.md`)
 - ADRs: `docs/adr/` (current: `0003-migrate-docs-to-nimbus.md`)
 
 ## Gotchas
 
 - `packages/perttier-config` directory is intentionally(?) misspelled — do not rename without coordinating release-please config, CI workflows, and npm package name
 - `bunfig.toml` sets `linker = "hoisted"` — introduced for the former Docus site (Bun 1.3.2+ defaults to the `isolated` linker in workspaces, which broke Nitro's `rollup-plugin-inject` on Docus's raw `.ts` files). The Nimbus site has not been verified without it, so keep it until removing it is tested across all workspace packages.
-- `apps/docs/src/components/ui/**` and `apps/docs/src/layouts/DocsLayout.astro` are kept byte-identical to upstream Nimbus and excluded from ESLint, so `nimbus-docs diff --apply` / `nimbus-docs add <slug> --overwrite` can update them. Keep local edits there minimal.
+- `apps/docs/src/components/ui/**` and `apps/docs/src/layouts/DocsLayout.astro` are kept as close to upstream Nimbus as possible and excluded from ESLint, so `nimbus-docs diff --apply` / `nimbus-docs add <slug> --overwrite` can update them. Local edits are limited to `aside`, `card`, `pagination`, and `search` (links and i18n strings from `src/i18n/locales.ts`); merge those by hand on upgrade.
 - Docs URLs are file-style (`build.format: 'file'`, `trailingSlash: 'never'`): `/en/cli` is served from `en/cli.html`. Don't switch to directory format — Cloudflare Pages would redirect `/en/cli` to `/en/cli/`.

@@ -116,7 +116,7 @@ export function initSearch(config: SearchConfig): SearchInstance {
     const signal = activeController.signal;
 
     emptyState.style.display = "";
-    emptyState.textContent = "Searching…";
+    emptyState.textContent = emptyState.dataset.textSearching ?? "Searching…";
     clearResults();
 
     if (!(await ensureInitialized()) || signal.aborted) return;
@@ -130,7 +130,7 @@ export function initSearch(config: SearchConfig): SearchInstance {
 
       if (results.length === 0) {
         emptyState.style.display = "";
-        emptyState.textContent = "No results found.";
+        emptyState.textContent = emptyState.dataset.textNoResults ?? "No results found.";
         return;
       }
 
@@ -141,7 +141,7 @@ export function initSearch(config: SearchConfig): SearchInstance {
       if (signal.aborted) return;
       clearResults();
       emptyState.style.display = "";
-      emptyState.textContent = "Search is temporarily unavailable.";
+      emptyState.textContent = emptyState.dataset.textUnavailable ?? "Search is temporarily unavailable.";
     }
   }
 
@@ -153,7 +153,7 @@ export function initSearch(config: SearchConfig): SearchInstance {
         activeController?.abort();
         clearResults();
         emptyState.style.display = "";
-        emptyState.textContent = "Type to search…";
+        emptyState.textContent = emptyState.dataset.textEmpty ?? "Type to search…";
         return;
       }
       void runSearch(query);
@@ -192,7 +192,7 @@ export function initSearch(config: SearchConfig): SearchInstance {
       activeIndex = -1;
       clearResults();
       emptyState.style.display = "";
-      emptyState.textContent = "Type to search…";
+      emptyState.textContent = emptyState.dataset.textEmpty ?? "Type to search…";
       await ensureInitialized();
     },
     destroy() {

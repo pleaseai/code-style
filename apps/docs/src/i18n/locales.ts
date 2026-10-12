@@ -54,8 +54,64 @@ export function translatePath(pathname: string, target: Locale): string {
   return `/${target}`
 }
 
-/** Interface strings owned by this site's i18n wiring (not Nimbus chrome). */
-export const ui: Record<Locale, { home: string, language: string }> = {
-  en: { home: 'Home', language: 'Language' },
-  ko: { home: '홈', language: '언어' },
+interface UiStrings {
+  home: string
+  language: string
+  aside: Record<'note' | 'tip' | 'caution' | 'danger', string>
+  previous: string
+  next: string
+  search: {
+    label: string
+    placeholder: string
+    empty: string
+    searching: string
+    noResults: string
+    unavailable: string
+    navigate: string
+    select: string
+    close: string
+  }
+}
+
+/**
+ * Interface strings for the site's own i18n wiring and the localized Nimbus
+ * UI primitives (Aside, Pagination, SearchDialog).
+ */
+export const ui: Record<Locale, UiStrings> = {
+  en: {
+    home: 'Home',
+    language: 'Language',
+    aside: { note: 'Note', tip: 'Tip', caution: 'Caution', danger: 'Danger' },
+    previous: 'Previous',
+    next: 'Next',
+    search: {
+      label: 'Search documentation',
+      placeholder: 'Search documentation…',
+      empty: 'Type to search…',
+      searching: 'Searching…',
+      noResults: 'No results found.',
+      unavailable: 'Search is temporarily unavailable.',
+      navigate: '↑↓ navigate',
+      select: '↵ select',
+      close: 'Esc close',
+    },
+  },
+  ko: {
+    home: '홈',
+    language: '언어',
+    aside: { note: '참고', tip: '팁', caution: '주의', danger: '경고' },
+    previous: '이전',
+    next: '다음',
+    search: {
+      label: '문서 검색',
+      placeholder: '문서 검색…',
+      empty: '검색어를 입력하세요…',
+      searching: '검색 중…',
+      noResults: '검색 결과가 없습니다.',
+      unavailable: '지금은 검색을 사용할 수 없습니다.',
+      navigate: '↑↓ 이동',
+      select: '↵ 선택',
+      close: 'Esc 닫기',
+    },
+  },
 }

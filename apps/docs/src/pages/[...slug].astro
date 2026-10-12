@@ -12,7 +12,7 @@ import {
   stripBase,
 } from '@cloudflare/nimbus-docs/runtime'
 import { components } from '../components'
-import { getLocaleFromPath, ui } from '../i18n/locales'
+import { getLocaleFromPath, toPagePath, ui } from '../i18n/locales'
 import DocsLayout from '../layouts/DocsLayout.astro'
 
 export const prerender = true
@@ -24,7 +24,8 @@ if (page instanceof Response) {
 }
 const { entry, Content, headings, markdownUrl, ogImageUrl } = page
 
-const currentSlug = stripBase(Astro.url.pathname, import.meta.env.BASE_URL).replace(/\/$/, '') || '/'
+// `toPagePath` drops the `.html` suffix file-format prerender paths can carry.
+const currentSlug = toPagePath(stripBase(Astro.url.pathname, import.meta.env.BASE_URL))
 
 const { sidebar: sidebarOn, tableOfContents: tocOn } = await getRouteFlags(entry)
 

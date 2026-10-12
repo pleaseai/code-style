@@ -4,7 +4,12 @@
 
 Accepted
 
-Supersedes ADR-0001 and ADR-0002.
+This supersedes ADR-0001 (0001-choose-documentation-framework.md) and
+ADR-0002 (0002-workaround-docus-i18n-routing-bug.md).
+
+## Date
+
+2026-10-12
 
 ## Context
 
@@ -144,16 +149,19 @@ Nitro upgrade risks breaking the build or the i18n routes again.
 
 - **i18n is ours to maintain.** Every new page must exist under both
   `src/content/docs/en/` and `src/content/docs/ko/` with the same path, or the
-  language switcher and `hreflang` alternates omit it. Nimbus chrome strings
-  ("On this page", "Search", "Copy page", ...) stay in English on Korean
-  pages unless we localize them in the owned components.
+  language switcher and `hreflang` alternates omit it. Interface strings live
+  in the `ui` table in `src/i18n/locales.ts`; callout labels, pagination, and
+  the search dialog read from it. Other Nimbus chrome ("On this page", "Copy
+  page", ...) stays in English on Korean pages until it is localized the same way.
 - **Upgrades take review.** Nimbus releases ship as starter-file diffs
   (`nimbus-docs outdated` / `diff`) and migrations (`nimbus-docs migrate`).
   Files we edited for i18n (`BaseLayout.astro`, `Header.astro`,
   `[...slug].astro`) and the reformatted starter files need a manual merge.
   The vendored `src/components/ui/**` primitives and `DocsLayout.astro` are
-  kept byte-identical to upstream (and excluded from ESLint) so they can be
+  excluded from ESLint and kept as close to upstream as possible so they can be
   updated with `nimbus-docs diff --apply` or `nimbus-docs add <slug> --overwrite`.
+  The exceptions (`aside`, `card`, `pagination`, `search`) carry small local
+  edits for links and i18n, and need a manual merge on upgrade.
 - **Pinned 0.x versions** must be bumped deliberately, reading each package's
   changelog first.
 
