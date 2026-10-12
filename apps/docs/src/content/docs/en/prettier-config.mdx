@@ -1,0 +1,73 @@
+---
+title: "Prettier Config"
+description: "Shared Prettier configuration for PleaseAI projects."
+sidebar:
+  order: 2
+---
+`@pleaseai/prettier-config` provides a shared Prettier configuration for consistent formatting across PleaseAI projects.
+
+## Installation
+
+<CodeGroup titles={["bun", "pnpm", "npm"]}>
+
+```bash
+bun add -D @pleaseai/prettier-config prettier
+```
+
+```bash
+pnpm add -D @pleaseai/prettier-config prettier
+```
+
+```bash
+npm install -D @pleaseai/prettier-config prettier
+```
+
+</CodeGroup>
+
+## Usage
+
+Reference it in your `package.json`:
+
+```json title="package.json"
+{
+  "prettier": "@pleaseai/prettier-config"
+}
+```
+
+Or create a `.prettierrc.json`:
+
+```json title=".prettierrc.json"
+"@pleaseai/prettier-config"
+```
+
+### Extending
+
+To override specific options, create a `.prettierrc.mjs`:
+
+```js title=".prettierrc.mjs"
+import config from '@pleaseai/prettier-config'
+
+export default {
+  ...config,
+  printWidth: 100,
+}
+```
+
+## Configuration
+
+| Option | Value |
+|--------|-------|
+| `singleQuote` | `true` |
+| `semi` | `false` |
+| `useTabs` | `false` |
+| `tabWidth` | `2` |
+| `endOfLine` | `auto` |
+| `bracketSpacing` | `false` |
+| `arrowParens` | `always` |
+| `bracketSameLine` | `false` |
+| `printWidth` | `120` |
+| `trailingComma` | `all` |
+
+## Compatibility
+
+- Prettier `^2.8.8` or `^3.0.0`

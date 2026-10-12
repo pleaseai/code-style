@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — workaround applied in `docs/nuxt.config.ts` pending an upstream fix.
+Superseded by ADR-0003
 
 ## Context
 

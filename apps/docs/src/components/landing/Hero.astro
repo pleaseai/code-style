@@ -1,0 +1,34 @@
+---
+/**
+ * Hero — landing page heading block (title, lead paragraph, call-to-action
+ * buttons passed as children).
+ *
+ *   <Hero title="Product" description="One-line pitch.">
+ *     <LinkButton href="/en/start">Get started</LinkButton>
+ *   </Hero>
+ */
+interface Props {
+  title: string
+  description?: string
+}
+
+const { title, description } = Astro.props
+---
+
+<section class="not-prose border-b border-border">
+  <div class="mx-auto max-w-5xl px-4 md:px-6 py-20 sm:py-28 text-center">
+    <h1
+      class="m-0 text-foreground leading-tight [text-wrap:balance] text-4xl sm:text-5xl font-semibold tracking-tight"
+    >
+      {title}
+    </h1>
+    {description && (
+      <p class="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground leading-relaxed [text-wrap:pretty]">
+        {description}
+      </p>
+    )}
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3 [&>p]:contents">
+      <slot />
+    </div>
+  </div>
+</section>
