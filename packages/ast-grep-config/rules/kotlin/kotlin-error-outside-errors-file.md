@@ -67,5 +67,7 @@ class InvoiceService { /* … */ }
 
 ## Exempt files
 
-`Errors.kt` and test source sets (`src/test/`, `src/testFixtures/`,
-`src/androidTest/`) are ignored.
+`Errors.kt` and test source sets are ignored: `src/test/`, `src/testFixtures/`,
+and every source set whose name ends in `Test` (Android `src/androidTest/` and
+`src/androidUnitTest/`, Kotlin Multiplatform `src/commonTest/`, `src/jvmTest/`,
+`src/iosTest/`, `src/jsTest/`, …).

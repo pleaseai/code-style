@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
@@ -59,6 +59,30 @@ describe('ast-grep tool', () => {
     const result = await applyAstGrep({ cwd: dir, autoAccept: true })
     expect(result.updated).toEqual(['sgconfig.yml'])
     expect(readFileSync(join(dir, 'sgconfig.yml'), 'utf-8')).toContain('ruleDirs:\n  - node_modules/@pleaseai/ast-grep-config/rules\n')
+  })
+
+  test('does not write sgconfig.yml under Yarn Plug\'n\'Play, where node_modules does not exist', async () => {
+    writeFileSync(join(dir, '.pnp.cjs'), '')
+    const result = await applyAstGrep({ cwd: dir, autoAccept: true })
+    expect(result).toEqual({ created: [], updated: [], skipped: ['sgconfig.yml'] })
+    expect(existsSync(join(dir, 'sgconfig.yml'))).toBe(false)
+  })
+
+  test('detects Plug\'n\'Play from a workspace package whose .pnp.cjs is at the workspace root', async () => {
+    writeFileSync(join(dir, '.pnp.cjs'), '')
+    const pkg = join(dir, 'packages', 'app')
+    mkdirSync(pkg, { recursive: true })
+    const result = await applyAstGrep({ cwd: pkg, autoAccept: true })
+    expect(result.skipped).toEqual(['sgconfig.yml'])
+    expect(existsSync(join(pkg, 'sgconfig.yml'))).toBe(false)
+  })
+
+  test('writes sgconfig.yml for a node_modules project nested under a Plug\'n\'Play directory', async () => {
+    writeFileSync(join(dir, '.pnp.cjs'), '')
+    const project = join(dir, 'examples', 'app')
+    mkdirSync(join(project, 'node_modules', '@pleaseai', 'ast-grep-config', 'rules'), { recursive: true })
+    const result = await applyAstGrep({ cwd: project, autoAccept: true })
+    expect(result.created).toEqual(['sgconfig.yml'])
   })
 
   test('overwrites a different sgconfig.yml when overwrites are accepted', async () => {

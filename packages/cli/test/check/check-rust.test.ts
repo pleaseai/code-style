@@ -217,6 +217,17 @@ describe('rust unit-test split files', () => {
     expect(kinds(result)).toEqual(['unreachable-unit-test src/parser_tests.rs'])
   })
 
+  test('a conditionally applied test attribute marks a test file; `test` in the predicate does not', () => {
+    const result = checkFixture({
+      ...CARGO,
+      'src/lib.rs': '',
+      'src/miri_tests.rs': '#[cfg_attr(not(miri), test)]\nfn parses() {}',
+      'src/async_tests.rs': '#[cfg_attr(feature = "rt", tokio::test(flavor = "multi_thread"))]\nasync fn runs() {}',
+      'src/model.rs': '#[cfg_attr(test, derive(Debug))]\npub struct Model;\n#[cfg_attr(all(unix, test), ignore)]\nfn helper() {}\n#[cfg_attr(feature = "x", test::helper)]\nfn other() {}',
+    }, stub([['lib', 'src/lib.rs']]))
+    expect(kinds(result)).toEqual(['unreachable-unit-test src/async_tests.rs', 'unreachable-unit-test src/miri_tests.rs'])
+  })
+
   test('a #[test] file declared inside an inline module is not reported', () => {
     const result = checkFixture({
       ...CARGO,

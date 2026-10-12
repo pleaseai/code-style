@@ -17,6 +17,7 @@ interface Messages {
   created: (file: string) => string
   updated: (file: string) => string
   agentsBlockUpdated: string
+  astGrepPlugNPlay: string
   doctorHeading: string
   doctorOk: string
   doctorMissing: string
@@ -45,6 +46,7 @@ const messages: Record<Locale, Messages> = {
     created: file => `Created ${file}`,
     updated: file => `Updated ${file}`,
     agentsBlockUpdated: 'Refreshed AGENTS.md pleaseai-code-style block.',
+    astGrepPlugNPlay: 'Yarn Plug\'n\'Play has no node_modules, so ast-grep cannot read the rules from node_modules/@pleaseai/ast-grep-config. Set `nodeLinker: node-modules` in .yarnrc.yml, run yarn install, and run init again.',
     doctorHeading: 'Project status',
     doctorOk: 'OK',
     doctorMissing: 'missing',
@@ -99,6 +101,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     created: file => `${file} 생성됨`,
     updated: file => `${file} 업데이트됨`,
     agentsBlockUpdated: 'AGENTS.md의 pleaseai-code-style 블록을 갱신했습니다.',
+    astGrepPlugNPlay: 'Yarn Plug\'n\'Play는 node_modules를 만들지 않아 ast-grep이 node_modules/@pleaseai/ast-grep-config의 규칙을 읽을 수 없습니다. .yarnrc.yml에 `nodeLinker: node-modules`를 설정하고 yarn install 후 init을 다시 실행하세요.',
     doctorHeading: '프로젝트 상태',
     doctorOk: '정상',
     doctorMissing: '없음',
