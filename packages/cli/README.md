@@ -132,7 +132,8 @@ What it checks:
     `cargo metadata --no-deps --format-version 1` and follows `mod`
     declarations, then reports `tests/**/*.rs` files Cargo never compiles
     (except `tests/common/` and submodules of a `tests/<name>/main.rs`
-    target), and `#[test]` files no `mod` declaration reaches. Without
+    target), and `#[test]` files no `mod` declaration reaches (a test
+    attribute applied with `#[cfg_attr(…, test)]` counts too). Without
     `cargo`, Rust is skipped with a notice.
   - Files come from `git ls-files` (tracked plus untracked-not-ignored) or,
     outside a git work tree, a directory walk (which also skips build and

@@ -128,7 +128,8 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
     `cargo metadata --no-deps --format-version 1`을 읽고 `mod` 선언을 따라가,
     Cargo가 컴파일하지 않는 `tests/**/*.rs` 파일(`tests/common/`과
     `tests/<name>/main.rs` 대상의 하위 모듈은 제외)과 어떤 `mod` 선언도 닿지
-    않는 `#[test]` 파일을 보고합니다. `cargo`가 없으면 알림을 남기고 Rust를
+    않는 `#[test]` 파일(`#[cfg_attr(…, test)]`로 붙인 테스트 속성 포함)을
+    보고합니다. `cargo`가 없으면 알림을 남기고 Rust를
     건너뜁니다.
 - **`test-helpers-in-dedicated-location`**: 지정 위치 밖에서 선언된 헬퍼
   후보(`mock*`, `createMock*`, `fake*`, `stub*`)는 둘 이상의 테스트 파일이
