@@ -85,7 +85,7 @@
         "typescript": "^6.0.3",
       },
       "peerDependencies": {
-        "eslint": "^9.10.0 || ^10.0.0",
+        "eslint": "^10.4.0",
       },
     },
     "packages/perttier-config": {
