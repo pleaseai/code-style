@@ -1,0 +1,19 @@
+bun.lock
+  s_15072deb6eb871::t_fa2432bb286b88 21-22,24,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f2f5573b4c4741eddfcaff6039f027dffdf721e8",
+  "prompts": {},
+  "sessions": {
+    "s_15072deb6eb871": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9793d24-95a9-4b79-88d2-96ca20d74f30",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
