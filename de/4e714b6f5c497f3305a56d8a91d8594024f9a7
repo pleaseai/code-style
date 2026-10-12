@@ -1,0 +1,20 @@
+apps/docs/src/components/ui/pagination/Pagination.astro
+  h_9ee0685e8f5c3a 17,21
+apps/docs/src/components/ui/search/SearchDialog.astro
+  h_9ee0685e8f5c3a 48
+apps/docs/src/components/ui/search/search.client.ts
+  h_9ee0685e8f5c3a 108
+apps/docs/src/i18n/locales.ts
+  h_9ee0685e8f5c3a 61,71,87,97,107,117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "de4e714b6f5c497f3305a56d8a91d8594024f9a7",
+  "prompts": {},
+  "humans": {
+    "h_9ee0685e8f5c3a": {
+      "author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
