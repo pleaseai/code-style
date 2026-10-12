@@ -1,7 +1,7 @@
 import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
 import { copyFileSync, existsSync, writeFileSync } from 'node:fs'
-import { resolve as joinPath } from 'node:path'
-import { confirm, isCancel } from '@clack/prompts'
+import { dirname, resolve as joinPath } from 'node:path'
+import { confirm, isCancel, log } from '@clack/prompts'
 import {
   isPackageInstalled,
   readFileOrNull,
@@ -228,10 +228,34 @@ function listsAstGrepRules(yaml: string): boolean {
   return entries.some(e => normalizeRuleDir(e) === AST_GREP_RULES)
 }
 
+/**
+ * Yarn Plug'n'Play installs packages as zip archives without `node_modules`, so the rules path above does not exist.
+ * A workspace package's `.pnp.cjs` lives at the workspace root, so the enclosing directories are searched too;
+ * an installed rules directory means this project is not under Plug'n'Play, whatever an ancestor holds.
+ */
+function usesPlugNPlay(cwd: string): boolean {
+  if (existsSync(joinPath(cwd, AST_GREP_RULES))) {
+    return false
+  }
+  for (let dir = joinPath(cwd); ; dir = dirname(dir)) {
+    if (existsSync(joinPath(dir, '.pnp.cjs')) || existsSync(joinPath(dir, '.pnp.js'))) {
+      return true
+    }
+    if (dirname(dir) === dir) {
+      return false
+    }
+  }
+}
+
 export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, 'sgconfig.yml')
   const label = 'sgconfig.yml'
+  if (usesPlugNPlay(ctx.cwd)) {
+    log.warn(t('astGrepPlugNPlay'))
+    result.skipped.push(label)
+    return result
+  }
   const existing = readFileOrNull(target)
 
   if (existing == null) {

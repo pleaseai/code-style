@@ -13,7 +13,7 @@
 - 선택적 [React](#react), [Nextjs](#nextjs), [Svelte](#svelte), [UnoCSS](#unocss), [Astro](#astro), [Solid](#solid), [Angular](#angular) 지원
 - CSS, HTML, XML 등을 위한 선택적 [포매터](#포매터) 지원
 - [`eslint-plugin-package-json`](#package-json-린트) 설정 포함
-- ESLint v9.10.0 이상 필요
+- ESLint v10.4.0 이상 필요
 
 ## PleaseAI 기본값
 

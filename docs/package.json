@@ -11,12 +11,12 @@
     "preview:cf": "wrangler pages dev"
   },
   "dependencies": {
-    "@nuxtjs/i18n": "^10.2.4",
-    "better-sqlite3": "^12.6.2",
+    "@nuxtjs/i18n": "^10.6.0",
+    "better-sqlite3": "^12.11.1",
     "docus": "latest",
-    "nuxt": "^4.3.1"
+    "nuxt": "^4.6.1"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.149.0"
   }
 }
