@@ -189,7 +189,8 @@ rule:
 ---
 # A test function attribute: `#[test]`, `#[tokio::test(…)]`, or one applied
 # conditionally, `#[cfg_attr(<predicate>, test)]`. In the conditional form the
-# `test` must be a top-level item after a comma (optionally path-qualified), so
+# `test` must be a top-level item after a comma, optionally path-qualified and
+# never followed by `::` (`test::helper` is another attribute), so
 # a `test` inside the predicate (`cfg_attr(all(unix, test), ignore)`) or as the
 # predicate itself (`cfg_attr(test, derive(Debug))`) does not count.
 id: test-attr
@@ -213,3 +214,7 @@ rule:
                 regex: ^test$
                 follows:
                   regex: ^(,|::)$
+                # `test::helper` names a different attribute.
+                not:
+                  precedes:
+                    regex: ^::$

@@ -63,11 +63,12 @@ with the fix. See the
 structural rules. `please-style check` findings name their slug; each check is
 described under [`please-style check`](#please-style-check).
 
-Under Yarn Plug'n'Play (a `.pnp.cjs` file in the project), `init` does not
-write `sgconfig.yml` and prints a warning instead: ast-grep reads rules from a
-directory, and Plug'n'Play keeps packages in zip archives without
-`node_modules`. Set `nodeLinker: node-modules` in `.yarnrc.yml` to use the
-rules.
+Under Yarn Plug'n'Play (a `.pnp.cjs` or `.pnp.js` file in the project or an
+enclosing workspace root), `init` does not write `sgconfig.yml` and prints a
+warning instead: ast-grep reads rules from a directory, and Plug'n'Play keeps
+packages in zip archives without `node_modules`. To use the rules, set
+`nodeLinker: node-modules` in `.yarnrc.yml`, run `yarn install`, and run
+`init` again.
 
 ## `please-style check`
 
