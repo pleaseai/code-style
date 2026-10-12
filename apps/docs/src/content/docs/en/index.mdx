@@ -1,0 +1,90 @@
+---
+title: "PleaseAI Code Style"
+description: "Shared ESLint, Prettier, and EditorConfig configurations for consistent code style across PleaseAI projects."
+mode: custom
+sidebar:
+  order: 0
+  hidden: true
+  group:
+    label: "English"
+tableOfContents: false
+---
+
+<Hero title="PleaseAI Code Style" description="Shared ESLint, Prettier, and EditorConfig configurations for consistent code style across PleaseAI projects — plus a CLI that wires them up in one command.">
+  <LinkButton href="/en/cli" size="lg" icon>Get started</LinkButton>
+  <LinkButton href="https://github.com/pleaseai/code-style" variant="secondary" size="lg" target="_blank">Star on GitHub</LinkButton>
+</Hero>
+
+<Section title="Packages" description="Everything you need for consistent code style, shipped as focused packages.">
+
+<CardGrid>
+  <Card title="ESLint Config" icon="ph:shield-check" href="/en/eslint-config">
+
+Opinionated ESLint flat config built on top of `@antfu/eslint-config`.
+
+  </Card>
+
+  <Card title="Prettier Config" icon="ph:paint-brush" href="/en/prettier-config">
+
+Shared Prettier configuration for consistent formatting.
+
+  </Card>
+
+  <Card title="EditorConfig" icon="ph:file-code" href="/en/editorconfig">
+
+Shared `.editorconfig` for consistent editor settings.
+
+  </Card>
+
+  <Card title="CLI" icon="ph:terminal" href="/en/cli">
+
+One-command setup for eslint, prettier, editorconfig, and the `AGENTS.md` rules block.
+
+  </Card>
+</CardGrid>
+
+</Section>
+
+<Section title="Quick Start" description="The fastest path is the CLI — it installs the packages and writes the config files for you.">
+
+<CodeGroup titles={["bun", "pnpm", "npm"]}>
+
+```bash
+bunx @pleaseai/code-style
+```
+
+```bash
+pnpm dlx @pleaseai/code-style
+```
+
+```bash
+npx @pleaseai/code-style
+```
+
+</CodeGroup>
+
+Prefer to wire things up by hand? Install the ESLint config directly:
+
+<CodeGroup titles={["bun", "pnpm", "npm"]}>
+
+```bash
+bun add -D @pleaseai/eslint-config eslint
+```
+
+```bash
+pnpm add -D @pleaseai/eslint-config eslint
+```
+
+```bash
+npm install -D @pleaseai/eslint-config eslint
+```
+
+</CodeGroup>
+
+```ts title="eslint.config.ts"
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai()
+```
+
+</Section>

@@ -1,0 +1,3 @@
+# Cloudflare Pages redirects.
+# The previous (Docus) site published its sitemap at /sitemap.xml.
+/sitemap.xml /sitemap-index.xml 301

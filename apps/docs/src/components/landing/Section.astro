@@ -1,0 +1,32 @@
+---
+/**
+ * Section — a titled landing page band. Children render as regular docs
+ * prose, so Markdown, code groups, and cards work inside it.
+ *
+ *   <Section title="Packages" description="What ships.">
+ *     <CardGrid>…</CardGrid>
+ *   </Section>
+ */
+interface Props {
+  title: string
+  description?: string
+}
+
+const { title, description } = Astro.props
+---
+
+<section class="border-b border-border last:border-b-0">
+  <div class="mx-auto max-w-5xl px-4 md:px-6 py-16">
+    <div class="mb-8 text-center">
+      <h2 class="m-0 text-foreground text-2xl sm:text-3xl font-semibold tracking-tight">{title}</h2>
+      {description && (
+        <p class="mx-auto mt-3 max-w-2xl text-muted-foreground leading-relaxed [text-wrap:pretty]">
+          {description}
+        </p>
+      )}
+    </div>
+    <div class="docs-content mx-auto max-w-3xl">
+      <slot />
+    </div>
+  </div>
+</section>

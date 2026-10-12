@@ -16,7 +16,7 @@ This is a [bun](https://bun.sh) monorepo orchestrated by [Turborepo](https://tur
 
 The `packages/perttier-config` directory is intentionally misspelled. Do not rename it without coordinating the release-please config, CI workflows, and the npm package name.
 
-The documentation site lives in [`docs/`](./docs) (Docus on Nuxt).
+The documentation site lives in [`apps/docs/`](./apps/docs) (Nimbus on Astro).
 
 ## Getting started
 

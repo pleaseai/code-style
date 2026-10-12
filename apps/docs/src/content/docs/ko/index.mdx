@@ -1,0 +1,90 @@
+---
+title: "PleaseAI Code Style"
+description: "PleaseAI 프로젝트 전반에 걸쳐 일관된 코드 스타일을 유지하기 위한 공유 ESLint, Prettier, EditorConfig 설정."
+mode: custom
+sidebar:
+  order: 0
+  hidden: true
+  group:
+    label: "한국어"
+tableOfContents: false
+---
+
+<Hero title="PleaseAI Code Style" description="PleaseAI 프로젝트를 위한 공유 ESLint, Prettier, EditorConfig 설정 — 이 모든 것을 한 번에 연결해 주는 CLI도 함께 제공합니다.">
+  <LinkButton href="/ko/cli" size="lg" icon>시작하기</LinkButton>
+  <LinkButton href="https://github.com/pleaseai/code-style" variant="secondary" size="lg" target="_blank">GitHub에서 보기</LinkButton>
+</Hero>
+
+<Section title="패키지" description="일관된 코드 스타일에 필요한 모든 것을, 목적이 분명한 패키지로 제공합니다.">
+
+<CardGrid>
+  <Card title="ESLint Config" icon="ph:shield-check" href="/ko/eslint-config">
+
+`@antfu/eslint-config` 위에 구축된 의견이 반영된 ESLint flat config.
+
+  </Card>
+
+  <Card title="Prettier Config" icon="ph:paint-brush" href="/ko/prettier-config">
+
+일관된 포매팅을 위한 공유 Prettier 설정.
+
+  </Card>
+
+  <Card title="EditorConfig" icon="ph:file-code" href="/ko/editorconfig">
+
+일관된 에디터 설정을 위한 공유 `.editorconfig`.
+
+  </Card>
+
+  <Card title="CLI" icon="ph:terminal" href="/ko/cli">
+
+eslint, prettier, editorconfig, 그리고 `AGENTS.md` 규칙 블록을 한 번에 설정.
+
+  </Card>
+</CardGrid>
+
+</Section>
+
+<Section title="빠른 시작" description="가장 빠른 방법은 CLI입니다 — 패키지를 설치하고 설정 파일까지 자동으로 작성해 줍니다.">
+
+<CodeGroup titles={["bun", "pnpm", "npm"]}>
+
+```bash
+bunx @pleaseai/code-style
+```
+
+```bash
+pnpm dlx @pleaseai/code-style
+```
+
+```bash
+npx @pleaseai/code-style
+```
+
+</CodeGroup>
+
+직접 연결하고 싶다면, ESLint 설정을 바로 설치할 수 있습니다:
+
+<CodeGroup titles={["bun", "pnpm", "npm"]}>
+
+```bash
+bun add -D @pleaseai/eslint-config eslint
+```
+
+```bash
+pnpm add -D @pleaseai/eslint-config eslint
+```
+
+```bash
+npm install -D @pleaseai/eslint-config eslint
+```
+
+</CodeGroup>
+
+```ts title="eslint.config.ts"
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai()
+```
+
+</Section>
