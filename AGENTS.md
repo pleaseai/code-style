@@ -17,6 +17,7 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 
 | Package | Path | Build |
 |---------|------|-------|
+| `@pleaseai/code-style` | `packages/cli` | tsdown |
 | `@pleaseai/eslint-config` | `packages/eslint-config` | tsdown |
 | `@pleaseai/prettier-config` | `packages/perttier-config` | none (JSON only) |
 | `@pleaseai/editorconfig` | `packages/editorconfig` | none (static file) |
