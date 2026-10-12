@@ -68,7 +68,9 @@ Yarn Plug'n'Play 프로젝트(프로젝트나 상위 워크스페이스 루트�
 경고만 출력합니다. ast-grep은 디렉터리에서 규칙을 읽는데, Plug'n'Play는
 패키지를 `node_modules` 없이 zip 아카이브로 보관하기 때문입니다. 규칙을
 쓰려면 `.yarnrc.yml`에 `nodeLinker: node-modules`를 설정하고 `yarn install`을
-실행한 뒤 `init`을 다시 실행하세요.
+실행한 뒤 `init`을 다시 실행하세요. 프로젝트 자체에
+`node_modules/@pleaseai/ast-grep-config/rules`가 설치되어 있으면 상위 디렉터리가
+Plug'n'Play여도 `sgconfig.yml`을 작성합니다.
 
 ## `please-style check`
 

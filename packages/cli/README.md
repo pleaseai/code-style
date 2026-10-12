@@ -68,7 +68,9 @@ enclosing workspace root), `init` does not write `sgconfig.yml` and prints a
 warning instead: ast-grep reads rules from a directory, and Plug'n'Play keeps
 packages in zip archives without `node_modules`. To use the rules, set
 `nodeLinker: node-modules` in `.yarnrc.yml`, run `yarn install`, and run
-`init` again.
+`init` again. A project with its own installed
+`node_modules/@pleaseai/ast-grep-config/rules` still gets `sgconfig.yml`, even
+under an enclosing Plug'n'Play directory.
 
 ## `please-style check`
 
