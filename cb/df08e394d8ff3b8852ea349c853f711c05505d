@@ -1,0 +1,21 @@
+packages/cli/src/check/check-filenames.ts
+  s_7a7f49d8e26c30::t_47d2ccde541ab2 42-43,66-73,108,148-149,195
+packages/cli/test/check/check-filenames.test.ts
+  s_7a7f49d8e26c30::t_d5d3b676541523 103-114,275-287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cbdf08e394d8ff3b8852ea349c853f711c05505d",
+  "prompts": {},
+  "sessions": {
+    "s_7a7f49d8e26c30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7380006b-f322-45b0-8f68-2bbc92c5f771",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
