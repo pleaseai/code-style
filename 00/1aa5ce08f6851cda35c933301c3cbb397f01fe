@@ -1,0 +1,16 @@
+bun.lock
+  h_9ee0685e8f5c3a 88
+packages/eslint-config/package.json
+  h_9ee0685e8f5c3a 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "001aa5ce08f6851cda35c933301c3cbb397f01fe",
+  "prompts": {},
+  "humans": {
+    "h_9ee0685e8f5c3a": {
+      "author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
