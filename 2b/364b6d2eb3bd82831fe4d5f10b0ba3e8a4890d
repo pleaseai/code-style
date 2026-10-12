@@ -1,0 +1,31 @@
+packages/ast-grep-config/extract/rust.yml
+  s_15072deb6eb871::t_df9d0b19f0e326 192-193,217-220
+packages/cli/src/appliers.ts
+  s_1b576d36181424::t_d9cbf34f131a50 3,231-235,237-247
+packages/cli/test/appliers.test.ts
+  s_1b576d36181424::t_fe5ea905f5b4ef 1,71-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2b364b6d2eb3bd82831fe4d5f10b0ba3e8a4890d",
+  "prompts": {},
+  "sessions": {
+    "s_15072deb6eb871": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9793d24-95a9-4b79-88d2-96ca20d74f30",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_1b576d36181424": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a121223352059bd83",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
