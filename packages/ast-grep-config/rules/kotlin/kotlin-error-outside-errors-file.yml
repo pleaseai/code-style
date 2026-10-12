@@ -38,4 +38,6 @@ ignores:
   - '**/Errors.kt'
   - '**/src/test/**'
   - '**/src/testFixtures/**'
-  - '**/src/androidTest/**'
+  # Android and Kotlin Multiplatform test source sets: androidTest,
+  # androidUnitTest, commonTest, jvmTest, iosTest, jsTest, …
+  - '**/src/*Test/**'
