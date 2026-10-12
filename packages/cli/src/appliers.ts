@@ -1,7 +1,7 @@
 import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
 import { copyFileSync, existsSync, writeFileSync } from 'node:fs'
 import { resolve as joinPath } from 'node:path'
-import { confirm, isCancel } from '@clack/prompts'
+import { confirm, isCancel, log } from '@clack/prompts'
 import {
   isPackageInstalled,
   readFileOrNull,
@@ -228,10 +228,20 @@ function listsAstGrepRules(yaml: string): boolean {
   return entries.some(e => normalizeRuleDir(e) === AST_GREP_RULES)
 }
 
+/** Yarn Plug'n'Play installs packages as zip archives without `node_modules`, so the rules path above does not exist. */
+function usesPlugNPlay(cwd: string): boolean {
+  return existsSync(joinPath(cwd, '.pnp.cjs')) || existsSync(joinPath(cwd, '.pnp.js'))
+}
+
 export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, 'sgconfig.yml')
   const label = 'sgconfig.yml'
+  if (usesPlugNPlay(ctx.cwd)) {
+    log.warn(t('astGrepPlugNPlay'))
+    result.skipped.push(label)
+    return result
+  }
   const existing = readFileOrNull(target)
 
   if (existing == null) {

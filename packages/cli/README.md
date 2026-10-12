@@ -63,6 +63,12 @@ with the fix. See the
 structural rules. `please-style check` findings name their slug; each check is
 described under [`please-style check`](#please-style-check).
 
+Under Yarn Plug'n'Play (a `.pnp.cjs` file in the project), `init` does not
+write `sgconfig.yml` and prints a warning instead: ast-grep reads rules from a
+directory, and Plug'n'Play keeps packages in zip archives without
+`node_modules`. Set `nodeLinker: node-modules` in `.yarnrc.yml` to use the
+rules.
+
 ## `please-style check`
 
 `check` is the layer-3 path checker of
