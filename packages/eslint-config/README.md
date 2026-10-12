@@ -13,7 +13,7 @@ PleaseAI's shared ESLint config, built on top of [@antfu/eslint-config](https://
 - Optional [React](#react), [Next.js](#nextjs), [Svelte](#svelte), [UnoCSS](#unocss), [Astro](#astro), [Solid](#solid), [Angular](#angular) support
 - Optional [formatters](#formatters) support for CSS, HTML, XML, etc.
 - Includes [`eslint-plugin-package-json`](#package-json-linting) configs
-- Requires ESLint v9.10.0+
+- Requires ESLint v10.4.0+
 
 ## PleaseAI Defaults
 
