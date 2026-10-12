@@ -1,0 +1,14 @@
+AGENTS.md
+  h_9ee0685e8f5c3a 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a71f43293be6fce3315e3ef3d74a78c32215a28b",
+  "prompts": {},
+  "humans": {
+    "h_9ee0685e8f5c3a": {
+      "author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
