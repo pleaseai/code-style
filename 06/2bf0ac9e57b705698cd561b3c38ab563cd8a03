@@ -1,0 +1,41 @@
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md
+  s_7a7f49d8e26c30::t_f0f3089f1ed2d2 70-73
+packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.yml
+  s_7a7f49d8e26c30::t_8d0cae53d372c5 41-43
+packages/ast-grep-config/test/e2e/sgconfig.test.ts
+  s_7a7f49d8e26c30::t_527466fc3e388b 73-76,91
+packages/cli/README.ko.md
+  s_765c12c37617ef::t_ff420040f94501 66-71
+packages/cli/README.md
+  s_765c12c37617ef::t_2faa179e28a7fb 66-71
+packages/cli/src/appliers.ts
+  s_7a7f49d8e26c30::t_f304d17e6f4318 4,231-235,240-244
+packages/cli/src/i18n.ts
+  s_7a7f49d8e26c30::t_da742c1fda4634 20,49,104
+packages/cli/test/appliers.test.ts
+  s_7a7f49d8e26c30::t_908aab94afe46e 1,64-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "062bf0ac9e57b705698cd561b3c38ab563cd8a03",
+  "prompts": {},
+  "sessions": {
+    "s_765c12c37617ef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d780694c-19bc-431f-a184-c7bc1681b2dd",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    },
+    "s_7a7f49d8e26c30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7380006b-f322-45b0-8f68-2bbc92c5f771",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
