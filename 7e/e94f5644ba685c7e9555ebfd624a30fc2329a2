@@ -1,0 +1,21 @@
+packages/cli/src/check/layouts.ts
+  s_7a7f49d8e26c30::t_2d8f2720ce0ec7 180-182,189-190,195-196,202-206,208-226,233-235
+packages/cli/test/check/check-test-paths.test.ts
+  s_7a7f49d8e26c30::t_36d27dfbaf1942 219-234
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7ee94f5644ba685c7e9555ebfd624a30fc2329a2",
+  "prompts": {},
+  "sessions": {
+    "s_7a7f49d8e26c30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7380006b-f322-45b0-8f68-2bbc92c5f771",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
