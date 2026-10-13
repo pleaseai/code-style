@@ -108,7 +108,7 @@ function inspectUnitTestFile(file: string, unit: Unit, layout: TestLayout, fileS
   }
   const testRoot = unit.testRoots.find(root => isUnder(rel, root) && rel !== root)
   if (testRoot == null) {
-    return layout.reportOutsideRoot(rel) ? outsideRootFinding(file, unit, layout) : null
+    return layout.reportOutsideRoot(rel, unit) ? outsideRootFinding(file, unit, layout) : null
   }
   if (layout.helperDirs(unit).some(dir => isUnder(rel, dir))) {
     return null

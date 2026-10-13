@@ -89,12 +89,16 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
     if (inDesignatedLocation(candidate.file, lang) || inFixtureProject(candidate.file, lang.units)) {
       continue
     }
+    const unit = unitOf(candidate.file, lang.units)
+    // A unit without a designated helper location (a multiplatform module) has nowhere to move a helper to.
+    if (unit != null && lang.layout.helperDirs(unit).length === 0) {
+      continue
+    }
     const importers = new Set([...lang.importers(candidate)].filter(f => !inFixtureProject(f, lang.units)))
     importers.delete(candidate.file)
     if (importers.size < 2) {
       continue
     }
-    const unit = unitOf(candidate.file, lang.units)
     if (unit == null) {
       unitless.push(candidate.file)
       continue

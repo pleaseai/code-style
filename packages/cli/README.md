@@ -77,7 +77,7 @@ copy `.editorconfig` from `node_modules`, so it skips the file and prints the
 command that copies it with Yarn's resolver:
 
 ```bash
-yarn node -e "require('fs').copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig')"
+yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig', fs.constants.COPYFILE_EXCL)"
 ```
 
 `please-style check` itself works under Plug'n'Play: `@pleaseai/ast-grep-config`
@@ -262,12 +262,14 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
 - Kotlin and Java modules are directories that contain `src/main|test|testFixtures/<lang>/`;
   tests are `*Test.kt`/`*Test.java`. A test may target a source in either main
   source set: `src/main/kotlin/…` (`.kt`, `.java`) or `src/main/java/…` (`.java`, `.kt`).
-- A Kotlin module with `src/commonMain/kotlin/` is Kotlin Multiplatform: every
-  `src/<name>Test/kotlin/` set is a test root and every `src/<name>Main/kotlin/`
-  set a source root. `androidInstrumentedTest` and `integrationTest` do not
+- A Kotlin module with `src/commonMain/kotlin/`, or with `src/<name>Main/kotlin/`
+  sets and no `src/main|test|testFixtures/kotlin/`, is Kotlin Multiplatform:
+  every `src/<name>Test/kotlin/` set is a test root and every
+  `src/<name>Main/kotlin/` set (or its `java/` sibling) a source root.
+  `androidInstrumentedTest`, `androidAndroidTest` and `integrationTest` do not
   mirror sources and are not checked; a `*Test.kt` inside a `*Main` set is
-  reported as outside the test root. The helper check does not cover
-  multiplatform modules yet (they have no `src/testFixtures/`).
+  reported as outside the test root. The helper check skips multiplatform
+  modules (they have no `src/testFixtures/`).
 - Test files that belong to no package or module (no enclosing `package.json`,
   `pubspec.yaml` or `src/<set>/<lang>/` directory) are not checked. This is
   reported as a notice, aggregated per language with the count and up to three

@@ -77,7 +77,7 @@ Plug'n'Play여도 `sgconfig.yml`을 작성합니다.
 모듈 해석으로 복사하는 명령을 출력합니다.
 
 ```bash
-yarn node -e "require('fs').copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig')"
+yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig', fs.constants.COPYFILE_EXCL)"
 ```
 
 `please-style check`는 Plug'n'Play에서도 동작합니다.
@@ -142,9 +142,11 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
   - Kotlin Multiplatform: `src/<target>Test/kotlin/…/FooTest.kt` ↔
     `src/<any>Main/kotlin/…/Foo.kt`(`commonTest` ↔ `commonMain`이며,
     `iosTest`는 중간 소스 셋인 `appleMain`의 코드도 대상으로 삼을 수 있습니다).
-    `src/commonMain/kotlin/`이 있는 모듈이 대상이고, `androidInstrumentedTest`와
-    `integrationTest`는 검사하지 않습니다. 헬퍼 검사는 아직 멀티플랫폼 모듈을
-    다루지 않습니다.
+    `src/commonMain/kotlin/`이 있거나, `src/<name>Main/kotlin/` 셋은 있지만
+    `src/main|test|testFixtures/kotlin/`이 없는 모듈이 대상입니다. 같은 셋의
+    `java/` 소스도 대상으로 삼습니다. `androidInstrumentedTest`,
+    `androidAndroidTest`, `integrationTest`는 검사하지 않습니다. 헬퍼 검사는
+    멀티플랫폼 모듈을 건너뜁니다(`src/testFixtures/`가 없기 때문입니다).
   - 테스트 루트 바로 아래의 환경 구간은 닫힌 목록 `unit`, `nuxt`, `browser`,
     `e2e`에 있을 때만 인정합니다. 첫 구간이 목록에 있으면 환경 구간으로도,
     미러 경로의 일부로도 해석해 봅니다. `e2e/` 아래 테스트는 경로를 유도하지

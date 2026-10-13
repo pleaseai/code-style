@@ -125,6 +125,19 @@ describe('editorconfig tool', () => {
       warn.mockRestore()
     }
   })
+
+  test('does not warn under Plug\'n\'Play when .editorconfig already exists', async () => {
+    writeFileSync(join(dir, '.pnp.cjs'), '')
+    writeFileSync(join(dir, '.editorconfig'), 'root = true\n')
+    const warn = spyOn(log, 'warn').mockImplementation(() => {})
+    try {
+      await findTool('editorconfig')!.apply({ cwd: dir, autoAccept: true })
+      expect(warn).not.toHaveBeenCalled()
+    }
+    finally {
+      warn.mockRestore()
+    }
+  })
 })
 
 // ---------------------------------------------------------------------------

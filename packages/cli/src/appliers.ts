@@ -111,7 +111,7 @@ async function applyEditorConfig(ctx: ToolContext): Promise<ToolApplyResult> {
 
   if (!existsSync(source)) {
     // Not installed (e.g. the install step failed), or installed by Plug'n'Play without a node_modules copy.
-    if (usesPlugNPlay(ctx.cwd, EDITORCONFIG_SOURCE)) {
+    if (!existsSync(target) && usesPlugNPlay(ctx.cwd, EDITORCONFIG_SOURCE)) {
       log.warn(t('editorconfigPlugNPlay'))
     }
     result.skipped.push(label)

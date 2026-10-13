@@ -232,6 +232,23 @@ describe('test-path-derivable-from-source (Dart, Kotlin, Java)', () => {
     ])
   })
 
+  test('kotlin multiplatform: detected without commonMain sources; a test may target a Java source of a *Main set', () => {
+    const findings = findingsFor({
+      'shared/src/jvmMain/java/com/acme/Invoice.java': '',
+      'shared/src/jvmMain/kotlin/com/acme/Payment.kt': '',
+      'shared/src/jvmTest/kotlin/com/acme/InvoiceTest.kt': '',
+      'shared/src/jvmTest/kotlin/com/acme/RefundTest.kt': '',
+    }, SLUG)
+    expect(files(findings)).toEqual(['shared/src/jvmTest/kotlin/com/acme/RefundTest.kt'])
+  })
+
+  test('kotlin: a test in a custom *Main set of a non-multiplatform module is not reported', () => {
+    expect(findingsFor({
+      'src/main/kotlin/com/acme/Invoice.kt': '',
+      'src/benchMain/kotlin/com/acme/InvoiceTest.kt': '',
+    }, SLUG)).toEqual([])
+  })
+
   test('java: src/main/java mirrors to src/test/java with Test.java', () => {
     const findings = findingsFor({
       'src/main/java/com/acme/Invoice.java': '',
