@@ -55,8 +55,9 @@ export default defineConfig({
     },
   },
   // `/` has no content of its own: send readers to the default locale's
-  // landing page. Static output emits this as a meta-refresh page, like the
-  // previous site did.
+  // landing page. Nimbus writes this into `dist/_redirects`, so Cloudflare
+  // Pages answers `/` with a 301; Astro's meta-refresh `index.html` is never
+  // served.
   redirects: {
     '/': `/${defaultLocale}`,
   },
