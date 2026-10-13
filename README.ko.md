@@ -57,6 +57,28 @@ export default pleaseai(
 - `typescript: true`
 - `gitignore: true`
 
+## `@pleaseai/ast-grep-config`
+
+### 설치
+
+```sh
+bun add -D @pleaseai/ast-grep-config @ast-grep/cli
+```
+
+### 사용법
+
+```yaml
+# sgconfig.yml
+ruleDirs:
+  - node_modules/@pleaseai/ast-grep-config/rules
+```
+
+```sh
+bunx ast-grep scan
+```
+
+모든 규칙은 경고(warning)로 배포됩니다. 규칙 목록과 위반을 고치는 방법은 [ast-grep Config 가이드](https://code-style.pages.dev/ko/ast-grep-config)를 참고하세요.
+
 ## 개발
 
 로컬에서 저장소를 설정하고 빌드·린트하는 방법은 [CONTRIBUTING.md의 Getting started](./CONTRIBUTING.md#getting-started)(영문)를 따르세요.

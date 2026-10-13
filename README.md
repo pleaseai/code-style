@@ -57,6 +57,28 @@ export default pleaseai(
 - `typescript: true`
 - `gitignore: true`
 
+## `@pleaseai/ast-grep-config`
+
+### Installation
+
+```sh
+bun add -D @pleaseai/ast-grep-config @ast-grep/cli
+```
+
+### Usage
+
+```yaml
+# sgconfig.yml
+ruleDirs:
+  - node_modules/@pleaseai/ast-grep-config/rules
+```
+
+```sh
+bunx ast-grep scan
+```
+
+Every rule ships as a warning. See the [ast-grep Config guide](https://code-style.pages.dev/en/ast-grep-config) for the rule list and how to fix each violation.
+
 ## Development
 
 To set up the repo, build, and lint locally, follow [Getting started in CONTRIBUTING.md](./CONTRIBUTING.md#getting-started).
