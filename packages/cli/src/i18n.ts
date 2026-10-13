@@ -18,6 +18,7 @@ interface Messages {
   updated: (file: string) => string
   agentsBlockUpdated: string
   astGrepPlugNPlay: string
+  editorconfigPlugNPlay: string
   doctorHeading: string
   doctorOk: string
   doctorMissing: string
@@ -47,6 +48,7 @@ const messages: Record<Locale, Messages> = {
     updated: file => `Updated ${file}`,
     agentsBlockUpdated: 'Refreshed AGENTS.md pleaseai-code-style block.',
     astGrepPlugNPlay: 'Yarn Plug\'n\'Play has no node_modules, so ast-grep cannot read the rules from node_modules/@pleaseai/ast-grep-config. Set `nodeLinker: node-modules` in .yarnrc.yml, run yarn install, and run init again.',
+    editorconfigPlugNPlay: 'Yarn Plug\'n\'Play has no node_modules, so .editorconfig was not copied from node_modules/@pleaseai/editorconfig. Copy it with: yarn node -e "require(\'fs\').copyFileSync(require.resolve(\'@pleaseai/editorconfig/.editorconfig\'), \'.editorconfig\')"',
     doctorHeading: 'Project status',
     doctorOk: 'OK',
     doctorMissing: 'missing',
@@ -102,6 +104,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     updated: file => `${file} 업데이트됨`,
     agentsBlockUpdated: 'AGENTS.md의 pleaseai-code-style 블록을 갱신했습니다.',
     astGrepPlugNPlay: 'Yarn Plug\'n\'Play는 node_modules를 만들지 않아 ast-grep이 node_modules/@pleaseai/ast-grep-config의 규칙을 읽을 수 없습니다. .yarnrc.yml에 `nodeLinker: node-modules`를 설정하고 yarn install 후 init을 다시 실행하세요.',
+    editorconfigPlugNPlay: 'Yarn Plug\'n\'Play는 node_modules를 만들지 않아 node_modules/@pleaseai/editorconfig에서 .editorconfig를 복사하지 못했습니다. 다음 명령으로 복사하세요: yarn node -e "require(\'fs\').copyFileSync(require.resolve(\'@pleaseai/editorconfig/.editorconfig\'), \'.editorconfig\')"',
     doctorHeading: '프로젝트 상태',
     doctorOk: '정상',
     doctorMissing: '없음',

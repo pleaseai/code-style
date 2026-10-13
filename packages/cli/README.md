@@ -72,6 +72,18 @@ packages in zip archives without `node_modules`. To use the rules, set
 `node_modules/@pleaseai/ast-grep-config/rules` still gets `sgconfig.yml`, even
 under an enclosing Plug'n'Play directory.
 
+The same goes for the **editorconfig** tool: under Plug'n'Play `init` cannot
+copy `.editorconfig` from `node_modules`, so it skips the file and prints the
+command that copies it with Yarn's resolver:
+
+```bash
+yarn node -e "require('fs').copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig')"
+```
+
+`please-style check` itself works under Plug'n'Play: `@pleaseai/ast-grep-config`
+sets `preferUnplugged`, so Yarn installs it as a real directory that ast-grep
+can read.
+
 ## `please-style check`
 
 `check` is the layer-3 path checker of

@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { log } from '@clack/prompts'
+import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test'
 import { applyAgentsMd, applyAstGrep, findTool } from '../src/appliers.js'
 
 let dir: string
@@ -90,6 +91,39 @@ describe('ast-grep tool', () => {
     const result = await applyAstGrep({ cwd: dir, autoAccept: true })
     expect(result.updated).toEqual(['sgconfig.yml'])
     expect(readFileSync(join(dir, 'sgconfig.yml'), 'utf-8')).toContain('@pleaseai/ast-grep-config/rules')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// editorconfig
+// ---------------------------------------------------------------------------
+
+describe('editorconfig tool', () => {
+  test('the package it installs is publishable and ships .editorconfig', () => {
+    const pkg = JSON.parse(readFileSync(join(import.meta.dir, '../../editorconfig/package.json'), 'utf-8')) as { private?: boolean, files?: string[] }
+    expect(pkg.private).toBeUndefined()
+    expect(pkg.files).toContain('.editorconfig')
+  })
+
+  test('copies .editorconfig from node_modules', async () => {
+    mkdirSync(join(dir, 'node_modules', '@pleaseai', 'editorconfig'), { recursive: true })
+    writeFileSync(join(dir, 'node_modules', '@pleaseai', 'editorconfig', '.editorconfig'), 'root = true\n')
+    const result = await findTool('editorconfig')!.apply({ cwd: dir, autoAccept: true })
+    expect(result.created).toEqual(['.editorconfig'])
+    expect(readFileSync(join(dir, '.editorconfig'), 'utf-8')).toBe('root = true\n')
+  })
+
+  test('skips with a warning under Yarn Plug\'n\'Play, where node_modules does not exist', async () => {
+    writeFileSync(join(dir, '.pnp.cjs'), '')
+    const warn = spyOn(log, 'warn').mockImplementation(() => {})
+    try {
+      const result = await findTool('editorconfig')!.apply({ cwd: dir, autoAccept: true })
+      expect(result).toEqual({ created: [], updated: [], skipped: ['.editorconfig'] })
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('yarn node -e'))
+    }
+    finally {
+      warn.mockRestore()
+    }
   })
 })
 

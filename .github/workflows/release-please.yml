@@ -27,6 +27,7 @@ jobs:
       prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
       code-style-released: ${{ steps.release.outputs['packages/cli--release_created'] }}
       ast-grep-config-released: ${{ steps.release.outputs['packages/ast-grep-config--release_created'] }}
+      editorconfig-released: ${{ steps.release.outputs['packages/editorconfig--release_created'] }}
     steps:
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -108,6 +109,19 @@ jobs:
           else
             bun pm pack
             npm publish pleaseai-prettier-config-*.tgz --provenance --access public
+          fi
+
+      # No build step: the package ships its .editorconfig as-is.
+      - name: Publish @pleaseai/editorconfig
+        if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.editorconfig-released == 'true') }}
+        working-directory: packages/editorconfig
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "@pleaseai/editorconfig@$VERSION" version 2>/dev/null; then
+            echo "⚠ @pleaseai/editorconfig@$VERSION already published, skipping"
+          else
+            bun pm pack
+            npm publish pleaseai-editorconfig-*.tgz --provenance --access public
           fi
 
       # No build step: the package ships YAML rules and READMEs as-is.

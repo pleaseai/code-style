@@ -15,6 +15,9 @@
     },
     "packages/ast-grep-config": {
       "package-name": "@pleaseai/ast-grep-config"
+    },
+    "packages/editorconfig": {
+      "package-name": "@pleaseai/editorconfig"
     }
   }
 }

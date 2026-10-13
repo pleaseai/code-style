@@ -72,6 +72,18 @@ Yarn Plug'n'Play 프로젝트(프로젝트나 상위 워크스페이스 루트�
 `node_modules/@pleaseai/ast-grep-config/rules`가 설치되어 있으면 상위 디렉터리가
 Plug'n'Play여도 `sgconfig.yml`을 작성합니다.
 
+**editorconfig** 도구도 마찬가지입니다. Plug'n'Play에서는 `init`이
+`node_modules`에서 `.editorconfig`를 복사할 수 없으므로 파일을 건너뛰고, Yarn의
+모듈 해석으로 복사하는 명령을 출력합니다.
+
+```bash
+yarn node -e "require('fs').copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig')"
+```
+
+`please-style check`는 Plug'n'Play에서도 동작합니다.
+`@pleaseai/ast-grep-config`가 `preferUnplugged`를 설정해 두었으므로, Yarn이 이
+패키지를 ast-grep이 읽을 수 있는 실제 디렉터리로 설치합니다.
+
 ## `please-style check`
 
 `check`는
