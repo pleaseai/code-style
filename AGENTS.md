@@ -51,7 +51,7 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 
 ## Docs Site
 
-- Located at `apps/docs/` (`@pleaseai/code-style-docs`) — [Nimbus](https://github.com/cloudflare/nimbus) (Astro 7 + Tailwind v4), static output deployed to the Cloudflare Pages project `pleaseai-code-style`
+- Located at `apps/docs/` (`@pleaseai/code-style-docs`) — [Nimbus](https://github.com/cloudflare/nimbus) (Astro 7 + Tailwind v4), static output deployed to the Cloudflare Pages project `code-style`
 - Bun workspace member (`apps/*`); `bun run build` (turbo) builds it to `apps/docs/dist/`
 - Dev / build / deploy: `bun run docs:dev`, `bun run docs:build`, `bun run docs:deploy` (`wrangler pages deploy`)
 - Checks inside `apps/docs`: `bun run typecheck` (`astro check`), `bun run lint:docs` (Nimbus prose/MDX lint)
