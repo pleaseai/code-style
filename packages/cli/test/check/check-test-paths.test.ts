@@ -225,10 +225,12 @@ describe('test-path-derivable-from-source (Dart, Kotlin, Java)', () => {
       'shared/src/jvmTest/kotlin/com/acme/PaymentTest.kt': '',
       'shared/src/androidInstrumentedTest/kotlin/com/acme/ScreenTest.kt': '',
       'shared/src/commonMain/kotlin/com/acme/RefundTest.kt': '',
+      'shared/src/main/kotlin/com/acme/LegacyTest.kt': '',
     }, SLUG)
     expect(findings.map(f => [f.kind, f.file])).toEqual([
       ['test-outside-root', 'shared/src/commonMain/kotlin/com/acme/RefundTest.kt'],
       ['orphan-test', 'shared/src/jvmTest/kotlin/com/acme/PaymentTest.kt'],
+      ['test-outside-root', 'shared/src/main/kotlin/com/acme/LegacyTest.kt'],
     ])
   })
 

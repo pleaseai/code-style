@@ -239,7 +239,7 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
     helperDirs: unit => unit.multiplatform === true ? [] : ['src/testFixtures'],
     // Only a test class inside production sources (`src/main`, or a multiplatform `src/*Main`) is misplaced;
     // other source sets (androidTest, integrationTest, …) are their own test roots.
-    reportOutsideRoot: (rel, unit) => unit.multiplatform === true ? /^src\/\w+Main\//.test(rel) : rel.startsWith('src/main/'),
+    reportOutsideRoot: (rel, unit) => rel.startsWith('src/main/') || (unit.multiplatform === true && /^src\/\w+Main\//.test(rel)),
   }
 }
 
