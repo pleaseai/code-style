@@ -1,0 +1,19 @@
+packages/cli/src/check/layouts.ts
+  s_7a7f49d8e26c30::t_030f206d048a84 190,203,217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "771e539d69aa4ff962efaf3b632ed2cf87f3cf0a",
+  "prompts": {},
+  "sessions": {
+    "s_7a7f49d8e26c30": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7380006b-f322-45b0-8f68-2bbc92c5f771",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
