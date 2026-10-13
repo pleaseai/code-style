@@ -187,7 +187,7 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
   const test = new RegExp(`.Test\\${ext}$`)
   const sourceSet = new RegExp(`^(?:(.*)/)?src/(?:main|test|testFixtures)/${language}/`)
   // Kotlin Multiplatform source sets: `src/commonMain/kotlin`, `src/jvmTest/kotlin`, …
-  const kmpSet = new RegExp(`^(?:(.*)/)?src/(\\w+)(Main|Test)/${language}/`)
+  const kmpSet = new RegExp(String.raw`^(?:(.*)/)?src/(\w+)(Main|Test)/${language}/`)
   return {
     language,
     units(files, base, rootDir) {
@@ -200,7 +200,7 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
           dirs.add(m[1] ?? '')
         }
         const k = kmpSet.exec(f)
-        if (k != null && !(k[3] === 'Test' && KMP_UNMIRRORED_TESTS.has(k[2] ?? ''))) {
+        if (k != null && !(k[3] === 'Test' && KMP_UNMIRRORED_TESTS.has(k[2]))) {
           const dir = k[1] ?? ''
           kmpSets.set(dir, (kmpSets.get(dir) ?? new Set()).add(`${k[2]}${k[3]}`))
         }
@@ -214,7 +214,7 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
       }
       return [...dirs].map((dir) => {
         const sets = kmpSets.get(dir)
-        const kmp = sets?.has('commonMain') === true ? [...sets].sort() : null
+        const kmp = sets?.has('commonMain') === true ? [...sets].sort((a, b) => a.localeCompare(b)) : null
         return {
           dir,
           testRoots: kmp == null ? [`src/test/${language}`] : kmp.filter(s => s.endsWith('Test')).map(s => `src/${s}/${language}`),
