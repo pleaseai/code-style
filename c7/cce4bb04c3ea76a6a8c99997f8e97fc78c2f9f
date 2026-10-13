@@ -1,0 +1,23 @@
+AGENTS.md
+  s_5f968098c533fd::t_d2fe0995d174fc 54
+apps/docs/wrangler.jsonc
+  s_5f968098c533fd::t_370c47846ee0bf 5
+docs/adr/0003-migrate-docs-to-nimbus.md
+  s_5f968098c533fd::t_ccad46787c62e7 18,40-41,74-77,174-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c7cce4bb04c3ea76a6a8c99997f8e97fc78c2f9f",
+  "prompts": {},
+  "sessions": {
+    "s_5f968098c533fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "025af38a-6b50-4915-a685-00db1f693ad3",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
