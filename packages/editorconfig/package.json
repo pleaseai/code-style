@@ -1,6 +1,6 @@
 {
   "name": "@pleaseai/editorconfig",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shared .editorconfig for PleaseAI projects, copied into a project by @pleaseai/code-style",
   "author": "PleaseAI",
   "license": "MIT",
