@@ -1,0 +1,169 @@
+---
+title: "ast-grep Config"
+description: "ast-grep rules that keep a codebase navigable for coding agents."
+sidebar:
+  order: 5
+---
+`@pleaseai/ast-grep-config` is a set of [ast-grep](https://ast-grep.github.io/) rules that keep a codebase navigable for coding agents: public symbols you can find by name, error types in a designated file, and no tests inside source files. It enforces layer 2 (structural rules) of [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) for TypeScript, Dart, Kotlin, Java, and Rust.
+
+Every rule ships as a **warning**. Nothing here fails a build unless you raise a rule's severity in your own config.
+
+## Installation
+
+<CodeGroup titles={["bun", "pnpm", "npm"]}>
+
+```bash
+bun add -D @pleaseai/ast-grep-config @ast-grep/cli
+```
+
+```bash
+pnpm add -D @pleaseai/ast-grep-config @ast-grep/cli
+```
+
+```bash
+npm install -D @pleaseai/ast-grep-config @ast-grep/cli
+```
+
+</CodeGroup>
+
+[`@ast-grep/cli`](https://ast-grep.github.io/) is a peer dependency that provides the `ast-grep` binary. Install it next to this package so `ast-grep` is on your project's bin path.
+
+With bun, add `@ast-grep/cli` to `trustedDependencies` so its postinstall step runs. Otherwise `ast-grep` prints a fallback warning on every call (`please-style check` is unaffected).
+
+```json title="package.json"
+{
+  "trustedDependencies": ["@ast-grep/cli"]
+}
+```
+
+<Aside type="tip" href="/en/cli">
+
+Run `bunx @pleaseai/code-style init` and select **ast-grep** — the CLI installs both packages and writes `sgconfig.yml` for you.
+
+</Aside>
+
+## Usage
+
+Point your project's `sgconfig.yml` at the rules:
+
+```yaml title="sgconfig.yml"
+ruleDirs:
+  - node_modules/@pleaseai/ast-grep-config/rules
+```
+
+```bash
+bunx ast-grep scan
+```
+
+Or scan with the package's own config without adding one:
+
+```bash
+bunx ast-grep scan -c node_modules/@pleaseai/ast-grep-config/sgconfig.yml
+```
+
+## The Five Principles
+
+| Slug | Principle |
+| --- | --- |
+| `code-greppable-public-symbols` | Public symbols are named declarations, so one name search finds the definition and every use. |
+| `code-filename-matches-primary-symbol` | A file with one public symbol is named after it (normalized to the language's file-name convention). |
+| `code-error-types-in-dedicated-module` | A module's error types live in its designated error file or package. |
+| `test-path-derivable-from-source` | Tests live under the toolchain's test root, at a path mirrored from the source they test. |
+| `test-helpers-in-dedicated-location` | Helpers shared by several tests live in the designated helper location. |
+
+The checks run in two layers:
+
+- **Layer 2** — the ast-grep rules in this package, run with `ast-grep scan`.
+- **Layer 3** — [`please-style check`](/en/cli#check), a path checker for what ast-grep cannot see (file names, test paths, and which helpers are shared). It runs the extraction rules in this package's `extract/` directory. `extract/` is not listed in `ruleDirs`, so its matches never appear in `ast-grep scan` output.
+
+## Rules
+
+| Rule | Slug | Language |
+| --- | --- | --- |
+| [`ts-no-default-export`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/typescript/ts-no-default-export.md) | `code-greppable-public-symbols` | TypeScript |
+| [`tsx-no-default-export`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/tsx/tsx-no-default-export.md) | `code-greppable-public-symbols` | TSX |
+| [`rust-no-glob-reexport`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/rust/rust-no-glob-reexport.md) | `code-greppable-public-symbols` | Rust |
+| [`ts-error-outside-errors-file`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/typescript/ts-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | TypeScript |
+| [`tsx-error-outside-errors-file`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/tsx/tsx-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | TSX |
+| [`dart-error-outside-errors-file`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/dart/dart-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Dart |
+| [`kotlin-error-outside-errors-file`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/kotlin/kotlin-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Kotlin |
+| [`java-error-outside-error-package`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/java/java-error-outside-error-package.md) | `code-error-types-in-dedicated-module` | Java |
+| [`rust-error-outside-error-file`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/rust/rust-error-outside-error-file.md) | `code-error-types-in-dedicated-module` | Rust |
+| [`ts-no-in-source-test`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/typescript/ts-no-in-source-test.md) | `test-path-derivable-from-source` | TypeScript |
+| [`tsx-no-in-source-test`](https://github.com/pleaseai/code-style/blob/main/packages/ast-grep-config/rules/tsx/tsx-no-in-source-test.md) | `test-path-derivable-from-source` | TSX |
+
+Each rule has a README next to it with the reason, a wrong and a right example, and the steps to fix a violation. The warning message names the slug and the README path inside `node_modules`, so an agent can fix the violation from the message alone:
+
+```text
+[code-greppable-public-symbols] Default export hides the symbol's name from
+grep. Export a named declaration instead. Fix guide:
+node_modules/@pleaseai/ast-grep-config/rules/typescript/ts-no-default-export.md
+```
+
+### No default exports
+
+`ts-no-default-export` and `tsx-no-default-export` flag `export default …`, `export { foo as default }`, and `export { default } from './x'`. A default import lets every importer pick its own local name, so a search for the declaration's name misses those import sites. A named import must mention the exported name.
+
+```ts
+// Wrong
+export default class UserService {}
+
+// Right
+export class UserService {}
+```
+
+### No glob re-exports
+
+`rust-no-glob-reexport` flags any `use` with a visibility modifier (`pub`, `pub(crate)`, `pub(super)`) that contains a `*`. Private glob imports such as `use super::*;` are not matched. Replace the glob with an explicit list of the items it exports today:
+
+```rust
+// Wrong
+pub use crate::model::*;
+
+// Right
+pub use crate::model::{Account, User};
+```
+
+### Error types in a dedicated module
+
+ast-grep has no type information, so the error rules match by name: a class (or Rust `struct`/`enum`) whose supertype or own name ends in `Error` or `Exception` (and `Throwable` for Kotlin and Java). Rust also matches `#[derive(…Error)]` and `impl Error for T`. Each language has its own designated location:
+
+| Language | Error types live in | Also exempt |
+| --- | --- | --- |
+| TypeScript / TSX | `errors.ts` in the module directory | `*.d.ts`, `*.test.*`, `*.spec.*`, `test/`, `tests/`, `__tests__/` |
+| Dart / Flutter | `errors.dart` in the library directory | `*_test.dart`, `test/`, `integration_test/`, `test_driver/` |
+| Kotlin | `Errors.kt` in the package directory | `src/test/`, `src/testFixtures/`, source sets ending in `Test` |
+| Java | an `error/` subpackage of the module | `src/test/`, `src/testFixtures/`, `src/androidTest/` |
+| Rust | `error.rs` next to the module root (or an `error/` module) | integration tests under `tests/` |
+
+Only the location is checked — the error file may contain helpers and imports.
+
+### No in-source tests
+
+`ts-no-in-source-test` and `tsx-no-in-source-test` flag Vitest [in-source tests](https://vitest.dev/guide/in-source.html) (`if (import.meta.vitest) { … }`). A `test/**` glob cannot find them, and production builds need a bundler `define` to strip them. Move the block into a test file under the package's test root, at a path mirrored from the source: `src/math/add.ts` becomes `test/math/add.test.ts`.
+
+## Framework Files
+
+Files whose shape a framework dictates are excluded through each rule's `ignores` list: config files (`*.config.ts`), `*.d.ts`, Storybook stories, `.vitepress/`, `.storybook/`, Nuxt 4 `app/pages/`, `app/layouts/`, `app/middleware/`, `app/plugins/`, and Nitro `server/api/`, `server/routes/`, `server/middleware/`, `server/plugins/`, `server/tasks/`.
+
+Nuxt 3 root layouts (`pages/` without `app/`) are **not** excluded: a glob such as `**/plugins/**` would also exempt every unrelated directory named `plugins`. ast-grep cannot override a shipped rule's `ignores`, so scope the rule from the command line instead — turn it off in the main scan and run it once more with your framework directories excluded:
+
+```bash
+ast-grep scan --off=ts-no-default-export
+ast-grep scan --filter '^ts-no-default-export$' \
+  --globs '!pages/**' --globs '!layouts/**' \
+  --globs '!middleware/**' --globs '!plugins/**' --globs '!app.config.ts'
+```
+
+Put both commands in one package script (for example `lint:structure`) so CI and agents run the same thing. Migrating to the Nuxt 4 `app/` layout removes the need for the second command.
+
+<Aside type="caution">
+
+Do not add `ast-grep-ignore` comments to silence a rule — they are suppressions that review flags. If a framework requires a default export somewhere else, propose the path for the allowlist in `@pleaseai/ast-grep-config`.
+
+</Aside>
+
+## Compatibility
+
+- `@ast-grep/cli` `^0.45.3`
+- Node.js `>=22.0.0`
