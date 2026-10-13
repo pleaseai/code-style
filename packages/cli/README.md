@@ -143,6 +143,9 @@ What it checks:
   - Dart: `lib/a/b.dart` ↔ `test/a/b_test.dart`.
   - Kotlin/Java: `src/main/kotlin/…/Foo.kt` ↔ `src/test/kotlin/…/FooTest.kt`
     (same for `java`).
+  - Kotlin Multiplatform: `src/<target>Test/kotlin/…/FooTest.kt` ↔
+    `src/<any>Main/kotlin/…/Foo.kt` (`commonTest` ↔ `commonMain`, and an
+    `iosTest` may target an intermediate `appleMain`).
   - An environment segment directly under the test root is allowed if it is on
     the closed list `unit`, `nuxt`, `browser`, `e2e`. A first segment on the
     list is tried both as an environment and as part of the mirrored path.
@@ -259,6 +262,12 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
 - Kotlin and Java modules are directories that contain `src/main|test|testFixtures/<lang>/`;
   tests are `*Test.kt`/`*Test.java`. A test may target a source in either main
   source set: `src/main/kotlin/…` (`.kt`, `.java`) or `src/main/java/…` (`.java`, `.kt`).
+- A Kotlin module with `src/commonMain/kotlin/` is Kotlin Multiplatform: every
+  `src/<name>Test/kotlin/` set is a test root and every `src/<name>Main/kotlin/`
+  set a source root. `androidInstrumentedTest` and `integrationTest` do not
+  mirror sources and are not checked; a `*Test.kt` inside a `*Main` set is
+  reported as outside the test root. The helper check does not cover
+  multiplatform modules yet (they have no `src/testFixtures/`).
 - Test files that belong to no package or module (no enclosing `package.json`,
   `pubspec.yaml` or `src/<set>/<lang>/` directory) are not checked. This is
   reported as a notice, aggregated per language with the count and up to three

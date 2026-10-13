@@ -139,6 +139,12 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
   - Dart: `lib/a/b.dart` ↔ `test/a/b_test.dart`.
   - Kotlin/Java: `src/main/kotlin/…/Foo.kt` ↔ `src/test/kotlin/…/FooTest.kt`
     (`java`도 같음).
+  - Kotlin Multiplatform: `src/<target>Test/kotlin/…/FooTest.kt` ↔
+    `src/<any>Main/kotlin/…/Foo.kt`(`commonTest` ↔ `commonMain`이며,
+    `iosTest`는 중간 소스 셋인 `appleMain`의 코드도 대상으로 삼을 수 있습니다).
+    `src/commonMain/kotlin/`이 있는 모듈이 대상이고, `androidInstrumentedTest`와
+    `integrationTest`는 검사하지 않습니다. 헬퍼 검사는 아직 멀티플랫폼 모듈을
+    다루지 않습니다.
   - 테스트 루트 바로 아래의 환경 구간은 닫힌 목록 `unit`, `nuxt`, `browser`,
     `e2e`에 있을 때만 인정합니다. 첫 구간이 목록에 있으면 환경 구간으로도,
     미러 경로의 일부로도 해석해 봅니다. `e2e/` 아래 테스트는 경로를 유도하지

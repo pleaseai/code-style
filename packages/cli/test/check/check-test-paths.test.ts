@@ -216,6 +216,22 @@ describe('test-path-derivable-from-source (Dart, Kotlin, Java)', () => {
     expect(files(findings)).toEqual(['src/test/kotlin/com/x/MissingTest.kt'])
   })
 
+  test('kotlin multiplatform: *Test sets mirror any *Main set; instrumented tests are their own root', () => {
+    const findings = findingsFor({
+      'shared/src/commonMain/kotlin/com/acme/Invoice.kt': '',
+      'shared/src/appleMain/kotlin/com/acme/Keychain.kt': '',
+      'shared/src/commonTest/kotlin/com/acme/InvoiceTest.kt': '',
+      'shared/src/iosTest/kotlin/com/acme/KeychainTest.kt': '',
+      'shared/src/jvmTest/kotlin/com/acme/PaymentTest.kt': '',
+      'shared/src/androidInstrumentedTest/kotlin/com/acme/ScreenTest.kt': '',
+      'shared/src/commonMain/kotlin/com/acme/RefundTest.kt': '',
+    }, SLUG)
+    expect(findings.map(f => [f.kind, f.file])).toEqual([
+      ['test-outside-root', 'shared/src/commonMain/kotlin/com/acme/RefundTest.kt'],
+      ['orphan-test', 'shared/src/jvmTest/kotlin/com/acme/PaymentTest.kt'],
+    ])
+  })
+
   test('java: src/main/java mirrors to src/test/java with Test.java', () => {
     const findings = findingsFor({
       'src/main/java/com/acme/Invoice.java': '',
