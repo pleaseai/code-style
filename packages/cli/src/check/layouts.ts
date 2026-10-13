@@ -24,6 +24,8 @@ export interface Unit {
   envSegments: string[]
   /** Fixture projects (a `package.json` under a test root) relative to `dir`; their test files are test data. */
   fixtureDirs?: string[]
+  /** A Kotlin Multiplatform module (`src/<target>Main`, `src/<target>Test` source sets). */
+  multiplatform?: boolean
 }
 
 /**
@@ -43,8 +45,8 @@ export interface TestLayout {
   allowIndex: boolean
   /** Designated shared-helper directory, relative to the unit (per test root). */
   helperDirs: (unit: Unit) => string[]
-  /** Report a test file found in `rel` (relative to its unit) outside the test roots? */
-  reportOutsideRoot: (rel: string) => boolean
+  /** Report a test file found in `rel` (relative to `unit`) outside the test roots? */
+  reportOutsideRoot: (rel: string, unit: Unit) => boolean
 }
 
 export function isUnder(path: string, dir: string): boolean {
@@ -177,39 +179,67 @@ export const DART_LAYOUT: TestLayout = {
 
 // --- Kotlin / Java (Gradle / Maven) -----------------------------------------
 
+/** Kotlin Multiplatform test sets that do not mirror sources, like Android's `src/androidTest` or an `integrationTest` set. */
+const KMP_UNMIRRORED_TESTS = new Set(['androidInstrumented', 'androidAndroid', 'integration'])
+
 function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayout {
   // Gradle/Maven modules mix both languages: a test may target a source in the sibling-language main set.
   const sibling = language === 'kotlin' ? 'java' : 'kotlin'
   const siblingExt = ext === '.kt' ? '.java' : '.kt'
   const test = new RegExp(`.Test\\${ext}$`)
   const sourceSet = new RegExp(`^(?:(.*)/)?src/(?:main|test|testFixtures)/${language}/`)
+  // Kotlin Multiplatform source sets: `src/commonMain/kotlin`, `src/jvmTest/kotlin`, …
+  const kmpSet = new RegExp(String.raw`^(?:(.*)/)?src/(\w+)(Main|Test)/${language}/`)
   return {
     language,
     units(files, base, rootDir) {
       const dirs = new Set<string>()
+      // Module dir → KMP source set names (`commonMain`, `jvmTest`, …).
+      const kmpSets = new Map<string, Set<string>>()
       for (const f of files) {
         const m = sourceSet.exec(f)
         if (m != null) {
           dirs.add(m[1] ?? '')
         }
+        const k = kmpSet.exec(f)
+        if (k != null && !(k[3] === 'Test' && KMP_UNMIRRORED_TESTS.has(k[2]))) {
+          const dir = k[1] ?? ''
+          kmpSets.set(dir, (kmpSets.get(dir) ?? new Set()).add(`${k[2]}${k[3]}`))
+        }
       }
-      return [...dirs].map(dir => ({
-        dir,
-        testRoots: [`src/test/${language}`],
-        sourceRoots: [`src/main/${language}`],
-        alternateSourceRoots: [`src/main/${sibling}`],
-        keepRootName: false,
-        envSegments: withConfig(rootDir, dir, base).envSegments,
-      }))
+      // A module with `src/commonMain/<lang>`, or with `src/<target>Main/<lang>` sets and no classic source set
+      // (an empty commonMain is not listed), is multiplatform: every `*Test` set is a test root, and a test
+      // may target any `*Main` set (an `iosTest` may test code in an intermediate `appleMain`).
+      const multiplatform = new Set<string>()
+      for (const [dir, sets] of kmpSets) {
+        if (sets.has('commonMain') || (!dirs.has(dir) && [...sets].some(s => s.endsWith('Main')))) {
+          multiplatform.add(dir)
+          dirs.add(dir)
+        }
+      }
+      return [...dirs].map((dir) => {
+        const kmp = multiplatform.has(dir) ? [...kmpSets.get(dir) ?? []].sort((a, b) => a.localeCompare(b)) : null
+        const mains = kmp?.filter(s => s.endsWith('Main')) ?? []
+        return {
+          dir,
+          testRoots: kmp == null ? [`src/test/${language}`] : kmp.filter(s => s.endsWith('Test')).map(s => `src/${s}/${language}`),
+          sourceRoots: kmp == null ? [`src/main/${language}`] : mains.map(s => `src/${s}/${language}`),
+          alternateSourceRoots: kmp == null ? [`src/main/${sibling}`] : mains.map(s => `src/${s}/${sibling}`),
+          keepRootName: false,
+          envSegments: withConfig(rootDir, dir, base).envSegments,
+          multiplatform: kmp != null,
+        }
+      })
     },
     isTestFile: path => test.test(path),
     sourceStem: fileName => fileName.slice(0, -`Test${ext}`.length),
     sourceExtensions: [ext, siblingExt],
     allowIndex: false,
-    helperDirs: () => ['src/testFixtures'],
-    // Only a test class inside production sources is misplaced; other source
-    // sets (androidTest, integrationTest, …) are their own test roots.
-    reportOutsideRoot: rel => rel.startsWith('src/main/'),
+    // Multiplatform modules have no `src/testFixtures`, so they have no designated helper location yet.
+    helperDirs: unit => unit.multiplatform === true ? [] : ['src/testFixtures'],
+    // Only a test class inside production sources (`src/main`, or a multiplatform `src/*Main`) is misplaced;
+    // other source sets (androidTest, integrationTest, …) are their own test roots.
+    reportOutsideRoot: (rel, unit) => rel.startsWith('src/main/') || (unit.multiplatform === true && /^src\/\w+Main\//.test(rel)),
   }
 }
 

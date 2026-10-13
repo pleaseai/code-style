@@ -1,5 +1,20 @@
 {
   "name": "@pleaseai/editorconfig",
   "version": "0.0.1",
-  "private": true
+  "description": "Shared .editorconfig for PleaseAI projects, copied into a project by @pleaseai/code-style",
+  "author": "PleaseAI",
+  "license": "MIT",
+  "homepage": "https://github.com/pleaseai/code-style/tree/main/packages/editorconfig#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pleaseai/code-style.git",
+    "directory": "packages/editorconfig"
+  },
+  "keywords": [
+    "editorconfig",
+    "pleaseai"
+  ],
+  "files": [
+    ".editorconfig"
+  ]
 }

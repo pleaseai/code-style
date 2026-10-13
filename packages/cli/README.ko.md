@@ -72,6 +72,18 @@ Yarn Plug'n'Play 프로젝트(프로젝트나 상위 워크스페이스 루트�
 `node_modules/@pleaseai/ast-grep-config/rules`가 설치되어 있으면 상위 디렉터리가
 Plug'n'Play여도 `sgconfig.yml`을 작성합니다.
 
+**editorconfig** 도구도 마찬가지입니다. Plug'n'Play에서는 `init`이
+`node_modules`에서 `.editorconfig`를 복사할 수 없으므로 파일을 건너뛰고, Yarn의
+모듈 해석으로 복사하는 명령을 출력합니다.
+
+```bash
+yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig', fs.constants.COPYFILE_EXCL)"
+```
+
+`please-style check`는 Plug'n'Play에서도 동작합니다.
+`@pleaseai/ast-grep-config`가 `preferUnplugged`를 설정해 두었으므로, Yarn이 이
+패키지를 ast-grep이 읽을 수 있는 실제 디렉터리로 설치합니다.
+
 ## `please-style check`
 
 `check`는
@@ -127,6 +139,14 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
   - Dart: `lib/a/b.dart` ↔ `test/a/b_test.dart`.
   - Kotlin/Java: `src/main/kotlin/…/Foo.kt` ↔ `src/test/kotlin/…/FooTest.kt`
     (`java`도 같음).
+  - Kotlin Multiplatform: `src/<target>Test/kotlin/…/FooTest.kt` ↔
+    `src/<any>Main/kotlin/…/Foo.kt`(`commonTest` ↔ `commonMain`이며,
+    `iosTest`는 중간 소스 셋인 `appleMain`의 코드도 대상으로 삼을 수 있습니다).
+    `src/commonMain/kotlin/`이 있거나, `src/<name>Main/kotlin/` 셋은 있지만
+    `src/main|test|testFixtures/kotlin/`이 없는 모듈이 대상입니다. 같은 셋의
+    `java/` 소스도 대상으로 삼습니다. `androidInstrumentedTest`,
+    `androidAndroidTest`, `integrationTest`는 검사하지 않습니다. 헬퍼 검사는
+    멀티플랫폼 모듈을 건너뜁니다(`src/testFixtures/`가 없기 때문입니다).
   - 테스트 루트 바로 아래의 환경 구간은 닫힌 목록 `unit`, `nuxt`, `browser`,
     `e2e`에 있을 때만 인정합니다. 첫 구간이 목록에 있으면 환경 구간으로도,
     미러 경로의 일부로도 해석해 봅니다. `e2e/` 아래 테스트는 경로를 유도하지

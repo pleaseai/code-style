@@ -1,4 +1,4 @@
-import { chmodSync } from 'node:fs'
+import { chmodSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -87,5 +87,12 @@ describe('checkCodeOrganization file set', () => {
       'dist/bar.ts': 'export function Zed() {}',
     })
     expect(result.findings).toEqual([])
+  })
+})
+
+describe('Yarn Plug\'n\'Play', () => {
+  test('the rules package asks Yarn to install it unpacked, so ast-grep can read extract/ from disk', () => {
+    const pkg = JSON.parse(readFileSync(join(import.meta.dir, '../../../ast-grep-config/package.json'), 'utf-8')) as { preferUnplugged?: boolean }
+    expect(pkg.preferUnplugged).toBe(true)
   })
 })

@@ -79,16 +79,41 @@ async function applyPrettierConfig(ctx: ToolContext): Promise<ToolApplyResult> {
   return result
 }
 
+/**
+ * Yarn Plug'n'Play installs packages as zip archives without `node_modules`, so a package file read from
+ * `node_modules` does not exist. A workspace package's `.pnp.cjs` lives at the workspace root, so the enclosing
+ * directories are searched too; an `installed` path that exists means this project is not under Plug'n'Play,
+ * whatever an ancestor holds.
+ */
+function usesPlugNPlay(cwd: string, installed: string): boolean {
+  if (existsSync(joinPath(cwd, installed))) {
+    return false
+  }
+  for (let dir = joinPath(cwd); ; dir = dirname(dir)) {
+    if (existsSync(joinPath(dir, '.pnp.cjs')) || existsSync(joinPath(dir, '.pnp.js'))) {
+      return true
+    }
+    if (dirname(dir) === dir) {
+      return false
+    }
+  }
+}
+
 // --- editorconfig -----------------------------------------------------------
+
+const EDITORCONFIG_SOURCE = 'node_modules/@pleaseai/editorconfig/.editorconfig'
 
 async function applyEditorConfig(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, '.editorconfig')
-  const source = joinPath(ctx.cwd, 'node_modules', '@pleaseai', 'editorconfig', '.editorconfig')
+  const source = joinPath(ctx.cwd, EDITORCONFIG_SOURCE)
   const label = '.editorconfig'
 
   if (!existsSync(source)) {
-    // Package not installed yet (e.g. install step failed). Skip silently.
+    // Not installed (e.g. the install step failed), or installed by Plug'n'Play without a node_modules copy.
+    if (!existsSync(target) && usesPlugNPlay(ctx.cwd, EDITORCONFIG_SOURCE)) {
+      log.warn(t('editorconfigPlugNPlay'))
+    }
     result.skipped.push(label)
     return result
   }
@@ -228,30 +253,11 @@ function listsAstGrepRules(yaml: string): boolean {
   return entries.some(e => normalizeRuleDir(e) === AST_GREP_RULES)
 }
 
-/**
- * Yarn Plug'n'Play installs packages as zip archives without `node_modules`, so the rules path above does not exist.
- * A workspace package's `.pnp.cjs` lives at the workspace root, so the enclosing directories are searched too;
- * an installed rules directory means this project is not under Plug'n'Play, whatever an ancestor holds.
- */
-function usesPlugNPlay(cwd: string): boolean {
-  if (existsSync(joinPath(cwd, AST_GREP_RULES))) {
-    return false
-  }
-  for (let dir = joinPath(cwd); ; dir = dirname(dir)) {
-    if (existsSync(joinPath(dir, '.pnp.cjs')) || existsSync(joinPath(dir, '.pnp.js'))) {
-      return true
-    }
-    if (dirname(dir) === dir) {
-      return false
-    }
-  }
-}
-
 export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const target = joinPath(ctx.cwd, 'sgconfig.yml')
   const label = 'sgconfig.yml'
-  if (usesPlugNPlay(ctx.cwd)) {
+  if (usesPlugNPlay(ctx.cwd, AST_GREP_RULES)) {
     log.warn(t('astGrepPlugNPlay'))
     result.skipped.push(label)
     return result

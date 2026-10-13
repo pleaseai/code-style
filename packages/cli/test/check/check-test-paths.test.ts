@@ -216,6 +216,41 @@ describe('test-path-derivable-from-source (Dart, Kotlin, Java)', () => {
     expect(files(findings)).toEqual(['src/test/kotlin/com/x/MissingTest.kt'])
   })
 
+  test('kotlin multiplatform: *Test sets mirror any *Main set; instrumented tests are their own root', () => {
+    const findings = findingsFor({
+      'shared/src/commonMain/kotlin/com/acme/Invoice.kt': '',
+      'shared/src/appleMain/kotlin/com/acme/Keychain.kt': '',
+      'shared/src/commonTest/kotlin/com/acme/InvoiceTest.kt': '',
+      'shared/src/iosTest/kotlin/com/acme/KeychainTest.kt': '',
+      'shared/src/jvmTest/kotlin/com/acme/PaymentTest.kt': '',
+      'shared/src/androidInstrumentedTest/kotlin/com/acme/ScreenTest.kt': '',
+      'shared/src/commonMain/kotlin/com/acme/RefundTest.kt': '',
+      'shared/src/main/kotlin/com/acme/LegacyTest.kt': '',
+    }, SLUG)
+    expect(findings.map(f => [f.kind, f.file])).toEqual([
+      ['test-outside-root', 'shared/src/commonMain/kotlin/com/acme/RefundTest.kt'],
+      ['orphan-test', 'shared/src/jvmTest/kotlin/com/acme/PaymentTest.kt'],
+      ['test-outside-root', 'shared/src/main/kotlin/com/acme/LegacyTest.kt'],
+    ])
+  })
+
+  test('kotlin multiplatform: detected without commonMain sources; a test may target a Java source of a *Main set', () => {
+    const findings = findingsFor({
+      'shared/src/jvmMain/java/com/acme/Invoice.java': '',
+      'shared/src/jvmMain/kotlin/com/acme/Payment.kt': '',
+      'shared/src/jvmTest/kotlin/com/acme/InvoiceTest.kt': '',
+      'shared/src/jvmTest/kotlin/com/acme/RefundTest.kt': '',
+    }, SLUG)
+    expect(files(findings)).toEqual(['shared/src/jvmTest/kotlin/com/acme/RefundTest.kt'])
+  })
+
+  test('kotlin: a test in a custom *Main set of a non-multiplatform module is not reported', () => {
+    expect(findingsFor({
+      'src/main/kotlin/com/acme/Invoice.kt': '',
+      'src/benchMain/kotlin/com/acme/InvoiceTest.kt': '',
+    }, SLUG)).toEqual([])
+  })
+
   test('java: src/main/java mirrors to src/test/java with Test.java', () => {
     const findings = findingsFor({
       'src/main/java/com/acme/Invoice.java': '',

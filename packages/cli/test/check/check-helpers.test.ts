@@ -180,6 +180,16 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     expect(findings).toEqual([])
   })
 
+  test('kotlin multiplatform: a shared helper is not reported (no designated location yet)', () => {
+    const findings = findingsFor({
+      'src/commonMain/kotlin/com/acme/Clock.kt': 'package com.acme',
+      'src/commonTest/kotlin/com/acme/ClockTest.kt': 'package com.acme\nclass FakeClock\nclass ClockTest',
+      'src/commonTest/kotlin/com/acme/InvoiceTest.kt': 'package com.acme\nclass InvoiceTest { val c = FakeClock() }',
+      'src/jvmTest/kotlin/com/acme/PaymentTest.kt': 'package com.acme\nclass PaymentTest { val c = FakeClock() }',
+    }, SLUG)
+    expect(findings).toEqual([])
+  })
+
   test.each(['ts', 'tsx'])('a default-exported helper is credited through default and namespace imports (.%s)', (ext) => {
     const findings = findingsFor({
       ...PKG,
