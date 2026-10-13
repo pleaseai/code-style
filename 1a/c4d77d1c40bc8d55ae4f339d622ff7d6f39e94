@@ -1,0 +1,14 @@
+apps/docs/astro.config.ts
+  h_9ee0685e8f5c3a 58-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1ac4d77d1c40bc8d55ae4f339d622ff7d6f39e94",
+  "prompts": {},
+  "humans": {
+    "h_9ee0685e8f5c3a": {
+      "author": "Minsu Lee <minsu.lee@pleaseai.dev>"
+    }
+  }
+}
