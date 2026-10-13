@@ -17,13 +17,13 @@ PleaseAI 프로젝트를 위한 공유 코드 스타일 설정 모노레포 — 
 
 ## `@pleaseai/eslint-config`
 
-### 설치
+### eslint-config 설치
 
 ```sh
 bun add -D @pleaseai/eslint-config eslint
 ```
 
-### 사용법
+### eslint-config 사용법
 
 ```ts
 // eslint.config.ts
@@ -51,7 +51,7 @@ export default pleaseai(
 )
 ```
 
-### 기본값
+### eslint-config 기본값
 
 - `stylistic`: `indent: 2`, `quotes: 'single'`, `semi: false`
 - `typescript: true`
@@ -59,13 +59,13 @@ export default pleaseai(
 
 ## `@pleaseai/ast-grep-config`
 
-### 설치
+### ast-grep-config 설치
 
 ```sh
 bun add -D @pleaseai/ast-grep-config @ast-grep/cli
 ```
 
-### 사용법
+### ast-grep-config 사용법
 
 ```yaml
 # sgconfig.yml

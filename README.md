@@ -17,13 +17,13 @@ See the [code-style documentation site](https://code-style.pages.dev) for full g
 
 ## `@pleaseai/eslint-config`
 
-### Installation
+### eslint-config installation
 
 ```sh
 bun add -D @pleaseai/eslint-config eslint
 ```
 
-### Usage
+### eslint-config usage
 
 ```ts
 // eslint.config.ts
@@ -51,7 +51,7 @@ export default pleaseai(
 )
 ```
 
-### Defaults
+### eslint-config defaults
 
 - `stylistic`: `indent: 2`, `quotes: 'single'`, `semi: false`
 - `typescript: true`
@@ -59,13 +59,13 @@ export default pleaseai(
 
 ## `@pleaseai/ast-grep-config`
 
-### Installation
+### ast-grep-config installation
 
 ```sh
 bun add -D @pleaseai/ast-grep-config @ast-grep/cli
 ```
 
-### Usage
+### ast-grep-config usage
 
 ```yaml
 # sgconfig.yml
