@@ -15,7 +15,7 @@ ADR-0002 (0002-workaround-docus-i18n-routing-bug.md).
 
 The documentation site (`https://code-style.pages.dev`) ran on **Docus**
 (Nuxt 4 + Nuxt Content) from `docs/`, deployed to the Cloudflare Pages project
-`pleaseai-code-style`. Keeping it working required a stack of workarounds:
+`code-style`. Keeping it working required a stack of workarounds:
 
 - **Bun linker** — Docus ships raw `.ts` server files that Nitro's
   `rollup-plugin-inject` cannot parse under Bun's isolated linker, so the root
@@ -37,8 +37,8 @@ requirement, not an add-on.
 
 ### Constraints
 
-- Keep every live URL: `/` (200), `/en`, `/ko`, `/en/<slug>`, `/ko/<slug>`,
-  and `/llms.txt`.
+- Keep every live URL: `/` (sends readers to `/en`), `/en`, `/ko`,
+  `/en/<slug>`, `/ko/<slug>`, and `/llms.txt`.
 - Keep the existing Cloudflare Pages project and its domain.
 - Bun workspace, ESM only, lint with the repository's own ESLint config.
 - English and Korean content, with the same pages in both locales.
@@ -71,8 +71,10 @@ the owned source instead of adopting a third-party plugin:
 
 - `astro.config.ts` declares `i18n` with `locales: ['en', 'ko']`,
   `defaultLocale: 'en'`, and `prefixDefaultLocale: true`, so every locale is
-  prefixed. `redirects: { '/': '/en' }` makes `/` a meta-refresh page to the
-  English landing, as before.
+  prefixed. `redirects: { '/': '/en' }` sends `/` to the English landing.
+  Nimbus writes the rule into `dist/_redirects`, so Cloudflare Pages answers
+  `/` with a 301 to `/en`. Astro's meta-refresh `index.html` is still emitted
+  but is never served.
 - Content lives in one Nimbus `docs` collection under
   `src/content/docs/<locale>/`, so the locale is the first segment of every
   URL. `sidebar.scope: 'section'` limits the rail (and prev/next) to the
@@ -169,7 +171,8 @@ Nitro upgrade risks breaking the build or the i18n routes again.
 
 - Page URLs are unchanged. Docus's `/raw/<locale>/<page>.md` Markdown paths
   are replaced by Nimbus's `/<locale>/<page>/index.md`; `/sitemap.xml`
-  redirects to `/sitemap-index.xml`.
+  redirects to `/sitemap-index.xml`. `/` answered 200 on the Docus site and
+  now answers a 301 to `/en`.
 - `bunfig.toml` keeps `linker = "hoisted"`. It was introduced for Docus and
   may no longer be needed, but removing it changes how every workspace
   package resolves dependencies and has not been verified.

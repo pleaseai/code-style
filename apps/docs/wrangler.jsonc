@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   // Existing Cloudflare Pages project. The site is fully static, so no
   // bindings, compatibility flags, or vars are needed.
-  "name": "pleaseai-code-style",
+  "name": "code-style",
   "pages_build_output_dir": "dist",
   "compatibility_date": "2026-10-12"
 }
