@@ -17,10 +17,13 @@ const lockPath = join(root, 'bun.lock')
 const lock = readFileSync(lockPath, 'utf8')
 
 // A workspace entry: `"<path>": {` followed by its `name` and `version`.
-const workspaceEntry = /^( {4}"([^"]+)": \{\n {6}"name": "[^"]+",\n {6}"version": ")([^"]+)(")/gm
+// `\r?\n` keeps a CRLF checkout matching; `head` carries its line endings over.
+const workspaceEntry = /^( {4}"([^"]+)": \{\r?\n {6}"name": "[^"]+",\r?\n {6}"version": ")([^"]+)(")/gm
 
+let matched = 0
 let changed = 0
 const next = lock.replace(workspaceEntry, (match, head: string, path: string, locked: string, tail: string) => {
+  matched++
   const { version } = JSON.parse(readFileSync(join(root, path, 'package.json'), 'utf8')) as { version?: string }
   if (!version || version === locked) {
     return match
@@ -29,6 +32,13 @@ const next = lock.replace(workspaceEntry, (match, head: string, path: string, lo
   process.stdout.write(`${path}: ${locked} -> ${version}\n`)
   return `${head}${version}${tail}`
 })
+
+// Matching nothing means bun.lock changed shape, not that it is in sync: fail
+// rather than let a release ship with stale workspace versions.
+if (matched === 0) {
+  process.stderr.write(`no workspace entries matched in ${lockPath}\n`)
+  process.exit(1)
+}
 
 if (changed > 0) {
   writeFileSync(lockPath, next)
