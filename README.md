@@ -17,13 +17,13 @@ See the [code-style documentation site](https://code-style.pages.dev) for full g
 
 ## `@pleaseai/eslint-config`
 
-### Installation
+### eslint-config installation
 
 ```sh
 bun add -D @pleaseai/eslint-config eslint
 ```
 
-### Usage
+### eslint-config usage
 
 ```ts
 // eslint.config.ts
@@ -51,11 +51,33 @@ export default pleaseai(
 )
 ```
 
-### Defaults
+### eslint-config defaults
 
 - `stylistic`: `indent: 2`, `quotes: 'single'`, `semi: false`
 - `typescript: true`
 - `gitignore: true`
+
+## `@pleaseai/ast-grep-config`
+
+### ast-grep-config installation
+
+```sh
+bun add -D @pleaseai/ast-grep-config @ast-grep/cli
+```
+
+### ast-grep-config usage
+
+```yaml
+# sgconfig.yml
+ruleDirs:
+  - node_modules/@pleaseai/ast-grep-config/rules
+```
+
+```sh
+bunx ast-grep scan
+```
+
+Every rule ships as a warning. See the [ast-grep Config guide](https://code-style.pages.dev/en/ast-grep-config) for the rule list and how to fix each violation.
 
 ## Development
 
