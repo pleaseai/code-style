@@ -170,7 +170,7 @@ ast-grep scan --filter '^(ts|tsx)-no-default-export$' \
   --globs '!middleware/**' --globs '!plugins/**' --globs '!app.config.ts'
 ```
 
-CI와 에이전트가 같은 명령을 실행하도록 두 명령을 하나의 패키지 스크립트(예: `lint:structure`)에 넣으세요. Nuxt 4의 `app/` 구조로 옮긴 뒤에는 두 명령을 모두 일반 `ast-grep scan`으로 바꾸세요. 두 번째 명령만 지우면 모든 파일에서 두 규칙이 꺼진 채로 남습니다.
+CI와 에이전트가 같은 명령을 실행하도록 두 명령을 하나의 패키지 스크립트(예: `lint:structure`)에 넣으세요. Nuxt 4의 `app/` 구조로 옮기면 이 두 단계 대신 일반 `ast-grep scan`을 한 번 실행하세요. 첫 번째 명령만 남기면 두 규칙이 모든 파일에서 꺼집니다.
 
 <Aside type="caution">
 

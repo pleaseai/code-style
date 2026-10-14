@@ -170,7 +170,7 @@ ast-grep scan --filter '^(ts|tsx)-no-default-export$' \
   --globs '!middleware/**' --globs '!plugins/**' --globs '!app.config.ts'
 ```
 
-Put both commands in one package script (for example `lint:structure`) so CI and agents run the same thing. After migrating to the Nuxt 4 `app/` layout, replace both commands with a plain `ast-grep scan`. Dropping only the second command would leave both rules turned off for every file.
+Put both commands in one package script (for example `lint:structure`) so CI and agents run the same thing. After migrating to the Nuxt 4 `app/` layout, replace the two-step workaround with a single plain `ast-grep scan`. Keeping only the first command would leave both rules turned off for every file.
 
 <Aside type="caution">
 
