@@ -151,7 +151,7 @@ Only the location is checked — the error file may contain helpers and imports.
 
 ## Framework Files
 
-Files whose shape a framework dictates are excluded through each rule's `ignores` list: config files (`*.config.ts`), `*.d.ts`, Storybook stories, `.vitepress/`, `.storybook/`, Nuxt 4 `app/pages/`, `app/layouts/`, `app/middleware/`, `app/plugins/`, and Nitro `server/api/`, `server/routes/`, `server/middleware/`, `server/plugins/`, `server/tasks/`.
+Files whose shape a framework dictates are excluded from `ts-no-default-export` and `tsx-no-default-export` through their `ignores` lists. No other rule exempts these paths. The excluded paths are config files (`*.config.ts`), `*.d.ts`, Storybook stories, `.vitepress/`, `.storybook/`, Nuxt 4 `app/pages/`, `app/layouts/`, `app/middleware/`, `app/plugins/`, and Nitro `server/api/`, `server/routes/`, `server/middleware/`, `server/plugins/`, `server/tasks/`.
 
 Nuxt 3 root layouts (`pages/` without `app/`) are **not** excluded: a glob such as `**/plugins/**` would also exempt every unrelated directory named `plugins`. ast-grep cannot override a shipped rule's `ignores`, so scope the rules from the command line instead — turn them off in the main scan and run them once more with your framework directories excluded:
 
