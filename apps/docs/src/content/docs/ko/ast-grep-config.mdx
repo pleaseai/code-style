@@ -151,7 +151,7 @@ Rust는 이름이 `Error`로 끝나는(`Exception`은 제외) `struct`/`enum`, `
 
 ## 프레임워크 파일
 
-프레임워크가 형태를 정하는 파일은 `ts-no-default-export`와 `tsx-no-default-export`의 `ignores` 목록으로만 제외합니다. 다른 규칙은 이 경로를 제외하지 않습니다. 제외되는 경로는 설정 파일(`*.config.ts`), `*.d.ts`, Storybook story, `.vitepress/`, `.storybook/`, Nuxt 4 `app/pages/`·`app/layouts/`·`app/middleware/`·`app/plugins/`, Nitro `server/api/`·`server/routes/`·`server/middleware/`·`server/plugins/`·`server/tasks/`입니다.
+프레임워크가 형태를 정하는 파일은 `ts-no-default-export`와 `tsx-no-default-export`의 `ignores` 목록으로만 제외합니다. 다른 규칙은 이 프레임워크 디렉터리를 제외하지 않습니다. 제외되는 경로는 설정 파일(`*.config.ts`), `*.d.ts`, Storybook story, `.vitepress/`, `.storybook/`, Nuxt 4 `app/pages/`·`app/layouts/`·`app/middleware/`·`app/plugins/`, Nitro `server/api/`·`server/routes/`·`server/middleware/`·`server/plugins/`·`server/tasks/`입니다.
 
 `app/` 없이 루트에 `pages/`를 두는 Nuxt 3 구조는 제외하지 **않습니다**. `**/plugins/**` 같은 glob은 이름이 `plugins`인 무관한 디렉터리까지 모두 제외해 버리기 때문입니다. ast-grep은 배포된 규칙의 `ignores`를 덮어쓸 수 없으므로 명령줄에서 규칙 범위를 좁히세요. 기본 스캔에서는 두 규칙을 끄고, 프레임워크 디렉터리를 제외한 채 한 번 더 실행합니다.
 
