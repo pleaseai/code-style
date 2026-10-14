@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/pleaseai/code-style/compare/code-style-v0.1.0...code-style-v0.1.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* **cli:** depend on @pleaseai/ast-grep-config with a caret range ([#52](https://github.com/pleaseai/code-style/issues/52)) ([8d24651](https://github.com/pleaseai/code-style/commit/8d24651e16984e224ccce6a3fdbf89035405496e))
+
 ## [0.1.0](https://github.com/pleaseai/code-style/compare/code-style-v0.0.3...code-style-v0.1.0) (2026-10-13)
 
 

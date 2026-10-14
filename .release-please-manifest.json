@@ -1,7 +1,7 @@
 {
   "packages/eslint-config": "0.1.0",
   "packages/perttier-config": "0.1.0",
-  "packages/cli": "0.1.0",
+  "packages/cli": "0.1.1",
   "packages/ast-grep-config": "0.1.0",
   "packages/editorconfig": "0.0.2"
 }
