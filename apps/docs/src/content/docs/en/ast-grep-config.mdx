@@ -126,7 +126,14 @@ pub use crate::model::{Account, User};
 
 ### Error types in a dedicated module
 
-ast-grep has no type information, so the error rules match by name. For TypeScript, TSX, Dart, Kotlin, and Java, a class is flagged when it extends or implements a type ending in `Error` or `Exception` (Kotlin and Java also accept `Throwable`; Dart also matches `implements`). A class whose own name ends in `Error` or `Exception` is flagged only when it also has a superclass or supertype. Kotlin also checks `object` declarations. Rust flags a `struct` or `enum` whose name ends in `Error` (not `Exception`) or that has `#[derive(…Error)]`, plus any `impl Error for T` (including `std::error::Error` and `core::error::Error`). Each language has its own designated location:
+ast-grep has no type information, so the error rules match by name. For the class-based languages, a class is flagged when its supertype ends in `Error` or `Exception`, or when its own name ends in `Error` or `Exception` and it also has a supertype:
+
+- TypeScript / TSX: the `extends` superclass only. `implements` does not match, and a class named `*Error` or `*Exception` is flagged only when it has an `extends` clause.
+- Java: the superclass only (`Throwable` also counts). `implements` does not match.
+- Dart: the superclass or any implemented type. A class named `*Error` or `*Exception` needs a superclass or `implements` clause.
+- Kotlin: any supertype (`Throwable` also counts), on `class` and `object` declarations.
+
+Rust flags a `struct` or `enum` whose name ends in `Error` (not `Exception`) or that has `#[derive(…Error)]`, plus any `impl Error for T` (including `std::error::Error` and `core::error::Error`). Each language has its own designated location:
 
 | Language | Error types live in | Also exempt |
 | --- | --- | --- |
@@ -146,11 +153,11 @@ Only the location is checked — the error file may contain helpers and imports.
 
 Files whose shape a framework dictates are excluded through each rule's `ignores` list: config files (`*.config.ts`), `*.d.ts`, Storybook stories, `.vitepress/`, `.storybook/`, Nuxt 4 `app/pages/`, `app/layouts/`, `app/middleware/`, `app/plugins/`, and Nitro `server/api/`, `server/routes/`, `server/middleware/`, `server/plugins/`, `server/tasks/`.
 
-Nuxt 3 root layouts (`pages/` without `app/`) are **not** excluded: a glob such as `**/plugins/**` would also exempt every unrelated directory named `plugins`. ast-grep cannot override a shipped rule's `ignores`, so scope the rule from the command line instead — turn it off in the main scan and run it once more with your framework directories excluded:
+Nuxt 3 root layouts (`pages/` without `app/`) are **not** excluded: a glob such as `**/plugins/**` would also exempt every unrelated directory named `plugins`. ast-grep cannot override a shipped rule's `ignores`, so scope the rules from the command line instead — turn them off in the main scan and run them once more with your framework directories excluded:
 
 ```bash
-ast-grep scan --off=ts-no-default-export
-ast-grep scan --filter '^ts-no-default-export$' \
+ast-grep scan --off=ts-no-default-export --off=tsx-no-default-export
+ast-grep scan --filter '^(ts|tsx)-no-default-export$' \
   --globs '!pages/**' --globs '!layouts/**' \
   --globs '!middleware/**' --globs '!plugins/**' --globs '!app.config.ts'
 ```
