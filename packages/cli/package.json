@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.8.1",
-    "@pleaseai/ast-grep-config": "workspace:*"
+    "@pleaseai/ast-grep-config": "workspace:^"
   },
   "devDependencies": {
     "@ast-grep/cli": "0.45.3",

@@ -1,7 +1,7 @@
 /**
  * Syncs each workspace's `version` in bun.lock with its package.json.
  *
- * `bun pm pack` resolves `workspace:*` dependencies from the version bun.lock
+ * `bun pm pack` resolves `workspace:` dependencies from the version bun.lock
  * recorded, and `bun install` does not refresh it after a version bump.
  * release-please bumps package.json only (googleapis/release-please#2689), so
  * the release workflow runs this on the release PR branch. Without it the
