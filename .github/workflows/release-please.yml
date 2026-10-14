@@ -45,7 +45,7 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   # release-please bumps package.json but not bun.lock
-  # (googleapis/release-please#2689), and `bun pm pack` resolves `workspace:*`
+  # (googleapis/release-please#2689), and `bun pm pack` resolves `workspace:`
   # dependencies from the versions bun.lock recorded. Commit the synced
   # lockfile to the release PR so the release ships it.
   sync-bun-lock:
