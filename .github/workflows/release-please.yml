@@ -22,6 +22,8 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.publish_only != true }}
     runs-on: ubuntu-latest
     outputs:
+      prs_created: ${{ steps.release.outputs.prs_created }}
+      pr: ${{ steps.release.outputs.pr }}
       releases_created: ${{ steps.release.outputs.releases_created }}
       eslint-config-released: ${{ steps.release.outputs['packages/eslint-config--release_created'] }}
       prettier-config-released: ${{ steps.release.outputs['packages/perttier-config--release_created'] }}
@@ -41,6 +43,48 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # release-please bumps package.json but not bun.lock
+  # (googleapis/release-please#2689), and `bun pm pack` resolves `workspace:*`
+  # dependencies from the versions bun.lock recorded. Commit the synced
+  # lockfile to the release PR so the release ships it.
+  sync-bun-lock:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.prs_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      # The app token (not GITHUB_TOKEN) so the push re-runs CI on the PR.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ fromJSON(needs.release-please.outputs.pr).headBranchName }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+
+      - name: Sync bun.lock workspace versions
+        run: bun scripts/sync-bun-lock.ts
+
+      - name: Commit bun.lock
+        env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          if git diff --quiet -- bun.lock; then
+            echo "bun.lock already in sync"
+            exit 0
+          fi
+          USER_ID=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit -m "chore: sync bun.lock workspace versions"
+          git push
 
   publish:
     needs: release-please

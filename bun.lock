@@ -43,7 +43,7 @@
     },
     "packages/ast-grep-config": {
       "name": "@pleaseai/ast-grep-config",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "devDependencies": {
         "@ast-grep/cli": "0.45.3",
         "@types/bun": "^1.4.3",
@@ -59,7 +59,7 @@
     },
     "packages/cli": {
       "name": "@pleaseai/code-style",
-      "version": "0.0.3",
+      "version": "0.1.0",
       "bin": {
         "pleaseai-code-style": "./dist/index.mjs",
         "please-style": "./dist/index.mjs",
@@ -84,11 +84,11 @@
     },
     "packages/editorconfig": {
       "name": "@pleaseai/editorconfig",
-      "version": "0.0.1",
+      "version": "0.0.2",
     },
     "packages/eslint-config": {
       "name": "@pleaseai/eslint-config",
-      "version": "0.0.4",
+      "version": "0.1.0",
       "dependencies": {
         "@antfu/eslint-config": "^9.5.1",
         "eslint-plugin-package-json": "^1.10.1",
@@ -104,7 +104,7 @@
     },
     "packages/perttier-config": {
       "name": "@pleaseai/prettier-config",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "devDependencies": {
         "prettier": "^3.9.10",
       },
