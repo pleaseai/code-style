@@ -126,7 +126,7 @@ pub use crate::model::{Account, User};
 
 ### 에러 타입은 전용 모듈에
 
-ast-grep에는 타입 정보가 없으므로 에러 규칙은 이름으로 판단합니다. 상위 타입이나 자신의 이름이 `Error` 또는 `Exception`(Kotlin과 Java는 `Throwable`도 포함)으로 끝나는 클래스(Rust는 `struct`/`enum`)가 대상입니다. Rust는 `#[derive(…Error)]`와 `impl Error for T`도 잡아냅니다. 에러 타입을 두는 위치는 언어마다 다릅니다.
+ast-grep에는 타입 정보가 없으므로 에러 규칙은 이름으로 판단합니다. TypeScript, TSX, Dart, Kotlin, Java에서는 이름이 `Error` 또는 `Exception`으로 끝나는 타입을 상속하거나 구현한 클래스가 대상입니다(Kotlin과 Java는 `Throwable`도 포함하고, Dart는 `implements`도 확인합니다). 자신의 이름이 `Error` 또는 `Exception`으로 끝나는 클래스는 상위 타입도 함께 있을 때만 대상입니다. Kotlin은 `object` 선언도 검사합니다. Rust는 이름이 `Error`로 끝나는(`Exception`은 제외) `struct`/`enum`, `#[derive(…Error)]`가 붙은 `struct`/`enum`, 그리고 모든 `impl Error for T`(`std::error::Error`, `core::error::Error` 포함)를 잡아냅니다. 에러 타입을 두는 위치는 언어마다 다릅니다.
 
 | 언어 | 에러 타입 위치 | 함께 제외되는 경로 |
 | --- | --- | --- |

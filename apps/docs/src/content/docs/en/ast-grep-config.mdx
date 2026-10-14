@@ -126,7 +126,7 @@ pub use crate::model::{Account, User};
 
 ### Error types in a dedicated module
 
-ast-grep has no type information, so the error rules match by name: a class (or Rust `struct`/`enum`) whose supertype or own name ends in `Error` or `Exception` (and `Throwable` for Kotlin and Java). Rust also matches `#[derive(…Error)]` and `impl Error for T`. Each language has its own designated location:
+ast-grep has no type information, so the error rules match by name. For TypeScript, TSX, Dart, Kotlin, and Java, a class is flagged when it extends or implements a type ending in `Error` or `Exception` (Kotlin and Java also accept `Throwable`; Dart also matches `implements`). A class whose own name ends in `Error` or `Exception` is flagged only when it also has a superclass or supertype. Kotlin also checks `object` declarations. Rust flags a `struct` or `enum` whose name ends in `Error` (not `Exception`) or that has `#[derive(…Error)]`, plus any `impl Error for T` (including `std::error::Error` and `core::error::Error`). Each language has its own designated location:
 
 | Language | Error types live in | Also exempt |
 | --- | --- | --- |
