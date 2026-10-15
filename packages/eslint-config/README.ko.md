@@ -489,6 +489,21 @@ npx @eslint/config-inspector
 | `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
 | `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
 
+### 원래 플러그인 이름 사용
+
+Bun의 `bun lint`처럼 등록된 이름으로 플러그인을 매칭하는 린터는 이름이 바뀐 플러그인을 네이티브가 아닌 JavaScript로 실행합니다. `canonicalPluginNames: true`를 설정하면 `@typescript-eslint`와 `n`이 원래 이름으로 등록됩니다. 나머지 이름 변경은 그대로 유지됩니다:
+
+```ts
+// eslint.config.ts
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  canonicalPluginNames: true,
+})
+```
+
+규칙 ID는 `@typescript-eslint/*`와 `n/*`로 바뀝니다. 설정 `rules`의 `ts/*`, `node/*` 키는 자동으로 변환되지만, 이를 사용하는 `eslint-disable` 주석은 직접 수정해야 합니다.
+
 ## 버전 정책
 
 `@pleaseai/eslint-config`는 [Semantic Versioning](https://semver.org/)을 따르지만, 여러 가지가 얽힌 스타일 프리셋이기 때문에 **규칙 변경은 breaking change로 취급하지 않습니다**. 아래 표는 `@antfu/eslint-config`에서 상속받은 정책과 동일합니다.

@@ -25,7 +25,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "test": "bun test"
   },
   "peerDependencies": {
     "eslint": "^10.4.0"

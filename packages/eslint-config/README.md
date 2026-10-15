@@ -489,6 +489,21 @@ This config inherits `@antfu/eslint-config`'s plugin renaming for a consistent D
 | `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
 | `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
 
+### Canonical plugin names
+
+Some linters, such as Bun's `bun lint`, match plugins by their registered name and run renamed plugins in JavaScript instead of natively. Set `canonicalPluginNames: true` to register `@typescript-eslint` and `n` under their original names. The other renames stay:
+
+```ts
+// eslint.config.ts
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  canonicalPluginNames: true,
+})
+```
+
+Rule IDs change to `@typescript-eslint/*` and `n/*`. `ts/*` and `node/*` keys in config `rules` are renamed for you, but `eslint-disable` comments that use them must be updated by hand.
+
 ## Versioning Policy
 
 `@pleaseai/eslint-config` follows [Semantic Versioning](https://semver.org/), but because it's an opinionated style preset with many moving parts, **rule changes are not treated as breaking changes**. The tables below match the policy inherited from `@antfu/eslint-config`.
