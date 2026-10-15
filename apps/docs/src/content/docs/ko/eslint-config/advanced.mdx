@@ -109,6 +109,20 @@ export default pleaseai({
 })
 ```
 
+### 원래 플러그인 이름 사용
+
+Bun의 `bun lint`처럼 등록된 이름으로 플러그인을 매칭하는 린터는 이름이 바뀐 플러그인을 네이티브가 아닌 JavaScript로 실행합니다. `canonicalPluginNames: true`를 설정하면 `@typescript-eslint`와 `n`이 원래 이름으로 등록됩니다. 나머지 이름 변경은 그대로 유지됩니다:
+
+```ts title="eslint.config.ts"
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  canonicalPluginNames: true,
+})
+```
+
+규칙 ID는 `@typescript-eslint/*`와 `n/*`로 바뀝니다. 설정 `rules`의 `ts/*`, `node/*` 키는 자동으로 변환되지만, 이를 사용하는 `eslint-disable` 주석은 직접 수정해야 합니다.
+
 ## 활성화된 규칙 보기
 
 [`@eslint/config-inspector`](https://github.com/eslint/config-inspector)를 사용하면 완전히 해결된 설정을 브라우저에서 시각화할 수 있습니다 — 활성화된 모든 규칙, 모든 플러그인, 모든 파일 glob까지:

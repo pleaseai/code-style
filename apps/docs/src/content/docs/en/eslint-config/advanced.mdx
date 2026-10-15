@@ -109,6 +109,20 @@ export default pleaseai({
 })
 ```
 
+### Canonical plugin names
+
+Some linters, such as Bun's `bun lint`, match plugins by their registered name and run renamed plugins in JavaScript instead of natively. Set `canonicalPluginNames: true` to register `@typescript-eslint` and `n` under their original names. The other renames stay:
+
+```ts title="eslint.config.ts"
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  canonicalPluginNames: true,
+})
+```
+
+Rule IDs change to `@typescript-eslint/*` and `n/*`. `ts/*` and `node/*` keys in config `rules` are renamed for you, but `eslint-disable` comments that use them must be updated by hand.
+
 ## View Enabled Rules
 
 Use [`@eslint/config-inspector`](https://github.com/eslint/config-inspector) to visualise the fully-resolved config in a browser — every enabled rule, every plugin, every file glob:
