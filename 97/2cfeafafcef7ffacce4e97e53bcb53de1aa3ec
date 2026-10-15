@@ -1,0 +1,32 @@
+packages/eslint-config/README.md
+  s_697465d81b70e5::t_6a2dbbbf3a0ee4 492-506
+packages/eslint-config/README.ko.md
+  s_697465d81b70e5::t_23cc761614a4e8 492-506
+apps/docs/src/content/docs/ko/eslint-config/advanced.mdx
+  s_697465d81b70e5::t_7d96617bf2b4f6 112-125
+packages/eslint-config/src/index.ts
+  s_697465d81b70e5::t_dc7c26d7ffea67 51,53
+  s_697465d81b70e5::t_97596437aaad51 2-20,23,26-29,43-46,50,52,54-62
+apps/docs/src/content/docs/en/eslint-config/advanced.mdx
+  s_697465d81b70e5::t_e37459836386a2 112-125
+packages/eslint-config/test/index.test.ts
+  s_697465d81b70e5::t_59a3aae2daaf5c 1-50
+packages/eslint-config/package.json
+  s_697465d81b70e5::t_a21279c34e6246 28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "972cfeafafcef7ffacce4e97e53bcb53de1aa3ec",
+  "prompts": {},
+  "sessions": {
+    "s_697465d81b70e5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2cf35c74-ee3a-4fe5-baa6-48c4611e89f5",
+        "model": "unknown"
+      },
+      "human_author": "Minsu Lee <amond@amond.net>"
+    }
+  }
+}
