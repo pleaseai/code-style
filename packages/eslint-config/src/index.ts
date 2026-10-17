@@ -30,10 +30,10 @@ const canonicalPluginRenaming: Record<string, string> = {
 }
 
 /** `eslint-plugin-import-lite` and `eslint-plugin-import` spell these options differently. */
-const typeSpecifierStyles: Record<string, string> = {
-  'top-level': 'prefer-top-level',
-  'inline': 'prefer-inline',
-}
+const typeSpecifierStyles = new Map([
+  ['top-level', 'prefer-top-level'],
+  ['inline', 'prefer-inline'],
+])
 
 async function loadEslintPluginImport(): Promise<ESLint.Plugin> {
   try {
@@ -53,7 +53,7 @@ function toPreferTypeSpecifierStyle(entry: Linter.RuleEntry): Linter.RuleEntry {
     return entry
   }
   const [severity, style, ...rest] = entry
-  return [severity, typeSpecifierStyles[style] ?? style, ...rest]
+  return [severity, typeSpecifierStyles.get(style) ?? style, ...rest]
 }
 
 function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {

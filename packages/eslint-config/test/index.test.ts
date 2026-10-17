@@ -71,6 +71,16 @@ describe('canonicalPluginNames', () => {
     expect(ruleEntry(configs, 'import/consistent-type-specifier-style')).toEqual(['error', 'prefer-top-level'])
   })
 
+  test('passes through type specifier styles that need no translation', async () => {
+    const rule = 'import/consistent-type-specifier-style'
+    const preferred = await pleaseai({ canonicalPluginNames: true, rules: { [rule]: ['error', 'prefer-top-level'] } })
+    // A prototype key must not resolve to an inherited member such as `Object.prototype.toString`.
+    const inherited = await pleaseai({ canonicalPluginNames: true, rules: { [rule]: ['error', 'toString' as 'inline'] } })
+
+    expect(ruleEntry(preferred, rule)).toEqual(['error', 'prefer-top-level'])
+    expect(ruleEntry(inherited, rule)).toEqual(['error', 'toString'])
+  })
+
   test('registers no import plugin when imports are disabled', async () => {
     const configs = await pleaseai({ canonicalPluginNames: true, imports: false })
 
