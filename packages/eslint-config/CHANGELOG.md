@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/pleaseai/code-style/compare/eslint-config-v0.1.0...eslint-config-v0.1.1) (2026-10-17)
+
+
+### Features
+
+* **eslint-config:** add opt-in canonicalPluginNames for bun lint native rules ([#61](https://github.com/pleaseai/code-style/issues/61)) ([5454e2d](https://github.com/pleaseai/code-style/commit/5454e2d9b40a6feb3ca63637226c6215e866d72c))
+
 ## [0.1.0](https://github.com/pleaseai/code-style/compare/eslint-config-v0.0.4...eslint-config-v0.1.0) (2026-10-13)
 
 

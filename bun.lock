@@ -88,7 +88,7 @@
     },
     "packages/eslint-config": {
       "name": "@pleaseai/eslint-config",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@antfu/eslint-config": "^9.5.1",
         "eslint-plugin-package-json": "^1.10.1",
