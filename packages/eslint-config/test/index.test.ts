@@ -24,6 +24,14 @@ describe('pleaseai', () => {
     expect(pluginNames(configs)).not.toContain('@typescript-eslint')
     expect(configs.find(config => config.name === 'antfu/imports/rules')?.plugins?.import).not.toBe(pluginImport)
   })
+
+  test('merges rules from options with the PleaseAI defaults', async () => {
+    const configs = await pleaseai({ rules: { 'no-console': 'error', 'antfu/top-level-function': 'off' } })
+
+    expect(ruleEntry(configs, 'no-console')).toBe('error')
+    expect(ruleEntry(configs, 'antfu/top-level-function')).toBe('off')
+    expect(ruleEntry(configs, 'test/prefer-lowercase-title')).toBe('off')
+  })
 })
 
 describe('canonicalPluginNames', () => {

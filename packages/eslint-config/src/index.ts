@@ -2,7 +2,7 @@ import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
 
-export interface PleaseaiOptions extends OptionsConfig {
+export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
   /**
    * Register plugins under the names and packages that Bun's `bun lint` runs
    * natively:
@@ -85,11 +85,12 @@ export function pleaseai(
       },
       typescript: true,
       gitignore: true,
+      ...antfuOptions,
       rules: {
         'antfu/top-level-function': 'error',
         'test/prefer-lowercase-title': 'off',
+        ...antfuOptions.rules,
       },
-      ...antfuOptions,
       // antfu's renaming maps `@typescript-eslint` to `ts`, which would undo
       // the rename below for configs that register the canonical name.
       ...(canonicalPluginNames ? { autoRenamePlugins: false } : {}),
