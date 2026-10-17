@@ -1,6 +1,6 @@
 # `bun lint` compatibility tracking
 
-Tracks how `@pleaseai/eslint-config` behaves under Bun's built-in `bun lint`, until `bun lint` ships in a stable Bun release. Discussion: [#56](https://github.com/pleaseai/code-style/issues/56).
+Tracks how `@pleaseai/eslint-config` behaves under Bun's built-in `bun lint`, until `bun lint` ships in a stable Bun release. It also tracks two [upstream configs](#upstream-configs) for comparison: `@antfu/eslint-config`, which this package wraps, and `eslint-config-xo`, which registers canonical plugin names. Discussion: [#56](https://github.com/pleaseai/code-style/issues/56).
 
 - **Status:** tracking — `bun lint` is canary-only (stable `1.4.3` has no `lint` command)
 - **Last checked:** 2026-10-17, canary `1.4.4-canary.1+5f5799ed1` (built from a 2026-10-15 commit)
@@ -28,6 +28,34 @@ On a repo this size the fixed cost dominates: one JS engine loading 3,544 module
 4. **antfu defines its `test` plugin inside the config.** `--timing` reports `loaded the whole config file for the plugin "test"`, so every thread evaluates the whole config. Bun's docs list this as a slowdown.
 5. **Locally, lint needs a build first.** On a fresh checkout `bun run lint` fails with `ERR_PACKAGE_PATH_NOT_EXPORTED` until `packages/eslint-config/dist` exists. CI runs `bun run build` before linting.
 
+## Upstream configs
+
+Both were measured in scratch projects (`/tmp/probe-*`) with the same canary, ESLint 10.13.0, TypeScript 6.0.3, typescript-eslint 8.71.2, and eslint-plugin-n 18.4.1. Fixtures are the same violation files plus 21 TS files copied from `packages/cli/src`.
+
+| | `@antfu/eslint-config` 9.5.1 | `eslint-config-xo` 6.0.0 |
+| --- | --- | --- |
+| Plugin names | renamed (`ts`, `node`, `import`, `style`, `test`, …) | canonical (`@typescript-eslint`, `n`, `import-x`, `@stylistic`, `node-test`, …) |
+| Native / JS rules (`--doctor`) | 102 / 242; renamed back: 128 / 216 | 246 / 638 (93 typescript-eslint + 153 core native) |
+| Native typescript-eslint | only after `.renamePlugins({ ts: '@typescript-eslint' })` | yes, as-is |
+| `n` rules native | 0 of 8 | 0 of 18 |
+| `import` rules native | 0 of 6 (`eslint-plugin-import-lite`) | 0 of 22 (`eslint-plugin-import-x`; `--native-plugin-rules=import` changes nothing) |
+| `prettier/prettier` | not used | native, with `prettier: true` |
+| Type-aware rules | off by default | on (`projectService: true`); plain `bun lint` already runs them |
+| Findings vs. ESLint, fixtures | identical (22) | identical (73), also vs. the `xo` 5.0.1 CLI |
+| Findings vs. ESLint, whole project | identical | **16 missing, no warning**: 10 `unicorn/consistent-boolean-name`, 6 `regexp/*` |
+| Non-JS files | JSON handed to ESLint; Markdown runs in JS | CSS, HTML, JSON, Markdown handed to ESLint; no unsupported-language errors |
+| `--doctor` removal advice | none (correct) | none (correct) |
+| Wall time vs. ESLint | no gain (2.7–3.3 s both) | ~1.5× faster (3.7 s vs. 5.5 s) |
+
+The 16 missing problems come from plugin rules that read types through `parserServices` (unicorn's `getTypeAtLocation`, regexp's type checker). Bun gives types only to its native rules, so these JS rules see no types. They quietly report less, and `--doctor` still shows 0 rules not run. For unicorn this is confirmed by the missed pattern (`const ok = await confirmOverwrite(...)`, a boolean known only from types); for regexp it is inferred. This repo's config is not type-aware, so it does not hit this, but it would once antfu's type-aware mode (`typescript: { tsconfigPath }`) is turned on.
+
+The false "You can remove: @pleaseai/eslint-config" advice does not appear with plain antfu or with eslint-config-xo. It seems specific to this repo's wrapper loaded through a workspace link.
+
+### Upstream positions
+
+- **antfu/eslint-config** keeps the `ts/` rename on purpose. [antfu/eslint-config#527](https://github.com/antfu/eslint-config/issues/527) added docs on renaming back, with antfu noting he "wouldn't recommend doing it with my config in particular". So canonical names have to come from this package (#56). Faster runners are tracked in [antfu/eslint-config#767](https://github.com/antfu/eslint-config/issues/767) (open, oxlint "NOT READY"). Its target is a drop-in runner that uses the config unchanged, which `bun lint` with an ESLint config already is. `bun lint` itself is not discussed there yet.
+- **XO** won't switch from ESLint ([xojs/xo#872](https://github.com/xojs/xo/issues/872), not planned). Its rules are moving into `eslint-config-xo` "so should be easy to just use any ESLint compatible runner". Bun-specific problems are left to Bun ([xojs/xo#808](https://github.com/xojs/xo/issues/808)). The `xo` 5.0.1 CLI still depends on `eslint-config-xo` ^3.0.2, while 6.0.0 is the standalone flat config measured here.
+
 ## Watch list
 
 | Item | State on 2026-10-17 | Re-check |
@@ -40,6 +68,10 @@ On a repo this size the fixed cost dominates: one JS engine loading 3,544 module
 | `--doctor` removal advice for `@pleaseai/eslint-config` | present | `--doctor` "You can remove" line |
 | TypeScript 7 | `7.0.2` out; `@typescript-eslint/parser` 8.71.2 requires `typescript <6.1.0` | `npm view @typescript-eslint/parser peerDependencies.typescript` |
 | `eslint-plugin-astro` / `astro-eslint-parser` 3.x | released; antfu accepts them (`>=`); untested here | upgrade in a branch and lint |
+| JS plugin rules get no types | 16 problems silently missed with eslint-config-xo | whole-project diff in `/tmp/probe-xo`; also antfu with `typescript: { tsconfigPath }` |
+| `eslint-plugin-import-x` native | Bun lists it in its conformance versions, but all rules run in JS | `--doctor` with eslint-config-xo |
+| antfu releases / [antfu/eslint-config#767](https://github.com/antfu/eslint-config/issues/767) | 9.5.1 (2026-09-02); #767 open | `gh release list -R antfu/eslint-config`; new comments on #767 mentioning Bun |
+| `eslint-config-xo` releases / `xo` CLI catching up | 6.0.0 (2026-10-12); `xo` 5.0.1 on ^3.0.2 | `gh release list -R xojs/eslint-config-xo`; `npm view xo dependencies.eslint-config-xo` |
 
 ## Re-check procedure
 
@@ -80,8 +112,25 @@ rm eslint.config.canonical.tmp.ts
 
 Compare the JSON reports by `file:line:column ruleId`, normalizing `@typescript-eslint/` → `ts/` and `n/` → `node/` for the renamed run. The repo lints clean, so add a fixture with violations (including an `eslint-disable-next-line ts/…` comment) to compare findings.
 
+### Upstream configs
+
+Use a new scratch directory per config, with `"type": "module"` and no `lint` script in `package.json`. Pin `typescript@~6.0`; typescript-eslint rejects 7.x.
+
+```bash
+# antfu
+bun add -d eslint @antfu/eslint-config typescript@~6.0
+echo "import antfu from '@antfu/eslint-config'; export default antfu()" > eslint.config.mjs
+
+# eslint-config-xo (type-aware: add a tsconfig.json, plus @types/node with "types": ["node"])
+bun add -d eslint eslint-config-xo typescript@~6.0 @types/node
+echo "import xo from 'eslint-config-xo'; export default xo()" > eslint.config.js
+```
+
+Then run the same `--doctor`, JSON comparison, and timing steps as above. Copy real sources (such as `packages/cli/src`) into the scratch project too: the type-related misses only show up on real code, not on the small fixtures.
+
 ## Log
 
 | Date | Bun | Result |
 | --- | --- | --- |
 | 2026-10-17 | `1.4.4-canary.1+5f5799ed1` | Baseline above |
+| 2026-10-17 | `1.4.4-canary.1+5f5799ed1` | Added antfu 9.5.1 and eslint-config-xo 6.0.0 baselines |
