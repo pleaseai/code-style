@@ -3,8 +3,16 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "types": [
+      "node",
+      "bun"
+    ],
     "strict": true,
     "declaration": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ]
 }

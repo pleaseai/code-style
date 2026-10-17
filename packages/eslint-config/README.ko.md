@@ -170,6 +170,35 @@ export default pleaseai({
 })
 ```
 
+### 표준 플러그인 이름(Canonical Plugin Names)
+
+Bun의 내장 `bun lint`(canary)는 `eslint.config.*`를 그대로 읽고 일부 플러그인을 네이티브로 실행합니다. 다만 플러그인이 원래 이름과 패키지로 등록되어 있을 때만 그렇습니다. `canonicalPluginNames`를 켜면 이 조건에 맞춥니다:
+
+- typescript-eslint 규칙을 `ts/*` 대신 `@typescript-eslint/*`로 보고합니다.
+- `import/*` 규칙을 `eslint-plugin-import-lite` 대신 [`eslint-plugin-import`](https://github.com/import-js/eslint-plugin-import)에서 가져옵니다. 규칙 ID는 `import/*` 그대로입니다.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  canonicalPluginNames: true,
+})
+```
+
+```bash
+bun add -D eslint-plugin-import
+```
+
+이 저장소에서는 `bun lint --doctor`가 네이티브로 보고하는 규칙이 118개에서 150개로 늘어납니다. ESLint는 이전과 똑같이 동작합니다.
+
+켜기 전에 확인하세요:
+
+- **`eslint-disable` 주석을 고쳐야 합니다.** `ts/*` 규칙을 지정한 주석은 오류(`Definition for rule 'ts/…' was not found`)로 보고됩니다. 설정 파일에서 `ts/*`로 지정한 규칙 설정은 자동으로 이름이 바뀝니다.
+- **`eslint-plugin-import` 2.32.0은 peer dependency에 ESLint 10을 포함하지 않습니다.** 테스트에서는 ESLint 10에서 동작했지만, npm은 `overrides`를 추가하거나 `--legacy-peer-deps`를 쓰지 않으면 설치를 거부합니다(`ERESOLVE`). bun과 pnpm은 경고만 합니다.
+- 나머지 이름 변경(`style/*`, `node/*`, `test/*`, `yaml/*`)은 그대로 둡니다. 이 설정이 켜는 `node/*` 규칙은 Bun이 하나도 네이티브로 실행하지 않으므로, 이름을 바꿔도 disable 주석만 깨집니다.
+
+측정 결과는 [#56](https://github.com/pleaseai/code-style/issues/56)에 있습니다.
+
 ## 선택적 설정
 
 ### React
@@ -488,6 +517,8 @@ npx @eslint/config-inspector
 | `ts/*` | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
 | `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
 | `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
+
+[`canonicalPluginNames`](#표준-플러그인-이름canonical-plugin-names)를 켜면 typescript-eslint는 `@typescript-eslint/*`를 유지하고, `import/*`는 `eslint-plugin-import`에서 가져옵니다.
 
 ## 버전 정책
 
