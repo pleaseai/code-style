@@ -61,8 +61,8 @@ The false "You can remove: @pleaseai/eslint-config" advice does not appear with 
 | Item | State on 2026-10-17 | Re-check |
 | --- | --- | --- |
 | `bun lint` in a stable release | not released (stable `1.4.3`) | `npm view bun dist-tags`, then `bun lint --help` on `latest` |
-| `--no-script` | in the docs, not in canary `5f5799ed1` | `bun lint --no-script --doctor` |
-| JSON and Markdown run natively ([oven-sh/bun#45595](https://github.com/oven-sh/bun/pull/45595), merged 2026-10-17) | not in the tested canary: 15 `@eslint/markdown` rules in JS | `--doctor` counts for `@eslint/markdown` and files handed to ESLint |
+| `--no-script` | in the docs, not in canary `5f5799ed1`; works in the #45595 PR build | `bun lint --no-script --doctor` |
+| JSON and Markdown run natively ([oven-sh/bun#45595](https://github.com/oven-sh/bun/pull/45595), merged 2026-10-17) | not in a canary yet; measured on the PR build, see [below](#oven-shbun45595-pr-build) | `--doctor` counts for `@eslint/markdown` and files handed to ESLint |
 | Extglob `overrides[].files` on the oxlint config path ([oven-sh/bun#45470](https://github.com/oven-sh/bun/issues/45470)) | fixed by [oven-sh/bun#45482](https://github.com/oven-sh/bun/pull/45482) (2026-10-16), not in the tested canary | only matters for an oxlint config; the ESLint config path already matched |
 | `eslint-plugin-n` native coverage | antfu's 8 enabled rules all in JS | `--doctor` with the renamed config |
 | `--doctor` removal advice for `@pleaseai/eslint-config` | present | `--doctor` "You can remove" line |
@@ -72,6 +72,21 @@ The false "You can remove: @pleaseai/eslint-config" advice does not appear with 
 | `eslint-plugin-import-x` native | Bun lists it in its conformance versions, but all rules run in JS | `--doctor` with eslint-config-xo |
 | antfu releases / [antfu/eslint-config#767](https://github.com/antfu/eslint-config/issues/767) | 9.5.1 (2026-09-02); #767 open | `gh release list -R antfu/eslint-config`; new comments on #767 mentioning Bun |
 | `eslint-config-xo` releases / `xo` CLI catching up | 6.0.0 (2026-10-12); `xo` 5.0.1 on ^3.0.2 | `gh release list -R xojs/eslint-config-xo`; `npm view xo dependencies.eslint-config-xo` |
+
+### oven-sh/bun#45595 (PR build)
+
+[oven-sh/bun#45595](https://github.com/oven-sh/bun/pull/45595) builds in all 6 `@eslint/json` rules and all 21 `@eslint/markdown` rules. A file still goes to the installed ESLint when any rule on it is not built in. Measured on the PR's CI build `1.4.4-canary.1+a1ab4b531` (fetched with `bunx bun-pr 45595`; it does not include the oven-sh/bun#45482 fix):
+
+| Config | Native / JS before | Native / JS with #45595 | Files to ESLint | Findings vs. ESLint |
+| --- | --- | --- | --- | --- |
+| this repo, as-is | 103 / 253 | 118 / 238 | 112 → 78 (`--timing`) | identical (0 / 0) |
+| this repo, canonical names | 129 / 227 | 144 / 212 | same | — |
+| `@antfu/eslint-config` 9.5.1 | 102 / 242 | 117 / 227 | 2 JSON | identical (26) |
+| `eslint-config-xo` 6.0.0 | 246 / 638 | 266 / 638 | 6 → 3 (CSS, HTML, `package.json`) | same 16 type-related misses |
+
+- **Markdown moves for antfu-based configs:** the 15 `@eslint/markdown` rules now run natively. Code blocks inside Markdown are still linted through the JS rules, with identical results.
+- **JSON does not move for antfu-based configs.** antfu lints JSON with `eslint-plugin-jsonc` on `jsonc-eslint-parser`, not with `@eslint/json`, so all 17 JSON files still go to ESLint. eslint-config-xo uses `@eslint/json`, so its JSON files run natively, except `package.json`, where the `package-json` plugin is not built in.
+- **Wall time on this repo stays about the same:** 4.3–5.5 s vs. ESLint's 5.3–6.0 s, at load average 5–8.
 
 ## Re-check procedure
 
@@ -134,3 +149,4 @@ Then run the same `--doctor`, JSON comparison, and timing steps as above. Copy r
 | --- | --- | --- |
 | 2026-10-17 | `1.4.4-canary.1+5f5799ed1` | Baseline above |
 | 2026-10-17 | `1.4.4-canary.1+5f5799ed1` | Added antfu 9.5.1 and eslint-config-xo 6.0.0 baselines |
+| 2026-10-17 | `1.4.4-canary.1+a1ab4b531` (oven-sh/bun#45595 PR build) | Markdown native: +15 native rules for antfu-based configs; JSON stays on ESLint (`eslint-plugin-jsonc`) |
