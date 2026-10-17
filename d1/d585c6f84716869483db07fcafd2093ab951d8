@@ -1,0 +1,33 @@
+packages/eslint-config/test/index.test.ts
+  s_868889ed680002::t_2d68e984dcd73d 80-93
+  s_868889ed680002::t_175634ae26ab88 17-22
+  s_868889ed680002::t_ae727906fcc3df 2-3
+packages/eslint-config/test/fixtures/without-eslint-plugin-import.ts
+  s_868889ed680002::t_64c7177a3c10b1 1-8,10-14,20
+  s_868889ed680002::t_1388cfb8d45d5d 9
+  s_868889ed680002::t_759b25949629e5 15-19,21-24
+packages/eslint-config/tsconfig.json
+  s_868889ed680002::t_fcc10ea2840359 16-17
+packages/eslint-config/README.ko.md
+  s_868889ed680002::t_a4afa16df96c95 200
+  s_868889ed680002::t_a60e31ada1bde4 192
+packages/eslint-config/README.md
+  s_868889ed680002::t_0235c3324c9fee 200
+  s_868889ed680002::t_6b581001893e28 192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d1d585c6f84716869483db07fcafd2093ab951d8",
+  "prompts": {},
+  "sessions": {
+    "s_868889ed680002": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9b358ce8-c067-4534-8c9b-b7db803abe38",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <amond@amond.net>"
+    }
+  }
+}
