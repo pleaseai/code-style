@@ -189,7 +189,7 @@ export default pleaseai({
 bun add -D eslint-plugin-import
 ```
 
-이 저장소에서는 `bun lint --doctor`가 네이티브로 보고하는 규칙이 118개에서 150개로 늘어납니다. ESLint는 이전과 똑같이 동작합니다.
+[oven-sh/bun#45595](https://github.com/oven-sh/bun/pull/45595)의 Bun 빌드(2026년 10월)로 이 저장소를 측정하면, `bun lint --doctor`가 네이티브로 보고하는 규칙이 118개에서 150개로 늘어납니다. 이 수치는 Bun이 네이티브 규칙을 추가할 때마다 바뀝니다. 규칙이 검사하는 내용은 이전과 같습니다.
 
 켜기 전에 확인하세요:
 
@@ -197,7 +197,7 @@ bun add -D eslint-plugin-import
 - **`eslint-plugin-import` 2.32.0은 peer dependency에 ESLint 10을 포함하지 않습니다.** 테스트에서는 ESLint 10에서 동작했지만, npm은 `overrides`를 추가하거나 `--legacy-peer-deps`를 쓰지 않으면 설치를 거부합니다(`ERESOLVE`). bun과 pnpm은 경고만 합니다.
 - 나머지 이름 변경(`style/*`, `node/*`, `test/*`, `yaml/*`)은 그대로 둡니다. 이 설정이 켜는 `node/*` 규칙은 Bun이 하나도 네이티브로 실행하지 않으므로, 이름을 바꿔도 disable 주석만 깨집니다.
 
-측정 결과는 [#56](https://github.com/pleaseai/code-style/issues/56)에 있습니다.
+측정 결과는 [이슈 #56](https://github.com/pleaseai/code-style/issues/56)에 있습니다.
 
 ## 선택적 설정
 

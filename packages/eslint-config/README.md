@@ -189,7 +189,7 @@ export default pleaseai({
 bun add -D eslint-plugin-import
 ```
 
-On this repository, it raises the rules `bun lint --doctor` reports as native from 118 to 150. ESLint itself works as before.
+Measured on this repository with the Bun build from [oven-sh/bun#45595](https://github.com/oven-sh/bun/pull/45595) (October 2026), it raises the rules `bun lint --doctor` reports as native from 118 to 150. The counts change as Bun adds native rules. The rules check the same code as before.
 
 Before you turn it on:
 
@@ -197,7 +197,7 @@ Before you turn it on:
 - **`eslint-plugin-import` 2.32.0 does not list ESLint 10 in its peer dependencies.** It runs with ESLint 10 in our tests, but npm refuses to install it (`ERESOLVE`) unless you add an `overrides` entry or use `--legacy-peer-deps`. bun and pnpm only warn.
 - The other renames (`style/*`, `node/*`, `test/*`, `yaml/*`) stay as they are. Bun runs none of the `node/*` rules this config enables natively, so renaming them would only break disable comments.
 
-See [#56](https://github.com/pleaseai/code-style/issues/56) for the measurements.
+See [issue #56](https://github.com/pleaseai/code-style/issues/56) for the measurements.
 
 ## Optional Configs
 

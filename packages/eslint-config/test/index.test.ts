@@ -1,4 +1,6 @@
 import type { TypedFlatConfigItem } from '../src/index'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'bun:test'
 import { ESLint } from 'eslint'
 import pluginImport from 'eslint-plugin-import'
@@ -10,6 +12,12 @@ function pluginNames(configs: TypedFlatConfigItem[]): Set<string> {
 
 function ruleIds(configs: TypedFlatConfigItem[]): string[] {
   return configs.flatMap(config => Object.keys(config.rules ?? {}))
+}
+
+/** Resolves the canonical config in a child process where `eslint-plugin-import` cannot be loaded. */
+function resolveWithoutEslintPluginImport(...args: string[]) {
+  const fixture = fileURLToPath(new URL('./fixtures/without-eslint-plugin-import.ts', import.meta.url))
+  return Bun.spawnSync([process.execPath, fixture, ...args], { stdout: 'ignore', stderr: 'pipe' })
 }
 
 function ruleEntry(configs: TypedFlatConfigItem[], id: string): unknown {
@@ -67,6 +75,20 @@ describe('canonicalPluginNames', () => {
     const configs = await pleaseai({ canonicalPluginNames: true, imports: false })
 
     expect(pluginNames(configs)).not.toContain('import')
+  })
+
+  test('does not load eslint-plugin-import when imports are disabled', () => {
+    const result = resolveWithoutEslintPluginImport('imports=false')
+
+    expect(result.stderr.toString()).toBe('')
+    expect(result.exitCode).toBe(0)
+  })
+
+  test('explains how to install eslint-plugin-import when it is missing', () => {
+    const result = resolveWithoutEslintPluginImport()
+
+    expect(result.exitCode).not.toBe(0)
+    expect(result.stderr.toString()).toContain('`canonicalPluginNames` requires `eslint-plugin-import`')
   })
 
   test('reports under the canonical rule IDs when linting', async () => {
