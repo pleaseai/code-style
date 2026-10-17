@@ -1,0 +1,22 @@
+docs/research/bun-lint-compatibility.md
+  s_868889ed680002::t_3045617f891514 65
+  s_868889ed680002::t_64047405e4de5a 76-90
+  s_868889ed680002::t_555124d4d987a4 152
+  s_868889ed680002::t_c0ab815b20a1dd 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f18ddc460ecf50c346705282bc40994d05ae2d7f",
+  "prompts": {},
+  "sessions": {
+    "s_868889ed680002": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9b358ce8-c067-4534-8c9b-b7db803abe38",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Minsu Lee <amond@amond.net>"
+    }
+  }
+}
