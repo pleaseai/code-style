@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { cancel, intro, isCancel, log, multiselect, outro, spinner } from '@clack/prompts'
-import { applyAgentsMd, TOOLS } from './appliers.js'
+import { applyAgentsMd, defaultToolIds, TOOLS } from './appliers.js'
 import {
   detectPackageManager,
   installCommand,
@@ -67,10 +67,10 @@ export async function runInit(opts: CommandOptions): Promise<void> {
     }
   })
 
-  const initialValues = opts.autoAccept ? TOOLS.map(tool => tool.id) : undefined
+  const initialValues = opts.autoAccept ? defaultToolIds() : undefined
 
   const selectedIdsRaw = opts.autoAccept
-    ? TOOLS.map(tool => tool.id)
+    ? defaultToolIds()
     : await multiselect({
         message: t('selectTools'),
         options,

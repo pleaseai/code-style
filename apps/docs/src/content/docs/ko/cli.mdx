@@ -101,6 +101,8 @@ please-style check --strict     # 발견 사항이 있으면 exit 1 (위반을 �
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
 | bun-lint-config | `@pleaseai/bun-lint-config` | `bunfig.toml`의 `[lint]` (마커로 관리되는 블록) |
 
+`init --yes`는 **bun-lint-config**를 뺀 모든 도구를 적용합니다. `bun lint`는 ESLint에 더하는 도구가 아니라 ESLint를 대신하는 도구이므로, 대화형 `init`에서 직접 선택해야 합니다.
+
 ## `AGENTS.md` 규칙 블록
 
 CLI는 `AGENTS.md`에 마커로 구분된 블록을 작성하므로, 주변에 직접 작성한 내용을 섞어 두어도 다음 실행 시 사라지지 않습니다:
@@ -131,7 +133,7 @@ CLI는 두 마커 주석 사이의 내용 **만** 관리하며 — `AGENTS.md`�
 
 | 플래그 | 설명 |
 | --- | --- |
-| `--yes`, `-y` | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀 |
+| `--yes`, `-y` | 기본값(opt-in인 bun-lint-config를 뺀 모든 도구)을 수락하고 기존 파일을 확인 없이 덮어씀 |
 | `--lang <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LC_ALL` / `$LANG`) |
 | `--help`, `-h` | 도움말 출력 |
 | `--version`, `-v` | CLI 버전 출력 |
@@ -152,7 +154,7 @@ pleaseai-code-style --lang ko init
 pleaseai-code-style --yes --lang en init
 ```
 
-모든 도구의 기본값을 수락하고, 기존 설정 파일을 덮어쓰며, 영어로 출력합니다.
+opt-in인 bun-lint-config를 뺀 모든 도구를 적용하고, 기존 설정 파일을 덮어쓰며, 영어로 출력합니다.
 
 ## 바이너리
 

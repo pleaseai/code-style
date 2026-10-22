@@ -45,6 +45,10 @@ The `init` command:
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
 | bun-lint-config | `@pleaseai/bun-lint-config` | `bunfig.toml` `[lint]` (marker-managed block) |
 
+`init --yes` applies every tool except **bun-lint-config**, which is opt-in:
+`bun lint` is an alternative to ESLint, not an addition to it, so select it
+yourself in the interactive `init`.
+
 ## ast-grep rules
 
 Selecting **ast-grep** installs
@@ -414,7 +418,7 @@ to refresh just this block. The full rules list is shipped as
 
 | Flag | Description |
 | --- | --- |
-| `--yes`, `-y` | Accept defaults, overwrite existing files without prompting |
+| `--yes`, `-y` | Accept defaults (every tool except the opt-in bun-lint-config), overwrite existing files without prompting |
 | `--lang <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print version |

@@ -1,5 +1,5 @@
 import type { Markers } from './fs-utils.js'
-import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
+import type { Tool, ToolApplyResult, ToolContext, ToolId } from './tools.js'
 import { copyFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve as joinPath } from 'node:path'
 import { confirm, isCancel, log } from '@clack/prompts'
@@ -414,9 +414,16 @@ export const TOOLS: Tool[] = [
     label: '@pleaseai/bun-lint-config (bunfig.toml [lint])',
     packages: ['@pleaseai/bun-lint-config'],
     apply: applyBunLintConfig,
+    // An alternative to the ESLint config, not an addition to it.
+    optIn: true,
   },
 ]
 
 export function findTool(id: string): Tool | undefined {
   return TOOLS.find(t => t.id === id)
+}
+
+/** The tools `init --yes` applies: every tool that is not opt-in. */
+export function defaultToolIds(): ToolId[] {
+  return TOOLS.filter(tool => tool.optIn !== true).map(tool => tool.id)
 }

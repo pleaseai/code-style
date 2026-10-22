@@ -45,6 +45,10 @@ bunx @pleaseai/code-style check   # 파일 이름과 테스트 경로 검사 (AD
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
 | bun-lint-config | `@pleaseai/bun-lint-config` | `bunfig.toml`의 `[lint]` (마커로 관리되는 블록) |
 
+`init --yes`는 **bun-lint-config**를 뺀 모든 도구를 적용합니다. `bun lint`는
+ESLint에 더하는 도구가 아니라 ESLint를 대신하는 도구이므로, 대화형 `init`에서
+직접 선택해야 합니다.
+
 ## ast-grep 규칙
 
 **ast-grep**을 선택하면 [`@pleaseai/ast-grep-config`](../ast-grep-config)와
@@ -230,7 +234,7 @@ CLI는 아래 마커 사이의 내용만 관리합니다 — `AGENTS.md`의 나�
 
 | 플래그 | 설명 |
 | --- | --- |
-| `--yes`, `-y` | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀 |
+| `--yes`, `-y` | 기본값(opt-in인 bun-lint-config를 뺀 모든 도구)을 수락하고 기존 파일을 확인 없이 덮어씀 |
 | `--lang <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LANG`) |
 | `--help`, `-h` | 도움말 출력 |
 | `--version`, `-v` | 버전 출력 |

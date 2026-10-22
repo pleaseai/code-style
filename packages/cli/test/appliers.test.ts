@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { log } from '@clack/prompts'
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test'
-import { applyAgentsMd, applyAstGrep, applyBunLintConfig, findTool } from '../src/appliers.js'
+import { applyAgentsMd, applyAstGrep, applyBunLintConfig, defaultToolIds, findTool, TOOLS } from '../src/appliers.js'
 
 let dir: string
 
@@ -158,6 +158,10 @@ describe('bun-lint-config tool', () => {
 
   test('installs the config package', () => {
     expect(findTool('bun-lint-config')?.packages).toEqual(['@pleaseai/bun-lint-config'])
+  })
+
+  test('is opt-in: init --yes applies every other tool but not this one', () => {
+    expect(defaultToolIds()).toEqual(TOOLS.map(tool => tool.id).filter(id => id !== 'bun-lint-config'))
   })
 
   test('creates bunfig.toml with the lint tables in a managed block', async () => {
