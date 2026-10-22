@@ -1,14 +1,12 @@
 import type { Linter } from 'eslint'
 import { stringify } from 'smol-toml'
 
-/** A rule that `bun lint` runs natively, from `bun lint --rules -f json`. */
 export interface BuiltinRule {
   id: string
   aliases: string[]
   on_by_default: boolean
 }
 
-/** The committed snapshot in builtin-rules.json. */
 export interface BuiltinRules {
   revision: string
   rules: BuiltinRule[]
@@ -33,10 +31,8 @@ const HEADER = `# Generated from @pleaseai/eslint-config by \`bun run generate\`
 
 const SEVERITIES: Severity[] = ['off', 'warn', 'error']
 
-/** The file extensions `bun lint` reads. */
 const LINTED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.mts', '.cts']
 
-/** Orders rule ids the same way in every locale. */
 export function compareIds(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
 }
@@ -70,12 +66,10 @@ export function toBunGlob(glob: string): string {
   return out
 }
 
-/** Index of the `]` that closes the class opened at `start`, or -1. */
 function classEnd(glob: string, start: number): number {
   return glob.indexOf(']', start + 2)
 }
 
-/** Expands `{a,b}` alternatives (nested ones too) into separate globs. */
 export function expandBraces(glob: string): string[] {
   let depth = 0
   let open = -1
@@ -106,7 +100,6 @@ export function expandBraces(glob: string): string[] {
   return [glob]
 }
 
-/** Expands simple character classes such as `[jt]`; ranges and negations are left as they are. */
 function expandClasses(glob: string): string[] {
   const match = /\[([^\]!^\\-]+)\]/.exec(glob)
   if (match == null) {
@@ -187,12 +180,10 @@ function withOptions(entry: RuleEntry, previous: RuleEntry | undefined): RuleEnt
   return typeof entry === 'string' && Array.isArray(previous) ? [entry, ...previous.slice(1)] : entry
 }
 
-/** Whether a config item only lists global ignores. */
 function isGlobalIgnores(item: Linter.Config): boolean {
   return item.ignores != null && Object.keys(item).every(key => key === 'ignores' || key === 'name')
 }
 
-/** Sorted by id; `off` is written without the options it carries. */
 function sortedRules(rules: Map<string, RuleEntry>): Record<string, RuleEntry> {
   return Object.fromEntries([...rules]
     .sort(([a], [b]) => compareIds(a, b))
@@ -256,15 +247,11 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
       continue
     }
     for (const [rule, entry] of rules) {
-      // Options are carried over from [lint.rules] only, not from earlier
-      // overrides: an approximation, since which overrides match is per file.
       rules.set(rule, withOptions(entry, base.get(rule)))
     }
     overrides.push({ files, ...(excludeFiles.length > 0 ? { excludeFiles } : {}), rules })
   }
 
-  // An `off` entry is kept only where it turns off a rule that is on by
-  // default in Bun or that an earlier entry turns on.
   const turnedOn = new Set<string>()
   for (const [rule, entry] of base) {
     if (severityOf(entry) !== 'off') {

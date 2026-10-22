@@ -168,7 +168,6 @@ jobs:
             npm publish pleaseai-editorconfig-*.tgz --provenance --access public
           fi
 
-      # No build step: the package ships its committed lint.toml as-is.
       - name: Publish @pleaseai/bun-lint-config
         if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.bun-lint-config-released == 'true') }}
         working-directory: packages/bun-lint-config

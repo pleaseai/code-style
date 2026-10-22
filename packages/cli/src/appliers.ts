@@ -286,8 +286,6 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   return result
 }
 
-// --- bun-lint-config --------------------------------------------------------
-
 const BUN_LINT_SOURCE = 'node_modules/@pleaseai/bun-lint-config/lint.toml'
 
 const BUNFIG_MARKERS: Markers = {
@@ -305,11 +303,6 @@ function outsideMarkerBlock(text: string, markers: Markers): string {
   return begin !== -1 && end > begin ? text.slice(0, begin) + text.slice(end + markers.end.length) : text
 }
 
-/**
- * Whether a bunfig.toml sets lint options: a `[lint]`, `[lint.…]` or
- * `[[lint.…]]` table (quoted key forms included), or a top-level `lint = …`
- * or `lint.…` dotted key before the first table.
- */
 function definesLint(toml: string): boolean {
   let inTable = false
   for (const line of toml.split(/\r?\n/).map(l => l.trim())) {
@@ -338,7 +331,6 @@ export async function applyBunLintConfig(ctx: ToolContext): Promise<ToolApplyRes
   const lintToml = readFileOrNull(joinPath(ctx.cwd, BUN_LINT_SOURCE))
 
   if (lintToml == null) {
-    // Not installed (e.g. the install step failed), or installed by Plug'n'Play without a node_modules copy.
     if (!existsSync(target) && usesPlugNPlay(ctx.cwd, BUN_LINT_SOURCE)) {
       log.warn(t('bunLintPlugNPlay'))
     }
@@ -364,7 +356,6 @@ export async function applyBunLintConfig(ctx: ToolContext): Promise<ToolApplyRes
     return result
   }
   if (existing === next) {
-    // No-op — already up to date.
     return result
   }
   writeFileSync(target, next)
@@ -414,7 +405,6 @@ export const TOOLS: Tool[] = [
     label: '@pleaseai/bun-lint-config (bunfig.toml [lint])',
     packages: ['@pleaseai/bun-lint-config'],
     apply: applyBunLintConfig,
-    // An alternative to the ESLint config, not an addition to it.
     optIn: true,
   },
 ]
@@ -423,7 +413,6 @@ export function findTool(id: string): Tool | undefined {
   return TOOLS.find(t => t.id === id)
 }
 
-/** The tools `init --yes` applies: every tool that is not opt-in. */
 export function defaultToolIds(): ToolId[] {
   return TOOLS.filter(tool => tool.optIn !== true).map(tool => tool.id)
 }

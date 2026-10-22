@@ -140,10 +140,6 @@ describe('editorconfig tool', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// bun-lint-config
-// ---------------------------------------------------------------------------
-
 describe('bun-lint-config tool', () => {
   const lintToml = '[lint.rules]\nno-var = "error"\n'
 
@@ -207,7 +203,6 @@ describe('bun-lint-config tool', () => {
       }
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('[lint]'))
 
-      // A key named `lint` inside another table is not lint config.
       writeFileSync(join(dir, 'bunfig.toml'), '[run]\nlint = true\n')
       expect((await applyBunLintConfig({ cwd: dir, autoAccept: true })).updated).toEqual(['bunfig.toml'])
     }

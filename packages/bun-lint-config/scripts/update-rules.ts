@@ -1,8 +1,3 @@
-/**
- * Refreshes builtin-rules.json from a Bun binary that has `bun lint`
- * (`BUN_LINT_BIN=/path/to/bun bun run update-rules`). The pinned Bun has no
- * linter yet, so the snapshot is committed and only refreshed by hand.
- */
 import type { BuiltinRule, BuiltinRules } from '../src/generate'
 import { writeFileSync } from 'node:fs'
 import process from 'node:process'
@@ -32,7 +27,6 @@ const rules: BuiltinRule[] = listed
   .sort((a, b) => compareIds(a.id, b.id))
 const snapshot: BuiltinRules = { revision: run(['--revision']), rules }
 
-// One rule per line keeps the snapshot small and its diffs readable.
 const lines = rules.map(({ id, aliases, on_by_default }) =>
   `    { "id": ${JSON.stringify(id)}, "aliases": [${aliases.map(alias => JSON.stringify(alias)).join(', ')}], "on_by_default": ${on_by_default} }`)
 writeFileSync(
