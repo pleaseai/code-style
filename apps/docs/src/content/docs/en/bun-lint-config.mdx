@@ -23,6 +23,8 @@ What is left out:
 - JSON, YAML, TOML, and Markdown, which `bun lint` does not lint
 - formatting: the package configures `[lint]` only, not `[fmt]`
 
+Bun's own default rules stay on even where `@pleaseai/eslint-config` does not enable them: 14 ESLint core rules (such as `no-constant-condition`, `for-direction`, `no-useless-escape`, and `no-unsafe-optional-chaining`), the `bun:test` rules in files that import `bun:test`, and the React rules when `react` is a dependency. So `bun lint` can report a little more than ESLint.
+
 ## Usage
 
 Run the CLI and select **bun-lint-config**:

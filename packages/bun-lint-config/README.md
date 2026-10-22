@@ -36,6 +36,12 @@ What is left out:
 An `off` setting is written only where it turns off a rule that is on by
 default in Bun or that an earlier table turns on.
 
+Bun's own default rules stay on even where `@pleaseai/eslint-config` does not
+enable them: 14 ESLint core rules (such as `no-constant-condition`,
+`for-direction`, `no-useless-escape`, and `no-unsafe-optional-chaining`), the
+`bun:test` rules in files that import `bun:test`, and the React rules when
+`react` is a dependency. So `bun lint` can report a little more than ESLint.
+
 ## Usage
 
 ### With `please-style`

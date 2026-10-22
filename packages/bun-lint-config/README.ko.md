@@ -36,6 +36,13 @@
 `off` 설정은 Bun에서 기본으로 켜진 규칙이나 앞선 테이블이 켠 규칙을 끄는 경우에만
 기록합니다.
 
+`@pleaseai/eslint-config`가 켜지 않는 규칙이라도 Bun이 기본으로 켜는 규칙은
+그대로 켜져 있습니다. ESLint 코어 규칙 14개(`no-constant-condition`,
+`for-direction`, `no-useless-escape`, `no-unsafe-optional-chaining` 등),
+`bun:test`를 import하는 파일의 `bun:test` 규칙, `react`가 의존성에 있을 때의
+React 규칙이 그렇습니다. 그래서 `bun lint`는 ESLint보다 조금 더 많이 보고할 수
+있습니다.
+
 ## 사용법
 
 ### `please-style`로 적용
