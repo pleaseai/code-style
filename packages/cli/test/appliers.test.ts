@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { log } from '@clack/prompts'
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test'
-import { applyAgentsMd, applyAstGrep, findTool } from '../src/appliers.js'
+import { applyAgentsMd, applyAstGrep, applyBunLintConfig, findTool } from '../src/appliers.js'
 
 let dir: string
 
@@ -133,6 +133,117 @@ describe('editorconfig tool', () => {
     try {
       await findTool('editorconfig')!.apply({ cwd: dir, autoAccept: true })
       expect(warn).not.toHaveBeenCalled()
+    }
+    finally {
+      warn.mockRestore()
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// bun-lint-config
+// ---------------------------------------------------------------------------
+
+describe('bun-lint-config tool', () => {
+  const lintToml = '[lint.rules]\nno-var = "error"\n'
+
+  function installLintToml(contents = lintToml): void {
+    mkdirSync(join(dir, 'node_modules', '@pleaseai', 'bun-lint-config'), { recursive: true })
+    writeFileSync(join(dir, 'node_modules', '@pleaseai', 'bun-lint-config', 'lint.toml'), contents)
+  }
+
+  function bunfig(): string {
+    return readFileSync(join(dir, 'bunfig.toml'), 'utf-8')
+  }
+
+  test('installs the config package', () => {
+    expect(findTool('bun-lint-config')?.packages).toEqual(['@pleaseai/bun-lint-config'])
+  })
+
+  test('creates bunfig.toml with the lint tables in a managed block', async () => {
+    installLintToml()
+    const result = await applyBunLintConfig({ cwd: dir, autoAccept: true })
+    expect(result.created).toEqual(['bunfig.toml'])
+    expect(bunfig()).toStartWith('# >>> @pleaseai/bun-lint-config\n# Managed by @pleaseai/code-style')
+    expect(bunfig()).toEndWith('[lint.rules]\nno-var = "error"\n# <<< @pleaseai/bun-lint-config\n')
+  })
+
+  test('appends the block to an existing bunfig.toml', async () => {
+    installLintToml()
+    writeFileSync(join(dir, 'bunfig.toml'), '[install]\nlinker = "hoisted"\n')
+    const result = await applyBunLintConfig({ cwd: dir, autoAccept: true })
+    expect(result.updated).toEqual(['bunfig.toml'])
+    expect(bunfig()).toStartWith('[install]\nlinker = "hoisted"\n\n# >>> @pleaseai/bun-lint-config\n')
+  })
+
+  test('replaces an outdated block and leaves a current one alone', async () => {
+    installLintToml()
+    writeFileSync(join(dir, 'bunfig.toml'), '[install]\nlinker = "hoisted"\n')
+    await applyBunLintConfig({ cwd: dir, autoAccept: true })
+    installLintToml('[lint.rules]\nno-var = "warn"\n')
+    expect((await applyBunLintConfig({ cwd: dir, autoAccept: true })).updated).toEqual(['bunfig.toml'])
+    expect(bunfig()).toContain('no-var = "warn"')
+    expect(bunfig()).not.toContain('no-var = "error"')
+    expect(bunfig().match(/# >>> @pleaseai\/bun-lint-config/g)).toHaveLength(1)
+
+    const current = bunfig()
+    expect(await applyBunLintConfig({ cwd: dir, autoAccept: true })).toEqual({ created: [], updated: [], skipped: [] })
+    expect(bunfig()).toBe(current)
+  })
+
+  test('skips with a warning when bunfig.toml already sets lint options outside the block', async () => {
+    installLintToml()
+    const warn = spyOn(log, 'warn').mockImplementation(() => {})
+    try {
+      for (const custom of ['[lint]\ntypeAware = true\n', '[ "lint" . rules ]\nno-var = "off"\n', '[[lint.overrides]]\nfiles = ["*.ts"]\n', 'lint.typeAware = true\n']) {
+        writeFileSync(join(dir, 'bunfig.toml'), custom)
+        const result = await applyBunLintConfig({ cwd: dir, autoAccept: true })
+        expect(result).toEqual({ created: [], updated: [], skipped: ['bunfig.toml'] })
+        expect(bunfig()).toBe(custom)
+      }
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('[lint]'))
+
+      // A key named `lint` inside another table is not lint config.
+      writeFileSync(join(dir, 'bunfig.toml'), '[run]\nlint = true\n')
+      expect((await applyBunLintConfig({ cwd: dir, autoAccept: true })).updated).toEqual(['bunfig.toml'])
+    }
+    finally {
+      warn.mockRestore()
+    }
+  })
+
+  test('warns but still applies next to an ESLint config', async () => {
+    installLintToml()
+    const warn = spyOn(log, 'warn').mockImplementation(() => {})
+    try {
+      await applyBunLintConfig({ cwd: dir, autoAccept: true })
+      expect(warn).not.toHaveBeenCalled()
+
+      await applyBunLintConfig({ cwd: dir, autoAccept: true, selectedToolIds: ['eslint-config', 'bun-lint-config'] })
+      expect(warn).toHaveBeenCalledTimes(1)
+
+      writeFileSync(join(dir, 'eslint.config.mjs'), 'export default []\n')
+      rmSync(join(dir, 'bunfig.toml'))
+      const result = await applyBunLintConfig({ cwd: dir, autoAccept: true, selectedToolIds: ['bun-lint-config'] })
+      expect(result.created).toEqual(['bunfig.toml'])
+      expect(warn).toHaveBeenCalledTimes(2)
+      expect(warn).toHaveBeenLastCalledWith(expect.stringContaining('eslint.config.*'))
+    }
+    finally {
+      warn.mockRestore()
+    }
+  })
+
+  test('skips when the package is not installed, warning only under Plug\'n\'Play', async () => {
+    const warn = spyOn(log, 'warn').mockImplementation(() => {})
+    try {
+      expect(await applyBunLintConfig({ cwd: dir, autoAccept: true })).toEqual({ created: [], updated: [], skipped: ['bunfig.toml'] })
+      expect(warn).not.toHaveBeenCalled()
+
+      writeFileSync(join(dir, '.pnp.cjs'), '')
+      expect((await applyBunLintConfig({ cwd: dir, autoAccept: true })).skipped).toEqual(['bunfig.toml'])
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('yarn node -e'))
+      expect(existsSync(join(dir, 'bunfig.toml'))).toBe(false)
     }
     finally {
       warn.mockRestore()

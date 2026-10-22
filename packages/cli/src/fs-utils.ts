@@ -58,29 +58,36 @@ export function isPackageInstalled(pkg: PackageJson, name: string): boolean {
 }
 
 /**
- * Marker block helpers for AGENTS.md (and any other marker-managed markdown).
+ * Marker block helpers for AGENTS.md (and any other marker-managed file).
  *
  * The CLI owns only the content *between* the markers — anything else in the
  * file is user content and is preserved verbatim.
  */
-const BEGIN_MARKER = '<!-- pleaseai-code-style:start -->'
-const END_MARKER = '<!-- pleaseai-code-style:end -->'
-
-export function buildMarkerBlock(body: string): string {
-  return `${BEGIN_MARKER}\n${body.trim()}\n${END_MARKER}`
+export interface Markers {
+  begin: string
+  end: string
 }
 
-export function upsertMarkerBlock(existing: string | null, body: string): string {
-  const block = buildMarkerBlock(body)
+const MARKDOWN_MARKERS: Markers = {
+  begin: '<!-- pleaseai-code-style:start -->',
+  end: '<!-- pleaseai-code-style:end -->',
+}
+
+export function buildMarkerBlock(body: string, markers: Markers = MARKDOWN_MARKERS): string {
+  return `${markers.begin}\n${body.trim()}\n${markers.end}`
+}
+
+export function upsertMarkerBlock(existing: string | null, body: string, markers: Markers = MARKDOWN_MARKERS): string {
+  const block = buildMarkerBlock(body, markers)
   if (existing == null) {
     return `${block}\n`
   }
 
-  const begin = existing.indexOf(BEGIN_MARKER)
-  const end = existing.indexOf(END_MARKER)
+  const begin = existing.indexOf(markers.begin)
+  const end = existing.indexOf(markers.end)
   if (begin !== -1 && end !== -1 && end > begin) {
     const before = existing.slice(0, begin)
-    const after = existing.slice(end + END_MARKER.length)
+    const after = existing.slice(end + markers.end.length)
     return `${before}${block}${after}`
   }
   // No marker block yet — append with spacing.

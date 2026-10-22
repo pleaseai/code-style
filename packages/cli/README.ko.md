@@ -3,7 +3,7 @@
 [English](./README.md) | 한국어
 
 PleaseAI의 공유 코드 스타일을 어떤 프로젝트에도 적용해 주는 CLI입니다 —
-eslint/prettier/editorconfig/ast-grep 패키지를 설치하고, AI 코딩 어시스턴트가
+eslint/prettier/editorconfig/ast-grep/bun-lint 패키지를 설치하고, AI 코딩 어시스턴트가
 처음부터 린트를 통과하는 코드를 작성할 수 있도록 `AGENTS.md`의 규칙 블록을
 관리합니다. `please-style check`로 파일 이름과 테스트 경로를 검사합니다.
 
@@ -43,6 +43,7 @@ bunx @pleaseai/code-style check   # 파일 이름과 테스트 경로 검사 (AD
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (`node_modules`에서 복사) |
 | agents-md | — | `AGENTS.md` (마커로 관리되는 블록) |
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| bun-lint-config | `@pleaseai/bun-lint-config` | `bunfig.toml`의 `[lint]` (마커로 관리되는 블록) |
 
 ## ast-grep 규칙
 
@@ -78,6 +79,18 @@ Plug'n'Play여도 `sgconfig.yml`을 작성합니다.
 
 ```bash
 yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig', fs.constants.COPYFILE_EXCL)"
+```
+
+**bun-lint-config** 도구는 [`@pleaseai/bun-lint-config`](../bun-lint-config)의
+`[lint]` 테이블을 `bunfig.toml`의 `# >>> @pleaseai/bun-lint-config`와
+`# <<< @pleaseai/bun-lint-config` 주석 사이에 씁니다. `init`은 이 블록만 갱신하고
+파일의 나머지는 그대로 둡니다. 블록 밖에 이미 lint 설정이 있으면 `init`은 파일을
+건드리지 않고 그 설정을 먼저 지우라고 안내합니다. `eslint.config.*` 파일이 있으면
+`bun lint`는 그 설정을 읽고 그 위에 `[lint]` 키를 적용하므로, 둘을 함께 고르면
+`init`이 경고합니다. Plug'n'Play에서는 파일을 건너뛰고 복사 명령을 출력합니다.
+
+```bash
+yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/bun-lint-config/lint.toml'), 'bunfig.toml', fs.constants.COPYFILE_EXCL)"
 ```
 
 `please-style check`는 Plug'n'Play에서도 동작합니다.

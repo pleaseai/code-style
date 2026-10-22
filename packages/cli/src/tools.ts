@@ -38,6 +38,7 @@ export type ToolId
     | 'editorconfig'
     | 'agents-md'
     | 'ast-grep'
+    | 'bun-lint-config'
 
 export const EMPTY_RESULT: ToolApplyResult = {
   created: [],
