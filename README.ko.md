@@ -14,6 +14,7 @@ PleaseAI 프로젝트를 위한 공유 코드 스타일 설정 모노레포 — 
 | [`@pleaseai/prettier-config`](./packages/perttier-config) | 공유 Prettier 설정 (JSON) |
 | [`@pleaseai/editorconfig`](./packages/editorconfig) | 일관된 에디터 설정을 위한 공유 `.editorconfig` |
 | [`@pleaseai/ast-grep-config`](./packages/ast-grep-config) | 에이전트가 탐색하기 쉬운 코드 배치를 위한 ast-grep 규칙 (ADR-0022). 경로 검사기는 `please-style check` |
+| [`@pleaseai/bun-lint-config`](./packages/bun-lint-config) | `@pleaseai/eslint-config`의 규칙 가운데 `bun lint`가 네이티브로 실행하는 규칙을 담은 `bunfig.toml`의 `[lint]` 테이블 |
 
 ## `@pleaseai/eslint-config`
 
@@ -78,6 +79,14 @@ bunx ast-grep scan
 ```
 
 모든 규칙은 경고(warning)로 배포됩니다. 규칙 목록과 위반을 고치는 방법은 [ast-grep Config 가이드](https://code-style.pages.dev/ko/ast-grep-config)를 참고하세요.
+
+## `@pleaseai/bun-lint-config`
+
+```sh
+bunx @pleaseai/code-style init   # bun-lint-config 선택
+```
+
+`init`은 `bun lint`(Bun canary)용으로 패키지의 `lint.toml`을 `bunfig.toml`에 씁니다. 포함 범위와 직접 복사하는 방법은 [bun lint Config 가이드](https://code-style.pages.dev/ko/bun-lint-config)를 참고하세요.
 
 ## 개발
 

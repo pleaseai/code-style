@@ -1,0 +1,48 @@
+---
+title: "bun lint Config"
+description: "The @pleaseai/eslint-config rules that bun lint runs natively, as bunfig.toml [lint] tables."
+sidebar:
+  order: 6
+---
+`@pleaseai/bun-lint-config` provides the rules of `@pleaseai/eslint-config` that [`bun lint`](https://bun.com/docs/lint) runs natively, as the `[lint]` tables of a `bunfig.toml`. The package ships one file, `lint.toml`, generated from the ESLint config.
+
+`bun lint` is only in Bun canary builds for now. bunfig.toml has no `extends`, so the tables are copied into your project's `bunfig.toml`.
+
+## What it covers
+
+The generator keeps:
+
+- the rules Bun has built in: ESLint core, `@typescript-eslint`, `unicorn`, `import`, and `node` (`eslint-plugin-n`), with their options
+- the file scoping of the ESLint config, as `[[lint.overrides]]` for TypeScript files, tests, scripts, `.d.ts`, config files, and so on
+- the global ignores, as `ignorePatterns`
+
+What is left out:
+
+- plugins Bun does not run natively: stylistic (`style/*`), `regexp`, `jsdoc`, `antfu`, `perfectionist`, `unused-imports`, `eslint-comments`, `command`, and `e18e`
+- vitest rules, which antfu registers as `test/*`
+- JSON, YAML, TOML, and Markdown, which `bun lint` does not lint
+- formatting: the package configures `[lint]` only, not `[fmt]`
+
+## Usage
+
+Run the CLI and select **bun-lint-config**:
+
+```bash
+bunx @pleaseai/code-style init
+```
+
+`init` installs the package and writes `lint.toml` into `bunfig.toml` between `# >>> @pleaseai/bun-lint-config` and `# <<< @pleaseai/bun-lint-config` comments. Run `init` again after an upgrade to refresh the block; the rest of `bunfig.toml` is kept. If `bunfig.toml` already sets lint options outside the block, `init` leaves the file alone and asks you to remove them first.
+
+To copy it by hand, append the file to `bunfig.toml` and keep the tables at the end of the file, since a key after them belongs to the last table:
+
+```bash
+bun add -D @pleaseai/bun-lint-config
+cat node_modules/@pleaseai/bun-lint-config/lint.toml >> bunfig.toml
+```
+
+`bun --config=node_modules/@pleaseai/bun-lint-config/lint.toml lint` is not the same: `--config` replaces `bunfig.toml` instead of adding to it.
+
+## Running bun lint
+
+- A `lint` script in `package.json` shadows `bun lint`. Run `bun lint --no-script`, or make the script `bun lint`.
+- Do not use this next to an `eslint.config.*` file. Next to an ESLint config, `bun lint` reads that config and applies the `[lint]` keys on top of it, so pick one of the two.
