@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { detectLanguages, languagesFromAgentsBlock, parseLangFlag } from '../src/languages.js'
+import { detectLanguages, guidePathsFromAgentsBlock, languagesFromAgentsBlock, parseLangFlag } from '../src/languages.js'
 
 let dir: string
 
@@ -71,15 +71,17 @@ describe('parseLangFlag', () => {
 
 describe('languagesFromAgentsBlock', () => {
   const block = (body: string): string => `<!-- pleaseai-code-style:start -->\n${body}\n<!-- pleaseai-code-style:end -->\n`
-  const guide = (id: string): string => `node_modules/@pleaseai/code-style/rules/${id}.md`
+  const guide = (id: string): string => `.agents/code-style/${id}.md`
+  const legacyGuide = (id: string): string => `node_modules/@pleaseai/code-style/rules/${id}.md`
 
   test('is undefined without a block', () => {
     expect(languagesFromAgentsBlock(null)).toBeUndefined()
     expect(languagesFromAgentsBlock(`see ${guide('general')} and ${guide('dart')}`)).toBeUndefined()
   })
 
-  test('is undefined for a legacy block that does not link the general guide', () => {
+  test('is undefined for a block that does not link the general guide', () => {
     expect(languagesFromAgentsBlock(block(`read ${guide('typescript')}`))).toBeUndefined()
+    expect(languagesFromAgentsBlock(block(`read ${legacyGuide('typescript')}`))).toBeUndefined()
   })
 
   test('is undefined for the v0.1.1 block, so update falls back to detection', () => {
@@ -90,5 +92,22 @@ describe('languagesFromAgentsBlock', () => {
   test('lists the languages the block links', () => {
     expect(languagesFromAgentsBlock(block(`read ${guide('general')} and ${guide('dart')}`))).toEqual(['dart'])
     expect(languagesFromAgentsBlock(block(`read ${guide('general')}`))).toEqual([])
+  })
+
+  test('reads the links of a block written before the guides were copied into the project', () => {
+    expect(languagesFromAgentsBlock(block(`read ${legacyGuide('general')} and ${legacyGuide('dart')}`))).toEqual(['dart'])
+  })
+})
+
+describe('guidePathsFromAgentsBlock', () => {
+  const block = (body: string): string => `<!-- pleaseai-code-style:start -->\n${body}\n<!-- pleaseai-code-style:end -->\n`
+
+  test('returns the guide paths exactly as the block links them', () => {
+    expect(guidePathsFromAgentsBlock(block('read `.agents/code-style/general.md` and `.agents/code-style/dart.md`'))).toEqual(['.agents/code-style/general.md', '.agents/code-style/dart.md'])
+    expect(guidePathsFromAgentsBlock(block('read `node_modules/@pleaseai/code-style/rules/general.md` and `node_modules/@pleaseai/code-style/rules/dart.md`'))).toEqual(['node_modules/@pleaseai/code-style/rules/general.md', 'node_modules/@pleaseai/code-style/rules/dart.md'])
+  })
+
+  test('is undefined for a block that does not link the general guide', () => {
+    expect(guidePathsFromAgentsBlock(block('read `node_modules/@pleaseai/code-style/rules.md`'))).toBeUndefined()
   })
 })

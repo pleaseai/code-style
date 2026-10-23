@@ -169,12 +169,12 @@ describe('AGENTS.md rules block', () => {
   test('points only at rule files the package ships', async () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true })
     const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
-    const linked = [...body.matchAll(/node_modules\/@pleaseai\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
-    expect(linked).toEqual(['rules/general.md', 'rules/typescript.md'])
+    const linked = [...body.matchAll(/\.agents\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
+    expect(linked).toEqual(['general.md', 'typescript.md'])
 
     const pkgRoot = join(import.meta.dir, '..')
     const { files } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf-8')) as { files: string[] }
-    for (const path of linked) {
+    for (const path of linked.map(name => `rules/${name}`)) {
       expect(existsSync(join(pkgRoot, path))).toBe(true)
       expect(files.some(entry => path === entry || path.startsWith(`${entry}/`))).toBe(true)
     }
@@ -203,8 +203,8 @@ describe('AGENTS.md rules block', () => {
   test('links the selected languages and drops the TypeScript bullets when typescript is not selected', async () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart', 'rust'] })
     const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
-    const linked = [...body.matchAll(/node_modules\/@pleaseai\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
-    expect(linked).toEqual(['rules/general.md', 'rules/dart.md', 'rules/rust.md'])
+    const linked = [...body.matchAll(/\.agents\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
+    expect(linked).toEqual(['general.md', 'dart.md', 'rust.md'])
     expect(body).not.toContain('@pleaseai/eslint-config')
     expect(body).not.toContain('ESM only')
     expect(body).not.toContain('import.meta.vitest')
@@ -216,17 +216,20 @@ describe('AGENTS.md rules block', () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart'] })
     await applyAgentsMd({ cwd: dir, autoAccept: true })
     const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
-    expect(body).toContain('rules/dart.md')
-    expect(body).not.toContain('rules/typescript.md')
+    expect(body).toContain('.agents/code-style/dart.md')
+    expect(body).not.toContain('.agents/code-style/typescript.md')
   })
 
-  test('ships a guide for every language, covered by the package files', () => {
-    const pkgRoot = join(import.meta.dir, '..')
-    const { files } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf-8')) as { files: string[] }
-    for (const id of LANGUAGES) {
-      const path = `rules/${id}.md`
-      expect(existsSync(join(pkgRoot, path))).toBe(true)
-      expect(files.some(entry => path.startsWith(`${entry}/`))).toBe(true)
+  test('copies every guide the block links into .agents/code-style', async () => {
+    for (const languages of [undefined, ['dart', 'rust'], [...LANGUAGES]] as const) {
+      rmSync(join(dir, '.agents'), { recursive: true, force: true })
+      await applyAgentsMd({ cwd: dir, autoAccept: true, languages: languages == null ? undefined : [...languages] })
+      const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+      const linked = [...body.matchAll(/\.agents\/code-style\/[\w./-]+\.md/g)].map(m => m[0])
+      expect(linked.length).toBeGreaterThan(1)
+      for (const path of linked) {
+        expect(existsSync(join(dir, path))).toBe(true)
+      }
     }
   })
 })

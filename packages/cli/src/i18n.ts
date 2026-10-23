@@ -5,7 +5,6 @@ export type Locale = 'en' | 'ko'
 
 interface Messages {
   appTitle: string
-  noPackageJson: string
   detectedPm: (pm: string) => string
   selectTools: string
   alreadyInstalled: string
@@ -23,6 +22,7 @@ interface Messages {
   doctorHeading: string
   doctorOk: string
   doctorMissing: string
+  guideSymlink: (path: string) => string
   done: string
   cancelled: string
   unknownCommand: (cmd: string) => string
@@ -43,7 +43,6 @@ interface Messages {
 const messages: Record<Locale, Messages> = {
   en: {
     appTitle: 'PleaseAI code-style setup',
-    noPackageJson: 'package.json not found. Run this command from your project root.',
     detectedPm: pm => `Detected package manager: ${pm}`,
     selectTools: 'Select items to install or update',
     alreadyInstalled: '(installed)',
@@ -61,6 +60,7 @@ const messages: Record<Locale, Messages> = {
     doctorHeading: 'Project status',
     doctorOk: 'OK',
     doctorMissing: 'missing',
+    guideSymlink: path => `${path} is a symlink; replace it with a regular file or directory so guides are not written outside the project.`,
     done: 'Done!',
     cancelled: 'Cancelled.',
     unknownCommand: cmd => `Unknown command: ${cmd}`,
@@ -79,7 +79,7 @@ const messages: Record<Locale, Messages> = {
 
 Commands:
   init       Interactive setup (select packages + write configs)
-  update     Re-apply the AGENTS.md rules block only
+  update     Re-apply the AGENTS.md rules block and its guides
   doctor     Check current project status
   check      Check file names, test paths, and shared test helpers (see check --help)
 
@@ -108,7 +108,6 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
   },
   ko: {
     appTitle: 'PleaseAI code-style 설치',
-    noPackageJson: 'package.json이 없습니다. 프로젝트 루트에서 실행해주세요.',
     detectedPm: pm => `감지된 패키지 매니저: ${pm}`,
     selectTools: '설치하거나 업데이트할 항목을 선택하세요',
     alreadyInstalled: '(설치됨)',
@@ -126,6 +125,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     doctorHeading: '프로젝트 상태',
     doctorOk: '정상',
     doctorMissing: '없음',
+    guideSymlink: path => `${path}이(가) 심볼릭 링크입니다. 가이드가 프로젝트 밖에 쓰이지 않도록 일반 파일이나 디렉터리로 바꾸세요.`,
     done: '완료!',
     cancelled: '취소되었습니다.',
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
@@ -144,7 +144,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
 
 명령어:
   init       대화형 설치 (패키지 선택 + 설정 파일 생성)
-  update     AGENTS.md 룰 블록만 다시 적용
+  update     AGENTS.md 룰 블록과 가이드 다시 적용
   doctor     현재 프로젝트 상태 점검
   check      파일 이름, 테스트 경로, 공유 테스트 헬퍼 검사 (check --help 참고)
 

@@ -15,6 +15,9 @@ apply to every language, then the guide for the language you are writing:
 - [`rules/html-css.md`](./rules/html-css.md) — HTML and CSS
 
 `pleaseai-code-style init` and `update` point your `AGENTS.md` block at the
-general guide plus the guide of each selected language. Languages are detected
+general guide plus the guide of each selected language, and copy those guides
+(with `NOTICE.md` and `LICENSE-Apache-2.0.txt`) into `.agents/code-style/` in
+your project, so the links work without `node_modules`. Commit that directory;
+`update` rewrites it. Languages are detected
 from marker files in the project root, or set with `--lang <list>`; `update`
 keeps the languages the existing block links unless `--lang` is given.

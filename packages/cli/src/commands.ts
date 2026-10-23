@@ -10,10 +10,12 @@ import {
   detectPackageManager,
   installCommand,
   isPackageInstalled,
+  readFileOrNull,
   readPackageJson,
 } from './fs-utils.js'
+import { assertGuidesWritable } from './guides.js'
 import { t } from './i18n.js'
-import { detectLanguages, LANGUAGES } from './languages.js'
+import { detectLanguages, guidePathsFromAgentsBlock, LANGUAGES } from './languages.js'
 
 export interface CommandOptions {
   cwd: string
@@ -21,11 +23,8 @@ export interface CommandOptions {
   languages?: Language[]
 }
 
-function assertProjectRoot(cwd: string): void {
-  if (!existsSync(resolve(cwd, 'package.json'))) {
-    log.error(t('noPackageJson'))
-    process.exit(1)
-  }
+function hasPackageJson(cwd: string): boolean {
+  return existsSync(resolve(cwd, 'package.json'))
 }
 
 function mergeResults(results: ToolApplyResult[]): ToolApplyResult {
@@ -53,16 +52,19 @@ function reportResults(result: ToolApplyResult): void {
 // --- init -------------------------------------------------------------------
 
 export async function runInit(opts: CommandOptions): Promise<void> {
-  assertProjectRoot(opts.cwd)
   intro(t('appTitle'))
 
-  const pm = detectPackageManager(opts.cwd)
-  log.info(t('detectedPm')(pm))
+  const withPackages = hasPackageJson(opts.cwd)
+  const pm = withPackages ? detectPackageManager(opts.cwd) : undefined
+  const pkg = withPackages ? readPackageJson(opts.cwd) : undefined
+  if (pm != null) {
+    log.info(t('detectedPm')(pm))
+  }
 
-  const pkg = readPackageJson(opts.cwd)
-
-  const options = TOOLS.map((tool) => {
-    const installed = tool.packages.length > 0
+  const available = withPackages ? TOOLS : TOOLS.filter(tool => tool.packages.length === 0)
+  const options = available.map((tool) => {
+    const installed = pkg != null
+      && tool.packages.length > 0
       && tool.packages.some(p => isPackageInstalled(pkg, p))
     return {
       value: tool.id,
@@ -70,10 +72,10 @@ export async function runInit(opts: CommandOptions): Promise<void> {
     }
   })
 
-  const initialValues = opts.autoAccept ? TOOLS.map(tool => tool.id) : undefined
+  const initialValues = opts.autoAccept ? available.map(tool => tool.id) : undefined
 
   const selectedIdsRaw = opts.autoAccept
-    ? TOOLS.map(tool => tool.id)
+    ? available.map(tool => tool.id)
     : await multiselect({
         message: t('selectTools'),
         options,
@@ -94,7 +96,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   }
 
   const selectedTools: Tool[] = selectedIds
-    .map(id => TOOLS.find(tool => tool.id === id))
+    .map(id => available.find(tool => tool.id === id))
     .filter((tool): tool is Tool => tool != null)
 
   let languages = opts.languages
@@ -117,13 +119,17 @@ export async function runInit(opts: CommandOptions): Promise<void> {
       languages = chosen
     }
   }
+  if (selectedTools.some(tool => tool.id === 'agents-md')) {
+    // Fail before installing anything rather than leave a half-configured project.
+    assertGuidesWritable(opts.cwd, languages ?? [])
+  }
 
   // 1. Install packages (de-duped) for selected tools.
   const packagesToInstall = Array.from(
     new Set(selectedTools.flatMap(tool => tool.packages)),
   )
 
-  if (packagesToInstall.length > 0) {
+  if (pm != null && packagesToInstall.length > 0) {
     const [cmd, args] = installCommand(pm, packagesToInstall)
     const spin = spinner()
     spin.start(t('installing'))
@@ -152,7 +158,6 @@ export async function runInit(opts: CommandOptions): Promise<void> {
 // --- update -----------------------------------------------------------------
 
 export async function runUpdate(opts: CommandOptions): Promise<void> {
-  assertProjectRoot(opts.cwd)
   intro(t('appTitle'))
   const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true, selectedToolIds: [], languages: opts.languages })
   reportResults(result)
@@ -163,21 +168,21 @@ export async function runUpdate(opts: CommandOptions): Promise<void> {
 // --- doctor -----------------------------------------------------------------
 
 export function runDoctor(opts: CommandOptions): void {
-  assertProjectRoot(opts.cwd)
-  const pkg = readPackageJson(opts.cwd)
-  const pm = detectPackageManager(opts.cwd)
-
   log.info(`${t('doctorHeading')}:`)
-  log.info(`  ${t('detectedPm')(pm)}`)
 
-  // Package-based tools only — file-only tools (agents-md) are reported below.
-  for (const tool of TOOLS) {
-    if (tool.packages.length === 0) {
-      continue
+  const packageBased = hasPackageJson(opts.cwd)
+  if (packageBased) {
+    const pkg = readPackageJson(opts.cwd)
+    log.info(`  ${t('detectedPm')(detectPackageManager(opts.cwd))}`)
+
+    for (const tool of TOOLS) {
+      if (tool.packages.length === 0) {
+        continue
+      }
+      const installed = tool.packages.every(p => isPackageInstalled(pkg, p))
+      const suffix = installed ? t('doctorOk') : t('doctorMissing')
+      log.info(`  ${tool.label} — ${suffix}`)
     }
-    const installed = tool.packages.every(p => isPackageInstalled(pkg, p))
-    const suffix = installed ? t('doctorOk') : t('doctorMissing')
-    log.info(`  ${tool.label} — ${suffix}`)
   }
 
   if (opts.languages != null) {
@@ -188,15 +193,17 @@ export function runDoctor(opts: CommandOptions): void {
     log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
   }
 
-  // File presence checks.
-  const files = [
-    'eslint.config.mjs',
-    '.editorconfig',
-    'AGENTS.md',
-    'sgconfig.yml',
-  ]
+  // File presence checks. Without a package.json, init offers only the AGENTS.md block.
+  const files = packageBased
+    ? ['eslint.config.mjs', '.editorconfig', 'AGENTS.md', 'sgconfig.yml']
+    : ['AGENTS.md']
   for (const f of files) {
     const exists = existsSync(resolve(opts.cwd, f))
     log.info(`  ${f} — ${exists ? t('doctorOk') : t('doctorMissing')}`)
+  }
+
+  for (const guide of guidePathsFromAgentsBlock(readFileOrNull(resolve(opts.cwd, 'AGENTS.md'))) ?? []) {
+    const exists = existsSync(resolve(opts.cwd, guide))
+    log.info(`  ${guide} — ${exists ? t('doctorOk') : t('doctorMissing')}`)
   }
 }

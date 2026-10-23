@@ -10,7 +10,7 @@ Inspired by [ultracite](https://github.com/haydenbleasel/ultracite) and NaverPay
 
 ## Quick Start
 
-Run from the root of any project that has a `package.json`:
+Run from the root of your project. A `package.json` is optional: without one (Gradle, pubspec or Cargo-only projects) `init` offers only the AGENTS.md block and its guides, and `update` and `doctor` work as usual:
 
 <CodeGroup titles={["bun", "pnpm", "npm"]}>
 
@@ -48,7 +48,7 @@ pleaseai-code-style init --yes   # non-interactive, accept defaults
 
 ### `update`
 
-Refresh **only** the `AGENTS.md` rules block without touching packages or other config files. Use this after bumping `@pleaseai/code-style` to pull in the latest rules.
+Refresh the `AGENTS.md` rules block and the guides in `.agents/code-style/` without touching packages or other config files. Use this after bumping `@pleaseai/code-style` to pull in the latest rules.
 
 ```bash
 pleaseai-code-style update
@@ -122,9 +122,9 @@ These rules are managed by `@pleaseai/code-style`. Run
 My own content stays here untouched.
 ```
 
-The CLI **only** owns the content between the two marker comments — everything else in `AGENTS.md` is preserved verbatim. Running `update` twice in a row is a no-op; the block never duplicates.
+In `AGENTS.md`, the CLI **only** owns the content between the two marker comments — everything else is preserved verbatim. Running `update` twice in a row is a no-op; the block never duplicates.
 
-The full canonical rules are shipped per language for AI assistants that prefer to read the long version: start with `node_modules/@pleaseai/code-style/rules/general.md` (every language), then the language guide listed in `node_modules/@pleaseai/code-style/rules.md` (for example, `node_modules/@pleaseai/code-style/rules/typescript.md` for TypeScript and JavaScript).
+The full canonical rules are copied into your project per language for AI assistants that prefer to read the long version, so they resolve without `node_modules`: start with `.agents/code-style/general.md` (every language), then the guide of your language (for example, `.agents/code-style/typescript.md` for TypeScript and JavaScript). `NOTICE.md` and `LICENSE-Apache-2.0.txt` in the same directory carry the attribution for the adapted guides. Commit `.agents/code-style/`: `init` and `update` rewrite it, overwrite its files and remove the guide of a language that is no longer selected (other files there are never touched). `doctor` checks that every guide the block links exists.
 
 ## Options
 

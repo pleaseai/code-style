@@ -6,7 +6,9 @@ export const LANGUAGES = ['typescript', 'dart', 'rust', 'java', 'go', 'python', 
 
 export type Language = typeof LANGUAGES[number]
 
-export const RULES_PREFIX = 'node_modules/@pleaseai/code-style/rules'
+export const GUIDES_DIR = '.agents/code-style'
+
+const LEGACY_GUIDES_DIR = 'node_modules/@pleaseai/code-style/rules'
 
 const MARKERS: Array<{ language: Language, files: string[] }> = [
   { language: 'typescript', files: ['package.json', 'tsconfig.json'] },
@@ -53,8 +55,16 @@ export function parseLangFlag(value: string | boolean | undefined): LangFlag {
   return { kind: 'languages', languages: inOrder(items) }
 }
 
+function linkedGuidePath(block: string, id: string): string | undefined {
+  return [`${GUIDES_DIR}/${id}.md`, `${LEGACY_GUIDES_DIR}/${id}.md`].find(path => block.includes(path))
+}
+
+function linksGuide(block: string, id: string): boolean {
+  return linkedGuidePath(block, id) !== undefined
+}
+
 function isLanguageAwareBlock(block: string | undefined): block is string {
-  return block !== undefined && block.includes(`${RULES_PREFIX}/general.md`)
+  return block !== undefined && linksGuide(block, 'general')
 }
 
 export function languagesFromAgentsBlock(content: string | null): Language[] | undefined {
@@ -62,5 +72,13 @@ export function languagesFromAgentsBlock(content: string | null): Language[] | u
   if (!isLanguageAwareBlock(block)) {
     return undefined
   }
-  return LANGUAGES.filter(language => block.includes(`${RULES_PREFIX}/${language}.md`))
+  return LANGUAGES.filter(language => linksGuide(block, language))
+}
+
+export function guidePathsFromAgentsBlock(content: string | null): string[] | undefined {
+  const block = content == null ? undefined : readMarkerBlock(content)
+  if (!isLanguageAwareBlock(block)) {
+    return undefined
+  }
+  return ['general', ...LANGUAGES].flatMap(id => linkedGuidePath(block, id) ?? [])
 }
