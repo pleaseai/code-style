@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
@@ -162,6 +162,26 @@ describe('projects without a package.json', () => {
     }
     finally {
       rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('init stops on a symlinked guide directory before writing anything', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-nopkg-'))
+    const outside = mkdtempSync(join(tmpdir(), 'pleaseai-cli-outside-'))
+    try {
+      writeFileSync(join(dir, 'pubspec.yaml'), '')
+      symlinkSync(outside, join(dir, '.agents'))
+      for (const args of [['init', '--yes'], ['init', '--yes', '--lang', 'dart']]) {
+        const res = run(args, dir)
+        expect(res.status).toBe(1)
+        expect(res.stderr).toContain('.agents is a symlink')
+        expect(existsSync(join(dir, 'AGENTS.md'))).toBe(false)
+      }
+      expect(existsSync(join(outside, 'code-style'))).toBe(false)
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+      rmSync(outside, { recursive: true, force: true })
     }
   })
 

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
@@ -77,6 +77,25 @@ describe('syncGuides', () => {
       symlinkSync(outside, join(dir, '.agents'))
       expect(() => syncGuides(dir, ['dart'])).toThrow('.agents is a symlink')
       expect(existsSync(join(outside, 'code-style'))).toBe(false)
+    }
+    finally {
+      rmSync(outside, { recursive: true, force: true })
+    }
+  })
+
+  test('unlinks a symlinked guide of a deselected language without touching its target', () => {
+    const outside = mkdtempSync(join(tmpdir(), 'pleaseai-cli-outside-'))
+    try {
+      writeFileSync(join(outside, 'target.md'), 'outside')
+      mkdirSync(join(dir, '.agents/code-style'), { recursive: true })
+      symlinkSync(join(outside, 'target.md'), join(dir, '.agents/code-style/rust.md'))
+      symlinkSync(join(outside, 'gone.md'), join(dir, '.agents/code-style/go.md'))
+      const { updated } = syncGuides(dir, ['dart'])
+      expect(updated).toContain('.agents/code-style/rust.md (removed)')
+      expect(updated).toContain('.agents/code-style/go.md (removed)')
+      expect(lstatSync(join(dir, '.agents/code-style/rust.md'), { throwIfNoEntry: false })).toBeUndefined()
+      expect(lstatSync(join(dir, '.agents/code-style/go.md'), { throwIfNoEntry: false })).toBeUndefined()
+      expect(readFileSync(join(outside, 'target.md'), 'utf-8')).toBe('outside')
     }
     finally {
       rmSync(outside, { recursive: true, force: true })

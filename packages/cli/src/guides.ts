@@ -26,13 +26,22 @@ function assertNotSymlink(cwd: string, path: string): void {
   }
 }
 
-export function syncGuides(cwd: string, languages: Language[]): GuidesResult {
-  const result: GuidesResult = { created: [], updated: [] }
-  const names = ['general.md', ...languages.map(language => `${language}.md`), ...ATTRIBUTION_FILES]
-  const removed = LANGUAGES.filter(language => !languages.includes(language)).map(language => `${GUIDES_DIR}/${language}.md`)
-  for (const path of ['.agents', GUIDES_DIR, ...names.map(name => `${GUIDES_DIR}/${name}`), ...removed]) {
+function guideNames(languages: Language[]): string[] {
+  return ['general.md', ...languages.map(language => `${language}.md`), ...ATTRIBUTION_FILES]
+}
+
+// Removing a deselected guide only unlinks a symlink, so only the written paths are checked.
+export function assertGuidesWritable(cwd: string, languages: Language[]): void {
+  for (const path of ['.agents', GUIDES_DIR, ...guideNames(languages).map(name => `${GUIDES_DIR}/${name}`)]) {
     assertNotSymlink(cwd, path)
   }
+}
+
+export function syncGuides(cwd: string, languages: Language[]): GuidesResult {
+  const result: GuidesResult = { created: [], updated: [] }
+  assertGuidesWritable(cwd, languages)
+  const names = guideNames(languages)
+  const removed = LANGUAGES.filter(language => !languages.includes(language)).map(language => `${GUIDES_DIR}/${language}.md`)
   const dir = resolve(cwd, GUIDES_DIR)
   mkdirSync(dir, { recursive: true })
 
@@ -52,7 +61,8 @@ export function syncGuides(cwd: string, languages: Language[]): GuidesResult {
 
   for (const label of removed) {
     const target = resolve(cwd, label)
-    if (existsSync(target)) {
+    // lstat, unlike existsSync, also sees a dangling symlink.
+    if (lstatSync(target, { throwIfNoEntry: false }) !== undefined) {
       rmSync(target)
       result.updated.push(`${label} (removed)`)
     }

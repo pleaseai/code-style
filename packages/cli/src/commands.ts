@@ -13,6 +13,7 @@ import {
   readFileOrNull,
   readPackageJson,
 } from './fs-utils.js'
+import { assertGuidesWritable } from './guides.js'
 import { t } from './i18n.js'
 import { detectLanguages, guidePathsFromAgentsBlock, LANGUAGES } from './languages.js'
 
@@ -117,6 +118,10 @@ export async function runInit(opts: CommandOptions): Promise<void> {
       }
       languages = chosen
     }
+  }
+  if (selectedTools.some(tool => tool.id === 'agents-md')) {
+    // Fail before installing anything rather than leave a half-configured project.
+    assertGuidesWritable(opts.cwd, languages ?? [])
   }
 
   // 1. Install packages (de-duped) for selected tools.
