@@ -154,6 +154,13 @@ describe('AGENTS.md rules block', () => {
     expect(body).toContain('please-style check')
   })
 
+  test('titles the block Passion Factory Code Style', async () => {
+    await applyAgentsMd({ cwd: dir, autoAccept: true })
+    const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+    expect(body).toContain('<!-- pleaseai-code-style:start -->\n# Passion Factory Code Style\n')
+    expect(body).not.toContain('PleaseAI Code Style')
+  })
+
   test('points only at rule files the package ships', async () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true })
     const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')

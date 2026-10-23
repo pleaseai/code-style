@@ -136,7 +136,7 @@ async function applyEditorConfig(ctx: ToolContext): Promise<ToolApplyResult> {
 
 // --- AGENTS.md --------------------------------------------------------------
 
-const AGENTS_BODY = `# PleaseAI Code Style
+const AGENTS_BODY = `# Passion Factory Code Style
 
 These rules are managed by \`@pleaseai/code-style\`. Run \`pleaseai-code-style update\`
 to refresh this block. Do not edit between the marker comments — your changes
