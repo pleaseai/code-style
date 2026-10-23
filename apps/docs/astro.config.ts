@@ -10,13 +10,13 @@ const nimbusConfig = defineNimbusConfig({
   // Canonical origin (no trailing slash). Drives canonical URLs, absolute OG
   // image URLs, robots.txt, sitemap, and the links in /llms.txt.
   site: 'https://code-style.pages.dev',
-  title: 'PleaseAI Code Style',
+  title: 'Passion Factory Code Style',
   description: 'Shared code style configurations for PleaseAI projects',
   // Fallback only: BaseLayout sets <html lang> per page from the URL locale.
   locale: defaultLocale,
   github: 'https://github.com/pleaseai/code-style',
   editPattern: 'https://github.com/pleaseai/code-style/edit/main/apps/docs/{path}',
-  socialImageAlt: 'PleaseAI Code Style documentation preview',
+  socialImageAlt: 'Passion Factory Code Style documentation preview',
   sidebar: {
     // Content lives under `src/content/docs/<locale>/`, so each locale is a
     // top-level section. Scoping the rail to the active section keeps Korean
