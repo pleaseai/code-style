@@ -404,7 +404,7 @@ JavaScript).
 | Flag | Description |
 | --- | --- |
 | `--yes`, `-y` | Accept defaults, overwrite existing files without prompting |
-| `--lang <list>` | Languages for the AGENTS.md rules block, comma-separated (defaults to detected; see below) |
+| `--lang <list>` | Languages for the AGENTS.md rules block, comma-separated (`init`/`doctor`: detected; `update`: the languages already in the block; see below) |
 | `--locale <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print version |

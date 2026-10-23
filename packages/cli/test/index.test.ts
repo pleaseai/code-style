@@ -62,4 +62,18 @@ describe('--lang languages', () => {
       rmSync(dir, { recursive: true, force: true })
     }
   })
+
+  test('doctor --lang reports the given languages instead of the detected ones', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-lang-'))
+    try {
+      writeFileSync(join(dir, 'package.json'), '{}')
+      const res = run(['doctor', '--lang', 'dart'], dir)
+      expect(res.status).toBe(0)
+      expect(res.stdout).toContain('Selected languages (--lang): dart')
+      expect(res.stdout).not.toContain('typescript')
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
 })

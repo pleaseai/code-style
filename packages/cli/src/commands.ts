@@ -180,8 +180,13 @@ export function runDoctor(opts: CommandOptions): void {
     log.info(`  ${tool.label} — ${suffix}`)
   }
 
-  const languages = detectLanguages(opts.cwd)
-  log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
+  if (opts.languages != null) {
+    log.info(`  ${t('doctorSelectedLanguages')(opts.languages.join(', '))}`)
+  }
+  else {
+    const languages = detectLanguages(opts.cwd)
+    log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
+  }
 
   // File presence checks.
   const files = [

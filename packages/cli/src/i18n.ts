@@ -35,6 +35,7 @@ interface Messages {
   selectLanguages: string
   doctorLanguages: (languages: string) => string
   doctorNoLanguages: string
+  doctorSelectedLanguages: (languages: string) => string
   usage: string
   checkUsage: string
 }
@@ -65,13 +66,14 @@ const messages: Record<Locale, Messages> = {
     unknownCommand: cmd => `Unknown command: ${cmd}`,
     unexpectedArguments: args => `Unexpected arguments: ${args}`,
     optionBeforeCheck: option => `${option} is a check option; put it after \`check\` (please-style check ${option})`,
-    deprecatedLangFlag: locale => `--lang ${locale} is deprecated; use --locale ${locale}. A future release will use --lang to select programming languages.`,
-    ignoredLangFlag: locale => `--lang ${locale} is deprecated and ignored because --locale is set; remove it. A future release will use --lang to select programming languages.`,
+    deprecatedLangFlag: locale => `--lang ${locale} is deprecated; use --locale ${locale}. Use --lang to select programming languages.`,
+    ignoredLangFlag: locale => `--lang ${locale} is deprecated and ignored because --locale is set; remove it. Use --lang to select programming languages.`,
     invalidLocaleFlag: value => `Unknown --locale value: "${value}". Use ko or en.`,
     invalidLangFlag: value => `Unknown --lang value: "${value}". Use a comma-separated list of: ${LANGUAGES.join(', ')}. To set the CLI locale, use --locale <ko|en>.`,
     selectLanguages: 'Select the languages for the AGENTS.md rules block',
     doctorLanguages: languages => `Detected languages: ${languages}`,
     doctorNoLanguages: 'Detected languages: none',
+    doctorSelectedLanguages: languages => `Selected languages (--lang): ${languages}`,
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -129,13 +131,14 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
     unexpectedArguments: args => `예상하지 못한 인자: ${args}`,
     optionBeforeCheck: option => `${option}는 check 옵션입니다. \`check\` 뒤에 쓰세요 (please-style check ${option})`,
-    deprecatedLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않습니다. 대신 --locale ${locale} 옵션을 쓰세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
-    ignoredLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않으며, --locale 옵션이 있어 무시합니다. 이 옵션을 지우세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
+    deprecatedLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않습니다. 대신 --locale ${locale} 옵션을 쓰세요. 프로그래밍 언어는 --lang으로 고르세요.`,
+    ignoredLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않으며, --locale 옵션이 있어 무시합니다. 이 옵션을 지우세요. 프로그래밍 언어는 --lang으로 고르세요.`,
     invalidLocaleFlag: value => `알 수 없는 --locale 값: "${value}". ko 또는 en을 쓰세요.`,
     invalidLangFlag: value => `알 수 없는 --lang 값: "${value}". 쉼표로 구분한 목록으로 지정하세요: ${LANGUAGES.join(', ')}. CLI 로케일은 --locale <ko|en>으로 지정하세요.`,
     selectLanguages: 'AGENTS.md 룰 블록에 넣을 언어를 선택하세요',
     doctorLanguages: languages => `감지된 언어: ${languages}`,
     doctorNoLanguages: '감지된 언어: 없음',
+    doctorSelectedLanguages: languages => `선택한 언어(--lang): ${languages}`,
     usage: `사용법:
   pleaseai-code-style <command> [options]
 
