@@ -1,5 +1,6 @@
 import type { Linter } from 'eslint'
 import { stringify } from 'smol-toml'
+import { RULE_MAP } from './rule-map'
 
 export interface BuiltinRule {
   id: string
@@ -193,13 +194,29 @@ function sortedRules(rules: Map<string, RuleEntry>): Record<string, RuleEntry> {
  * keeping only the rules in `builtinRules` and the files `bun lint` reads.
  * Flat-config order is kept: global rules go to `[lint.rules]` (and win over
  * earlier file-scoped settings), file-scoped ones to `[[lint.overrides]]`.
+ * A rule in `ruleMap` whose native target is in `builtinRules` is written as
+ * that target and owns it: eslint-config's own entries for the target are
+ * dropped, and any of them that is not `off` throws.
  */
-export function generateLintToml(configs: Linter.Config[], builtinRules: BuiltinRules): string {
+export function generateLintToml(configs: Linter.Config[], builtinRules: BuiltinRules, ruleMap: Record<string, string> = RULE_MAP): string {
   const onByDefault = new Map<string, boolean>()
   for (const rule of builtinRules.rules) {
     for (const id of [rule.id, ...rule.aliases]) {
       onByDefault.set(id, rule.on_by_default)
     }
+  }
+
+  const targetOf = new Map<string, string>()
+  const sourceOf = new Map<string, string>()
+  for (const [source, target] of Object.entries(ruleMap)) {
+    if (!onByDefault.has(target) || onByDefault.has(source)) {
+      continue
+    }
+    if (sourceOf.has(target)) {
+      throw new Error(`Both "${sourceOf.get(target)}" and "${source}" map to "${target}"`)
+    }
+    targetOf.set(source, target)
+    sourceOf.set(target, source)
   }
 
   const ignorePatterns = new Set<string>()
@@ -215,10 +232,19 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
       continue
     }
     const rules = new Map<string, RuleEntry>()
-    for (const [rule, entry] of Object.entries(item.rules ?? {})) {
-      if (entry !== undefined && onByDefault.has(rule)) {
-        rules.set(rule, toEntry(entry, rule))
+    for (const [name, value] of Object.entries(item.rules ?? {})) {
+      const rule = targetOf.get(name) ?? name
+      if (value === undefined || !onByDefault.has(rule)) {
+        continue
       }
+      const entry = toEntry(value, name)
+      if (sourceOf.has(name)) {
+        if (severityOf(entry) !== 'off') {
+          throw new Error(`"${name}" is on, but "${sourceOf.get(name)}" is mapped onto it and owns it`)
+        }
+        continue
+      }
+      rules.set(rule, entry)
     }
     if (rules.size === 0) {
       continue

@@ -13,7 +13,15 @@ const builtin: BuiltinRules = {
     { id: 'no-console', aliases: ['eslint/no-console'], on_by_default: false },
     { id: 'no-debugger', aliases: ['eslint/no-debugger'], on_by_default: true },
     { id: 'n/no-path-concat', aliases: ['node/no-path-concat'], on_by_default: false },
+    { id: '@typescript-eslint/no-unused-vars', aliases: [], on_by_default: false },
+    { id: 'vitest/no-focused-tests', aliases: [], on_by_default: false },
   ],
+}
+
+const ruleMap = {
+  'unused-imports/no-unused-vars': '@typescript-eslint/no-unused-vars',
+  'test/no-only-tests': 'vitest/no-focused-tests',
+  'style/semi': 'no-semi-native',
 }
 
 interface Lint {
@@ -23,7 +31,7 @@ interface Lint {
 }
 
 function generate(...configs: Linter.Config[]): Lint {
-  return (parse(generateLintToml(configs, builtin)) as unknown as { lint: Lint }).lint
+  return (parse(generateLintToml(configs, builtin, ruleMap)) as unknown as { lint: Lint }).lint
 }
 
 describe('globs', () => {
@@ -147,6 +155,47 @@ describe('rules', () => {
     expect(() => generate({ rules: { eqeqeq: ['error', { pattern: /x/ }] } })).toThrow('"eqeqeq"')
     expect(generate({ rules: { eqeqeq: ['error', { null: 'ignore', extra: undefined }] } }).rules)
       .toEqual({ eqeqeq: ['error', { null: 'ignore' }] })
+  })
+})
+
+describe('rule map', () => {
+  test('writes a mapped source as its target, with options and overrides', () => {
+    const lint = generate(
+      { rules: { 'unused-imports/no-unused-vars': ['error', { args: 'after-used' }] } },
+      { files: ['**/*.d.ts'], rules: { 'unused-imports/no-unused-vars': 'off' } },
+      { files: ['**/*.test.ts'], rules: { 'test/no-only-tests': 'warn' } },
+    )
+    expect(lint.rules).toEqual({ '@typescript-eslint/no-unused-vars': ['error', { args: 'after-used' }] })
+    expect(lint.overrides).toEqual([
+      { files: ['**/*.d.ts'], rules: { '@typescript-eslint/no-unused-vars': 'off' } },
+      { files: ['**/*.test.ts'], rules: { 'vitest/no-focused-tests': 'warn' } },
+    ])
+  })
+
+  test('drops the own `off` entries of the target and throws when one is on', () => {
+    const lint = generate(
+      { rules: { 'unused-imports/no-unused-vars': 'error' } },
+      { files: ['**/*.ts'], rules: { '@typescript-eslint/no-unused-vars': 'off' } },
+      { rules: { 'vitest/no-focused-tests': ['off', { x: 1 }] } },
+    )
+    expect(lint.rules).toEqual({ '@typescript-eslint/no-unused-vars': 'error' })
+    expect(lint.overrides).toEqual([])
+
+    expect(() => generate({ files: ['**/*.ts'], rules: { '@typescript-eslint/no-unused-vars': 'warn' } }))
+      .toThrow('"@typescript-eslint/no-unused-vars" is on, but "unused-imports/no-unused-vars"')
+    expect(() => generate({ rules: { 'vitest/no-focused-tests': ['error'] } })).toThrow('"test/no-only-tests"')
+  })
+
+  test('ignores a mapping whose target is not native or whose source is', () => {
+    const lint = generate({ rules: { 'style/semi': 'error', 'eqeqeq': 'error' } })
+    expect(lint.rules).toEqual({ eqeqeq: 'error' })
+
+    const configs = [{ rules: { 'eqeqeq': 'error', 'no-console': 'warn' } }] as Linter.Config[]
+    expect(generateLintToml(configs, builtin, { eqeqeq: 'no-console' })).toBe(generateLintToml(configs, builtin, {}))
+  })
+
+  test('throws when two sources map to the same target', () => {
+    expect(() => generateLintToml([], builtin, { 'a/x': 'eqeqeq', 'b/x': 'eqeqeq' })).toThrow('"a/x" and "b/x"')
   })
 })
 

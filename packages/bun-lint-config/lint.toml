@@ -8,6 +8,7 @@
 ignorePatterns = [ "**/node_modules", "**/dist", "**/package-lock.json", "**/yarn.lock", "**/pnpm-lock.yaml", "**/bun.lockb", "**/output", "**/coverage", "**/temp", "**/.temp", "**/tmp", "**/.tmp", "**/.history", "**/.vitepress/cache", "**/.nuxt", "**/.next", "**/.svelte-kit", "**/.vercel", "**/.changeset", "**/.idea", "**/.cache", "**/.output", "**/.vite-inspect", "**/.yarn", "**/CHANGELOG*.md", "**/LICENSE*", "**/*.min.*", "**/__snapshots__", "**/vite.config.*.timestamp-*", "**/auto-import.d.ts", "**/auto-imports.d.ts", "**/components.d.ts", "**/.context", "**/.claude", "**/.agents", "**/.*/skills" ]
 
 [lint.rules]
+"@typescript-eslint/no-unused-vars" = [ "error", { args = "after-used", argsIgnorePattern = "^_", ignoreRestSiblings = true, vars = "all", varsIgnorePattern = "^_" } ]
 accessor-pairs = [ "error", { enforceForClassMembers = true, setWithoutGet = true } ]
 array-callback-return = "error"
 block-scoped-var = "error"
@@ -22,6 +23,7 @@ eqeqeq = [ "error", "smart" ]
 "import/no-duplicates" = "error"
 "import/no-mutable-exports" = "error"
 "import/no-named-default" = "error"
+"n/no-top-level-await" = "error"
 new-cap = [ "error", { capIsNew = false, newIsCap = true, properties = true } ]
 no-alert = "error"
 no-array-constructor = "error"
@@ -109,13 +111,28 @@ one-var = [ "error", { initialized = "never" } ]
 prefer-arrow-callback = [ "error", { allowNamedFunctions = false, allowUnboundThis = true } ]
 prefer-const = [ "error", { destructuring = "all", ignoreReadBeforeAssign = true } ]
 prefer-exponentiation-operator = "error"
+prefer-object-has-own = "error"
 prefer-promise-reject-errors = "error"
 prefer-regex-literals = [ "error", { disallowRedundantWrapping = true } ]
 prefer-rest-params = "error"
 prefer-spread = "error"
 prefer-template = "error"
+"react/jsx-closing-bracket-location" = "error"
+"react/jsx-closing-tag-location" = "error"
+"react/jsx-curly-brace-presence" = [ "error", { propElementValues = "always" } ]
+"react/jsx-curly-newline" = "error"
+"react/jsx-curly-spacing" = [ "error", "never" ]
+"react/jsx-equals-spacing" = "error"
+"react/jsx-first-prop-new-line" = "error"
+"react/jsx-indent-props" = [ "error", 2 ]
+"react/jsx-max-props-per-line" = [ "error", { maximum = 1, when = "multiline" } ]
+"react/jsx-one-expression-per-line" = [ "error", { allow = "single-child" } ]
+"react/jsx-tag-spacing" = [ "error", { afterOpening = "never", beforeClosing = "never", beforeSelfClosing = "always", closingSlash = "never" } ]
 symbol-description = "error"
 unicode-bom = [ "error", "never" ]
+"unicorn/prefer-array-some" = "error"
+"unicorn/prefer-date-now" = "error"
+"unicorn/prefer-regexp-test" = "error"
 use-isnan = [ "error", { enforceForIndexOf = true, enforceForSwitchCase = true } ]
 valid-typeof = [ "error", { requireStringLiterals = true } ]
 vars-on-top = "error"
@@ -176,7 +193,6 @@ files = [ "**/*.{,[cm]}ts", "**/*.{,[cm]}tsx" ]
 "@typescript-eslint/no-unsafe-declaration-merging" = "error"
 "@typescript-eslint/no-unsafe-function-type" = "error"
 "@typescript-eslint/no-unused-expressions" = [ "error", { allowShortCircuit = true, allowTaggedTemplates = true, allowTernary = true } ]
-"@typescript-eslint/no-unused-vars" = "off"
 "@typescript-eslint/no-use-before-define" = [ "error", { classes = false, functions = false, variables = true } ]
 "@typescript-eslint/no-wrapper-object-types" = "error"
 "@typescript-eslint/prefer-as-const" = "error"
@@ -215,24 +231,33 @@ prefer-spread = "error"
 files = [ "**/__tests__/**/*.{,[cm]}[jt]s{,x}", "**/*.spec.{,[cm]}[jt]s{,x}", "**/*.test.{,[cm]}[jt]s{,x}", "**/*.bench.{,[cm]}[jt]s{,x}", "**/*.benchmark.{,[cm]}[jt]s{,x}" ]
 
 [lint.overrides.rules]
+"n/no-top-level-await" = "off"
 no-unused-expressions = "off"
+"vitest/consistent-test-it" = [ "error", { fn = "it", withinDescribe = "it" } ]
+"vitest/no-focused-tests" = "error"
+"vitest/no-identical-title" = "error"
+"vitest/no-import-node-test" = "error"
+"vitest/prefer-hooks-in-order" = "error"
 
 [[lint.overrides]]
 files = [ "**/scripts/**/*.{,[cm]}[jt]s{,x}" ]
 
 [lint.overrides.rules]
+"n/no-top-level-await" = "off"
 no-console = "off"
 
 [[lint.overrides]]
 files = [ "**/cli/**/*.{,[cm]}[jt]s{,x}", "**/cli.{,[cm]}[jt]s{,x}" ]
 
 [lint.overrides.rules]
+"n/no-top-level-await" = "off"
 no-console = "off"
 
 [[lint.overrides]]
 files = [ "**/*.d.{,[cm]}ts" ]
 
 [lint.overrides.rules]
+"@typescript-eslint/no-unused-vars" = "off"
 no-restricted-syntax = "off"
 
 [[lint.overrides]]
@@ -245,4 +270,5 @@ files = [ "**/*.js", "**/*.cjs" ]
 files = [ "**/*.config.{,[cm]}[jt]s{,x}", "**/*.config.*.{,[cm]}[jt]s{,x}" ]
 
 [lint.overrides.rules]
+"n/no-top-level-await" = "off"
 no-console = "off"

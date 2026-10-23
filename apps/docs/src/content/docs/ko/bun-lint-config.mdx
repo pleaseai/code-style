@@ -15,15 +15,34 @@ sidebar:
 - Bun에 내장된 규칙: ESLint 코어, `@typescript-eslint`, `unicorn`, `import`, `node`(`eslint-plugin-n`)와 그 옵션
 - ESLint 설정의 파일 범위: TypeScript 파일, 테스트, 스크립트, `.d.ts`, 설정 파일 등에 대한 `[[lint.overrides]]`
 - 전역 ignore: `ignorePatterns`
+- 이름은 다르지만 네이티브 대응 규칙이 있는 규칙: 대응 규칙으로 매핑(아래 참고)
 
 다음은 포함하지 않습니다.
 
-- Bun이 네이티브로 실행하지 않는 플러그인: stylistic(`style/*`), `regexp`, `jsdoc`, `antfu`, `perfectionist`, `unused-imports`, `eslint-comments`, `command`, `e18e`
-- antfu가 `test/*`로 등록하는 vitest 규칙
+- Bun이 네이티브로 실행하지 않는 플러그인(아래에서 매핑한 규칙 제외): stylistic(`style/*`), `regexp`, `jsdoc`, `antfu`, `perfectionist`, `unused-imports`, `eslint-comments`, `command`, `e18e`
 - `bun lint`가 검사하지 않는 JSON, YAML, TOML, Markdown
 - 포매팅: 이 패키지는 `[fmt]`가 아니라 `[lint]`만 설정합니다.
 
 `@pleaseai/eslint-config`가 켜지 않는 규칙이라도 Bun이 기본으로 켜는 규칙은 그대로 켜져 있습니다. ESLint 코어 규칙 14개(`no-constant-condition`, `for-direction`, `no-useless-escape`, `no-unsafe-optional-chaining` 등), `bun:test`를 import하는 파일의 `bun:test` 규칙, `react`가 의존성에 있을 때의 React 규칙이 그렇습니다. 그래서 `bun lint`는 ESLint보다 조금 더 많이 보고할 수 있습니다.
+
+## 매핑한 규칙
+
+`src/rule-map.ts`는 `bun lint`에 같은 이름의 네이티브 규칙이 없지만 같은 일을 하는 네이티브 규칙이 있는 경우, 그 규칙으로 매핑합니다. 생성기는 심각도, 옵션, 파일 범위를 그대로 두고 네이티브 이름으로 기록합니다.
+
+- antfu의 `test/*`(vitest) 규칙을 `vitest/*`로: `consistent-test-it`, `no-identical-title`, `no-import-node-test`, `prefer-hooks-in-order`, `prefer-lowercase-title`, 그리고 `no-only-tests`는 `vitest/no-focused-tests`로
+- `unused-imports/no-unused-vars`를 `@typescript-eslint/no-unused-vars`로
+- `style/jsx-*` 규칙을 `react/jsx-*`로: `closing-bracket-location`, `closing-tag-location`, `curly-brace-presence`, `curly-newline`, `curly-spacing`, `equals-spacing`, `first-prop-new-line`, `indent-props`, `max-props-per-line`, `one-expression-per-line`, `tag-spacing`
+- `antfu/no-top-level-await`를 `n/no-top-level-await`로
+- `e18e/prefer-array-some`, `prefer-date-now`, `prefer-regex-test`, `prefer-object-has-own`을 각각 `unicorn/prefer-array-some`, `unicorn/prefer-date-now`, `unicorn/prefer-regexp-test`, `prefer-object-has-own`으로
+
+매핑한 규칙이 대상 규칙을 소유합니다. 대상 규칙에 대한 ESLint 설정의 자체 항목은 버리고(예: TypeScript 파일에서 `@typescript-eslint/no-unused-vars`를 끄는 항목), 그 항목 중 `off`가 아닌 것이 있으면 생성기가 실패합니다. `jsx-wrap-multilines`는 Bun이 `propertyValue` 옵션을 거부하므로 매핑하지 않습니다.
+
+매핑한 규칙은 ESLint 규칙과 비슷하지만 똑같지는 않습니다.
+
+- vitest 규칙은 `vitest`에서 import하는 파일에서 동작합니다. `bun:test`를 import하는 파일에서는 Bun이 자체 `bun:test` 규칙을 실행합니다.
+- 보고 위치(열)가 다를 수 있습니다. `no-import-node-test`는 모듈 이름, `no-identical-title`은 제목, `prefer-array-some`은 `filter`, `prefer-regexp-test`는 정규식을 가리킵니다.
+- Bun은 `no-unused-vars`와 `@typescript-eslint/no-unused-vars`를 하나의 규칙으로 다루고 TypeScript override가 `no-unused-vars`를 끄므로, TypeScript 파일에서는 사용하지 않는 변수를 보고하지 않습니다. JavaScript 파일에서는 코어 규칙의 옵션(`args: none`)이 적용됩니다.
+- `react/jsx-*` 규칙은 설정이 명시적으로 켜므로 `react`가 의존성에 없어도 실행됩니다.
 
 ## 사용법
 

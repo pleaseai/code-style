@@ -22,14 +22,15 @@ generator keeps:
   `import`, and `node` (`eslint-plugin-n`), with their options;
 - the file scoping of the ESLint config, as `[[lint.overrides]]` for
   TypeScript files, tests, scripts, `.d.ts`, config files, and so on;
-- the global ignores, as `ignorePatterns`.
+- the global ignores, as `ignorePatterns`;
+- rules that have a native equivalent under another name, mapped onto it (see
+  below).
 
 What is left out:
 
-- plugins Bun does not run natively: stylistic (`style/*`), `regexp`, `jsdoc`,
-  `antfu`, `perfectionist`, `unused-imports`, `eslint-comments`, `command`,
-  and `e18e`;
-- vitest rules, which antfu registers as `test/*`;
+- plugins Bun does not run natively, apart from the rules mapped below:
+  stylistic (`style/*`), `regexp`, `jsdoc`, `antfu`, `perfectionist`,
+  `unused-imports`, `eslint-comments`, `command`, and `e18e`;
 - JSON, YAML, TOML, and Markdown, which `bun lint` does not lint;
 - formatting. This package configures `[lint]` only, not `[fmt]`.
 
@@ -41,6 +42,46 @@ enable them: 14 ESLint core rules (such as `no-constant-condition`,
 `for-direction`, `no-useless-escape`, and `no-unsafe-optional-chaining`), the
 `bun:test` rules in files that import `bun:test`, and the React rules when
 `react` is a dependency. So `bun lint` can report a little more than ESLint.
+
+### Mapped rules
+
+`src/rule-map.ts` maps a rule that `bun lint` has no native version of onto
+the native rule that does the same, and the generator writes it under the
+native name, with the same severity, options, and file scoping:
+
+- antfu's `test/*` (vitest) rules onto `vitest/*`: `consistent-test-it`,
+  `no-identical-title`, `no-import-node-test`, `prefer-hooks-in-order`,
+  `prefer-lowercase-title`, and `no-only-tests` as `vitest/no-focused-tests`
+- `unused-imports/no-unused-vars` onto `@typescript-eslint/no-unused-vars`
+- the `style/jsx-*` rules onto `react/jsx-*`: `closing-bracket-location`,
+  `closing-tag-location`, `curly-brace-presence`, `curly-newline`,
+  `curly-spacing`, `equals-spacing`, `first-prop-new-line`, `indent-props`,
+  `max-props-per-line`, `one-expression-per-line`, and `tag-spacing`
+- `antfu/no-top-level-await` onto `n/no-top-level-await`
+- `e18e/prefer-array-some`, `prefer-date-now`, `prefer-regex-test`, and
+  `prefer-object-has-own` onto `unicorn/prefer-array-some`,
+  `unicorn/prefer-date-now`, `unicorn/prefer-regexp-test`, and
+  `prefer-object-has-own`
+
+A mapped rule owns its target: the ESLint config's own entries for the target
+are dropped (it turns `@typescript-eslint/no-unused-vars` off in TypeScript
+files, for example), and the generator fails if one of them is not `off`.
+`jsx-wrap-multilines` is not mapped, because Bun rejects its `propertyValue`
+option.
+
+The mapped rules are close to the ESLint ones, not identical:
+
+- the vitest rules need an import from `vitest`; in a file that imports
+  `bun:test`, Bun runs its own `bun:test` rules instead
+- findings can start at a different column: `no-import-node-test` points at
+  the module name, `no-identical-title` at the title, `prefer-array-some` at
+  `filter`, and `prefer-regexp-test` at the regular expression
+- Bun treats `no-unused-vars` and `@typescript-eslint/no-unused-vars` as one
+  rule, and the TypeScript override turns `no-unused-vars` off, so unused
+  variables are not reported in TypeScript files; in JavaScript files the core
+  rule's options (`args: none`) apply
+- the `react/jsx-*` rules run without `react` as a dependency, because the
+  config turns them on explicitly
 
 ## Usage
 
