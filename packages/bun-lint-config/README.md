@@ -76,10 +76,10 @@ The mapped rules are close to the ESLint ones, not identical:
 - findings can start at a different column: `no-import-node-test` points at
   the module name, `no-identical-title` at the title, `prefer-array-some` at
   `filter`, and `prefer-regexp-test` at the regular expression
-- Bun treats `no-unused-vars` and `@typescript-eslint/no-unused-vars` as one
-  rule, and the TypeScript override turns `no-unused-vars` off, so unused
-  variables are not reported in TypeScript files; in JavaScript files the core
-  rule's options (`args: none`) apply
+- Bun runs `no-unused-vars` and `@typescript-eslint/no-unused-vars` as one
+  rule, so the mapped `unused-imports/no-unused-vars` owns `no-unused-vars` too
+  and its options apply in every file; the core rule, which ESLint also runs
+  in JavaScript files, is not written
 - the `react/jsx-*` rules run without `react` as a dependency, because the
   config turns them on explicitly
 

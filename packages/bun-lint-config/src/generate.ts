@@ -208,6 +208,7 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
 
   const targetOf = new Map<string, string>()
   const sourceOf = new Map<string, string>()
+  const sharedOwned = new Set<string>()
   for (const [source, target] of Object.entries(ruleMap)) {
     if (!onByDefault.has(target) || onByDefault.has(source)) {
       continue
@@ -217,6 +218,12 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
     }
     targetOf.set(source, target)
     sourceOf.set(target, source)
+    // `bun lint` runs a core rule and its `@typescript-eslint` version as one
+    // rule, so the core rule's entries would shadow the mapped one.
+    const core = target.replace(/^@typescript-eslint\//, '')
+    if (core !== target && onByDefault.has(core)) {
+      sharedOwned.add(core)
+    }
   }
 
   const ignorePatterns = new Set<string>()
@@ -234,7 +241,7 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
     const rules = new Map<string, RuleEntry>()
     for (const [name, value] of Object.entries(item.rules ?? {})) {
       const rule = targetOf.get(name) ?? name
-      if (value === undefined || !onByDefault.has(rule)) {
+      if (value === undefined || !onByDefault.has(rule) || sharedOwned.has(name)) {
         continue
       }
       const entry = toEntry(value, name)

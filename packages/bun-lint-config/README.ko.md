@@ -76,9 +76,9 @@ Bun이 `propertyValue` 옵션을 거부하므로 매핑하지 않습니다.
   `no-identical-title`은 제목, `prefer-array-some`은 `filter`,
   `prefer-regexp-test`는 정규식을 가리킵니다.
 - Bun은 `no-unused-vars`와 `@typescript-eslint/no-unused-vars`를 하나의 규칙으로
-  다루고 TypeScript override가 `no-unused-vars`를 끄므로, TypeScript 파일에서는
-  사용하지 않는 변수를 보고하지 않습니다. JavaScript 파일에서는 코어 규칙의
-  옵션(`args: none`)이 적용됩니다.
+  실행하므로, 매핑한 `unused-imports/no-unused-vars`가 `no-unused-vars`도 소유하고
+  모든 파일에서 그 옵션이 적용됩니다. ESLint가 JavaScript 파일에서 함께 실행하는
+  코어 규칙은 쓰지 않습니다.
 - `react/jsx-*` 규칙은 설정이 명시적으로 켜므로 `react`가 의존성에 없어도
   실행됩니다.
 

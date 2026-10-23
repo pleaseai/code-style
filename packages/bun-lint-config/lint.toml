@@ -95,7 +95,6 @@ no-unreachable-loop = "error"
 no-unsafe-finally = "error"
 no-unsafe-negation = "error"
 no-unused-expressions = [ "error", { allowShortCircuit = true, allowTaggedTemplates = true, allowTernary = true } ]
-no-unused-vars = [ "error", { args = "none", caughtErrors = "none", ignoreRestSiblings = true, vars = "all" } ]
 no-use-before-define = [ "error", { classes = false, functions = false, variables = true } ]
 no-useless-backreference = "off"
 no-useless-call = "error"
@@ -218,7 +217,6 @@ no-undef = "off"
 no-unreachable = "off"
 no-unsafe-negation = "off"
 no-unused-expressions = "off"
-no-unused-vars = "off"
 no-use-before-define = "off"
 no-useless-constructor = "off"
 no-var = "error"

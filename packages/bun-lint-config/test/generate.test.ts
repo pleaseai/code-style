@@ -186,6 +186,17 @@ describe('rule map', () => {
     expect(() => generate({ rules: { 'vitest/no-focused-tests': ['error'] } })).toThrow('"test/no-only-tests"')
   })
 
+  test('a mapped `@typescript-eslint` target also owns its core rule, which Bun runs as the same rule', () => {
+    const lint = generateLintToml([
+      { rules: { 'no-unused-vars': ['error', { args: 'none' }], 'unused-imports/no-unused-vars': 'error' } },
+      { files: ['**/*.ts'], rules: { 'no-unused-vars': 'off' } },
+    ], { revision: 'test', rules: [...builtin.rules, { id: 'no-unused-vars', aliases: [], on_by_default: true }] }, ruleMap)
+    expect((parse(lint) as unknown as { lint: Lint }).lint).toEqual({
+      rules: { '@typescript-eslint/no-unused-vars': 'error' },
+      overrides: [],
+    })
+  })
+
   test('ignores a mapping whose target is not native or whose source is', () => {
     const lint = generate({ rules: { 'style/semi': 'error', 'eqeqeq': 'error' } })
     expect(lint.rules).toEqual({ eqeqeq: 'error' })
