@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { log } from '@clack/prompts'
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test'
 import { applyAgentsMd, applyAstGrep, findTool } from '../src/appliers.js'
+import { LANGUAGES } from '../src/languages.js'
 
 let dir: string
 
@@ -145,6 +146,10 @@ describe('editorconfig tool', () => {
 // ---------------------------------------------------------------------------
 
 describe('AGENTS.md rules block', () => {
+  beforeEach(() => {
+    writeFileSync(join(dir, 'package.json'), '{}')
+  })
+
   test('puts tests under the test root instead of next to the source', async () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true })
     const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
@@ -193,5 +198,34 @@ describe('AGENTS.md rules block', () => {
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ devDependencies: { '@ast-grep/cli': '^0.45.3', '@pleaseai/ast-grep-config': '^0.0.1' } }))
     await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: [] })
     expect(readFileSync(join(dir, 'AGENTS.md'), 'utf-8')).toContain('please-style check')
+  })
+
+  test('links the selected languages and drops the TypeScript bullets when typescript is not selected', async () => {
+    await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart', 'rust'] })
+    const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+    const linked = [...body.matchAll(/node_modules\/@pleaseai\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
+    expect(linked).toEqual(['rules/general.md', 'rules/dart.md', 'rules/rust.md'])
+    expect(body).not.toContain('@pleaseai/eslint-config')
+    expect(body).not.toContain('ESM only')
+    expect(body).toContain('- File size target')
+    expect(body).toContain('- Conventional Commits')
+  })
+
+  test('keeps the languages of the existing block when none are given, even if detection differs', async () => {
+    await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart'] })
+    await applyAgentsMd({ cwd: dir, autoAccept: true })
+    const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+    expect(body).toContain('rules/dart.md')
+    expect(body).not.toContain('rules/typescript.md')
+  })
+
+  test('ships a guide for every language, covered by the package files', () => {
+    const pkgRoot = join(import.meta.dir, '..')
+    const { files } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf-8')) as { files: string[] }
+    for (const id of LANGUAGES) {
+      const path = `rules/${id}.md`
+      expect(existsSync(join(pkgRoot, path))).toBe(true)
+      expect(files.some(entry => path.startsWith(`${entry}/`))).toBe(true)
+    }
   })
 })

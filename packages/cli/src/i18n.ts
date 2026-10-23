@@ -1,4 +1,5 @@
 import process from 'node:process'
+import { LANGUAGES } from './languages.js'
 
 export type Locale = 'en' | 'ko'
 
@@ -29,7 +30,11 @@ interface Messages {
   optionBeforeCheck: (option: string) => string
   deprecatedLangFlag: (locale: Locale) => string
   ignoredLangFlag: (locale: Locale) => string
-  invalidLocaleFlag: (flag: LocaleFlag, value: string) => string
+  invalidLocaleFlag: (value: string) => string
+  invalidLangFlag: (value: string) => string
+  selectLanguages: string
+  doctorLanguages: (languages: string) => string
+  doctorNoLanguages: string
   usage: string
   checkUsage: string
 }
@@ -62,9 +67,11 @@ const messages: Record<Locale, Messages> = {
     optionBeforeCheck: option => `${option} is a check option; put it after \`check\` (please-style check ${option})`,
     deprecatedLangFlag: locale => `--lang ${locale} is deprecated; use --locale ${locale}. A future release will use --lang to select programming languages.`,
     ignoredLangFlag: locale => `--lang ${locale} is deprecated and ignored because --locale is set; remove it. A future release will use --lang to select programming languages.`,
-    invalidLocaleFlag: (flag, value) => flag === '--locale'
-      ? `Unknown --locale value: "${value}". Use ko or en.`
-      : `Unknown --lang value: "${value}". To set the CLI locale, use --locale <ko|en>.`,
+    invalidLocaleFlag: value => `Unknown --locale value: "${value}". Use ko or en.`,
+    invalidLangFlag: value => `Unknown --lang value: "${value}". Use a comma-separated list of: ${LANGUAGES.join(', ')}. To set the CLI locale, use --locale <ko|en>.`,
+    selectLanguages: 'Select the languages for the AGENTS.md rules block',
+    doctorLanguages: languages => `Detected languages: ${languages}`,
+    doctorNoLanguages: 'Detected languages: none',
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -76,6 +83,7 @@ Commands:
 
 Options:
   --yes, -y        Accept defaults, overwrite existing files
+  --lang <list>    Languages for the rules block, comma-separated (default: detected)
   --locale <ko|en> Force CLI locale
   --help, -h       Show this message
   --version, -v    Print version`,
@@ -123,9 +131,11 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     optionBeforeCheck: option => `${option}는 check 옵션입니다. \`check\` 뒤에 쓰세요 (please-style check ${option})`,
     deprecatedLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않습니다. 대신 --locale ${locale} 옵션을 쓰세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
     ignoredLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않으며, --locale 옵션이 있어 무시합니다. 이 옵션을 지우세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
-    invalidLocaleFlag: (flag, value) => flag === '--locale'
-      ? `알 수 없는 --locale 값: "${value}". ko 또는 en을 쓰세요.`
-      : `알 수 없는 --lang 값: "${value}". CLI 로케일은 --locale <ko|en>으로 지정하세요.`,
+    invalidLocaleFlag: value => `알 수 없는 --locale 값: "${value}". ko 또는 en을 쓰세요.`,
+    invalidLangFlag: value => `알 수 없는 --lang 값: "${value}". 쉼표로 구분한 목록으로 지정하세요: ${LANGUAGES.join(', ')}. CLI 로케일은 --locale <ko|en>으로 지정하세요.`,
+    selectLanguages: 'AGENTS.md 룰 블록에 넣을 언어를 선택하세요',
+    doctorLanguages: languages => `감지된 언어: ${languages}`,
+    doctorNoLanguages: '감지된 언어: 없음',
     usage: `사용법:
   pleaseai-code-style <command> [options]
 
@@ -137,6 +147,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
 
 옵션:
   --yes, -y        기본값 수락, 기존 파일 덮어쓰기
+  --lang <list>    룰 블록에 넣을 언어, 쉼표로 구분 (기본: 자동 감지)
   --locale <ko|en> CLI 로케일 강제 지정
   --help, -h       이 메시지 표시
   --version, -v    버전 출력`,
@@ -167,8 +178,6 @@ export function detectLocale(override?: string): Locale {
   return env.toLowerCase().startsWith('ko') ? 'ko' : 'en'
 }
 
-export type LocaleFlag = '--locale' | '--lang'
-
 type FlagValue = string | boolean | undefined
 
 export interface LangWarning {
@@ -178,7 +187,7 @@ export interface LangWarning {
 
 export type LocaleFlags
   = | { kind: 'ok', locale: Locale, langWarning?: LangWarning }
-    | { kind: 'invalid', locale: Locale, flag: LocaleFlag, value: string }
+    | { kind: 'invalid', locale: Locale, value: string }
 
 function asLocale(value: FlagValue): Locale | undefined {
   return value === 'ko' || value === 'en' ? value : undefined
@@ -193,10 +202,7 @@ export function resolveLocaleFlags(flags: { locale?: FlagValue, lang?: FlagValue
   const fromLang = asLocale(flags.lang)
   const locale = fromLocale ?? fromLang ?? detectLocale()
   if (flags.locale !== undefined && fromLocale === undefined) {
-    return { kind: 'invalid', locale, flag: '--locale', value: flagText(flags.locale) }
-  }
-  if (flags.lang !== undefined && fromLang === undefined) {
-    return { kind: 'invalid', locale, flag: '--lang', value: flagText(flags.lang) }
+    return { kind: 'invalid', locale, value: flagText(flags.locale) }
   }
   if (fromLang === undefined) {
     return { kind: 'ok', locale }

@@ -1,3 +1,4 @@
+import type { Language } from './languages.js'
 import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -12,10 +13,12 @@ import {
   readPackageJson,
 } from './fs-utils.js'
 import { t } from './i18n.js'
+import { detectLanguages, LANGUAGES } from './languages.js'
 
 export interface CommandOptions {
   cwd: string
   autoAccept: boolean
+  languages?: Language[]
 }
 
 function assertProjectRoot(cwd: string): void {
@@ -94,6 +97,27 @@ export async function runInit(opts: CommandOptions): Promise<void> {
     .map(id => TOOLS.find(tool => tool.id === id))
     .filter((tool): tool is Tool => tool != null)
 
+  let languages = opts.languages
+  if (languages === undefined && selectedTools.some(tool => tool.id === 'agents-md')) {
+    const detected = detectLanguages(opts.cwd)
+    if (opts.autoAccept) {
+      languages = detected
+    }
+    else {
+      const chosen = await multiselect({
+        message: t('selectLanguages'),
+        options: LANGUAGES.map(value => ({ value, label: value })),
+        initialValues: detected,
+        required: false,
+      })
+      if (isCancel(chosen)) {
+        cancel(t('cancelled'))
+        process.exit(0)
+      }
+      languages = chosen
+    }
+  }
+
   // 1. Install packages (de-duped) for selected tools.
   const packagesToInstall = Array.from(
     new Set(selectedTools.flatMap(tool => tool.packages)),
@@ -115,7 +139,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   }
 
   // 2. Apply each tool's side-effects.
-  const ctx: ToolContext = { cwd: opts.cwd, autoAccept: opts.autoAccept, selectedToolIds: selectedTools.map(tool => tool.id) }
+  const ctx: ToolContext = { cwd: opts.cwd, autoAccept: opts.autoAccept, selectedToolIds: selectedTools.map(tool => tool.id), languages }
   const results: ToolApplyResult[] = []
   for (const tool of selectedTools) {
     results.push(await tool.apply(ctx))
@@ -130,7 +154,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
 export async function runUpdate(opts: CommandOptions): Promise<void> {
   assertProjectRoot(opts.cwd)
   intro(t('appTitle'))
-  const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true, selectedToolIds: [] })
+  const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true, selectedToolIds: [], languages: opts.languages })
   reportResults(result)
   log.success(t('agentsBlockUpdated'))
   outro(t('done'))
@@ -155,6 +179,9 @@ export function runDoctor(opts: CommandOptions): void {
     const suffix = installed ? t('doctorOk') : t('doctorMissing')
     log.info(`  ${tool.label} — ${suffix}`)
   }
+
+  const languages = detectLanguages(opts.cwd)
+  log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
 
   // File presence checks.
   const files = [

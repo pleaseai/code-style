@@ -70,6 +70,15 @@ export function buildMarkerBlock(body: string): string {
   return `${BEGIN_MARKER}\n${body.trim()}\n${END_MARKER}`
 }
 
+export function readMarkerBlock(content: string): string | undefined {
+  const begin = content.indexOf(BEGIN_MARKER)
+  const end = content.indexOf(END_MARKER)
+  if (begin === -1 || end === -1 || end < begin) {
+    return undefined
+  }
+  return content.slice(begin + BEGIN_MARKER.length, end)
+}
+
 export function upsertMarkerBlock(existing: string | null, body: string): string {
   const block = buildMarkerBlock(body)
   if (existing == null) {
