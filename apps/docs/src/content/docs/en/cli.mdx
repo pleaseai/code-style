@@ -131,24 +131,26 @@ The full canonical rules are shipped per language for AI assistants that prefer 
 | Flag | Description |
 | --- | --- |
 | `--yes`, `-y` | Accept defaults and overwrite existing files without prompting |
-| `--lang <ko\|en>` | Force the CLI locale (defaults to `$LC_ALL` / `$LANG`) |
+| `--locale <ko\|en>` | Force the CLI locale (defaults to `$LC_ALL` / `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print the CLI version |
 
 ## Localisation
 
-The CLI auto-detects your locale from `LC_ALL`, `LANG`, or `LC_MESSAGES` and currently ships Korean and English messages. Override with `--lang ko` or `--lang en`:
+The CLI auto-detects your locale from `LC_ALL`, `LANG`, or `LC_MESSAGES` and currently ships Korean and English messages. Override with `--locale ko` or `--locale en`:
 
 ```bash
-pleaseai-code-style --lang ko init
+pleaseai-code-style --locale ko init
 ```
+
+`--lang ko` and `--lang en` still set the locale for now, with a deprecation warning. A future release uses `--lang` to select programming languages, so any other `--lang` value exits with an error instead of being ignored.
 
 ## CI Usage
 
 Combine `--yes` with a locale override for a fully non-interactive invocation suitable for CI or project templates:
 
 ```bash
-pleaseai-code-style --yes --lang en init
+pleaseai-code-style --yes --locale en init
 ```
 
 This accepts defaults for every tool, overwrites any existing config files, and uses English output.
