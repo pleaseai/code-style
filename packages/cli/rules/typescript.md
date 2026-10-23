@@ -24,10 +24,12 @@ on the first try. Read it together with `general.md` in this directory.
   parent → sibling → index, with a blank line between groups and alphabetised
   within each group.
 - Use **named exports** so one name search finds the definition and every use.
-  Default exports are only for files whose shape a framework dictates (config
-  files, Nuxt 4 `app/pages/`/`app/layouts/`/`app/middleware/`/`app/plugins/`, Nitro
-  `server/api/`/`routes/`, Storybook stories). The `ts-no-default-export`
-  rule of `@pleaseai/ast-grep-config` lists the exact paths.
+  Default exports are only for files whose shape a framework dictates, such as
+  config files, type declarations, Storybook stories and `.storybook/`,
+  VitePress `.vitepress/`, Nuxt 4 `app/` pages, layouts, middleware, plugins,
+  `app.config.ts`, and `router.options.ts`, and Nitro `server/` api, routes,
+  middleware, plugins, and tasks. The `ts-no-default-export` rule of
+  `@pleaseai/ast-grep-config` lists the exact paths.
 
 ## TypeScript
 

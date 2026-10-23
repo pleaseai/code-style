@@ -43,8 +43,9 @@ together with `general.md` in this directory.
 
 ## Naming
 
-- Use only ASCII letters and digits in identifiers, with no prefixes or
-  suffixes such as `mName`, `name_`, or `kName`.
+- Use ASCII letters and digits in identifiers; use underscores only where the
+  naming convention requires them (constants). Avoid prefixes or suffixes such
+  as `mName`, `name_`, or `kName`.
 - Packages and modules are all lowercase with no underscores
   (`com.example.deepspace`). Classes are `UpperCamelCase`; methods, fields,
   parameters, and locals are `lowerCamelCase`.

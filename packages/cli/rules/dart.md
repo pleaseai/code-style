@@ -1,8 +1,9 @@
 # Passion Factory Code Style Rules — Dart
 
 Dart rules for `@pleaseai/code-style`, condensed from Effective Dart (style,
-documentation, usage, design). `dart format` sets the layout and `dart analyze`
-checks the rest. Read it together with `general.md` in this directory.
+documentation, usage, design). `dart format` sets the layout, `dart analyze`
+checks the lints configured in `analysis_options.yaml`, and `ast-grep scan`
+checks the Passion Factory rules. Read it together with `general.md` in this directory.
 
 ## Naming and Files
 
@@ -86,7 +87,8 @@ checks the rest. Read it together with `general.md` in this directory.
 
 - Make declarations private (`_`) unless they are part of the API, and make
   fields and top-level variables `final` where possible.
-- Make a constructor `const` when every field is `final`.
+- Make a constructor `const` when every instance field is `final`, its
+  initializers are constant, and its body can be empty.
 - Use class modifiers (`final`, `interface`, `sealed`) to state whether a class
   may be extended or implemented. Do not define a class that holds only static
   members or a one-method abstract class that a function type could replace.

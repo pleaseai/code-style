@@ -23,7 +23,7 @@ changed the text as described above.
 | --- | --- | --- |
 | `dart.md` | [Effective Dart](https://dart.dev/effective-dart) | CC BY 4.0 for the text, BSD-3-Clause for code samples ([dart-lang/site-www `LICENSE`](https://github.com/dart-lang/site-www/blob/main/LICENSE)) |
 | `go.md` | [Effective Go](https://go.dev/doc/effective_go) | CC BY 4.0 for the text, BSD for code ([go.dev/copyright](https://go.dev/copyright)) |
-| `rust.md` | [Google Rust Style Guide](https://google.github.io/styleguide/rustguide.html) | CC BY 3.0 ([google/styleguide `LICENSE`](https://github.com/google/styleguide/blob/gh-pages/LICENSE)) |
+| `rust.md` | [Google Rust Style Guide](https://google.github.io/styleguide/rustguide.html), [Rust Style Guide](https://doc.rust-lang.org/nightly/style-guide/), [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/) | CC BY 3.0 for Google's guide ([google/styleguide `LICENSE`](https://github.com/google/styleguide/blob/gh-pages/LICENSE)); Apache-2.0 OR MIT for the Rust project guides ([rust-lang/rust](https://github.com/rust-lang/rust#license), [rust-lang/api-guidelines](https://github.com/rust-lang/api-guidelines#license)) |
 | `java.md` | [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) | CC BY 3.0 ([google/styleguide `LICENSE`](https://github.com/google/styleguide/blob/gh-pages/LICENSE)) |
 | `python.md` | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) | CC BY 3.0 ([google/styleguide `LICENSE`](https://github.com/google/styleguide/blob/gh-pages/LICENSE)) |
 | `csharp.md` | [Google C# Style Guide](https://google.github.io/styleguide/csharp-style.html) | CC BY 3.0 ([google/styleguide `LICENSE`](https://github.com/google/styleguide/blob/gh-pages/LICENSE)) |

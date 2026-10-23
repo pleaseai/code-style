@@ -24,13 +24,14 @@ together with the guide for the language you are writing (for example
 
 ## Testing
 
-- Tests live under the package's test root, at a path mirrored from the source
-  they test. The language guide names the test root and file suffix.
+- Follow the language guide's test layout where it defines one. Otherwise,
+  keep the project's existing test layout and the language's conventions.
 - Helpers shared by two or more test files go in the language's designated
   location: `<test-root>/test-utils/` for TypeScript (`test/test-utils/` or
-  `tests/test-utils/`), `test/helpers/` for Dart, `src/testFixtures/` for
-  Kotlin and Java, and `tests/common/` for Rust. A helper used by one test file
-  stays in that file.
+  `tests/test-utils/`), `test/helpers/` for Dart, and `src/testFixtures/` for
+  Kotlin and Java. A helper used by one test file stays in that file. In Rust,
+  a helper shared by two or more integration test targets goes in
+  `tests/common/`.
 - Not every source file needs a test. These rules say where a test goes, not
   whether it must exist.
 

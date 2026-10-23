@@ -211,8 +211,9 @@ CLI는 아래 마커 사이의 내용만 관리합니다 — `AGENTS.md`의 나�
 
 `@pleaseai/code-style`을 업그레이드한 뒤에는 `pleaseai-code-style update`를
 다시 실행하면 이 블록만 새로고침할 수 있습니다. 전체 규칙은 참고용으로
-언어별로 나뉘어 함께 배포됩니다: `node_modules/@pleaseai/code-style/rules/general.md`(모든 언어)와
-`rules/typescript.md`(TypeScript·JavaScript).
+언어별로 나뉘어 함께 배포됩니다. `node_modules/@pleaseai/code-style/rules/general.md`(모든 언어)를
+먼저 읽고, `node_modules/@pleaseai/code-style/rules.md`에 나열된 언어별 가이드를 읽으세요
+(예: TypeScript·JavaScript는 `node_modules/@pleaseai/code-style/rules/typescript.md`).
 
 ## 옵션
 

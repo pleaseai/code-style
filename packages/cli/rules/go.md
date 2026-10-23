@@ -32,9 +32,12 @@ this directory.
 
 ## Functions and Data
 
-- Return `(value, err)` for operations that can fail, with the error last.
+- Return an `error` from operations that can fail, as the last result
+  (`(value, err)`, or just `err` when there is no value).
 - Use named results when they document the return values, not by habit.
-- Release resources with `defer` right after acquiring them.
+- Release resources with `defer` right after acquiring them. A deferred call
+  runs when the function returns, not at the end of a loop iteration; inside a
+  loop, release explicitly or move the body into its own function.
 - Use `new(T)` for a zeroed pointer and `make` only for slices, maps, and
   channels.
 - Prefer slices to arrays. Test map membership with `v, ok := m[key]`.
@@ -43,8 +46,9 @@ this directory.
 
 - Types satisfy interfaces implicitly; prefer many small interfaces to one
   large one.
-- Share memory by communicating: pass data between goroutines on channels
-  instead of guarding shared state.
+- Prefer sharing memory by communicating: pass ownership of data between
+  goroutines on channels. Use a mutex from `sync` when guarding a small piece of
+  shared state is simpler.
 
 ## Errors
 

@@ -2,8 +2,9 @@
 
 Rust rules for `@pleaseai/code-style`, condensed from the Google Rust Style
 Guide with the Chromium, Android, and Fuchsia parts removed. `rustfmt` sets the
-layout and `clippy` checks the rest; also follow the official Rust Style Guide
-and Rust API Guidelines. Read it together with `general.md` in this directory.
+layout, `clippy` catches common mistakes, and `ast-grep scan` checks the
+Passion Factory rules; also follow the official Rust Style Guide and Rust API
+Guidelines. Read it together with `general.md` in this directory.
 
 ## Modules and Imports
 

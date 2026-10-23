@@ -45,8 +45,9 @@ directory.
 - Use collection and object initializers, `?.` and `??` for null checks, and
   pattern matching (`obj is string str`) for type tests and casts.
 - Use LINQ for readability, but watch its cost in hot paths.
-- Make a variable `const` when possible, otherwise `readonly`. Use a named
-  constant instead of a magic number.
+- Make a field or local `const` when its value is a compile-time constant.
+  Otherwise make a field `readonly` when it is assigned only at declaration or
+  in a constructor. Use a named constant instead of a magic number.
 
 ## Design
 

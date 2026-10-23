@@ -14,5 +14,5 @@ apply to every language, then the guide for the language you are writing:
 - [`rules/csharp.md`](./rules/csharp.md) — C#
 - [`rules/html-css.md`](./rules/html-css.md) — HTML and CSS
 
-Run `pleaseai-code-style update` to point your `AGENTS.md` block at these files
-directly.
+`pleaseai-code-style update` points your `AGENTS.md` block at the general and
+TypeScript guides; the other guides are read from this index for now.

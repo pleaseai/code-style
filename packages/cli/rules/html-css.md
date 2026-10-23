@@ -20,7 +20,9 @@ directory.
 - Give images `alt` text, and give audio and video transcripts or captions.
 - Keep structure (HTML), presentation (CSS), and behavior (JavaScript) in
   separate files linked from the page.
-- Omit `type` on `<link rel="stylesheet">` and `<script>`.
+- Omit `type` on `<link rel="stylesheet">` and classic JavaScript `<script>`
+  elements. Preserve script types such as `module`, `importmap`, and
+  `application/ld+json`.
 - Put every block, list, and table element on its own line and indent its
   children.
 - Use double quotes for attribute values.
