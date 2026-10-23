@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.2](https://github.com/pleaseai/code-style/compare/code-style-v0.1.1...code-style-v0.1.2) (2026-10-23)
+
+
+### Features
+
+* **cli:** add --locale and deprecate --lang ko|en ([#68](https://github.com/pleaseai/code-style/issues/68)) ([8a7ca6d](https://github.com/pleaseai/code-style/commit/8a7ca6d393fc44b89478285da393a95e6a6bd3a6))
+* **cli:** detect project languages and select rule guides with --lang ([#69](https://github.com/pleaseai/code-style/issues/69)) ([b4d3274](https://github.com/pleaseai/code-style/commit/b4d32742f6e304ac548c6ce67257c22b5ce2f993)), closes [#65](https://github.com/pleaseai/code-style/issues/65)
+* **cli:** split rules into per-language guides ([#66](https://github.com/pleaseai/code-style/issues/66)) ([147dc0e](https://github.com/pleaseai/code-style/commit/147dc0ed62076361f88f9207de240880de9d9e5b))
+* **cli:** title the AGENTS.md block Passion Factory Code Style ([#67](https://github.com/pleaseai/code-style/issues/67)) ([ef4e526](https://github.com/pleaseai/code-style/commit/ef4e52670687b7427c7e42bf5fd4c7192d7eb1a3))
+* **cli:** work without package.json and copy rule guides into .agents/code-style ([#70](https://github.com/pleaseai/code-style/issues/70)) ([93e3967](https://github.com/pleaseai/code-style/commit/93e3967a42e43f204e98124dd4bcfbd18de21348)), closes [#65](https://github.com/pleaseai/code-style/issues/65)
+
 ## [0.1.1](https://github.com/pleaseai/code-style/compare/code-style-v0.1.0...code-style-v0.1.1) (2026-10-14)
 
 
