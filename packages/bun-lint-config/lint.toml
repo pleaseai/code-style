@@ -229,6 +229,7 @@ prefer-spread = "error"
 files = [ "**/__tests__/**/*.{,[cm]}[jt]s{,x}", "**/*.spec.{,[cm]}[jt]s{,x}", "**/*.test.{,[cm]}[jt]s{,x}", "**/*.bench.{,[cm]}[jt]s{,x}", "**/*.benchmark.{,[cm]}[jt]s{,x}" ]
 
 [lint.overrides.rules]
+"@typescript-eslint/no-unused-expressions" = [ "error", { allowShortCircuit = true, allowTaggedTemplates = true, allowTernary = true } ]
 "n/no-top-level-await" = "off"
 no-unused-expressions = "off"
 "vitest/consistent-test-it" = [ "error", { fn = "it", withinDescribe = "it" } ]

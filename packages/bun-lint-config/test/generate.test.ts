@@ -186,6 +186,25 @@ describe('rule map', () => {
     expect(() => generate({ rules: { 'vitest/no-focused-tests': ['error'] } })).toThrow('"test/no-only-tests"')
   })
 
+  test('an override that sets one of a core and `@typescript-eslint` pair keeps the other while it is on', () => {
+    const pairs: BuiltinRules = {
+      revision: 'test',
+      rules: ['no-shadow', 'no-redeclare'].flatMap(id => [
+        { id, aliases: [], on_by_default: false },
+        { id: `@typescript-eslint/${id}`, aliases: [], on_by_default: false },
+      ]),
+    }
+    const lint = (parse(generateLintToml([
+      { rules: { 'no-shadow': 'error', 'no-redeclare': 'error' } },
+      { files: ['**/*.ts'], rules: { 'no-shadow': 'off', '@typescript-eslint/no-shadow': ['error', { hoist: 'all' }], 'no-redeclare': 'off' } },
+      { files: ['**/*.test.ts'], rules: { 'no-shadow': 'off', '@typescript-eslint/no-redeclare': 'error' } },
+    ], pairs, {})) as unknown as { lint: Lint }).lint
+    expect(lint.overrides).toEqual([
+      { files: ['**/*.ts'], rules: { 'no-shadow': 'off', '@typescript-eslint/no-shadow': ['error', { hoist: 'all' }], 'no-redeclare': 'off' } },
+      { files: ['**/*.test.ts'], rules: { 'no-shadow': 'off', '@typescript-eslint/no-shadow': ['error', { hoist: 'all' }], '@typescript-eslint/no-redeclare': 'error' } },
+    ])
+  })
+
   test('a mapped `@typescript-eslint` target also owns its core rule, which Bun runs as the same rule', () => {
     const lint = generateLintToml([
       { rules: { 'no-unused-vars': ['error', { args: 'none' }], 'unused-imports/no-unused-vars': 'error' } },

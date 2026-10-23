@@ -312,6 +312,28 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
   prune(base, overrides)
   overrides.forEach((override, i) => prune(override.rules, overrides.slice(i + 1)))
 
+  // `bun lint` runs a core rule and its `@typescript-eslint` version as one
+  // rule: a table that sets both gives JavaScript files the core entry and
+  // TypeScript files the other, and a table that sets one replaces both.
+  // ESLint runs them as two rules, so an override that sets one of them gets
+  // the other's latest entry while that one is on.
+  const pairs = builtinRules.rules
+    .filter(rule => rule.id.startsWith('@typescript-eslint/') && onByDefault.has(rule.id.slice('@typescript-eslint/'.length)))
+    .map(rule => [rule.id.slice('@typescript-eslint/'.length), rule.id])
+  overrides.forEach((override, i) => {
+    const earlier = [...overrides.slice(0, i).map(({ rules }) => rules).reverse(), base]
+    for (const pair of pairs) {
+      const missing = pair.filter(rule => !override.rules.has(rule))
+      if (missing.length !== 1) {
+        continue
+      }
+      const previous = earlier.find(rules => rules.has(missing[0]!))?.get(missing[0]!)
+      if (previous !== undefined && severityOf(previous) !== 'off') {
+        override.rules.set(missing[0]!, previous)
+      }
+    }
+  })
+
   const lint: Record<string, unknown> = {}
   if (ignorePatterns.size > 0) {
     lint.ignorePatterns = [...ignorePatterns]
