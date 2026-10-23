@@ -124,7 +124,7 @@ My own content stays here untouched.
 
 The CLI **only** owns the content between the two marker comments — everything else in `AGENTS.md` is preserved verbatim. Running `update` twice in a row is a no-op; the block never duplicates.
 
-The full canonical rules list is shipped as `node_modules/@pleaseai/code-style/rules.md` for AI assistants that prefer to read the long version.
+The full canonical rules are shipped per language for AI assistants that prefer to read the long version: start with `node_modules/@pleaseai/code-style/rules/general.md` (every language), then the language guide listed in `node_modules/@pleaseai/code-style/rules.md` (for example, `node_modules/@pleaseai/code-style/rules/typescript.md` for TypeScript and JavaScript).
 
 ## Options
 
