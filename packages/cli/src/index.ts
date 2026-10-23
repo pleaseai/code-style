@@ -30,8 +30,9 @@ if (localeFlags.kind === 'invalid') {
   process.stderr.write(`${t('invalidLocaleFlag')(localeFlags.flag, localeFlags.value)}\n`)
   process.exit(1)
 }
-else if (localeFlags.deprecatedLang !== undefined) {
-  process.stderr.write(`${t('deprecatedLangFlag')(localeFlags.deprecatedLang)}\n`)
+else if (localeFlags.langWarning !== undefined) {
+  const { kind, locale } = localeFlags.langWarning
+  process.stderr.write(`${t(kind === 'deprecated' ? 'deprecatedLangFlag' : 'ignoredLangFlag')(locale)}\n`)
 }
 
 const command = positionals[0] ?? 'init'

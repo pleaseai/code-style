@@ -26,6 +26,13 @@ describe('locale flags', () => {
     expect(res.stderr).toContain('--locale ko')
   })
 
+  test('--lang overridden by --locale is reported as ignored, not as the migration target', () => {
+    const res = run(['--locale', 'en', '--lang', 'ko', '--help'])
+    expect(res.status).toBe(0)
+    expect(res.stdout).toContain('Usage:')
+    expect(res.stderr).toContain('--lang ko is deprecated and ignored because --locale is set; remove it.')
+  })
+
   test('an unknown --lang value exits non-zero instead of being ignored', () => {
     const res = run(['--lang', 'dart', '--help'])
     expect(res.status).toBe(1)

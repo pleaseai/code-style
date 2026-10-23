@@ -59,15 +59,15 @@ describe('detectLocale', () => {
 
 describe('resolveLocaleFlags', () => {
   test('--locale sets the locale without a warning', () => {
-    expect(resolveLocaleFlags({ locale: 'ko' })).toEqual({ kind: 'ok', locale: 'ko', deprecatedLang: undefined })
+    expect(resolveLocaleFlags({ locale: 'ko' })).toEqual({ kind: 'ok', locale: 'ko' })
   })
 
   test('--lang ko|en still sets the locale and is reported as deprecated', () => {
-    expect(resolveLocaleFlags({ lang: 'en' })).toEqual({ kind: 'ok', locale: 'en', deprecatedLang: 'en' })
+    expect(resolveLocaleFlags({ lang: 'en' })).toEqual({ kind: 'ok', locale: 'en', langWarning: { kind: 'deprecated', locale: 'en' } })
   })
 
-  test('--locale wins over --lang', () => {
-    expect(resolveLocaleFlags({ locale: 'en', lang: 'ko' })).toMatchObject({ kind: 'ok', locale: 'en', deprecatedLang: 'ko' })
+  test('--locale wins over --lang, which is reported as ignored', () => {
+    expect(resolveLocaleFlags({ locale: 'en', lang: 'ko' })).toEqual({ kind: 'ok', locale: 'en', langWarning: { kind: 'ignored', locale: 'ko' } })
   })
 
   test('an unknown --lang value is invalid instead of ignored', () => {

@@ -415,8 +415,9 @@ currently ships Korean and English messages. Override with `--locale ko` or
 `--locale en`.
 
 `--lang ko` and `--lang en` still set the locale for now, with a deprecation
-warning. A future release uses `--lang` to select programming languages, so any
-other `--lang` value exits with an error instead of being ignored.
+warning. When both flags are given, `--locale` wins. Any other `--lang` value, or
+a `--locale` value other than `ko` or `en`, exits with an error (exit code 1). A
+future release uses `--lang` to select programming languages.
 
 ## License
 

@@ -28,6 +28,7 @@ interface Messages {
   unexpectedArguments: (args: string) => string
   optionBeforeCheck: (option: string) => string
   deprecatedLangFlag: (locale: Locale) => string
+  ignoredLangFlag: (locale: Locale) => string
   invalidLocaleFlag: (flag: LocaleFlag, value: string) => string
   usage: string
   checkUsage: string
@@ -60,6 +61,7 @@ const messages: Record<Locale, Messages> = {
     unexpectedArguments: args => `Unexpected arguments: ${args}`,
     optionBeforeCheck: option => `${option} is a check option; put it after \`check\` (please-style check ${option})`,
     deprecatedLangFlag: locale => `--lang ${locale} is deprecated; use --locale ${locale}. A future release will use --lang to select programming languages.`,
+    ignoredLangFlag: locale => `--lang ${locale} is deprecated and ignored because --locale is set; remove it. A future release will use --lang to select programming languages.`,
     invalidLocaleFlag: (flag, value) => flag === '--locale'
       ? `Unknown --locale value: "${value}". Use ko or en.`
       : `Unknown --lang value: "${value}". To set the CLI locale, use --locale <ko|en>.`,
@@ -119,7 +121,8 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
     unexpectedArguments: args => `예상하지 못한 인자: ${args}`,
     optionBeforeCheck: option => `${option}는 check 옵션입니다. \`check\` 뒤에 쓰세요 (please-style check ${option})`,
-    deprecatedLangFlag: locale => `--lang ${locale}는 더 이상 권장하지 않습니다. --locale ${locale}를 쓰세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
+    deprecatedLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않습니다. 대신 --locale ${locale} 옵션을 쓰세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
+    ignoredLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않으며, --locale 옵션이 있어 무시합니다. 이 옵션을 지우세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
     invalidLocaleFlag: (flag, value) => flag === '--locale'
       ? `알 수 없는 --locale 값: "${value}". ko 또는 en을 쓰세요.`
       : `알 수 없는 --lang 값: "${value}". CLI 로케일은 --locale <ko|en>으로 지정하세요.`,
@@ -168,8 +171,13 @@ export type LocaleFlag = '--locale' | '--lang'
 
 type FlagValue = string | boolean | undefined
 
+export interface LangWarning {
+  kind: 'deprecated' | 'ignored'
+  locale: Locale
+}
+
 export type LocaleFlags
-  = | { kind: 'ok', locale: Locale, deprecatedLang?: Locale }
+  = | { kind: 'ok', locale: Locale, langWarning?: LangWarning }
     | { kind: 'invalid', locale: Locale, flag: LocaleFlag, value: string }
 
 function asLocale(value: FlagValue): Locale | undefined {
@@ -190,7 +198,10 @@ export function resolveLocaleFlags(flags: { locale?: FlagValue, lang?: FlagValue
   if (flags.lang !== undefined && fromLang === undefined) {
     return { kind: 'invalid', locale, flag: '--lang', value: flagText(flags.lang) }
   }
-  return { kind: 'ok', locale, deprecatedLang: fromLang }
+  if (fromLang === undefined) {
+    return { kind: 'ok', locale }
+  }
+  return { kind: 'ok', locale, langWarning: { kind: fromLocale === undefined ? 'deprecated' : 'ignored', locale: fromLang } }
 }
 
 let current: Locale = 'en'
