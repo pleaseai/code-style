@@ -62,7 +62,43 @@ describe('--lang languages', () => {
       rmSync(dir, { recursive: true, force: true })
     }
   })
+
+  test('doctor --lang reports the given languages instead of the detected ones', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-lang-'))
+    try {
+      writeFileSync(join(dir, 'package.json'), '{}')
+      const res = run(['doctor', '--lang', 'dart'], dir)
+      expect(res.status).toBe(0)
+      expect(res.stdout).toContain('Selected languages (--lang): dart')
+      expect(res.stdout).not.toContain('typescript')
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
 })
+
+// The AGENTS.md block exactly as code-style-v0.1.1 wrote it.
+const V011_BODY = [
+  '# PleaseAI Code Style',
+  '',
+  'These rules are managed by `@pleaseai/code-style`. Run `pleaseai-code-style update`',
+  'to refresh this block. Do not edit between the marker comments — your changes',
+  'will be overwritten.',
+  '',
+  '- Formatter: `@pleaseai/eslint-config` (wraps `@antfu/eslint-config`)',
+  '- No semicolons, single quotes, 2-space indent, trailing commas, LF line endings',
+  '- ESM only — never emit `require`/`module.exports`',
+  '- TypeScript: `strict: true`, prefer `type` over `interface`, no implicit `any`',
+  '- Prefer named exports, early returns, `async`/`await`, optional chaining',
+  '- File size target: ≤ 500 lines',
+  '- Tests live under the package\'s `test/` (or `tests/`) root, mirroring the source path',
+  '  (`src/foo/bar.ts` → `test/foo/bar.test.ts`); no `import.meta.vitest` in-source tests',
+  '- Conventional Commits for all commit messages',
+  '',
+  'For the full rules (what an AI coding assistant needs to know before writing code),',
+  'read `node_modules/@pleaseai/code-style/rules.md`.',
+].join('\n')
 
 describe('projects without a package.json', () => {
   const MARKERS = [
@@ -128,14 +164,40 @@ describe('projects without a package.json', () => {
     }
   })
 
-  test('doctor --lang reports the given languages instead of the detected ones', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-lang-'))
+  test('pubspec.yaml and Cargo.toml together: init --yes links both guides in guide order', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-nopkg-'))
+    try {
+      writeFileSync(join(dir, 'pubspec.yaml'), '')
+      writeFileSync(join(dir, 'Cargo.toml'), '')
+      expect(run(['init', '--yes'], dir).status).toBe(0)
+      const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+      const linked = [...body.matchAll(/\.agents\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
+      expect(linked).toEqual(['general.md', 'dart.md', 'rust.md'])
+      expect(existsSync(join(dir, '.agents/code-style/dart.md'))).toBe(true)
+      expect(existsSync(join(dir, '.agents/code-style/rust.md'))).toBe(true)
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('existing JS projects', () => {
+  test('update on a JS project carrying the v0.1.1 block leaves no broken link', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-v011-'))
     try {
       writeFileSync(join(dir, 'package.json'), '{}')
-      const res = run(['doctor', '--lang', 'dart'], dir)
-      expect(res.status).toBe(0)
-      expect(res.stdout).toContain('Selected languages (--lang): dart')
-      expect(res.stdout).not.toContain('typescript')
+      writeFileSync(join(dir, 'AGENTS.md'), `<!-- pleaseai-code-style:start -->\n${V011_BODY}\n<!-- pleaseai-code-style:end -->\n`)
+      expect(run(['update'], dir).status).toBe(0)
+      const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+      expect(body).not.toContain('node_modules/@pleaseai/code-style')
+      expect(body).toContain('.agents/code-style/general.md')
+      expect(body).toContain('.agents/code-style/typescript.md')
+      const linked = [...body.matchAll(/\.agents\/code-style\/[\w./-]+\.md/g)].map(m => m[0])
+      expect(linked.length).toBeGreaterThan(0)
+      for (const path of linked) {
+        expect(existsSync(join(dir, path))).toBe(true)
+      }
     }
     finally {
       rmSync(dir, { recursive: true, force: true })

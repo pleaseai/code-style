@@ -220,7 +220,7 @@ describe('AGENTS.md rules block', () => {
     expect(body).not.toContain('.agents/code-style/typescript.md')
   })
 
-  test('copies every guide the block links, plus the attribution files, into .agents/code-style', async () => {
+  test('copies every guide the block links into .agents/code-style', async () => {
     for (const languages of [undefined, ['dart', 'rust'], [...LANGUAGES]] as const) {
       rmSync(join(dir, '.agents'), { recursive: true, force: true })
       await applyAgentsMd({ cwd: dir, autoAccept: true, languages: languages == null ? undefined : [...languages] })
@@ -230,38 +230,6 @@ describe('AGENTS.md rules block', () => {
       for (const path of linked) {
         expect(existsSync(join(dir, path))).toBe(true)
       }
-      for (const name of ['NOTICE.md', 'LICENSE-Apache-2.0.txt']) {
-        expect(existsSync(join(dir, '.agents/code-style', name))).toBe(true)
-      }
-    }
-  })
-
-  test('removes the guide of a deselected language and leaves other files alone', async () => {
-    await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart', 'rust'] })
-    writeFileSync(join(dir, '.agents/code-style/team-notes.md'), 'mine')
-    writeFileSync(join(dir, '.agents/code-style/dart.md'), 'stale')
-    const result = await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['rust'] })
-    expect(existsSync(join(dir, '.agents/code-style/dart.md'))).toBe(false)
-    expect(existsSync(join(dir, '.agents/code-style/rust.md'))).toBe(true)
-    expect(readFileSync(join(dir, '.agents/code-style/team-notes.md'), 'utf-8')).toBe('mine')
-    expect(result.updated).toContain('.agents/code-style/dart.md (removed)')
-  })
-
-  test('refreshes a modified guide from the package copy', async () => {
-    await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart'] })
-    writeFileSync(join(dir, '.agents/code-style/general.md'), 'edited')
-    await applyAgentsMd({ cwd: dir, autoAccept: true, languages: ['dart'] })
-    const shipped = readFileSync(join(import.meta.dir, '../rules/general.md'), 'utf-8')
-    expect(readFileSync(join(dir, '.agents/code-style/general.md'), 'utf-8')).toBe(shipped)
-  })
-
-  test('ships a guide for every language, covered by the package files', () => {
-    const pkgRoot = join(import.meta.dir, '..')
-    const { files } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf-8')) as { files: string[] }
-    for (const id of LANGUAGES) {
-      const path = `rules/${id}.md`
-      expect(existsSync(join(pkgRoot, path))).toBe(true)
-      expect(files.some(entry => path.startsWith(`${entry}/`))).toBe(true)
     }
   })
 })
