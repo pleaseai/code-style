@@ -12,7 +12,8 @@ NaverPay's [`@naverpay/code-style-cli`](https://github.com/NaverPayDev/code-styl
 
 ## Usage
 
-From the root of any project that has a `package.json`:
+From the root of your project. A `package.json` is optional: without one (Gradle,
+pubspec or Cargo-only projects) `init` offers only the AGENTS.md block and its guides:
 
 ```bash
 bunx @pleaseai/code-style         # same as `init`
@@ -392,12 +393,15 @@ The CLI owns only the content between these markers — everything else in
 ```
 
 Re-run `pleaseai-code-style update` any time you upgrade `@pleaseai/code-style`
-to refresh just this block. The full rules are shipped per language for
-reference: start with `node_modules/@pleaseai/code-style/rules/general.md`
-(every language), then the language guide listed in
-`node_modules/@pleaseai/code-style/rules.md` (for example
-`node_modules/@pleaseai/code-style/rules/typescript.md` for TypeScript and
-JavaScript).
+to refresh just this block. The full rules are copied into your project, per
+language, so they resolve in every project (no `node_modules` needed): start
+with `.agents/code-style/general.md` (every language), then the guide of your
+language (for example `.agents/code-style/typescript.md` for TypeScript and
+JavaScript), with `NOTICE.md` and `LICENSE-Apache-2.0.txt` for the attribution
+of the adapted guides. Commit `.agents/code-style/`; `init` and `update`
+rewrite it, overwrite the files and remove the guide of a language that is no
+longer selected (other files in the directory are never touched). `doctor`
+checks that every guide the block links exists.
 
 ## Options
 

@@ -10,8 +10,9 @@ import {
   upsertMarkerBlock,
   writePackageJson,
 } from './fs-utils.js'
+import { syncGuides } from './guides.js'
 import { t } from './i18n.js'
-import { detectLanguages, languagesFromAgentsBlock, RULES_PREFIX } from './languages.js'
+import { detectLanguages, GUIDES_DIR, languagesFromAgentsBlock } from './languages.js'
 
 async function confirmOverwrite(file: string, auto: boolean): Promise<boolean> {
   if (auto) {
@@ -182,7 +183,7 @@ function wantsCodeOrganization(ctx: ToolContext): boolean {
 }
 
 function agentsBody(ctx: ToolContext, languages: Language[]): string {
-  const guides = ['general', ...languages].map(id => `\`${RULES_PREFIX}/${id}.md\``)
+  const guides = ['general', ...languages].map(id => `\`${GUIDES_DIR}/${id}.md\``)
   const pointer = guides.length > 1
     ? `${guides.slice(0, -1).join(', ')} and ${guides.at(-1)}`
     : guides[0]
@@ -199,6 +200,10 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   const existing = readFileOrNull(target)
   const languages = ctx.languages ?? languagesFromAgentsBlock(existing) ?? detectLanguages(ctx.cwd)
   const next = upsertMarkerBlock(existing, agentsBody(ctx, languages))
+
+  const guides = syncGuides(ctx.cwd, languages)
+  result.created.push(...guides.created)
+  result.updated.push(...guides.updated)
 
   if (existing == null) {
     writeFileSync(target, next)

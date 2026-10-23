@@ -5,7 +5,6 @@ export type Locale = 'en' | 'ko'
 
 interface Messages {
   appTitle: string
-  noPackageJson: string
   detectedPm: (pm: string) => string
   selectTools: string
   alreadyInstalled: string
@@ -43,7 +42,6 @@ interface Messages {
 const messages: Record<Locale, Messages> = {
   en: {
     appTitle: 'PleaseAI code-style setup',
-    noPackageJson: 'package.json not found. Run this command from your project root.',
     detectedPm: pm => `Detected package manager: ${pm}`,
     selectTools: 'Select items to install or update',
     alreadyInstalled: '(installed)',
@@ -108,7 +106,6 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
   },
   ko: {
     appTitle: 'PleaseAI code-style 설치',
-    noPackageJson: 'package.json이 없습니다. 프로젝트 루트에서 실행해주세요.',
     detectedPm: pm => `감지된 패키지 매니저: ${pm}`,
     selectTools: '설치하거나 업데이트할 항목을 선택하세요',
     alreadyInstalled: '(설치됨)',

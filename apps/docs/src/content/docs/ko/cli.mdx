@@ -10,7 +10,7 @@ sidebar:
 
 ## 빠른 시작
 
-`package.json`이 있는 프로젝트 루트에서 실행하세요:
+프로젝트 루트에서 실행하세요. `package.json`은 필수가 아닙니다. 없는 프로젝트(Gradle, pubspec, Cargo 전용)에서는 `init`이 AGENTS.md 블록과 가이드만 제공하며, `update`와 `doctor`는 그대로 동작합니다:
 
 <CodeGroup titles={["bun", "pnpm", "npm"]}>
 
@@ -124,7 +124,7 @@ CLI는 `AGENTS.md`에 마커로 구분된 블록을 작성하므로, 주변에 �
 
 CLI는 두 마커 주석 사이의 내용 **만** 관리하며 — `AGENTS.md`의 나머지 내용은 그대로 보존됩니다. `update`를 연속으로 두 번 실행해도 no-op이며, 블록이 중복되지 않습니다.
 
-전체 원본 규칙은 AI 어시스턴트가 긴 버전을 읽기 원할 때 참고할 수 있도록 언어별로 나뉘어 함께 배포됩니다. `node_modules/@pleaseai/code-style/rules/general.md`(모든 언어)를 먼저 읽고, `node_modules/@pleaseai/code-style/rules.md`에 나열된 언어별 가이드를 읽으세요(예: TypeScript·JavaScript는 `node_modules/@pleaseai/code-style/rules/typescript.md`).
+전체 원본 규칙은 AI 어시스턴트가 긴 버전을 읽기 원할 때 참고할 수 있도록 언어별로 나뉘어 프로젝트에 복사되므로 `node_modules` 없이도 읽을 수 있습니다. `.agents/code-style/general.md`(모든 언어)를 먼저 읽고, 사용하는 언어의 가이드를 읽으세요(예: TypeScript·JavaScript는 `.agents/code-style/typescript.md`). 같은 디렉터리의 `NOTICE.md`와 `LICENSE-Apache-2.0.txt`에 각색한 가이드의 출처 표기가 있습니다. `.agents/code-style/`은 커밋하세요. `init`과 `update`가 이 디렉터리를 다시 쓰며 파일을 덮어쓰고, 더 이상 선택하지 않은 언어의 가이드는 삭제합니다(디렉터리의 다른 파일은 건드리지 않습니다). `doctor`는 블록이 가리키는 가이드가 모두 있는지 확인합니다.
 
 ## 옵션
 

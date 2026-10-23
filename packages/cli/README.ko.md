@@ -12,7 +12,8 @@ eslint/prettier/editorconfig/ast-grep 패키지를 설치하고, AI 코딩 어�
 
 ## 사용법
 
-`package.json`이 있는 프로젝트 루트에서 실행하세요:
+프로젝트 루트에서 실행하세요. `package.json`은 필수가 아닙니다. 없는 프로젝트(Gradle,
+pubspec, Cargo 전용)에서는 `init`이 AGENTS.md 블록과 가이드만 제공합니다:
 
 ```bash
 bunx @pleaseai/code-style         # `init`과 동일
@@ -210,10 +211,14 @@ CLI는 아래 마커 사이의 내용만 관리합니다 — `AGENTS.md`의 나�
 ```
 
 `@pleaseai/code-style`을 업그레이드한 뒤에는 `pleaseai-code-style update`를
-다시 실행하면 이 블록만 새로고침할 수 있습니다. 전체 규칙은 참고용으로
-언어별로 나뉘어 함께 배포됩니다. `node_modules/@pleaseai/code-style/rules/general.md`(모든 언어)를
-먼저 읽고, `node_modules/@pleaseai/code-style/rules.md`에 나열된 언어별 가이드를 읽으세요
-(예: TypeScript·JavaScript는 `node_modules/@pleaseai/code-style/rules/typescript.md`).
+다시 실행하면 이 블록만 새로고침할 수 있습니다. 전체 규칙은 언어별로 나뉘어 프로젝트에
+복사되므로 `node_modules` 없이도 어떤 프로젝트에서나 읽을 수 있습니다.
+`.agents/code-style/general.md`(모든 언어)를 먼저 읽고, 사용하는 언어의 가이드를 읽으세요
+(예: TypeScript·JavaScript는 `.agents/code-style/typescript.md`). 각색한 가이드의 출처 표기는
+`NOTICE.md`와 `LICENSE-Apache-2.0.txt`에 있습니다. `.agents/code-style/`은 커밋하세요.
+`init`과 `update`가 이 디렉터리를 다시 쓰며 파일을 덮어쓰고, 더 이상 선택하지 않은 언어의
+가이드는 삭제합니다(디렉터리의 다른 파일은 건드리지 않습니다). `doctor`는 블록이 가리키는
+가이드가 모두 있는지 확인합니다.
 
 ## 옵션
 

@@ -71,7 +71,8 @@ describe('parseLangFlag', () => {
 
 describe('languagesFromAgentsBlock', () => {
   const block = (body: string): string => `<!-- pleaseai-code-style:start -->\n${body}\n<!-- pleaseai-code-style:end -->\n`
-  const guide = (id: string): string => `node_modules/@pleaseai/code-style/rules/${id}.md`
+  const guide = (id: string): string => `.agents/code-style/${id}.md`
+  const legacyGuide = (id: string): string => `node_modules/@pleaseai/code-style/rules/${id}.md`
 
   test('is undefined without a block', () => {
     expect(languagesFromAgentsBlock(null)).toBeUndefined()
@@ -90,5 +91,9 @@ describe('languagesFromAgentsBlock', () => {
   test('lists the languages the block links', () => {
     expect(languagesFromAgentsBlock(block(`read ${guide('general')} and ${guide('dart')}`))).toEqual(['dart'])
     expect(languagesFromAgentsBlock(block(`read ${guide('general')}`))).toEqual([])
+  })
+
+  test('reads the links of a block written before the guides were copied into the project', () => {
+    expect(languagesFromAgentsBlock(block(`read ${legacyGuide('general')} and ${legacyGuide('dart')}`))).toEqual(['dart'])
   })
 })
