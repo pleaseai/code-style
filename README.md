@@ -14,6 +14,7 @@ See the [code-style documentation site](https://code-style.pages.dev) for full g
 | [`@pleaseai/prettier-config`](./packages/perttier-config) | Shared Prettier config (JSON) |
 | [`@pleaseai/editorconfig`](./packages/editorconfig) | Shared `.editorconfig` for consistent editor settings |
 | [`@pleaseai/ast-grep-config`](./packages/ast-grep-config) | ast-grep rules for agent-navigable code (ADR-0022); the path checker is `please-style check` |
+| [`@pleaseai/bun-lint-config`](./packages/bun-lint-config) | `bunfig.toml` `[lint]` tables with the `@pleaseai/eslint-config` rules that `bun lint` runs natively |
 
 ## `@pleaseai/eslint-config`
 
@@ -78,6 +79,14 @@ bunx ast-grep scan
 ```
 
 Every rule ships as a warning. See the [ast-grep Config guide](https://code-style.pages.dev/en/ast-grep-config) for the rule list and how to fix each violation.
+
+## `@pleaseai/bun-lint-config`
+
+```sh
+bunx @pleaseai/code-style init   # select bun-lint-config
+```
+
+`init` writes the package's `lint.toml` into `bunfig.toml` for `bun lint` (Bun canary). See the [bun lint Config guide](https://code-style.pages.dev/en/bun-lint-config) for what it covers and how to copy it by hand.
 
 ## Development
 

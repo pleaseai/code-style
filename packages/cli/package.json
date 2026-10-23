@@ -2,7 +2,7 @@
   "name": "@pleaseai/code-style",
   "type": "module",
   "version": "0.1.1",
-  "description": "CLI to set up PleaseAI code style (eslint, prettier, editorconfig, ast-grep, AGENTS.md) in any project and check code organization",
+  "description": "CLI to set up PleaseAI code style (eslint, prettier, editorconfig, ast-grep, bun lint, AGENTS.md) in any project and check code organization",
   "author": "PleaseAI",
   "license": "MIT",
   "homepage": "https://github.com/pleaseai/code-style#readme",
@@ -18,6 +18,7 @@
     "prettier",
     "editorconfig",
     "ast-grep",
+    "bun-lint",
     "agents",
     "pleaseai"
   ],

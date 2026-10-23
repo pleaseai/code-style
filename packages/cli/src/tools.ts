@@ -7,6 +7,7 @@
  * - `packages`: npm packages installed when this tool is selected
  * - `apply`:    side-effect applied after packages are installed
  *               (returns a list of file labels that were created/updated)
+ * - `optIn`:    left out of `--yes`; only applied when picked explicitly
  */
 export interface ToolContext {
   cwd: string
@@ -30,6 +31,7 @@ export interface Tool {
   label: string
   packages: string[]
   apply: (ctx: ToolContext) => Promise<ToolApplyResult>
+  optIn?: boolean
 }
 
 export type ToolId
@@ -38,6 +40,7 @@ export type ToolId
     | 'editorconfig'
     | 'agents-md'
     | 'ast-grep'
+    | 'bun-lint-config'
 
 export const EMPTY_RESULT: ToolApplyResult = {
   created: [],

@@ -3,7 +3,7 @@
 English | [한국어](./README.ko.md)
 
 CLI that wires PleaseAI's shared code style into any project — installs the
-eslint/prettier/editorconfig/ast-grep packages and manages the `AGENTS.md`
+eslint/prettier/editorconfig/ast-grep/bun-lint packages and manages the `AGENTS.md`
 rules block so AI coding assistants know how to write code that passes lint on
 the first try. `please-style check` checks file names and test paths.
 
@@ -43,6 +43,11 @@ The `init` command:
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (copied from `node_modules`) |
 | agents-md | — | `AGENTS.md` (marker-managed block) |
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| bun-lint-config | `@pleaseai/bun-lint-config` | `bunfig.toml` `[lint]` (marker-managed block) |
+
+`init --yes` applies every tool except **bun-lint-config**, which is opt-in:
+`bun lint` is an alternative to ESLint, not an addition to it, so select it
+yourself in the interactive `init`.
 
 ## ast-grep rules
 
@@ -78,6 +83,20 @@ command that copies it with Yarn's resolver:
 
 ```bash
 yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/editorconfig/.editorconfig'), '.editorconfig', fs.constants.COPYFILE_EXCL)"
+```
+
+The **bun-lint-config** tool writes the `[lint]` tables of
+[`@pleaseai/bun-lint-config`](../bun-lint-config) into `bunfig.toml`, between
+`# >>> @pleaseai/bun-lint-config` and `# <<< @pleaseai/bun-lint-config`
+comments; `init` refreshes that block and keeps the rest of the file. If
+`bunfig.toml` already sets lint options outside the block, `init` leaves the
+file alone and asks you to remove them first. Next to an `eslint.config.*`
+file `bun lint` reads that config and applies the `[lint]` keys on top of it,
+so `init` warns when you pick both. Under Plug'n'Play it skips the file and
+prints the copy command:
+
+```bash
+yarn node -e "const fs = require('fs'); fs.copyFileSync(require.resolve('@pleaseai/bun-lint-config/lint.toml'), 'bunfig.toml', fs.constants.COPYFILE_EXCL)"
 ```
 
 `please-style check` itself works under Plug'n'Play: `@pleaseai/ast-grep-config`
@@ -403,7 +422,7 @@ JavaScript).
 
 | Flag | Description |
 | --- | --- |
-| `--yes`, `-y` | Accept defaults, overwrite existing files without prompting |
+| `--yes`, `-y` | Accept defaults (every tool except the opt-in bun-lint-config), overwrite existing files without prompting |
 | `--lang <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print version |

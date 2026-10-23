@@ -18,6 +18,9 @@
     },
     "packages/editorconfig": {
       "package-name": "@pleaseai/editorconfig"
+    },
+    "packages/bun-lint-config": {
+      "package-name": "@pleaseai/bun-lint-config"
     }
   }
 }

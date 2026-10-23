@@ -19,6 +19,9 @@ interface Messages {
   agentsBlockUpdated: string
   astGrepPlugNPlay: string
   editorconfigPlugNPlay: string
+  bunLintPlugNPlay: string
+  bunLintExistingSection: string
+  bunLintNextToEslint: string
   doctorHeading: string
   doctorOk: string
   doctorMissing: string
@@ -49,6 +52,9 @@ const messages: Record<Locale, Messages> = {
     agentsBlockUpdated: 'Refreshed AGENTS.md pleaseai-code-style block.',
     astGrepPlugNPlay: 'Yarn Plug\'n\'Play has no node_modules, so ast-grep cannot read the rules from node_modules/@pleaseai/ast-grep-config. Set `nodeLinker: node-modules` in .yarnrc.yml, run yarn install, and run init again.',
     editorconfigPlugNPlay: 'Yarn Plug\'n\'Play has no node_modules, so .editorconfig was not copied from node_modules/@pleaseai/editorconfig. Copy it with: yarn node -e "const fs = require(\'fs\'); fs.copyFileSync(require.resolve(\'@pleaseai/editorconfig/.editorconfig\'), \'.editorconfig\', fs.constants.COPYFILE_EXCL)"',
+    bunLintPlugNPlay: 'Yarn Plug\'n\'Play has no node_modules, so bunfig.toml was not written from node_modules/@pleaseai/bun-lint-config. Copy it with: yarn node -e "const fs = require(\'fs\'); fs.copyFileSync(require.resolve(\'@pleaseai/bun-lint-config/lint.toml\'), \'bunfig.toml\', fs.constants.COPYFILE_EXCL)"',
+    bunLintExistingSection: 'bunfig.toml already has lint settings outside the @pleaseai/bun-lint-config block, so it was left unchanged. Remove its [lint] tables and lint.* keys, then run init again.',
+    bunLintNextToEslint: 'This project also uses ESLint. Next to an eslint.config.* file, `bun lint` reads that config and applies the bunfig.toml [lint] keys on top of it, so use one or the other.',
     doctorHeading: 'Project status',
     doctorOk: 'OK',
     doctorMissing: 'missing',
@@ -105,6 +111,9 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     agentsBlockUpdated: 'AGENTS.md의 pleaseai-code-style 블록을 갱신했습니다.',
     astGrepPlugNPlay: 'Yarn Plug\'n\'Play는 node_modules를 만들지 않아 ast-grep이 node_modules/@pleaseai/ast-grep-config의 규칙을 읽을 수 없습니다. .yarnrc.yml에 `nodeLinker: node-modules`를 설정하고 yarn install 후 init을 다시 실행하세요.',
     editorconfigPlugNPlay: 'Yarn Plug\'n\'Play는 node_modules를 만들지 않아 node_modules/@pleaseai/editorconfig에서 .editorconfig를 복사하지 못했습니다. 다음 명령으로 복사하세요: yarn node -e "const fs = require(\'fs\'); fs.copyFileSync(require.resolve(\'@pleaseai/editorconfig/.editorconfig\'), \'.editorconfig\', fs.constants.COPYFILE_EXCL)"',
+    bunLintPlugNPlay: 'Yarn Plug\'n\'Play는 node_modules를 만들지 않아 node_modules/@pleaseai/bun-lint-config에서 bunfig.toml을 만들지 못했습니다. 다음 명령으로 복사하세요: yarn node -e "const fs = require(\'fs\'); fs.copyFileSync(require.resolve(\'@pleaseai/bun-lint-config/lint.toml\'), \'bunfig.toml\', fs.constants.COPYFILE_EXCL)"',
+    bunLintExistingSection: 'bunfig.toml의 @pleaseai/bun-lint-config 블록 밖에 이미 lint 설정이 있어 파일을 그대로 두었습니다. [lint] 테이블과 lint.* 키를 지운 뒤 init을 다시 실행하세요.',
+    bunLintNextToEslint: '이 프로젝트는 ESLint도 사용합니다. eslint.config.* 파일이 있으면 `bun lint`는 그 설정을 읽고 그 위에 bunfig.toml의 [lint] 키를 적용하므로, 둘 중 하나만 사용하세요.',
     doctorHeading: '프로젝트 상태',
     doctorOk: '정상',
     doctorMissing: '없음',

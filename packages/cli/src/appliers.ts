@@ -1,5 +1,6 @@
-import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
-import { copyFileSync, existsSync, writeFileSync } from 'node:fs'
+import type { Markers } from './fs-utils.js'
+import type { Tool, ToolApplyResult, ToolContext, ToolId } from './tools.js'
+import { copyFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve as joinPath } from 'node:path'
 import { confirm, isCancel, log } from '@clack/prompts'
 import {
@@ -286,6 +287,83 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   return result
 }
 
+const BUN_LINT_SOURCE = 'node_modules/@pleaseai/bun-lint-config/lint.toml'
+
+const BUNFIG_MARKERS: Markers = {
+  begin: '# >>> @pleaseai/bun-lint-config',
+  end: '# <<< @pleaseai/bun-lint-config',
+}
+
+const BUNFIG_NOTE = `# Managed by @pleaseai/code-style: do not edit inside this block, run
+# \`please-style init\` to refresh it. Keep it at the end of the file, since
+# keys after it would belong to its last table.`
+
+function outsideMarkerBlock(text: string, markers: Markers): string {
+  const begin = text.indexOf(markers.begin)
+  const end = text.indexOf(markers.end)
+  return begin !== -1 && end > begin ? text.slice(0, begin) + text.slice(end + markers.end.length) : text
+}
+
+function definesLint(toml: string): boolean {
+  let inTable = false
+  for (const line of toml.split(/\r?\n/).map(l => l.trim())) {
+    if (/^\[\[?\s*(?:lint|"lint"|'lint')\s*[.\]]/.test(line)) {
+      return true
+    }
+    if (line.startsWith('[')) {
+      inTable = true
+    }
+    else if (!inTable && /^(?:lint|"lint"|'lint')\s*[.=]/.test(line)) {
+      return true
+    }
+  }
+  return false
+}
+
+function hasEslintConfig(ctx: ToolContext): boolean {
+  return ctx.selectedToolIds?.includes('eslint-config') === true
+    || readdirSync(ctx.cwd).some(file => /^eslint\.config\.\w+$/.test(file))
+}
+
+export async function applyBunLintConfig(ctx: ToolContext): Promise<ToolApplyResult> {
+  const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
+  const target = joinPath(ctx.cwd, 'bunfig.toml')
+  const label = 'bunfig.toml'
+  const lintToml = readFileOrNull(joinPath(ctx.cwd, BUN_LINT_SOURCE))
+
+  if (lintToml == null) {
+    if (!existsSync(target) && usesPlugNPlay(ctx.cwd, BUN_LINT_SOURCE)) {
+      log.warn(t('bunLintPlugNPlay'))
+    }
+    result.skipped.push(label)
+    return result
+  }
+
+  const existing = readFileOrNull(target)
+  if (existing != null && definesLint(outsideMarkerBlock(existing, BUNFIG_MARKERS))) {
+    // TOML rejects a table defined twice, so the user's own lint settings have to go first.
+    log.warn(t('bunLintExistingSection'))
+    result.skipped.push(label)
+    return result
+  }
+  if (hasEslintConfig(ctx)) {
+    log.warn(t('bunLintNextToEslint'))
+  }
+
+  const next = upsertMarkerBlock(existing, `${BUNFIG_NOTE}\n\n${lintToml}`, BUNFIG_MARKERS)
+  if (existing == null) {
+    writeFileSync(target, next)
+    result.created.push(label)
+    return result
+  }
+  if (existing === next) {
+    return result
+  }
+  writeFileSync(target, next)
+  result.updated.push(label)
+  return result
+}
+
 // --- Registry ---------------------------------------------------------------
 
 export const TOOLS: Tool[] = [
@@ -323,8 +401,19 @@ export const TOOLS: Tool[] = [
     packages: ['@pleaseai/ast-grep-config', '@ast-grep/cli'],
     apply: applyAstGrep,
   },
+  {
+    id: 'bun-lint-config',
+    label: '@pleaseai/bun-lint-config (bunfig.toml [lint])',
+    packages: ['@pleaseai/bun-lint-config'],
+    apply: applyBunLintConfig,
+    optIn: true,
+  },
 ]
 
 export function findTool(id: string): Tool | undefined {
   return TOOLS.find(t => t.id === id)
+}
+
+export function defaultToolIds(): ToolId[] {
+  return TOOLS.filter(tool => tool.optIn !== true).map(tool => tool.id)
 }

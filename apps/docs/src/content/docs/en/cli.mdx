@@ -99,6 +99,9 @@ An optional `code-organization.json` can only **add** names — extra TypeScript
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` |
 | agents-md | — | `AGENTS.md` (marker-managed block) |
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| bun-lint-config | `@pleaseai/bun-lint-config` | `bunfig.toml` `[lint]` (marker-managed block) |
+
+`init --yes` applies every tool except **bun-lint-config**, which is opt-in: `bun lint` is an alternative to ESLint, not an addition to it, so select it yourself in the interactive `init`.
 
 ## The `AGENTS.md` Rules Block
 
@@ -130,7 +133,7 @@ The full canonical rules are shipped per language for AI assistants that prefer 
 
 | Flag | Description |
 | --- | --- |
-| `--yes`, `-y` | Accept defaults and overwrite existing files without prompting |
+| `--yes`, `-y` | Accept defaults (every tool except the opt-in bun-lint-config) and overwrite existing files without prompting |
 | `--lang <ko\|en>` | Force the CLI locale (defaults to `$LC_ALL` / `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print the CLI version |
@@ -151,7 +154,7 @@ Combine `--yes` with a locale override for a fully non-interactive invocation su
 pleaseai-code-style --yes --lang en init
 ```
 
-This accepts defaults for every tool, overwrites any existing config files, and uses English output.
+This applies every tool except the opt-in bun-lint-config, overwrites any existing config files, and uses English output.
 
 ## Binaries
 

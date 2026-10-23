@@ -1,0 +1,273 @@
+# Generated from @pleaseai/eslint-config by `bun run generate` in
+# packages/bun-lint-config. Do not edit it by hand.
+#
+# These are the [lint] tables of a project's bunfig.toml: `please-style init`
+# writes them there, or copy them in yourself.
+
+[lint]
+ignorePatterns = [ "**/node_modules", "**/dist", "**/package-lock.json", "**/yarn.lock", "**/pnpm-lock.yaml", "**/bun.lockb", "**/output", "**/coverage", "**/temp", "**/.temp", "**/tmp", "**/.tmp", "**/.history", "**/.vitepress/cache", "**/.nuxt", "**/.next", "**/.svelte-kit", "**/.vercel", "**/.changeset", "**/.idea", "**/.cache", "**/.output", "**/.vite-inspect", "**/.yarn", "**/CHANGELOG*.md", "**/LICENSE*", "**/*.min.*", "**/__snapshots__", "**/vite.config.*.timestamp-*", "**/auto-import.d.ts", "**/auto-imports.d.ts", "**/components.d.ts", "**/.context", "**/.claude", "**/.agents", "**/.*/skills" ]
+
+[lint.rules]
+"@typescript-eslint/no-unused-vars" = [ "error", { args = "after-used", argsIgnorePattern = "^_", ignoreRestSiblings = true, vars = "all", varsIgnorePattern = "^_" } ]
+accessor-pairs = [ "error", { enforceForClassMembers = true, setWithoutGet = true } ]
+array-callback-return = "error"
+block-scoped-var = "error"
+constructor-super = "error"
+curly = [ "error", "all" ]
+default-case-last = "error"
+dot-notation = [ "error", { allowKeywords = true } ]
+eqeqeq = [ "error", "smart" ]
+"import/consistent-type-specifier-style" = [ "error", "prefer-top-level" ]
+"import/first" = "error"
+"import/newline-after-import" = [ "error", { count = 1 } ]
+"import/no-duplicates" = "error"
+"import/no-mutable-exports" = "error"
+"import/no-named-default" = "error"
+"n/no-top-level-await" = "error"
+new-cap = [ "error", { capIsNew = false, newIsCap = true, properties = true } ]
+no-alert = "error"
+no-array-constructor = "error"
+no-async-promise-executor = "error"
+no-caller = "error"
+no-case-declarations = "error"
+no-class-assign = "error"
+no-compare-neg-zero = "error"
+no-cond-assign = [ "error", "always" ]
+no-console = [ "error", { allow = [ "warn", "error" ] } ]
+no-const-assign = "error"
+no-control-regex = "error"
+no-debugger = "error"
+no-delete-var = "error"
+no-dupe-args = "error"
+no-dupe-class-members = "error"
+no-dupe-keys = "error"
+no-duplicate-case = "error"
+no-empty = [ "error", { allowEmptyCatch = true } ]
+no-empty-character-class = "off"
+no-empty-pattern = "error"
+no-eval = "error"
+no-ex-assign = "error"
+no-extend-native = "error"
+no-extra-bind = "error"
+no-extra-boolean-cast = "error"
+no-fallthrough = "error"
+no-func-assign = "error"
+no-global-assign = "error"
+no-implied-eval = "error"
+no-import-assign = "error"
+no-invalid-regexp = "off"
+no-irregular-whitespace = "error"
+no-iterator = "error"
+no-labels = [ "error", { allowLoop = false, allowSwitch = false } ]
+no-lone-blocks = "error"
+no-loss-of-precision = "error"
+no-misleading-character-class = "error"
+no-multi-str = "error"
+no-new = "error"
+no-new-func = "error"
+no-new-native-nonconstructor = "error"
+no-new-wrappers = "error"
+no-obj-calls = "error"
+no-octal = "error"
+no-octal-escape = "error"
+no-proto = "error"
+no-prototype-builtins = "error"
+no-redeclare = [ "error", { builtinGlobals = false } ]
+no-regex-spaces = "error"
+no-restricted-globals = [ "error", { message = "Use `globalThis` instead.", name = "global" }, { message = "Use `globalThis` instead.", name = "self" } ]
+no-restricted-properties = [ "error", { message = "Use `Object.getPrototypeOf` or `Object.setPrototypeOf` instead.", property = "__proto__" }, { message = "Use `Object.defineProperty` instead.", property = "__defineGetter__" }, { message = "Use `Object.defineProperty` instead.", property = "__defineSetter__" }, { message = "Use `Object.getOwnPropertyDescriptor` instead.", property = "__lookupGetter__" }, { message = "Use `Object.getOwnPropertyDescriptor` instead.", property = "__lookupSetter__" } ]
+no-restricted-syntax = [ "error", "TSEnumDeclaration[const=true]", "TSExportAssignment" ]
+no-self-assign = [ "error", { props = true } ]
+no-self-compare = "error"
+no-sequences = "error"
+no-shadow-restricted-names = "error"
+no-sparse-arrays = "error"
+no-template-curly-in-string = "error"
+no-this-before-super = "error"
+no-throw-literal = "error"
+no-undef = "error"
+no-undef-init = "error"
+no-unexpected-multiline = "error"
+no-unmodified-loop-condition = "error"
+no-unneeded-ternary = [ "error", { defaultAssignment = false } ]
+no-unreachable = "error"
+no-unreachable-loop = "error"
+no-unsafe-finally = "error"
+no-unsafe-negation = "error"
+no-unused-expressions = [ "error", { allowShortCircuit = true, allowTaggedTemplates = true, allowTernary = true } ]
+no-use-before-define = [ "error", { classes = false, functions = false, variables = true } ]
+no-useless-backreference = "off"
+no-useless-call = "error"
+no-useless-catch = "error"
+no-useless-computed-key = "error"
+no-useless-constructor = "error"
+no-useless-rename = "error"
+no-useless-return = "error"
+no-var = "error"
+no-with = "error"
+object-shorthand = [ "error", "always", { avoidQuotes = true, ignoreConstructors = false } ]
+one-var = [ "error", { initialized = "never" } ]
+prefer-arrow-callback = [ "error", { allowNamedFunctions = false, allowUnboundThis = true } ]
+prefer-const = [ "error", { destructuring = "all", ignoreReadBeforeAssign = true } ]
+prefer-exponentiation-operator = "error"
+prefer-object-has-own = "error"
+prefer-promise-reject-errors = "error"
+prefer-regex-literals = [ "error", { disallowRedundantWrapping = true } ]
+prefer-rest-params = "error"
+prefer-spread = "error"
+prefer-template = "error"
+"react/jsx-closing-bracket-location" = "error"
+"react/jsx-closing-tag-location" = "error"
+"react/jsx-curly-brace-presence" = [ "error", { propElementValues = "always" } ]
+"react/jsx-curly-newline" = "error"
+"react/jsx-curly-spacing" = [ "error", "never" ]
+"react/jsx-equals-spacing" = "error"
+"react/jsx-first-prop-new-line" = "error"
+"react/jsx-indent-props" = [ "error", 2 ]
+"react/jsx-max-props-per-line" = [ "error", { maximum = 1, when = "multiline" } ]
+"react/jsx-one-expression-per-line" = [ "error", { allow = "single-child" } ]
+"react/jsx-tag-spacing" = [ "error", { afterOpening = "never", beforeClosing = "never", beforeSelfClosing = "always", closingSlash = "never" } ]
+symbol-description = "error"
+unicode-bom = [ "error", "never" ]
+"unicorn/prefer-array-some" = "error"
+"unicorn/prefer-date-now" = "error"
+"unicorn/prefer-regexp-test" = "error"
+use-isnan = [ "error", { enforceForIndexOf = true, enforceForSwitchCase = true } ]
+valid-typeof = [ "error", { requireStringLiterals = true } ]
+vars-on-top = "error"
+yoda = [ "error", "never" ]
+
+[[lint.overrides]]
+files = [ "**/*.{,[cm]}[jt]s{,x}" ]
+
+[lint.overrides.rules]
+"node/handle-callback-err" = [ "error", "^(err|error)$" ]
+"node/no-exports-assign" = "error"
+"node/no-new-require" = "error"
+"node/no-path-concat" = "error"
+
+[[lint.overrides]]
+files = [ "**/*.{,[cm]}[jt]s{,x}" ]
+
+[lint.overrides.rules]
+"unicorn/consistent-empty-array-spread" = "error"
+"unicorn/error-message" = "error"
+"unicorn/escape-case" = "error"
+"unicorn/new-for-builtins" = "error"
+"unicorn/no-instanceof-builtins" = "error"
+"unicorn/no-new-array" = "error"
+"unicorn/no-new-buffer" = "error"
+"unicorn/number-literal-case" = "error"
+"unicorn/prefer-dom-node-text-content" = "error"
+"unicorn/prefer-includes" = "error"
+"unicorn/prefer-node-protocol" = "error"
+"unicorn/prefer-number-properties" = "error"
+"unicorn/prefer-string-starts-ends-with" = "error"
+"unicorn/prefer-type-error" = "error"
+"unicorn/throw-new-error" = "error"
+
+[[lint.overrides]]
+files = [ "**/*.{,[cm]}ts", "**/*.{,[cm]}tsx" ]
+
+[lint.overrides.rules]
+"@typescript-eslint/ban-ts-comment" = [ "error", { ts-expect-error = "allow-with-description" } ]
+"@typescript-eslint/consistent-type-definitions" = [ "error", "interface" ]
+"@typescript-eslint/consistent-type-imports" = [ "error", { disallowTypeAnnotations = false, fixStyle = "separate-type-imports", prefer = "type-imports" } ]
+"@typescript-eslint/method-signature-style" = [ "error", "property" ]
+"@typescript-eslint/no-array-constructor" = "error"
+"@typescript-eslint/no-dupe-class-members" = "error"
+"@typescript-eslint/no-duplicate-enum-values" = "error"
+"@typescript-eslint/no-empty-object-type" = [ "error", { allowInterfaces = "always" } ]
+"@typescript-eslint/no-explicit-any" = "off"
+"@typescript-eslint/no-extra-non-null-assertion" = "error"
+"@typescript-eslint/no-import-type-side-effects" = "error"
+"@typescript-eslint/no-misused-new" = "error"
+"@typescript-eslint/no-namespace" = "error"
+"@typescript-eslint/no-non-null-asserted-nullish-coalescing" = "error"
+"@typescript-eslint/no-non-null-asserted-optional-chain" = "error"
+"@typescript-eslint/no-redeclare" = [ "error", { builtinGlobals = false } ]
+"@typescript-eslint/no-require-imports" = "error"
+"@typescript-eslint/no-this-alias" = "error"
+"@typescript-eslint/no-unnecessary-type-constraint" = "error"
+"@typescript-eslint/no-unsafe-declaration-merging" = "error"
+"@typescript-eslint/no-unsafe-function-type" = "error"
+"@typescript-eslint/no-unused-expressions" = [ "error", { allowShortCircuit = true, allowTaggedTemplates = true, allowTernary = true } ]
+"@typescript-eslint/no-use-before-define" = [ "error", { classes = false, functions = false, variables = true } ]
+"@typescript-eslint/no-wrapper-object-types" = "error"
+"@typescript-eslint/prefer-as-const" = "error"
+"@typescript-eslint/prefer-literal-enum-member" = "error"
+"@typescript-eslint/prefer-namespace-keyword" = "error"
+"@typescript-eslint/triple-slash-reference" = "off"
+constructor-super = "off"
+getter-return = "off"
+no-array-constructor = "off"
+no-class-assign = "off"
+no-const-assign = "off"
+no-dupe-args = "off"
+no-dupe-class-members = "off"
+no-dupe-keys = "off"
+no-func-assign = "off"
+no-import-assign = "off"
+no-new-native-nonconstructor = "off"
+no-obj-calls = "off"
+no-redeclare = "off"
+no-setter-return = "off"
+no-this-before-super = "off"
+no-undef = "off"
+no-unreachable = "off"
+no-unsafe-negation = "off"
+no-unused-expressions = "off"
+no-use-before-define = "off"
+no-useless-constructor = "off"
+no-var = "error"
+no-with = "off"
+prefer-const = "error"
+prefer-rest-params = "error"
+prefer-spread = "error"
+
+[[lint.overrides]]
+files = [ "**/__tests__/**/*.{,[cm]}[jt]s{,x}", "**/*.spec.{,[cm]}[jt]s{,x}", "**/*.test.{,[cm]}[jt]s{,x}", "**/*.bench.{,[cm]}[jt]s{,x}", "**/*.benchmark.{,[cm]}[jt]s{,x}" ]
+
+[lint.overrides.rules]
+"@typescript-eslint/no-unused-expressions" = [ "error", { allowShortCircuit = true, allowTaggedTemplates = true, allowTernary = true } ]
+"n/no-top-level-await" = "off"
+no-unused-expressions = "off"
+"vitest/consistent-test-it" = [ "error", { fn = "it", withinDescribe = "it" } ]
+"vitest/no-focused-tests" = "error"
+"vitest/no-identical-title" = "error"
+"vitest/no-import-node-test" = "error"
+"vitest/prefer-hooks-in-order" = "error"
+
+[[lint.overrides]]
+files = [ "**/scripts/**/*.{,[cm]}[jt]s{,x}" ]
+
+[lint.overrides.rules]
+"n/no-top-level-await" = "off"
+no-console = "off"
+
+[[lint.overrides]]
+files = [ "**/cli/**/*.{,[cm]}[jt]s{,x}", "**/cli.{,[cm]}[jt]s{,x}" ]
+
+[lint.overrides.rules]
+"n/no-top-level-await" = "off"
+no-console = "off"
+
+[[lint.overrides]]
+files = [ "**/*.d.{,[cm]}ts" ]
+
+[lint.overrides.rules]
+"@typescript-eslint/no-unused-vars" = "off"
+no-restricted-syntax = "off"
+
+[[lint.overrides]]
+files = [ "**/*.js", "**/*.cjs" ]
+
+[lint.overrides.rules]
+"@typescript-eslint/no-require-imports" = "off"
+
+[[lint.overrides]]
+files = [ "**/*.config.{,[cm]}[jt]s{,x}", "**/*.config.*.{,[cm]}[jt]s{,x}" ]
+
+[lint.overrides.rules]
+"n/no-top-level-await" = "off"
+no-console = "off"

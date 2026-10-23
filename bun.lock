@@ -57,6 +57,18 @@
         "@ast-grep/cli",
       ],
     },
+    "packages/bun-lint-config": {
+      "name": "@pleaseai/bun-lint-config",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@pleaseai/eslint-config": "workspace:*",
+        "@types/bun": "^1.4.3",
+        "eslint": "^10.12.0",
+        "eslint-plugin-import": "^2.32.0",
+        "smol-toml": "^1.9.1",
+        "typescript": "^6.0.3",
+      },
+    },
     "packages/cli": {
       "name": "@pleaseai/code-style",
       "version": "0.1.1",
@@ -509,6 +521,8 @@
     "@pkgr/core": ["@pkgr/core@0.2.9", "", {}, "sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA=="],
 
     "@pleaseai/ast-grep-config": ["@pleaseai/ast-grep-config@workspace:packages/ast-grep-config"],
+
+    "@pleaseai/bun-lint-config": ["@pleaseai/bun-lint-config@workspace:packages/bun-lint-config"],
 
     "@pleaseai/code-style": ["@pleaseai/code-style@workspace:packages/cli"],
 
