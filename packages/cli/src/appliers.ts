@@ -151,11 +151,11 @@ const AGENTS_TYPESCRIPT = `- Formatter: \`@pleaseai/eslint-config\` (wraps \`@an
 - ESM only — never emit \`require\`/\`module.exports\`
 - TypeScript: \`strict: true\`, prefer \`type\` over \`interface\`, no implicit \`any\`
 - Prefer named exports, early returns, \`async\`/\`await\`, optional chaining
+- Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
+  (\`src/foo/bar.ts\` → \`test/foo/bar.test.ts\`); no \`import.meta.vitest\` in-source tests
 `
 
 const AGENTS_GENERAL = `- File size target: ≤ 500 lines
-- Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
-  (\`src/foo/bar.ts\` → \`test/foo/bar.test.ts\`); no \`import.meta.vitest\` in-source tests
 `
 
 const AGENTS_CODE_ORGANIZATION = `- Code organization (named exports, file names, error files, test paths, shared helpers):

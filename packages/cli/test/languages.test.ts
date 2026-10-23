@@ -82,6 +82,11 @@ describe('languagesFromAgentsBlock', () => {
     expect(languagesFromAgentsBlock(block(`read ${guide('typescript')}`))).toBeUndefined()
   })
 
+  test('is undefined for the v0.1.1 block, so update falls back to detection', () => {
+    const released = block('For the full rules (what an AI coding assistant needs to know before writing code),\nread `node_modules/@pleaseai/code-style/rules.md`.')
+    expect(languagesFromAgentsBlock(released)).toBeUndefined()
+  })
+
   test('lists the languages the block links', () => {
     expect(languagesFromAgentsBlock(block(`read ${guide('general')} and ${guide('dart')}`))).toEqual(['dart'])
     expect(languagesFromAgentsBlock(block(`read ${guide('general')}`))).toEqual([])

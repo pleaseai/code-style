@@ -207,6 +207,7 @@ describe('AGENTS.md rules block', () => {
     expect(linked).toEqual(['rules/general.md', 'rules/dart.md', 'rules/rust.md'])
     expect(body).not.toContain('@pleaseai/eslint-config')
     expect(body).not.toContain('ESM only')
+    expect(body).not.toContain('import.meta.vitest')
     expect(body).toContain('- File size target')
     expect(body).toContain('- Conventional Commits')
   })
