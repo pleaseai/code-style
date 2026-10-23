@@ -27,6 +27,9 @@ interface Messages {
   unknownCommand: (cmd: string) => string
   unexpectedArguments: (args: string) => string
   optionBeforeCheck: (option: string) => string
+  deprecatedLangFlag: (locale: Locale) => string
+  ignoredLangFlag: (locale: Locale) => string
+  invalidLocaleFlag: (flag: LocaleFlag, value: string) => string
   usage: string
   checkUsage: string
 }
@@ -57,6 +60,11 @@ const messages: Record<Locale, Messages> = {
     unknownCommand: cmd => `Unknown command: ${cmd}`,
     unexpectedArguments: args => `Unexpected arguments: ${args}`,
     optionBeforeCheck: option => `${option} is a check option; put it after \`check\` (please-style check ${option})`,
+    deprecatedLangFlag: locale => `--lang ${locale} is deprecated; use --locale ${locale}. A future release will use --lang to select programming languages.`,
+    ignoredLangFlag: locale => `--lang ${locale} is deprecated and ignored because --locale is set; remove it. A future release will use --lang to select programming languages.`,
+    invalidLocaleFlag: (flag, value) => flag === '--locale'
+      ? `Unknown --locale value: "${value}". Use ko or en.`
+      : `Unknown --lang value: "${value}". To set the CLI locale, use --locale <ko|en>.`,
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -68,7 +76,7 @@ Commands:
 
 Options:
   --yes, -y        Accept defaults, overwrite existing files
-  --lang <ko|en>   Force CLI locale
+  --locale <ko|en> Force CLI locale
   --help, -h       Show this message
   --version, -v    Print version`,
     checkUsage: `Usage:
@@ -113,6 +121,11 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
     unexpectedArguments: args => `예상하지 못한 인자: ${args}`,
     optionBeforeCheck: option => `${option}는 check 옵션입니다. \`check\` 뒤에 쓰세요 (please-style check ${option})`,
+    deprecatedLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않습니다. 대신 --locale ${locale} 옵션을 쓰세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
+    ignoredLangFlag: locale => `--lang ${locale} 옵션은 더 이상 권장하지 않으며, --locale 옵션이 있어 무시합니다. 이 옵션을 지우세요. 이후 릴리스에서 --lang은 프로그래밍 언어 선택에 쓰입니다.`,
+    invalidLocaleFlag: (flag, value) => flag === '--locale'
+      ? `알 수 없는 --locale 값: "${value}". ko 또는 en을 쓰세요.`
+      : `알 수 없는 --lang 값: "${value}". CLI 로케일은 --locale <ko|en>으로 지정하세요.`,
     usage: `사용법:
   pleaseai-code-style <command> [options]
 
@@ -124,7 +137,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
 
 옵션:
   --yes, -y        기본값 수락, 기존 파일 덮어쓰기
-  --lang <ko|en>   CLI 로케일 강제 지정
+  --locale <ko|en> CLI 로케일 강제 지정
   --help, -h       이 메시지 표시
   --version, -v    버전 출력`,
     checkUsage: `사용법:
@@ -152,6 +165,43 @@ export function detectLocale(override?: string): Locale {
   }
   const env = process.env.LC_ALL || process.env.LANG || process.env.LC_MESSAGES || ''
   return env.toLowerCase().startsWith('ko') ? 'ko' : 'en'
+}
+
+export type LocaleFlag = '--locale' | '--lang'
+
+type FlagValue = string | boolean | undefined
+
+export interface LangWarning {
+  kind: 'deprecated' | 'ignored'
+  locale: Locale
+}
+
+export type LocaleFlags
+  = | { kind: 'ok', locale: Locale, langWarning?: LangWarning }
+    | { kind: 'invalid', locale: Locale, flag: LocaleFlag, value: string }
+
+function asLocale(value: FlagValue): Locale | undefined {
+  return value === 'ko' || value === 'en' ? value : undefined
+}
+
+function flagText(value: FlagValue): string {
+  return typeof value === 'string' ? value : ''
+}
+
+export function resolveLocaleFlags(flags: { locale?: FlagValue, lang?: FlagValue }): LocaleFlags {
+  const fromLocale = asLocale(flags.locale)
+  const fromLang = asLocale(flags.lang)
+  const locale = fromLocale ?? fromLang ?? detectLocale()
+  if (flags.locale !== undefined && fromLocale === undefined) {
+    return { kind: 'invalid', locale, flag: '--locale', value: flagText(flags.locale) }
+  }
+  if (flags.lang !== undefined && fromLang === undefined) {
+    return { kind: 'invalid', locale, flag: '--lang', value: flagText(flags.lang) }
+  }
+  if (fromLang === undefined) {
+    return { kind: 'ok', locale }
+  }
+  return { kind: 'ok', locale, langWarning: { kind: fromLocale === undefined ? 'deprecated' : 'ignored', locale: fromLang } }
 }
 
 let current: Locale = 'en'

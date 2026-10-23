@@ -5,12 +5,13 @@ import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import { runCheck } from './check/run-check.js'
 import { runDoctor, runInit, runUpdate } from './commands.js'
-import { detectLocale, setLocale, t } from './i18n.js'
+import { resolveLocaleFlags, setLocale, t } from './i18n.js'
 
 const GLOBAL_OPTIONS = {
   yes: { type: 'boolean', short: 'y' },
   help: { type: 'boolean', short: 'h' },
   version: { type: 'boolean', short: 'v' },
+  locale: { type: 'string' },
   lang: { type: 'string' },
 } as const
 
@@ -23,7 +24,16 @@ const { values: allValues, positionals, tokens } = parseArgs({
   options: GLOBAL_OPTIONS,
 })
 
-setLocale(detectLocale(typeof allValues.lang === 'string' ? allValues.lang : undefined))
+const localeFlags = resolveLocaleFlags({ locale: allValues.locale, lang: allValues.lang })
+setLocale(localeFlags.locale)
+if (localeFlags.kind === 'invalid') {
+  process.stderr.write(`${t('invalidLocaleFlag')(localeFlags.flag, localeFlags.value)}\n`)
+  process.exit(1)
+}
+else if (localeFlags.langWarning !== undefined) {
+  const { kind, locale } = localeFlags.langWarning
+  process.stderr.write(`${t(kind === 'deprecated' ? 'deprecatedLangFlag' : 'ignoredLangFlag')(locale)}\n`)
+}
 
 const command = positionals[0] ?? 'init'
 // `check` parses its own flags strictly, so only what precedes it is global

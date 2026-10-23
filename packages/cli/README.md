@@ -404,15 +404,20 @@ JavaScript).
 | Flag | Description |
 | --- | --- |
 | `--yes`, `-y` | Accept defaults, overwrite existing files without prompting |
-| `--lang <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
+| `--locale <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print version |
 
 ## Localisation
 
 The CLI auto-detects your locale from `LC_ALL` / `LANG` / `LC_MESSAGES` and
-currently ships Korean and English messages. Override with `--lang ko` or
-`--lang en`.
+currently ships Korean and English messages. Override with `--locale ko` or
+`--locale en`.
+
+`--lang ko` and `--lang en` still set the locale for now, with a deprecation
+warning. When both flags are given, `--locale` wins. Any other `--lang` value, or
+a `--locale` value other than `ko` or `en`, exits with an error (exit code 1). A
+future release uses `--lang` to select programming languages.
 
 ## License
 

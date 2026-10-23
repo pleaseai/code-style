@@ -22,7 +22,7 @@ export function runCheck(argv: string[], version: () => string): number {
         config: { type: 'string' },
         help: { type: 'boolean', short: 'h' },
         version: { type: 'boolean', short: 'v' },
-        // Global option, already applied by the entry point.
+        locale: { type: 'string' },
         lang: { type: 'string' },
       },
     })

@@ -1,6 +1,6 @@
 import process from 'node:process'
 import { afterEach, describe, expect, test } from 'bun:test'
-import { detectLocale, setLocale, t } from '../src/i18n.js'
+import { detectLocale, resolveLocaleFlags, setLocale, t } from '../src/i18n.js'
 
 describe('detectLocale', () => {
   const originalLang = process.env.LANG
@@ -54,6 +54,29 @@ describe('detectLocale', () => {
     process.env.LANG = 'ko_KR.UTF-8'
     // Only 'ko' / 'en' are valid overrides; anything else is ignored.
     expect(detectLocale('fr')).toBe('ko')
+  })
+})
+
+describe('resolveLocaleFlags', () => {
+  test('--locale sets the locale without a warning', () => {
+    expect(resolveLocaleFlags({ locale: 'ko' })).toEqual({ kind: 'ok', locale: 'ko' })
+  })
+
+  test('--lang ko|en still sets the locale and is reported as deprecated', () => {
+    expect(resolveLocaleFlags({ lang: 'en' })).toEqual({ kind: 'ok', locale: 'en', langWarning: { kind: 'deprecated', locale: 'en' } })
+  })
+
+  test('--locale wins over --lang, which is reported as ignored', () => {
+    expect(resolveLocaleFlags({ locale: 'en', lang: 'ko' })).toEqual({ kind: 'ok', locale: 'en', langWarning: { kind: 'ignored', locale: 'ko' } })
+  })
+
+  test('an unknown --lang value is invalid instead of ignored', () => {
+    expect(resolveLocaleFlags({ lang: 'dart' })).toMatchObject({ kind: 'invalid', flag: '--lang', value: 'dart' })
+    expect(resolveLocaleFlags({ lang: true })).toMatchObject({ kind: 'invalid', flag: '--lang', value: '' })
+  })
+
+  test('an unknown --locale value is invalid', () => {
+    expect(resolveLocaleFlags({ locale: 'fr' })).toMatchObject({ kind: 'invalid', flag: '--locale', value: 'fr' })
   })
 })
 
