@@ -154,6 +154,20 @@ describe('AGENTS.md rules block', () => {
     expect(body).toContain('please-style check')
   })
 
+  test('points only at rule files the package ships', async () => {
+    await applyAgentsMd({ cwd: dir, autoAccept: true })
+    const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
+    const linked = [...body.matchAll(/node_modules\/@pleaseai\/code-style\/([\w./-]+\.md)/g)].map(m => m[1])
+    expect(linked).toEqual(['rules/general.md', 'rules/typescript.md'])
+
+    const pkgRoot = join(import.meta.dir, '..')
+    const { files } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf-8')) as { files: string[] }
+    for (const path of linked) {
+      expect(existsSync(join(pkgRoot, path))).toBe(true)
+      expect(files.some(entry => path === entry || path.startsWith(`${entry}/`))).toBe(true)
+    }
+  })
+
   test('omits the ast-grep pointer unless ast-grep is selected or both its packages are already dependencies', async () => {
     await applyAgentsMd({ cwd: dir, autoAccept: true, selectedToolIds: ['agents-md'] })
     const bare = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')

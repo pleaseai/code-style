@@ -153,7 +153,8 @@ will be overwritten.
 - Conventional Commits for all commit messages
 
 For the full rules (what an AI coding assistant needs to know before writing code),
-read \`node_modules/@pleaseai/code-style/rules.md\`.`
+read \`node_modules/@pleaseai/code-style/rules/general.md\` and
+\`node_modules/@pleaseai/code-style/rules/typescript.md\`.`
 
 const AGENTS_CODE_ORGANIZATION = `- Code organization (named exports, file names, error files, test paths, shared helpers):
   \`node_modules/@pleaseai/ast-grep-config/README.md\`; check with \`ast-grep scan\` and \`please-style check\`

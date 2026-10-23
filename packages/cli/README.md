@@ -392,8 +392,9 @@ The CLI owns only the content between these markers — everything else in
 ```
 
 Re-run `pleaseai-code-style update` any time you upgrade `@pleaseai/code-style`
-to refresh just this block. The full rules list is shipped as
-`node_modules/@pleaseai/code-style/rules.md` for reference.
+to refresh just this block. The full rules are shipped per language for
+reference: `node_modules/@pleaseai/code-style/rules/general.md` (every language)
+and `rules/typescript.md` (TypeScript and JavaScript).
 
 ## Options
 
