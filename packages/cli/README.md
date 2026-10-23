@@ -18,7 +18,7 @@ pubspec or Cargo-only projects) `init` offers only the AGENTS.md block and its g
 ```bash
 bunx @pleaseai/code-style         # same as `init`
 bunx @pleaseai/code-style init    # interactive setup
-bunx @pleaseai/code-style update  # re-apply the AGENTS.md rules block only
+bunx @pleaseai/code-style update  # re-apply the AGENTS.md rules block and its guides
 bunx @pleaseai/code-style doctor  # check current project status
 bunx @pleaseai/code-style check   # check file names and test paths (ADR-0022)
 ```
@@ -383,8 +383,8 @@ does not catch lost tests.
 
 ## `AGENTS.md` block
 
-The CLI owns only the content between these markers — everything else in
-`AGENTS.md` is your content and is preserved verbatim:
+In `AGENTS.md`, the CLI owns only the content between these markers — everything
+else is your content and is preserved verbatim:
 
 ```md
 <!-- pleaseai-code-style:start -->
@@ -393,7 +393,7 @@ The CLI owns only the content between these markers — everything else in
 ```
 
 Re-run `pleaseai-code-style update` any time you upgrade `@pleaseai/code-style`
-to refresh just this block. The full rules are copied into your project, per
+to refresh this block and the guides it links. The full rules are copied into your project, per
 language, so they resolve in every project (no `node_modules` needed): start
 with `.agents/code-style/general.md` (every language), then the guide of your
 language (for example `.agents/code-style/typescript.md` for TypeScript and

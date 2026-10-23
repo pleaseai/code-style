@@ -18,7 +18,7 @@ pubspec, Cargo 전용)에서는 `init`이 AGENTS.md 블록과 가이드만 제�
 ```bash
 bunx @pleaseai/code-style         # `init`과 동일
 bunx @pleaseai/code-style init    # 대화형 설정
-bunx @pleaseai/code-style update  # AGENTS.md 규칙 블록만 다시 적용
+bunx @pleaseai/code-style update  # AGENTS.md 규칙 블록과 가이드 다시 적용
 bunx @pleaseai/code-style doctor  # 현재 프로젝트 상태 확인
 bunx @pleaseai/code-style check   # 파일 이름과 테스트 경로 검사 (ADR-0022)
 ```
@@ -201,7 +201,7 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
 
 ## `AGENTS.md` 블록
 
-CLI는 아래 마커 사이의 내용만 관리합니다 — `AGENTS.md`의 나머지 내용은
+`AGENTS.md`에서 CLI는 아래 마커 사이의 내용만 관리합니다 — 나머지 내용은
 사용자의 것이며 그대로 보존됩니다:
 
 ```md
@@ -211,7 +211,7 @@ CLI는 아래 마커 사이의 내용만 관리합니다 — `AGENTS.md`의 나�
 ```
 
 `@pleaseai/code-style`을 업그레이드한 뒤에는 `pleaseai-code-style update`를
-다시 실행하면 이 블록만 새로고침할 수 있습니다. 전체 규칙은 언어별로 나뉘어 프로젝트에
+다시 실행하면 이 블록과 블록이 가리키는 가이드를 새로고침할 수 있습니다. 전체 규칙은 언어별로 나뉘어 프로젝트에
 복사되므로 `node_modules` 없이도 어떤 프로젝트에서나 읽을 수 있습니다.
 `.agents/code-style/general.md`(모든 언어)를 먼저 읽고, 사용하는 언어의 가이드를 읽으세요
 (예: TypeScript·JavaScript는 `.agents/code-style/typescript.md`). 각색한 가이드의 출처 표기는

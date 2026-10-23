@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
@@ -27,7 +27,8 @@ describe('syncGuides', () => {
       rmSync(join(dir, '.agents'), { recursive: true, force: true })
       syncGuides(dir, [...languages])
       for (const name of ['general.md', ...languages.map(language => `${language}.md`), 'NOTICE.md', 'LICENSE-Apache-2.0.txt']) {
-        expect(existsSync(join(dir, '.agents/code-style', name))).toBe(true)
+        const shipped = readFileSync(join(import.meta.dir, '../rules', name), 'utf-8')
+        expect(readFileSync(join(dir, '.agents/code-style', name), 'utf-8')).toBe(shipped)
       }
     }
   })
@@ -56,6 +57,30 @@ describe('syncGuides', () => {
     const shipped = readFileSync(join(import.meta.dir, '../rules/general.md'), 'utf-8')
     expect(readFileSync(join(dir, '.agents/code-style/general.md'), 'utf-8')).toBe(shipped)
     expect(result.updated).toEqual(['.agents/code-style/general.md'])
+  })
+
+  test('refuses to write a guide through a symlinked file or directory', () => {
+    const outside = mkdtempSync(join(tmpdir(), 'pleaseai-cli-outside-'))
+    try {
+      writeFileSync(join(outside, 'target.md'), 'outside')
+      mkdirSync(join(dir, '.agents/code-style'), { recursive: true })
+      symlinkSync(join(outside, 'target.md'), join(dir, '.agents/code-style/general.md'))
+      expect(() => syncGuides(dir, ['dart'])).toThrow('.agents/code-style/general.md is a symlink')
+      expect(readFileSync(join(outside, 'target.md'), 'utf-8')).toBe('outside')
+
+      rmSync(join(dir, '.agents/code-style/general.md'))
+      symlinkSync(join(outside, 'target.md'), join(dir, '.agents/code-style/NOTICE.md'))
+      expect(() => syncGuides(dir, ['dart'])).toThrow('.agents/code-style/NOTICE.md is a symlink')
+      expect(existsSync(join(dir, '.agents/code-style/general.md'))).toBe(false)
+
+      rmSync(join(dir, '.agents'), { recursive: true, force: true })
+      symlinkSync(outside, join(dir, '.agents'))
+      expect(() => syncGuides(dir, ['dart'])).toThrow('.agents is a symlink')
+      expect(existsSync(join(outside, 'code-style'))).toBe(false)
+    }
+    finally {
+      rmSync(outside, { recursive: true, force: true })
+    }
   })
 
   test('ships a guide for every language, covered by the package files', () => {

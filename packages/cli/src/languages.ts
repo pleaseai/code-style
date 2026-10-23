@@ -55,8 +55,12 @@ export function parseLangFlag(value: string | boolean | undefined): LangFlag {
   return { kind: 'languages', languages: inOrder(items) }
 }
 
+function linkedGuidePath(block: string, id: string): string | undefined {
+  return [`${GUIDES_DIR}/${id}.md`, `${LEGACY_GUIDES_DIR}/${id}.md`].find(path => block.includes(path))
+}
+
 function linksGuide(block: string, id: string): boolean {
-  return block.includes(`${GUIDES_DIR}/${id}.md`) || block.includes(`${LEGACY_GUIDES_DIR}/${id}.md`)
+  return linkedGuidePath(block, id) !== undefined
 }
 
 function isLanguageAwareBlock(block: string | undefined): block is string {
@@ -69,4 +73,12 @@ export function languagesFromAgentsBlock(content: string | null): Language[] | u
     return undefined
   }
   return LANGUAGES.filter(language => linksGuide(block, language))
+}
+
+export function guidePathsFromAgentsBlock(content: string | null): string[] | undefined {
+  const block = content == null ? undefined : readMarkerBlock(content)
+  if (!isLanguageAwareBlock(block)) {
+    return undefined
+  }
+  return ['general', ...LANGUAGES].flatMap(id => linkedGuidePath(block, id) ?? [])
 }

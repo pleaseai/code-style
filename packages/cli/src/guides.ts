@@ -1,7 +1,8 @@
 import type { Language } from './languages.js'
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { t } from './i18n.js'
 import { GUIDES_DIR, LANGUAGES } from './languages.js'
 
 const PACKAGE_RULES = fileURLToPath(new URL('../rules/', import.meta.url))
@@ -18,12 +19,23 @@ export function guidePath(id: string): string {
   return `${GUIDES_DIR}/${id}.md`
 }
 
+// A committed symlink would redirect guide writes and deletions outside the project.
+function assertNotSymlink(cwd: string, path: string): void {
+  if (lstatSync(resolve(cwd, path), { throwIfNoEntry: false })?.isSymbolicLink()) {
+    throw new Error(t('guideSymlink')(path))
+  }
+}
+
 export function syncGuides(cwd: string, languages: Language[]): GuidesResult {
   const result: GuidesResult = { created: [], updated: [] }
+  const names = ['general.md', ...languages.map(language => `${language}.md`), ...ATTRIBUTION_FILES]
+  const removed = LANGUAGES.filter(language => !languages.includes(language)).map(language => `${GUIDES_DIR}/${language}.md`)
+  for (const path of ['.agents', GUIDES_DIR, ...names.map(name => `${GUIDES_DIR}/${name}`), ...removed]) {
+    assertNotSymlink(cwd, path)
+  }
   const dir = resolve(cwd, GUIDES_DIR)
   mkdirSync(dir, { recursive: true })
 
-  const names = ['general.md', ...languages.map(language => `${language}.md`), ...ATTRIBUTION_FILES]
   for (const name of names) {
     const source = readFileSync(resolve(PACKAGE_RULES, name))
     const target = resolve(dir, name)
@@ -38,11 +50,11 @@ export function syncGuides(cwd: string, languages: Language[]): GuidesResult {
     }
   }
 
-  for (const language of LANGUAGES) {
-    const target = resolve(dir, `${language}.md`)
-    if (!languages.includes(language) && existsSync(target)) {
+  for (const label of removed) {
+    const target = resolve(cwd, label)
+    if (existsSync(target)) {
       rmSync(target)
-      result.updated.push(`${GUIDES_DIR}/${language}.md (removed)`)
+      result.updated.push(`${label} (removed)`)
     }
   }
   return result

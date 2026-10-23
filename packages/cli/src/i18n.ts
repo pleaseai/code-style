@@ -22,6 +22,7 @@ interface Messages {
   doctorHeading: string
   doctorOk: string
   doctorMissing: string
+  guideSymlink: (path: string) => string
   done: string
   cancelled: string
   unknownCommand: (cmd: string) => string
@@ -59,6 +60,7 @@ const messages: Record<Locale, Messages> = {
     doctorHeading: 'Project status',
     doctorOk: 'OK',
     doctorMissing: 'missing',
+    guideSymlink: path => `${path} is a symlink; replace it with a regular file or directory so guides are not written outside the project.`,
     done: 'Done!',
     cancelled: 'Cancelled.',
     unknownCommand: cmd => `Unknown command: ${cmd}`,
@@ -77,7 +79,7 @@ const messages: Record<Locale, Messages> = {
 
 Commands:
   init       Interactive setup (select packages + write configs)
-  update     Re-apply the AGENTS.md rules block only
+  update     Re-apply the AGENTS.md rules block and its guides
   doctor     Check current project status
   check      Check file names, test paths, and shared test helpers (see check --help)
 
@@ -123,6 +125,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     doctorHeading: '프로젝트 상태',
     doctorOk: '정상',
     doctorMissing: '없음',
+    guideSymlink: path => `${path}이(가) 심볼릭 링크입니다. 가이드가 프로젝트 밖에 쓰이지 않도록 일반 파일이나 디렉터리로 바꾸세요.`,
     done: '완료!',
     cancelled: '취소되었습니다.',
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
@@ -141,7 +144,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
 
 명령어:
   init       대화형 설치 (패키지 선택 + 설정 파일 생성)
-  update     AGENTS.md 룰 블록만 다시 적용
+  update     AGENTS.md 룰 블록과 가이드 다시 적용
   doctor     현재 프로젝트 상태 점검
   check      파일 이름, 테스트 경로, 공유 테스트 헬퍼 검사 (check --help 참고)
 

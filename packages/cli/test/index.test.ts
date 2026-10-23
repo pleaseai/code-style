@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
@@ -127,6 +127,7 @@ describe('projects without a package.json', () => {
         expect(doctor.status).toBe(0)
         expect(doctor.stdout).toContain(`${guide} — OK`)
         expect(doctor.stdout).not.toContain('package manager')
+        expect(doctor.stdout).not.toContain('eslint.config.mjs')
       }
       finally {
         rmSync(dir, { recursive: true, force: true })
@@ -141,6 +142,23 @@ describe('projects without a package.json', () => {
       run(['update'], dir)
       rmSync(join(dir, '.agents/code-style/dart.md'))
       expect(run(['doctor'], dir).stdout).toContain('.agents/code-style/dart.md — missing')
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('doctor checks the guide paths a legacy node_modules block links', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-legacy-'))
+    try {
+      const legacy = 'node_modules/@pleaseai/code-style/rules'
+      writeFileSync(join(dir, 'AGENTS.md'), `<!-- pleaseai-code-style:start -->\nread \`${legacy}/general.md\` and \`${legacy}/dart.md\`\n<!-- pleaseai-code-style:end -->\n`)
+      mkdirSync(join(dir, legacy), { recursive: true })
+      writeFileSync(join(dir, legacy, 'general.md'), '')
+      const res = run(['doctor'], dir)
+      expect(res.stdout).toContain(`${legacy}/general.md — OK`)
+      expect(res.stdout).toContain(`${legacy}/dart.md — missing`)
+      expect(res.stdout).not.toContain('.agents/code-style')
     }
     finally {
       rmSync(dir, { recursive: true, force: true })

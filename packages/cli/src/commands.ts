@@ -13,9 +13,8 @@ import {
   readFileOrNull,
   readPackageJson,
 } from './fs-utils.js'
-import { guidePath } from './guides.js'
 import { t } from './i18n.js'
-import { detectLanguages, LANGUAGES, languagesFromAgentsBlock } from './languages.js'
+import { detectLanguages, guidePathsFromAgentsBlock, LANGUAGES } from './languages.js'
 
 export interface CommandOptions {
   cwd: string
@@ -166,7 +165,8 @@ export async function runUpdate(opts: CommandOptions): Promise<void> {
 export function runDoctor(opts: CommandOptions): void {
   log.info(`${t('doctorHeading')}:`)
 
-  if (hasPackageJson(opts.cwd)) {
+  const packageBased = hasPackageJson(opts.cwd)
+  if (packageBased) {
     const pkg = readPackageJson(opts.cwd)
     log.info(`  ${t('detectedPm')(detectPackageManager(opts.cwd))}`)
 
@@ -188,21 +188,16 @@ export function runDoctor(opts: CommandOptions): void {
     log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
   }
 
-  // File presence checks.
-  const files = [
-    'eslint.config.mjs',
-    '.editorconfig',
-    'AGENTS.md',
-    'sgconfig.yml',
-  ]
+  // File presence checks. Without a package.json, init offers only the AGENTS.md block.
+  const files = packageBased
+    ? ['eslint.config.mjs', '.editorconfig', 'AGENTS.md', 'sgconfig.yml']
+    : ['AGENTS.md']
   for (const f of files) {
     const exists = existsSync(resolve(opts.cwd, f))
     log.info(`  ${f} — ${exists ? t('doctorOk') : t('doctorMissing')}`)
   }
 
-  const linked = languagesFromAgentsBlock(readFileOrNull(resolve(opts.cwd, 'AGENTS.md')))
-  for (const id of linked == null ? [] : ['general', ...linked]) {
-    const guide = guidePath(id)
+  for (const guide of guidePathsFromAgentsBlock(readFileOrNull(resolve(opts.cwd, 'AGENTS.md'))) ?? []) {
     const exists = existsSync(resolve(opts.cwd, guide))
     log.info(`  ${guide} — ${exists ? t('doctorOk') : t('doctorMissing')}`)
   }

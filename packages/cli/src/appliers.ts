@@ -10,9 +10,9 @@ import {
   upsertMarkerBlock,
   writePackageJson,
 } from './fs-utils.js'
-import { syncGuides } from './guides.js'
+import { guidePath, syncGuides } from './guides.js'
 import { t } from './i18n.js'
-import { detectLanguages, GUIDES_DIR, languagesFromAgentsBlock } from './languages.js'
+import { detectLanguages, languagesFromAgentsBlock } from './languages.js'
 
 async function confirmOverwrite(file: string, auto: boolean): Promise<boolean> {
   if (auto) {
@@ -183,7 +183,7 @@ function wantsCodeOrganization(ctx: ToolContext): boolean {
 }
 
 function agentsBody(ctx: ToolContext, languages: Language[]): string {
-  const guides = ['general', ...languages].map(id => `\`${GUIDES_DIR}/${id}.md\``)
+  const guides = ['general', ...languages].map(id => `\`${guidePath(id)}\``)
   const pointer = guides.length > 1
     ? `${guides.slice(0, -1).join(', ')} and ${guides.at(-1)}`
     : guides[0]
