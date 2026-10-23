@@ -185,9 +185,7 @@ function isGlobalIgnores(item: Linter.Config): boolean {
 }
 
 function sortedRules(rules: Map<string, RuleEntry>): Record<string, RuleEntry> {
-  return Object.fromEntries([...rules]
-    .sort(([a], [b]) => compareIds(a, b))
-    .map(([rule, entry]) => [rule, severityOf(entry) === 'off' ? 'off' : entry]))
+  return Object.fromEntries([...rules].sort(([a], [b]) => compareIds(a, b)))
 }
 
 /**
@@ -239,38 +237,47 @@ export function generateLintToml(configs: Linter.Config[], builtinRules: Builtin
     }
 
     if (files == null) {
+      // [lint.rules] comes before every override, so an override's options
+      // for its files survive this entry only when it sets just the severity.
       for (const [rule, entry] of rules) {
         base.set(rule, withOptions(entry, base.get(rule)))
-        overrides.forEach(override => override.rules.delete(rule))
+        for (const override of overrides) {
+          const previous = override.rules.get(rule)
+          if (typeof entry === 'string' && Array.isArray(previous)) {
+            override.rules.set(rule, withOptions(entry, previous))
+          }
+          else {
+            override.rules.delete(rule)
+          }
+        }
       }
       overrides = overrides.filter(override => override.rules.size > 0)
       continue
     }
-    for (const [rule, entry] of rules) {
-      rules.set(rule, withOptions(entry, base.get(rule)))
-    }
+    // Severity-only entries stay that way: `bun lint` resolves their options
+    // per file from the earlier matching entries, as ESLint does.
     overrides.push({ files, ...(excludeFiles.length > 0 ? { excludeFiles } : {}), rules })
   }
 
   const turnedOn = new Set<string>()
-  for (const [rule, entry] of base) {
-    if (severityOf(entry) !== 'off') {
-      turnedOn.add(rule)
-    }
-    else if (!onByDefault.get(rule)) {
-      base.delete(rule)
-    }
-  }
-  for (const override of overrides) {
-    for (const [rule, entry] of override.rules) {
+  const prune = (rules: Map<string, RuleEntry>, later: Override[]): void => {
+    for (const [rule, entry] of rules) {
       if (severityOf(entry) !== 'off') {
         turnedOn.add(rule)
       }
-      else if (!onByDefault.get(rule) && !turnedOn.has(rule)) {
-        override.rules.delete(rule)
+      else if (Array.isArray(entry) && later.some(override => typeof override.rules.get(rule) === 'string')) {
+        continue
+      }
+      else if (onByDefault.get(rule) || turnedOn.has(rule)) {
+        rules.set(rule, 'off')
+      }
+      else {
+        rules.delete(rule)
       }
     }
   }
+  prune(base, overrides)
+  overrides.forEach((override, i) => prune(override.rules, overrides.slice(i + 1)))
 
   const lint: Record<string, unknown> = {}
   if (ignorePatterns.size > 0) {

@@ -84,7 +84,42 @@ describe('rules', () => {
       { files: ['**/*.ts'], rules: { eqeqeq: ['error'] } },
     )
     expect(lint.rules).toEqual({ eqeqeq: ['warn', 'smart'] })
-    expect(lint.overrides[0]!.rules).toEqual({ eqeqeq: ['error', 'smart'] })
+    expect(lint.overrides[0]!.rules).toEqual({ eqeqeq: 'error' })
+  })
+
+  test('a severity-only override is left for bun lint to resolve per file', () => {
+    const lint = generate(
+      { rules: { eqeqeq: ['error', 'always'] } },
+      { files: ['**/*.ts'], rules: { eqeqeq: ['error', 'smart'] } },
+      { files: ['**/*'], rules: { eqeqeq: 'warn' } },
+    )
+    expect(lint.overrides).toEqual([
+      { files: ['**/*.ts'], rules: { eqeqeq: ['error', 'smart'] } },
+      { files: ['**/*'], rules: { eqeqeq: 'warn' } },
+    ])
+  })
+
+  test('a later severity-only global entry keeps the options of earlier overrides', () => {
+    const lint = generate(
+      { files: ['**/*.ts'], rules: { eqeqeq: ['error', 'smart'] } },
+      { files: ['**/*.js'], rules: { eqeqeq: ['error', 'smart'] } },
+      { rules: { eqeqeq: 'warn' } },
+      { rules: { eqeqeq: ['error', 'always'] } },
+      { files: ['**/*.mts'], rules: { eqeqeq: ['error', 'smart'] } },
+      { rules: { eqeqeq: 'warn' } },
+    )
+    expect(lint.rules).toEqual({ eqeqeq: ['warn', 'always'] })
+    expect(lint.overrides).toEqual([{ files: ['**/*.mts'], rules: { eqeqeq: ['warn', 'smart'] } }])
+  })
+
+  test('keeps the options of an `off` entry that a later severity-only override inherits', () => {
+    expect(generate(
+      { rules: { eqeqeq: ['off', 'smart'] } },
+      { files: ['**/*.ts'], rules: { eqeqeq: 'error' } },
+    ).rules).toEqual({ eqeqeq: ['off', 'smart'] })
+    expect(generate(
+      { rules: { 'eqeqeq': ['off', 'smart'], 'no-debugger': ['off', 'x'] } },
+    ).rules).toEqual({ 'no-debugger': 'off' })
   })
 
   test('writes `off` only where it turns a rule off', () => {
