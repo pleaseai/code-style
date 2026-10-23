@@ -14,5 +14,7 @@ apply to every language, then the guide for the language you are writing:
 - [`rules/csharp.md`](./rules/csharp.md) — C#
 - [`rules/html-css.md`](./rules/html-css.md) — HTML and CSS
 
-`pleaseai-code-style update` points your `AGENTS.md` block at the general and
-TypeScript guides; the other guides are read from this index for now.
+`pleaseai-code-style init` and `update` point your `AGENTS.md` block at the
+general guide plus the guide of each selected language. Languages are detected
+from marker files in the project root, or set with `--lang <list>`; `update`
+keeps the languages the existing block links unless `--lang` is given.

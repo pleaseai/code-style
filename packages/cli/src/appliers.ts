@@ -1,3 +1,4 @@
+import type { Language } from './languages.js'
 import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
 import { copyFileSync, existsSync, writeFileSync } from 'node:fs'
 import { dirname, resolve as joinPath } from 'node:path'
@@ -10,6 +11,7 @@ import {
   writePackageJson,
 } from './fs-utils.js'
 import { t } from './i18n.js'
+import { detectLanguages, languagesFromAgentsBlock, RULES_PREFIX } from './languages.js'
 
 async function confirmOverwrite(file: string, auto: boolean): Promise<boolean> {
   if (auto) {
@@ -136,25 +138,25 @@ async function applyEditorConfig(ctx: ToolContext): Promise<ToolApplyResult> {
 
 // --- AGENTS.md --------------------------------------------------------------
 
-const AGENTS_BODY = `# Passion Factory Code Style
+const AGENTS_INTRO = `# Passion Factory Code Style
 
 These rules are managed by \`@pleaseai/code-style\`. Run \`pleaseai-code-style update\`
 to refresh this block. Do not edit between the marker comments — your changes
 will be overwritten.
 
-- Formatter: \`@pleaseai/eslint-config\` (wraps \`@antfu/eslint-config\`)
+`
+
+const AGENTS_TYPESCRIPT = `- Formatter: \`@pleaseai/eslint-config\` (wraps \`@antfu/eslint-config\`)
 - No semicolons, single quotes, 2-space indent, trailing commas, LF line endings
 - ESM only — never emit \`require\`/\`module.exports\`
 - TypeScript: \`strict: true\`, prefer \`type\` over \`interface\`, no implicit \`any\`
 - Prefer named exports, early returns, \`async\`/\`await\`, optional chaining
-- File size target: ≤ 500 lines
 - Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
   (\`src/foo/bar.ts\` → \`test/foo/bar.test.ts\`); no \`import.meta.vitest\` in-source tests
-- Conventional Commits for all commit messages
+`
 
-For the full rules (what an AI coding assistant needs to know before writing code),
-read \`node_modules/@pleaseai/code-style/rules/general.md\` and
-\`node_modules/@pleaseai/code-style/rules/typescript.md\`.`
+const AGENTS_GENERAL = `- File size target: ≤ 500 lines
+`
 
 const AGENTS_CODE_ORGANIZATION = `- Code organization (named exports, file names, error files, test paths, shared helpers):
   \`node_modules/@pleaseai/ast-grep-config/README.md\`; check with \`ast-grep scan\` and \`please-style check\`
@@ -179,10 +181,15 @@ function wantsCodeOrganization(ctx: ToolContext): boolean {
   }
 }
 
-function agentsBody(ctx: ToolContext): string {
-  return wantsCodeOrganization(ctx)
-    ? AGENTS_BODY.replace('- Conventional', `${AGENTS_CODE_ORGANIZATION}- Conventional`)
-    : AGENTS_BODY
+function agentsBody(ctx: ToolContext, languages: Language[]): string {
+  const guides = ['general', ...languages].map(id => `\`${RULES_PREFIX}/${id}.md\``)
+  const pointer = guides.length > 1
+    ? `${guides.slice(0, -1).join(', ')} and ${guides.at(-1)}`
+    : guides[0]
+  return `${AGENTS_INTRO}${languages.includes('typescript') ? AGENTS_TYPESCRIPT : ''}${AGENTS_GENERAL}${wantsCodeOrganization(ctx) ? AGENTS_CODE_ORGANIZATION : ''}- Conventional Commits for all commit messages
+
+For the full rules (what an AI coding assistant needs to know before writing code),
+read ${pointer}.`
 }
 
 export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> {
@@ -190,7 +197,8 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   const target = joinPath(ctx.cwd, 'AGENTS.md')
   const label = 'AGENTS.md'
   const existing = readFileOrNull(target)
-  const next = upsertMarkerBlock(existing, agentsBody(ctx))
+  const languages = ctx.languages ?? languagesFromAgentsBlock(existing) ?? detectLanguages(ctx.cwd)
+  const next = upsertMarkerBlock(existing, agentsBody(ctx, languages))
 
   if (existing == null) {
     writeFileSync(target, next)

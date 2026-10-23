@@ -70,13 +70,13 @@ describe('resolveLocaleFlags', () => {
     expect(resolveLocaleFlags({ locale: 'en', lang: 'ko' })).toEqual({ kind: 'ok', locale: 'en', langWarning: { kind: 'ignored', locale: 'ko' } })
   })
 
-  test('an unknown --lang value is invalid instead of ignored', () => {
-    expect(resolveLocaleFlags({ lang: 'dart' })).toMatchObject({ kind: 'invalid', flag: '--lang', value: 'dart' })
-    expect(resolveLocaleFlags({ lang: true })).toMatchObject({ kind: 'invalid', flag: '--lang', value: '' })
+  test('a --lang language list does not affect the locale', () => {
+    expect(resolveLocaleFlags({ lang: 'dart,rust', locale: 'ko' })).toEqual({ kind: 'ok', locale: 'ko' })
+    expect(resolveLocaleFlags({ lang: true, locale: 'en' })).toEqual({ kind: 'ok', locale: 'en' })
   })
 
   test('an unknown --locale value is invalid', () => {
-    expect(resolveLocaleFlags({ locale: 'fr' })).toMatchObject({ kind: 'invalid', flag: '--locale', value: 'fr' })
+    expect(resolveLocaleFlags({ locale: 'fr' })).toMatchObject({ kind: 'invalid', value: 'fr' })
   })
 })
 

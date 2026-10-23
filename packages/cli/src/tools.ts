@@ -1,3 +1,5 @@
+import type { Language } from './languages.js'
+
 /**
  * Registry of tools this CLI knows how to install + configure.
  *
@@ -14,6 +16,7 @@ export interface ToolContext {
   autoAccept: boolean
   /** Tools chosen in this run; unset when the caller has no selection (the code-organization pointer is then kept). */
   selectedToolIds?: ToolId[]
+  languages?: Language[]
 }
 
 export interface ToolApplyResult {

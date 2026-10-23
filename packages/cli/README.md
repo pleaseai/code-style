@@ -404,9 +404,23 @@ JavaScript).
 | Flag | Description |
 | --- | --- |
 | `--yes`, `-y` | Accept defaults, overwrite existing files without prompting |
+| `--lang <list>` | Languages for the AGENTS.md rules block, comma-separated (`init`/`doctor`: detected; `update`: the languages already in the block; see below) |
 | `--locale <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
 | `--help`, `-h` | Print help |
 | `--version`, `-v` | Print version |
+
+## Languages
+
+`--lang <list>` selects the programming languages the AGENTS.md rules block links
+to, for example `--lang typescript,dart`. Accepted values: `typescript`, `dart`,
+`rust`, `java`, `go`, `python`, `ruby`, `csharp`, `html-css`. Without it, `init`
+detects languages from marker files in the project root: `package.json` or
+`tsconfig.json` (typescript), `pubspec.yaml` (dart), `Cargo.toml` (rust),
+`build.gradle`, `build.gradle.kts` or `pom.xml` (java), `go.mod` (go),
+`pyproject.toml` (python). Interactive `init` lets you adjust the detected set.
+`update` keeps the languages the existing block links unless `--lang` is given.
+An unknown `--lang` value exits with an error (exit code 1) listing the accepted
+languages. `doctor` reports the detected languages.
 
 ## Localisation
 
@@ -414,10 +428,10 @@ The CLI auto-detects your locale from `LC_ALL` / `LANG` / `LC_MESSAGES` and
 currently ships Korean and English messages. Override with `--locale ko` or
 `--locale en`.
 
-`--lang ko` and `--lang en` still set the locale for now, with a deprecation
-warning. When both flags are given, `--locale` wins. Any other `--lang` value, or
-a `--locale` value other than `ko` or `en`, exits with an error (exit code 1). A
-future release uses `--lang` to select programming languages.
+`--lang ko` and `--lang en` are the deprecated locale alias: they still set the
+locale for now, with a deprecation warning, and select no languages. When both
+`--lang ko|en` and `--locale` are given, `--locale` wins. A `--locale` value other
+than `ko` or `en` also exits with an error (exit code 1).
 
 ## License
 

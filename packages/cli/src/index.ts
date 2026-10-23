@@ -6,6 +6,7 @@ import { parseArgs } from 'node:util'
 import { runCheck } from './check/run-check.js'
 import { runDoctor, runInit, runUpdate } from './commands.js'
 import { resolveLocaleFlags, setLocale, t } from './i18n.js'
+import { parseLangFlag } from './languages.js'
 
 const GLOBAL_OPTIONS = {
   yes: { type: 'boolean', short: 'y' },
@@ -27,13 +28,20 @@ const { values: allValues, positionals, tokens } = parseArgs({
 const localeFlags = resolveLocaleFlags({ locale: allValues.locale, lang: allValues.lang })
 setLocale(localeFlags.locale)
 if (localeFlags.kind === 'invalid') {
-  process.stderr.write(`${t('invalidLocaleFlag')(localeFlags.flag, localeFlags.value)}\n`)
+  process.stderr.write(`${t('invalidLocaleFlag')(localeFlags.value)}\n`)
   process.exit(1)
 }
 else if (localeFlags.langWarning !== undefined) {
   const { kind, locale } = localeFlags.langWarning
   process.stderr.write(`${t(kind === 'deprecated' ? 'deprecatedLangFlag' : 'ignoredLangFlag')(locale)}\n`)
 }
+
+const langFlag = parseLangFlag(allValues.lang)
+if (langFlag.kind === 'invalid') {
+  process.stderr.write(`${t('invalidLangFlag')(langFlag.value)}\n`)
+  process.exit(1)
+}
+const languages = langFlag.kind === 'languages' ? langFlag.languages : undefined
 
 const command = positionals[0] ?? 'init'
 // `check` parses its own flags strictly, so only what precedes it is global
@@ -74,13 +82,13 @@ const cwd = process.cwd()
 try {
   switch (command) {
     case 'init':
-      await runInit({ cwd, autoAccept })
+      await runInit({ cwd, autoAccept, languages })
       break
     case 'update':
-      await runUpdate({ cwd, autoAccept })
+      await runUpdate({ cwd, autoAccept, languages })
       break
     case 'doctor':
-      runDoctor({ cwd, autoAccept })
+      runDoctor({ cwd, autoAccept, languages })
       break
     case 'check':
       // exitCode, not exit(): a large --json report must flush before exiting.

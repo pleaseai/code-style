@@ -131,9 +131,14 @@ CLI는 두 마커 주석 사이의 내용 **만** 관리하며 — `AGENTS.md`�
 | 플래그 | 설명 |
 | --- | --- |
 | `--yes`, `-y` | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀 |
+| `--lang <list>` | AGENTS.md 룰 블록에 넣을 언어, 쉼표로 구분 (`init`/`doctor`: 자동 감지, `update`: 블록에 이미 있는 언어, 아래 참고) |
 | `--locale <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LC_ALL` / `$LANG`) |
 | `--help`, `-h` | 도움말 출력 |
 | `--version`, `-v` | CLI 버전 출력 |
+
+## 언어
+
+`--lang <list>`는 AGENTS.md 룰 블록이 가리킬 프로그래밍 언어를 고릅니다. 예: `--lang typescript,dart`. 지원 값은 `typescript`, `dart`, `rust`, `java`, `go`, `python`, `ruby`, `csharp`, `html-css`입니다. 옵션이 없으면 `init`이 프로젝트 루트의 마커 파일로 언어를 감지합니다. `package.json` 또는 `tsconfig.json`(typescript), `pubspec.yaml`(dart), `Cargo.toml`(rust), `build.gradle`, `build.gradle.kts`, `pom.xml`(java), `go.mod`(go), `pyproject.toml`(python)이 해당합니다. 대화형 `init`은 감지된 목록을 조정할 수 있게 합니다. `update`는 `--lang`을 주지 않으면 기존 블록이 가리키는 언어를 유지합니다. 알 수 없는 `--lang` 값은 지원하는 언어 목록과 함께 오류로 종료합니다(종료 코드 1). `doctor`는 감지된 언어를 보여줍니다.
 
 ## 현지화
 
@@ -143,7 +148,7 @@ CLI는 `LC_ALL`, `LANG`, `LC_MESSAGES`에서 locale을 자동 감지하며, 현�
 pleaseai-code-style --locale ko init
 ```
 
-`--lang ko`와 `--lang en`도 당분간은 로케일을 지정하지만 사용 중단 경고를 출력합니다. 두 플래그를 함께 주면 `--locale`이 우선합니다. 그 밖의 `--lang` 값이나 지원하지 않는 `--locale` 값은 무시되지 않고 오류로 종료합니다(종료 코드 1). 이후 릴리스에서는 `--lang`이 프로그래밍 언어 선택에 쓰입니다.
+`--lang ko`와 `--lang en`은 사용 중단된 로케일 별칭입니다. 당분간은 로케일을 지정하며 사용 중단 경고를 출력하고, 언어는 선택하지 않습니다. `--lang ko|en`과 `--locale`을 함께 주면 `--locale`이 우선합니다. 지원하지 않는 `--locale` 값도 오류로 종료합니다(종료 코드 1).
 
 ## CI에서의 사용
 
