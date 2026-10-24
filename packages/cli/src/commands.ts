@@ -152,7 +152,7 @@ export function runDoctor(opts: CommandOptions): void {
       continue
     }
     const installed = tool.packages.every(p => isPackageInstalled(pkg, p))
-    const suffix = installed ? t('doctorOk') : t('doctorMissing')
+    const suffix = installed ? t('doctorOk') : tool.optIn === true ? t('doctorNotSelected') : t('doctorMissing')
     log.info(`  ${tool.label} — ${suffix}`)
   }
 

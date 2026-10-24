@@ -25,6 +25,7 @@ interface Messages {
   doctorHeading: string
   doctorOk: string
   doctorMissing: string
+  doctorNotSelected: string
   done: string
   cancelled: string
   unknownCommand: (cmd: string) => string
@@ -58,6 +59,7 @@ const messages: Record<Locale, Messages> = {
     doctorHeading: 'Project status',
     doctorOk: 'OK',
     doctorMissing: 'missing',
+    doctorNotSelected: 'not selected (optional)',
     done: 'Done!',
     cancelled: 'Cancelled.',
     unknownCommand: cmd => `Unknown command: ${cmd}`,
@@ -117,6 +119,7 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     doctorHeading: '프로젝트 상태',
     doctorOk: '정상',
     doctorMissing: '없음',
+    doctorNotSelected: '선택 안 함 (선택 사항)',
     done: '완료!',
     cancelled: '취소되었습니다.',
     unknownCommand: cmd => `알 수 없는 명령어: ${cmd}`,
