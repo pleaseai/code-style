@@ -173,7 +173,9 @@ jobs:
         working-directory: packages/bun-lint-config
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if npm view "@pleaseai/bun-lint-config@$VERSION" version 2>/dev/null; then
+          if [ "$VERSION" = "0.0.0" ]; then
+            echo "⚠ @pleaseai/bun-lint-config has not been released yet (0.0.0), skipping"
+          elif npm view "@pleaseai/bun-lint-config@$VERSION" version 2>/dev/null; then
             echo "⚠ @pleaseai/bun-lint-config@$VERSION already published, skipping"
           else
             bun pm pack
