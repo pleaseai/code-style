@@ -93,7 +93,7 @@ bun add -D eslint-plugin-slop eslint-plugin-sonarjs
 
 `antislop`을 지정하지 않으면 설치된 플러그인의 규칙만 켜집니다. 플러그인 없이 업그레이드하면 아무것도 바뀌지 않으며, `please-style`은 새 프로젝트에 두 플러그인을 함께 설치합니다.
 
-`antislop: true`(또는 객체)를 명시하면 켜지는 모든 플러그인이 필요합니다. 하나라도 없으면 오류가 발생합니다: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` 일부만 끄려면 `{ sonarjs: false }` 또는 `{ slop: false }`를, 전부 끄려면 `false`를 지정합니다.
+`antislop: true`는 두 플러그인이 모두 필요합니다. 객체를 넘기면 명시해서 켠 플러그인(`slop: true` 또는 `slop: { ... }`)만 필요하고, 언급하지 않은 플러그인은 설치 여부를 따릅니다. 필요한 플러그인이 없으면 오류가 발생합니다: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` 일부만 끄려면 `{ sonarjs: false }` 또는 `{ slop: false }`를, 전부 끄려면 `false`를 지정합니다.
 
 ```js
 import pleaseai from '@pleaseai/eslint-config'

@@ -9,8 +9,9 @@ export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem
    * of `eslint-plugin-sonarjs`. Both plugins are optional peer dependencies.
    *
    * Left unset, each plugin's rules turn on when that plugin is installed.
-   * Setting it explicitly requires every plugin it enables. In Markdown,
-   * `slop/no-em-dash` is a warning.
+   * `true` requires both plugins. An object requires each plugin it turns on
+   * explicitly, and a plugin it does not mention follows what is installed.
+   * In Markdown, `slop/no-em-dash` is a warning.
    *
    * @default true for each installed plugin, otherwise false
    */

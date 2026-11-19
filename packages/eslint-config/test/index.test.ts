@@ -128,8 +128,15 @@ describe('resolveAntislop', () => {
   })
 
   test('does not require a plugin the option turns off', () => {
-    expect(resolveAntislop({ sonarjs: false }, installed('eslint-plugin-slop'))).toEqual({ sonarjs: false })
+    expect(resolveAntislop({ sonarjs: false }, installed('eslint-plugin-slop'))).toEqual({ slop: true, sonarjs: false })
     expect(resolveAntislop(false, installed())).toBe(false)
+  })
+
+  test('leaves a plugin the option does not mention to what is installed', () => {
+    expect(resolveAntislop({ cognitiveComplexity: 20 }, installed('eslint-plugin-sonarjs')))
+      .toEqual({ cognitiveComplexity: 20, slop: false, sonarjs: true })
+    expect(() => resolveAntislop({ cognitiveComplexity: 20 }, installed()))
+      .toThrow('`antislop` requires `eslint-plugin-slop` and `eslint-plugin-sonarjs`')
   })
 })
 

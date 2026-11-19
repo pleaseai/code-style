@@ -1,40 +1,39 @@
-import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
+import type { OptionsAntislop, OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { Linter } from 'eslint'
 import { GLOB_MARKDOWN, GLOB_SRC, isPackageInScope } from '@antfu/eslint-config'
 
 type AntislopOption = OptionsConfig['antislop']
 type Rules = Record<string, Linter.RuleEntry | undefined>
 
-const antislopPlugins = {
-  slop: 'eslint-plugin-slop',
-  sonarjs: 'eslint-plugin-sonarjs',
-} as const
+const SLOP = 'eslint-plugin-slop'
+const SONARJS = 'eslint-plugin-sonarjs'
 
-const antislopParts = Object.keys(antislopPlugins) as (keyof typeof antislopPlugins)[]
+function pluginsOf({ slop, sonarjs }: OptionsAntislop): string[] {
+  return [slop !== false && SLOP, sonarjs !== false && SONARJS].filter(name => name !== false)
+}
 
 export function resolveAntislop(
   option: AntislopOption,
   isInstalled: (name: string) => boolean = isPackageInScope,
 ): AntislopOption {
-  if (option === undefined) {
-    const slop = isInstalled(antislopPlugins.slop)
-    const sonarjs = isInstalled(antislopPlugins.sonarjs)
-    return slop || sonarjs ? { slop, sonarjs } : false
-  }
   if (option === false) {
     return false
   }
-  const settings = option === true ? {} : option
-  const missing = antislopParts
-    .filter(part => settings[part] !== false && !isInstalled(antislopPlugins[part]))
-    .map(part => antislopPlugins[part])
+  const settings: OptionsAntislop = option === true ? { slop: true, sonarjs: true } : option ?? {}
+  const { slop = isInstalled(SLOP), sonarjs = isInstalled(SONARJS) } = settings
+  const enabled = pluginsOf({ slop, sonarjs })
+  if (option === undefined) {
+    return enabled.length > 0 ? { slop, sonarjs } : false
+  }
+  const required = enabled.length > 0 ? enabled : pluginsOf(settings)
+  const missing = required.filter(name => !isInstalled(name))
   if (missing.length > 0) {
     throw new Error(
       `\`antislop\` requires ${missing.map(name => `\`${name}\``).join(' and ')}. `
       + `Install with \`bun add -D ${missing.join(' ')}\`, or set \`antislop: false\`.`,
     )
   }
-  return option
+  return { ...settings, slop, sonarjs }
 }
 
 function isOff(severity: Linter.RuleEntry): boolean {

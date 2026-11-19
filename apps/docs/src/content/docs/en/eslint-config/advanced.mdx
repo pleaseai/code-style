@@ -93,7 +93,7 @@ bun add -D eslint-plugin-slop eslint-plugin-sonarjs
 
 When you leave `antislop` unset, each plugin's rules turn on if that plugin is installed. Upgrading without the plugins changes nothing, and `please-style` installs both for new projects.
 
-Setting `antislop: true` (or an object) requires every plugin it enables. A missing plugin throws: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` Turn off one part with `{ sonarjs: false }` or `{ slop: false }`, or everything with `false`.
+`antislop: true` requires both plugins. An object requires each plugin it turns on explicitly (`slop: true` or `slop: { ... }`), and a plugin it does not mention follows what is installed. A missing required plugin throws: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` Turn off one part with `{ sonarjs: false }` or `{ slop: false }`, or everything with `false`.
 
 ```js
 import pleaseai from '@pleaseai/eslint-config'
