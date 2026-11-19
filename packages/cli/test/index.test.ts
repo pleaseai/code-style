@@ -83,12 +83,12 @@ const V011_BODY = [
   '# PleaseAI Code Style',
   '',
   'These rules are managed by `@pleaseai/code-style`. Run `pleaseai-code-style update`',
-  'to refresh this block. Do not edit between the marker comments — your changes',
+  'to refresh this block. Do not edit between the marker comments \u2014 your changes',
   'will be overwritten.',
   '',
   '- Formatter: `@pleaseai/eslint-config` (wraps `@antfu/eslint-config`)',
   '- No semicolons, single quotes, 2-space indent, trailing commas, LF line endings',
-  '- ESM only — never emit `require`/`module.exports`',
+  '- ESM only \u2014 never emit `require`/`module.exports`',
   '- TypeScript: `strict: true`, prefer `type` over `interface`, no implicit `any`',
   '- Prefer named exports, early returns, `async`/`await`, optional chaining',
   '- File size target: ≤ 500 lines',
@@ -106,7 +106,7 @@ describe('doctor', () => {
     try {
       writeFileSync(join(dir, 'package.json'), JSON.stringify({ devDependencies: { '@pleaseai/eslint-config': '*', 'eslint': '*' } }))
       const res = run(['doctor'], dir)
-      expect(res.stdout).toContain('@pleaseai/eslint-config (eslint.config.mjs) — OK')
+      expect(res.stdout).toContain('@pleaseai/eslint-config (eslint.config.mjs): OK')
     }
     finally {
       rmSync(dir, { recursive: true, force: true })
@@ -139,7 +139,7 @@ describe('projects without a package.json', () => {
 
         const doctor = run(['doctor'], dir)
         expect(doctor.status).toBe(0)
-        expect(doctor.stdout).toContain(`${guide} — OK`)
+        expect(doctor.stdout).toContain(`${guide}: OK`)
         expect(doctor.stdout).not.toContain('package manager')
         expect(doctor.stdout).not.toContain('eslint.config.mjs')
       }
@@ -155,7 +155,7 @@ describe('projects without a package.json', () => {
       writeFileSync(join(dir, 'pubspec.yaml'), '')
       run(['update'], dir)
       rmSync(join(dir, '.agents/code-style/dart.md'))
-      expect(run(['doctor'], dir).stdout).toContain('.agents/code-style/dart.md — missing')
+      expect(run(['doctor'], dir).stdout).toContain('.agents/code-style/dart.md: missing')
     }
     finally {
       rmSync(dir, { recursive: true, force: true })
@@ -170,8 +170,8 @@ describe('projects without a package.json', () => {
       mkdirSync(join(dir, legacy), { recursive: true })
       writeFileSync(join(dir, legacy, 'general.md'), '')
       const res = run(['doctor'], dir)
-      expect(res.stdout).toContain(`${legacy}/general.md — OK`)
-      expect(res.stdout).toContain(`${legacy}/dart.md — missing`)
+      expect(res.stdout).toContain(`${legacy}/general.md: OK`)
+      expect(res.stdout).toContain(`${legacy}/dart.md: missing`)
       expect(res.stdout).not.toContain('.agents/code-style')
     }
     finally {

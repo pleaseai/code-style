@@ -1,3 +1,4 @@
+import type { PackageJson, PackageManager } from './fs-utils.js'
 import type { Language } from './languages.js'
 import type { Tool, ToolApplyResult, ToolContext } from './tools.js'
 import { spawnSync } from 'node:child_process'
@@ -49,7 +50,58 @@ function reportResults(result: ToolApplyResult): void {
   }
 }
 
-// --- init -------------------------------------------------------------------
+function toolOptions(available: Tool[], pkg: PackageJson | undefined): Array<{ value: string, label: string }> {
+  return available.map((tool) => {
+    const installed = pkg != null
+      && tool.packages.length > 0
+      && tool.packages.some(p => isPackageInstalled(pkg, p))
+    return {
+      value: tool.id,
+      label: installed ? `${tool.label} ${t('alreadyInstalled')}` : tool.label,
+    }
+  })
+}
+
+/** Guide languages for the AGENTS.md block: the detected ones, confirmed interactively unless auto-accepting. */
+async function chooseLanguages(opts: CommandOptions): Promise<Language[]> {
+  const detected = detectLanguages(opts.cwd)
+  if (opts.autoAccept) {
+    return detected
+  }
+  const chosen = await multiselect({
+    message: t('selectLanguages'),
+    options: LANGUAGES.map(value => ({ value, label: value })),
+    initialValues: detected,
+    required: false,
+  })
+  if (isCancel(chosen)) {
+    cancel(t('cancelled'))
+    process.exit(0)
+  }
+  return chosen
+}
+
+/** Installs the selected tools' packages (de-duped); exits when the install fails. */
+function installToolPackages(pm: PackageManager, tools: Tool[], cwd: string): void {
+  const packagesToInstall = Array.from(
+    new Set(tools.flatMap(tool => [...tool.packages, ...(tool.optionalPackages ?? [])])),
+  )
+  if (packagesToInstall.length === 0) {
+    return
+  }
+  const [cmd, args] = installCommand(pm, packagesToInstall)
+  const spin = spinner()
+  spin.start(t('installing'))
+  const res = spawnSync(cmd, args, {
+    cwd,
+    stdio: 'inherit',
+  })
+  if (res.status !== 0) {
+    spin.stop(t('installFailed'))
+    process.exit(1)
+  }
+  spin.stop(t('installDone'))
+}
 
 export async function runInit(opts: CommandOptions): Promise<void> {
   intro(t('appTitle'))
@@ -62,15 +114,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   }
 
   const available = withPackages ? TOOLS : TOOLS.filter(tool => tool.packages.length === 0)
-  const options = available.map((tool) => {
-    const installed = pkg != null
-      && tool.packages.length > 0
-      && tool.packages.some(p => isPackageInstalled(pkg, p))
-    return {
-      value: tool.id,
-      label: installed ? `${tool.label} ${t('alreadyInstalled')}` : tool.label,
-    }
-  })
+  const options = toolOptions(available, pkg)
 
   const initialValues = opts.autoAccept ? available.map(tool => tool.id) : undefined
 
@@ -99,49 +143,16 @@ export async function runInit(opts: CommandOptions): Promise<void> {
     .map(id => available.find(tool => tool.id === id))
     .filter((tool): tool is Tool => tool != null)
 
-  let languages = opts.languages
-  if (languages === undefined && selectedTools.some(tool => tool.id === 'agents-md')) {
-    const detected = detectLanguages(opts.cwd)
-    if (opts.autoAccept) {
-      languages = detected
-    }
-    else {
-      const chosen = await multiselect({
-        message: t('selectLanguages'),
-        options: LANGUAGES.map(value => ({ value, label: value })),
-        initialValues: detected,
-        required: false,
-      })
-      if (isCancel(chosen)) {
-        cancel(t('cancelled'))
-        process.exit(0)
-      }
-      languages = chosen
-    }
-  }
-  if (selectedTools.some(tool => tool.id === 'agents-md')) {
+  const withGuides = selectedTools.some(tool => tool.id === 'agents-md')
+  const languages = opts.languages === undefined && withGuides ? await chooseLanguages(opts) : opts.languages
+  if (withGuides) {
     // Fail before installing anything rather than leave a half-configured project.
     assertGuidesWritable(opts.cwd, languages ?? [])
   }
 
   // 1. Install packages (de-duped) for selected tools.
-  const packagesToInstall = Array.from(
-    new Set(selectedTools.flatMap(tool => [...tool.packages, ...(tool.optionalPackages ?? [])])),
-  )
-
-  if (pm != null && packagesToInstall.length > 0) {
-    const [cmd, args] = installCommand(pm, packagesToInstall)
-    const spin = spinner()
-    spin.start(t('installing'))
-    const res = spawnSync(cmd, args, {
-      cwd: opts.cwd,
-      stdio: 'inherit',
-    })
-    if (res.status !== 0) {
-      spin.stop(t('installFailed'))
-      process.exit(1)
-    }
-    spin.stop(t('installDone'))
+  if (pm != null) {
+    installToolPackages(pm, selectedTools, opts.cwd)
   }
 
   // 2. Apply each tool's side-effects.
@@ -155,8 +166,6 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   outro(t('done'))
 }
 
-// --- update -----------------------------------------------------------------
-
 export async function runUpdate(opts: CommandOptions): Promise<void> {
   intro(t('appTitle'))
   const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true, selectedToolIds: [], languages: opts.languages })
@@ -165,45 +174,54 @@ export async function runUpdate(opts: CommandOptions): Promise<void> {
   outro(t('done'))
 }
 
-// --- doctor -----------------------------------------------------------------
+/** `<path>: ok|missing` for a path relative to `cwd`. */
+function logPresence(cwd: string, path: string): void {
+  const exists = existsSync(resolve(cwd, path))
+  log.info(`  ${path}: ${exists ? t('doctorOk') : t('doctorMissing')}`)
+}
+
+function logPackageTools(cwd: string): void {
+  const pkg = readPackageJson(cwd)
+  log.info(`  ${t('detectedPm')(detectPackageManager(cwd))}`)
+
+  for (const tool of TOOLS) {
+    if (tool.packages.length === 0) {
+      continue
+    }
+    const installed = tool.packages.every(p => isPackageInstalled(pkg, p))
+    const suffix = installed ? t('doctorOk') : t('doctorMissing')
+    log.info(`  ${tool.label}: ${suffix}`)
+  }
+}
+
+function logLanguages(opts: CommandOptions): void {
+  if (opts.languages != null) {
+    log.info(`  ${t('doctorSelectedLanguages')(opts.languages.join(', '))}`)
+    return
+  }
+  const languages = detectLanguages(opts.cwd)
+  log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
+}
 
 export function runDoctor(opts: CommandOptions): void {
   log.info(`${t('doctorHeading')}:`)
 
   const packageBased = hasPackageJson(opts.cwd)
   if (packageBased) {
-    const pkg = readPackageJson(opts.cwd)
-    log.info(`  ${t('detectedPm')(detectPackageManager(opts.cwd))}`)
-
-    for (const tool of TOOLS) {
-      if (tool.packages.length === 0) {
-        continue
-      }
-      const installed = tool.packages.every(p => isPackageInstalled(pkg, p))
-      const suffix = installed ? t('doctorOk') : t('doctorMissing')
-      log.info(`  ${tool.label} — ${suffix}`)
-    }
+    logPackageTools(opts.cwd)
   }
 
-  if (opts.languages != null) {
-    log.info(`  ${t('doctorSelectedLanguages')(opts.languages.join(', '))}`)
-  }
-  else {
-    const languages = detectLanguages(opts.cwd)
-    log.info(`  ${languages.length > 0 ? t('doctorLanguages')(languages.join(', ')) : t('doctorNoLanguages')}`)
-  }
+  logLanguages(opts)
 
   // File presence checks. Without a package.json, init offers only the AGENTS.md block.
   const files = packageBased
     ? ['eslint.config.mjs', '.editorconfig', 'AGENTS.md', 'sgconfig.yml']
     : ['AGENTS.md']
   for (const f of files) {
-    const exists = existsSync(resolve(opts.cwd, f))
-    log.info(`  ${f} — ${exists ? t('doctorOk') : t('doctorMissing')}`)
+    logPresence(opts.cwd, f)
   }
 
   for (const guide of guidePathsFromAgentsBlock(readFileOrNull(resolve(opts.cwd, 'AGENTS.md'))) ?? []) {
-    const exists = existsSync(resolve(opts.cwd, guide))
-    log.info(`  ${guide} — ${exists ? t('doctorOk') : t('doctorMissing')}`)
+    logPresence(opts.cwd, guide)
   }
 }

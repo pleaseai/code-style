@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — Python
+# Passion Factory Code Style Rules: Python
 
 Python rules for `@pleaseai/code-style`, condensed from the Google Python Style
 Guide. The guide names `pylint` as its linter. Read it together with

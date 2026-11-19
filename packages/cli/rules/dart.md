@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — Dart
+# Passion Factory Code Style Rules: Dart
 
 Dart rules for `@pleaseai/code-style`, condensed from Effective Dart (style,
 documentation, usage, design). `dart format` sets the layout, `dart analyze`

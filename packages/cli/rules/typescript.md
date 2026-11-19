@@ -1,8 +1,8 @@
-# Passion Factory Code Style Rules — TypeScript
+# Passion Factory Code Style Rules: TypeScript
 
 TypeScript and JavaScript rules for `@pleaseai/code-style`. The
 `@pleaseai/eslint-config` package (based on `@antfu/eslint-config`) is the
-single source of truth — this document summarises the parts that an AI coding
+single source of truth; this document summarises the parts that an AI coding
 assistant needs to know _before_ writing code, so generated output passes lint
 on the first try. Read it together with `general.md` in this directory.
 
@@ -34,7 +34,7 @@ on the first try. Read it together with `general.md` in this directory.
 ## TypeScript
 
 - `target: ES2022`, `moduleResolution: bundler`.
-- `strict: true` — no implicit `any`, no unchecked indexed access hacks.
+- `strict: true`: no implicit `any`, no unchecked indexed access hacks.
 - Prefer `type` aliases over `interface` unless `extends`/declaration merging
   is actually needed.
 - Use `const` by default; `let` only when reassignment is required; never `var`.
@@ -46,7 +46,7 @@ on the first try. Read it together with `general.md` in this directory.
 
 - Use **optional chaining** (`?.`) and **nullish coalescing** (`??`).
 - Prefer `async`/`await` over raw `.then()` chains.
-- No `console.log` in production code paths — use a logger or remove before
+- No `console.log` in production code paths; use a logger or remove before
   commit. `console.warn`/`console.error` are acceptable for CLI tooling.
 - Throw `Error` instances (or subclasses), never bare strings or objects.
 
@@ -56,16 +56,16 @@ on the first try. Read it together with `general.md` in this directory.
   symbol is named after it in kebab-case (`UserService` → `user-service.ts`).
 - Put a module's error classes in its `errors.ts`.
 - Avoid barrel re-exports (`index.ts` that just re-exports everything) for
-  internal modules — they defeat tree-shaking.
+  internal modules; they defeat tree-shaking.
 
 ## Testing
 
 - Tests live under the package's test root, `test/` or `tests/` (one per
   package), at a path mirrored from the source they test, with a `.test.ts`
   (or `.spec.ts`) suffix:
-  - one source root: drop its name — `src/foo/bar.ts` → `test/foo/bar.test.ts`;
-  - several roots (Nuxt 4 `app/`, `server/`, `shared/`): keep it —
-    `server/utils/db.ts` → `test/unit/server/utils/db.test.ts`.
+  - with one source root, drop its name (`src/foo/bar.ts` → `test/foo/bar.test.ts`);
+  - with several roots (Nuxt 4 `app/`, `server/`, `shared/`), keep it
+    (`server/utils/db.ts` → `test/unit/server/utils/db.test.ts`).
 - One environment segment is allowed directly under the test root: `unit`,
   `nuxt`, `browser`, or `e2e`. End-to-end tests with no single source file go
   under `test/e2e/`.

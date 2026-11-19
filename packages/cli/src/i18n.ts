@@ -46,7 +46,7 @@ const messages: Record<Locale, Messages> = {
     detectedPm: pm => `Detected package manager: ${pm}`,
     selectTools: 'Select items to install or update',
     alreadyInstalled: '(installed)',
-    nothingSelected: 'Nothing selected — exiting.',
+    nothingSelected: 'Nothing selected, exiting.',
     installing: 'Installing packages…',
     installFailed: 'Package installation failed. Check your network or install manually.',
     installDone: 'Packages installed.',

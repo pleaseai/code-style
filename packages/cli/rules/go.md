@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — Go
+# Passion Factory Code Style Rules: Go
 
 Go rules for `@pleaseai/code-style`, condensed from Effective Go. `gofmt`
 (`go fmt`) is the authority on layout. Read it together with `general.md` in
