@@ -61,9 +61,6 @@ export default defineConfig({
   redirects: {
     '/': `/${defaultLocale}`,
   },
-  // Tailwind v4 via its Vite plugin, the integration Astro recommends for
-  // Tailwind v4. It replaces the PostCSS plugin, which doesn't build under
-  // Astro 7's Vite 8 bundler.
   vite: {
     plugins: [tailwindcss()],
   },
@@ -75,10 +72,6 @@ export default defineConfig({
   },
   integrations: [
     nimbus(nimbusConfig, {
-      // Authoring rules are opt-in. These two matter most: frontmatter must
-      // match the content schema for a page to render, and broken internal
-      // links are 404s for readers. See `nimbus-docs lint --help` for the
-      // others (heading hierarchy, code-block language, style).
       rules: {
         'nimbus/frontmatter-shape': 'error',
         'nimbus/internal-link': 'error',

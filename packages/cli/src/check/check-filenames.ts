@@ -169,13 +169,11 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
  * Files exempt by convention (`index.ts`, test files, …) never count.
  */
 export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage): { findings: Finding[], notices: string[] } {
-  // `export { x }` of a name the file imports re-exports it; it is not a local symbol.
   const imported = new Set(matches.filter(m => m.ruleId === 'import-binding').map(m => `${m.file}\0${m.text}`))
   const opaque = opaqueFiles(matches, lang, imported)
   const byFile = publicNamesByFile(matches, lang, imported, opaque)
   const skipped = new Map<string, Set<OpaqueReason>>()
   for (const [file, reasons] of opaque) {
-    // Two or more enumerated names are never judged anyway; fewer leave the opaque exports as the unknown part.
     if ((byFile.get(file)?.size ?? 0) <= 1 && lang.stem(file, unitOf(file, lang.units)) != null) {
       skipped.set(file, reasons)
     }
@@ -190,7 +188,6 @@ export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage
   return { findings, notices: skippedNotice(lang, skipped) }
 }
 
-/** file → why its exports cannot be enumerated, from opaque-rule matches and aliased re-exports. */
 function opaqueFiles(matches: ExtractMatch[], lang: FilenameLanguage, imported: Set<string>): Map<string, Set<OpaqueReason>> {
   const opaque = new Map<string, Set<OpaqueReason>>()
   for (const m of matches) {
@@ -211,10 +208,6 @@ function addOpaque(opaque: Map<string, Set<OpaqueReason>>, file: string, reason:
   opaque.set(file, (opaque.get(file) ?? new Set()).add(reason))
 }
 
-/**
- * file → public local name → first line, for the matches of `lang.nameRules`.
- * Re-exported imports and framework-reserved names also mark the file opaque.
- */
 function publicNamesByFile(
   matches: ExtractMatch[],
   lang: FilenameLanguage,
@@ -242,7 +235,6 @@ function publicNamesByFile(
   return byFile
 }
 
-/** The finding for a file whose only public symbol is not named after the file, else `null`. */
 function mismatchFinding(file: string, names: Map<string, number>, lang: FilenameLanguage): Finding | null {
   if (names.size !== 1) {
     return null

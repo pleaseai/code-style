@@ -41,11 +41,6 @@ function extract(root: string, files: string[], fileSet: Set<string>, language: 
   return out
 }
 
-/**
- * Runs the ADR-0022 layer-3 path checker over `options.root`. Packages are
- * discovered from the enclosing project (see `findScanRoot`); only findings
- * below `options.root` are returned. Never throws for findings: every finding is a warning; callers decide the exit code.
- */
 export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const requested = realpathSync(resolve(options.root ?? process.cwd()))
   const root = findScanRoot(requested)

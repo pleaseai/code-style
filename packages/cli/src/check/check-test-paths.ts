@@ -44,10 +44,8 @@ function candidateSources(inner: string, unit: Unit, layout: TestLayout, withAlt
   ])
 }
 
-/** Extension-less source paths the mirrored test path `rel` maps to in `unit`. */
 function sourceBases(rel: string, unit: Unit, withAlternates: boolean): string[] {
   if (unit.keepRootName) {
-    // Several roots: the root name is part of the test path.
     return unit.rootMirror === true || unit.sourceRoots.some(root => isUnder(rel, root) && rel !== root) ? [joinPath(unit.dir, rel)] : []
   }
   return [...unit.sourceRoots, ...(withAlternates ? unit.alternateSourceRoots ?? [] : [])].map(root => joinPath(unit.dir, root, rel))

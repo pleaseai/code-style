@@ -62,7 +62,6 @@ function toolOptions(available: Tool[], pkg: PackageJson | undefined): Array<{ v
   })
 }
 
-/** Guide languages for the AGENTS.md block: the detected ones, confirmed interactively unless auto-accepting. */
 async function chooseLanguages(opts: CommandOptions): Promise<Language[]> {
   const detected = detectLanguages(opts.cwd)
   if (opts.autoAccept) {
@@ -81,7 +80,6 @@ async function chooseLanguages(opts: CommandOptions): Promise<Language[]> {
   return chosen
 }
 
-/** Installs the selected tools' packages (de-duped); exits when the install fails. */
 function installToolPackages(pm: PackageManager, tools: Tool[], cwd: string): void {
   const packagesToInstall = Array.from(
     new Set(tools.flatMap(tool => [...tool.packages, ...(tool.optionalPackages ?? [])])),
@@ -174,7 +172,6 @@ export async function runUpdate(opts: CommandOptions): Promise<void> {
   outro(t('done'))
 }
 
-/** `<path>: ok|missing` for a path relative to `cwd`. */
 function logPresence(cwd: string, path: string): void {
   const exists = existsSync(resolve(cwd, path))
   log.info(`  ${path}: ${exists ? t('doctorOk') : t('doctorMissing')}`)

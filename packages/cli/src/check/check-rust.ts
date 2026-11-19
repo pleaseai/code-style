@@ -84,7 +84,6 @@ function metadataFor(provider: CargoMetadataProvider, rootDir: string, dir: stri
   return metadata
 }
 
-/** A cargo package's directory and target entry files, relative to the checked root (targets outside it are dropped). */
 function rustPackage(rootDir: string, manifestRel: string, pkg: CargoMetadata['packages'][number]): RustPackage {
   const roots: string[] = []
   const testRoots: string[] = []

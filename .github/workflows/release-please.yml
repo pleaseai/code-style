@@ -17,8 +17,6 @@ permissions:
 
 jobs:
   release-please:
-    # Skip the release machinery entirely on a publish_only dispatch. That
-    # path republishes the current versions without cutting a new release.
     if: ${{ github.event_name == 'push' || inputs.publish_only != true }}
     runs-on: ubuntu-latest
     outputs:

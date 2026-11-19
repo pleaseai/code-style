@@ -60,7 +60,6 @@ async function applyPrettierConfig(ctx: ToolContext): Promise<ToolApplyResult> {
   const label = 'package.json#prettier'
 
   if (pkg.prettier === '@pleaseai/prettier-config') {
-    // Already configured, nothing to do.
     return result
   }
 
@@ -204,7 +203,6 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   }
 
   if (existing === next) {
-    // No-op: already up to date.
     return result
   }
 
@@ -275,7 +273,6 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   }
 
   if (listsAstGrepRules(existing)) {
-    // Already lists the rules in `ruleDirs`; keep the user's other settings.
     return result
   }
 
