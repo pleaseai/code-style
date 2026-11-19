@@ -30,10 +30,10 @@ workaround that keeps the site correct until Docus ships a fix.
 
 | Docus version | Date        | Relevant change                                                                 |
 | ------------- | ----------- | ------------------------------------------------------------------------------- |
-| pre-v5.0.0    | —           | `layer/app/pages/[[lang]]/index.vue` — file-based landing page                  |
+| pre-v5.0.0    | n/a         | `layer/app/pages/[[lang]]/index.vue`: file-based landing page                   |
 | **v5.0.0**    | 2025-09-24  | Commit [`d97a793`](https://github.com/nuxt-content/docus/commit/d97a793) renamed `[[lang]]/index.vue` → `templates/landing.vue` and introduced `layer/modules/routing.ts` which pushes `lang-index` at path `/:lang?` programmatically |
 | v5.6.0        | 2026-02-17  | [PR #1274](https://github.com/nuxt-content/docus/pull/1274) wraps the push in a `landingPageExists()` check but leaves the `/:lang?` path unchanged |
-| v5.9.0        | 2026-04-02  | Current installed version — bug still present                                   |
+| v5.9.0        | 2026-04-02  | Current installed version, bug still present                                    |
 
 Before v5.0.0, the landing page lived as a real file at
 `pages/[[lang]]/index.vue`, which `@nuxtjs/i18n` could rewrite cleanly per
@@ -42,12 +42,12 @@ optional `:lang?` parameter is the source of the bug.
 
 ### Two interacting bugs
 
-**Bug 1 — `lang-index` route path (`/:lang?`).**
+**Bug 1: `lang-index` route path (`/:lang?`).**
 Docus forces `@nuxtjs/i18n` to `strategy: 'prefix'` in
 `layer/modules/config.ts`, so every page path is duplicated per locale. The
 `lang-index` route becomes `/en/:lang?` and `/ko/:lang?`. The same happens
 to the file-based `[[lang]]/[...slug].vue` page, which becomes
-`/en/:lang?/:slug(.*)*` and `/ko/:lang?/:slug(.*)*` — the `:lang?` is
+`/en/:lang?/:slug(.*)*` and `/ko/:lang?/:slug(.*)*`; the `:lang?` is
 redundant because i18n has already injected the locale.
 
 For a 2-segment URL like `/ko/cli`:
@@ -61,7 +61,7 @@ template's `.path('/ko/cli').first()` query would return `null` and a clean
 `createError({ statusCode: 404 })` would be thrown. Bug 2 is what turns
 this into a silent render of the wrong page.
 
-**Bug 2 — `landing.vue` uses a static `useAsyncData` key.**
+**Bug 2: `landing.vue` uses a static `useAsyncData` key.**
 `node_modules/docus/app/templates/landing.vue`:
 
 ```ts
@@ -105,7 +105,7 @@ dist/ko/_payload.json       ... "landing_ko": <ref 46>
 dist/ko/cli/_payload.json   ... "landing_ko": <ref 46>   ← same reference
 ```
 
-Both payloads point to the exact same `landing_ko` object — conclusive
+Both payloads point to the exact same `landing_ko` object. This is conclusive
 evidence of cross-route cache bleed.
 
 ### Why docus.dev is not affected
@@ -127,8 +127,8 @@ docs/content/en/
 ```
 
 All docs live at 3-or-more segments (`/en/concepts/edition`,
-`/en/essentials/markdown-syntax`, …). The affected URL surface — content
-whose path is exactly `/LOCALE/X` — is empty, so the routing collision
+`/en/essentials/markdown-syntax`, …). The affected URL surface (content
+whose path is exactly `/LOCALE/X`) is empty, so the routing collision
 never surfaces. Probing `docus.dev` confirms this:
 
 | URL | Status | Notes |
@@ -142,19 +142,19 @@ boundary:
 
 | Content file | URL | Affected? |
 | --- | --- | --- |
-| `content/ko/index.md` | `/ko` | No (1 segment — handled by design) |
+| `content/ko/index.md` | `/ko` | No (1 segment, handled by design) |
 | `content/ko/4.cli.md` | `/ko/cli` | **Yes** |
 | `content/ko/2.prettier-config.md` | `/ko/prettier-config` | **Yes** |
 | `content/ko/3.editorconfig.md` | `/ko/editorconfig` | **Yes** |
 | `content/ko/1.eslint-config/1.index.md` | `/ko/eslint-config` | **Yes** (sub-dir `index.md` also maps to 2 segments) |
 | `content/ko/1.eslint-config/5.advanced.md` | `/ko/eslint-config/advanced` | No (3 segments) |
 
-### Secondary issue — unprefixed landing links
+### Secondary issue: unprefixed landing links
 
 In addition to the routing bug, `docs/content/en/index.md` used
 unprefixed `to: /cli`, `to: /eslint-config`, … links in its hero buttons
 and page cards. With `strategy: 'prefix'` every route is locale-prefixed,
-so those hrefs 404 at runtime and — more visibly — the prerender crawler
+so those hrefs 404 at runtime and, more visibly, the prerender crawler
 never discovers `dist/en/cli`, `dist/en/eslint-config`, etc. This is an
 ordinary content mistake, not a Docus bug, but it compounded the
 symptoms and was fixed alongside the workaround. (Inline markdown links
@@ -209,7 +209,7 @@ The landing route matches only the locale root, and the slug route
 handles all sub-pages. Bug 1 is eliminated.
 
 Bug 2 (the static `useAsyncData` key in `landing.vue`) is **not touched
-locally** — Docus's template file lives in `node_modules/` and patching
+locally**: Docus's template file lives in `node_modules/` and patching
 it is not viable. Because Bug 1 is fixed, Bug 2 becomes unreachable in
 practice: the only URLs that dispatch to `landing.vue` are `/en` and
 `/ko`, and each runs its own query for its own `route.path`, so there is
@@ -265,15 +265,15 @@ generated.
       known-good version in `docs/package.json` instead of `"latest"` to
       prevent silent regressions.
 - [x] Fix remaining unprefixed inline markdown links in
-      `docs/content/en/1.eslint-config/**` — done in commit `0f94f60`
+      `docs/content/en/1.eslint-config/**`, done in commit `0f94f60`
       (covers markdown links, YAML `to:` props, and MDC component
       `::tip{to="..."}` / `::note{to="..."}` attrs).
 
 ## References
 
-- [Docus commit `d97a793` — fix(routing): handle unique root level content](https://github.com/nuxt-content/docus/commit/d97a793)
-- [Docus PR #1274 — feat(landing): make it optional](https://github.com/nuxt-content/docus/pull/1274)
-- [Docus PR #1275 — feat(layer): handle docs prefix & folder](https://github.com/nuxt-content/docus/pull/1275)
-- [@nuxtjs/i18n — Routing strategies](https://i18n.nuxtjs.org/docs/guide/routing-strategies)
-- [Nuxt — `pages:extend` hook](https://nuxt.com/docs/api/advanced/hooks)
-- [`@nuxt/content` — `queryCollection().path()` uses exact SQL equality](../../node_modules/@nuxt/content/dist/runtime/internal/query.js)
+- [Docus commit `d97a793`: fix(routing): handle unique root level content](https://github.com/nuxt-content/docus/commit/d97a793)
+- [Docus PR #1274: feat(landing): make it optional](https://github.com/nuxt-content/docus/pull/1274)
+- [Docus PR #1275: feat(layer): handle docs prefix & folder](https://github.com/nuxt-content/docus/pull/1275)
+- [@nuxtjs/i18n: Routing strategies](https://i18n.nuxtjs.org/docs/guide/routing-strategies)
+- [Nuxt: `pages:extend` hook](https://nuxt.com/docs/api/advanced/hooks)
+- [`@nuxt/content`: `queryCollection().path()` uses exact SQL equality](../../node_modules/@nuxt/content/dist/runtime/internal/query.js)

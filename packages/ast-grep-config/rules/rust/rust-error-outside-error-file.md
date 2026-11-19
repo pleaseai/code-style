@@ -5,7 +5,7 @@
 | Slug | `code-error-types-in-dedicated-module` |
 | Language | Rust (`.rs`) |
 | Severity | `warning` |
-| Enforcement layer | 2 (ast-grep) — [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
+| Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why
 
@@ -75,7 +75,7 @@ pub use crate::error::ParseError;
    `use crate::<module>::error::ParseError;` for `src/<module>/error.rs`. If it
    is part of the public API, re-export it by name from the module that
    exposed it before (`pub use crate::error::ParseError;`, or
-   `pub use self::error::ParseError;` inside `<module>`) — not with a glob
+   `pub use self::error::ParseError;` inside `<module>`): not with a glob
    (see `rust-no-glob-reexport`).
 4. Run `cargo check --all-targets`.
 

@@ -5,7 +5,7 @@
 | Slug | `code-error-types-in-dedicated-module` |
 | Language | Java (`.java`) |
 | Severity | `warning` |
-| Enforcement layer | 2 (ast-grep) — [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
+| Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why
 

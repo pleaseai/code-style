@@ -99,7 +99,7 @@ Keep the Nuxt-based Docus with a custom Rollup plugin to strip TypeScript from `
 - Requires custom Rollup plugin workaround for Bun
 - `defineAppConfig` prerender issue (additional fix needed)
 - D1 database required for SSR on Cloudflare
-- Fragile — Docus/Nitro updates may break the workaround
+- Fragile: Docus/Nitro updates may break the workaround
 
 ### Option 5: Nextra
 

@@ -2,7 +2,7 @@
 
 English | [한국어](./README.ko.md)
 
-CLI that wires PleaseAI's shared code style into any project — installs the
+CLI that wires PleaseAI's shared code style into any project. It installs the
 eslint/prettier/editorconfig/ast-grep packages and manages the `AGENTS.md`
 rules block so AI coding assistants know how to write code that passes lint on
 the first try. `please-style check` checks file names and test paths.
@@ -42,7 +42,7 @@ The `init` command:
 | eslint-config | `@pleaseai/eslint-config`, `eslint` | `eslint.config.mjs` |
 | prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (copied from `node_modules`) |
-| agents-md | — | `AGENTS.md` (marker-managed block) |
+| agents-md | - | `AGENTS.md` (marker-managed block) |
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
 
 ## ast-grep rules
@@ -99,7 +99,7 @@ when the CLI's own cannot be resolved (it exists to provide the lint `rules/`
 that `sgconfig.yml` points at).
 The binary resolves from the checked project first, so the project's pinned
 ast-grep version wins, then falls back to the CLI's own install. `@ast-grep/cli`
-is an optional peer dependency of this package, so install it in the project —
+is an optional peer dependency of this package, so install it in the project,
 the **ast-grep** tool in `init` does this:
 
 ```bash
@@ -383,7 +383,7 @@ does not catch lost tests.
 
 ## `AGENTS.md` block
 
-In `AGENTS.md`, the CLI owns only the content between these markers — everything
+In `AGENTS.md`, the CLI owns only the content between these markers; everything
 else is your content and is preserved verbatim:
 
 ```md

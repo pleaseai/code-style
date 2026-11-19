@@ -5,7 +5,7 @@
 | Slug | `code-greppable-public-symbols` |
 | Language | Rust (`.rs`) |
 | Severity | `warning` |
-| Enforcement layer | 2 (ast-grep) — [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
+| Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why
 
@@ -49,7 +49,7 @@ pub use crate::model::{Account, User};
    read the module's `pub` items).
 2. Replace `*` with a braced list of every item the glob exports today:
    `pub use crate::model::{Account, User};`. Leave an item out only when
-   removing it from the public API is intentional — downstream crates may use
+   removing it from the public API is intentional: downstream crates may use
    it.
 3. Run `cargo check --all-targets`. Any "unresolved import" or "cannot find"
    error names an item that was reached through the glob; add it to the list.

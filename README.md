@@ -2,7 +2,7 @@
 
 English | [한국어](./README.ko.md)
 
-A monorepo providing shared code style configurations for PleaseAI projects — for outsourcing, open source, and internal use.
+A monorepo providing shared code style configurations for PleaseAI projects. Use it in outsourced, open source, and internal projects alike.
 
 See the [code-style documentation site](https://code-style.pages.dev) for full guides.
 

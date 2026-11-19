@@ -26,8 +26,8 @@ This config wraps `@antfu/eslint-config` with the following defaults:
 | Semicolons | No |
 | TypeScript | Enabled |
 | Gitignore | Enabled |
-| `lessOpinionated` | `true` — disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
-| `antfu/top-level-function` | Re-enabled — prefer `function` declarations at top level |
+| `lessOpinionated` | `true`: disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
+| `antfu/top-level-function` | Re-enabled: prefer `function` declarations at top level |
 
 Additionally, `test/prefer-lowercase-title` is disabled.
 
@@ -224,7 +224,7 @@ export default pleaseai({
 - `slop/no-em-dash` is a warning in Markdown files and an error elsewhere. It has no autofix.
 - On non-JS files (CSS, HTML, Vue, JSON, YAML, TOML, Markdown, and so on), the rule runs only where another config already parses them. Enabling `antislop` never makes ESLint lint new file types, so you get no parsing errors on CSS or HTML.
 
-With antislop turned on, this repository reports 193 findings (its own `eslint.config.ts` sets `antislop: false` for now): 174 `slop/no-em-dash` (136 in Markdown), 8 `sonarjs/cognitive-complexity`, 7 `slop/prefer-jsdoc` (autofixable), 3 `slop/max-comment-length` and 1 `slop/no-trivial-functions`. See [issue #76](https://github.com/pleaseai/code-style/issues/76) for the measurements.
+When this repository first turned antislop on, it reported 193 findings: 174 `slop/no-em-dash` (136 in Markdown), 8 `sonarjs/cognitive-complexity`, 7 `slop/prefer-jsdoc` (autofixable), 3 `slop/max-comment-length` and 1 `slop/no-trivial-functions`. They are fixed, and this repository now lints itself with antislop on. See [issue #76](https://github.com/pleaseai/code-style/issues/76) for the measurements.
 
 ## Optional Configs
 
@@ -338,17 +338,17 @@ export default pleaseai({
 bun add -D @angular-eslint/eslint-plugin @angular-eslint/eslint-plugin-template @angular-eslint/template-parser
 ```
 
-### Optional Rules — `command`
+### Optional Rules: `command`
 
-`@antfu/eslint-config` ships with [`eslint-plugin-command`](https://github.com/antfu/eslint-plugin-command), which `@pleaseai/eslint-config` inherits. It is **not** a typical lint rule — it's an on-demand micro-codemod that triggers on specific triple-slash comments.
+`@antfu/eslint-config` ships with [`eslint-plugin-command`](https://github.com/antfu/eslint-plugin-command), which `@pleaseai/eslint-config` inherits. It is **not** a typical lint rule: it's an on-demand micro-codemod that triggers on specific triple-slash comments.
 
 A few built-in triggers:
 
-- `/// to-function` — converts an arrow function to a `function` declaration
-- `/// to-arrow` — converts a `function` declaration to an arrow function
-- `/// to-for-each` — converts a `for`-loop to `.forEach()`
-- `/// to-for-of` — converts a `.forEach()` to a `for-of`
-- `/// keep-sorted` — sorts the next object/array/interface
+- `/// to-function`: converts an arrow function to a `function` declaration
+- `/// to-arrow`: converts a `function` declaration to an arrow function
+- `/// to-for-each`: converts a `for`-loop to `.forEach()`
+- `/// to-for-of`: converts a `.forEach()` to a `for-of`
+- `/// keep-sorted`: sorts the next object/array/interface
 - …see the [plugin docs](https://github.com/antfu/eslint-plugin-command#built-in-commands) for the full list
 
 Place the trigger one line above the code you want to transform:
@@ -370,7 +370,7 @@ async function foo(msg: string): Promise<void> {
 }
 ```
 
-The trigger comment is one-off — it's removed along with the transformation.
+The trigger comment is one-off; it's removed along with the transformation.
 
 ### Formatters
 
@@ -400,8 +400,8 @@ This package also exports `eslint-plugin-package-json` configs:
 import { recommended, stylistic } from '@pleaseai/eslint-config/package-json'
 ```
 
-- `recommended` — `eslint-plugin-package-json` recommended-publishable config
-- `stylistic` — `eslint-plugin-package-json` stylistic config
+- `recommended`: `eslint-plugin-package-json` recommended-publishable config
+- `stylistic`: `eslint-plugin-package-json` stylistic config
 
 ## IDE Support (auto fix on save)
 
@@ -494,7 +494,7 @@ When ESLint runs inside a code editor, a handful of rules are **disabled for aut
 - `pnpm/json-prefer-workspace-settings`
 - `pnpm/json-valid-catalog`
 
-> Since `@antfu/eslint-config` v3.16.0 these rules are not disabled — they're made **non-fixable** in editor mode. They still report, just without a quick-fix action.
+> Since `@antfu/eslint-config` v3.16.0 these rules are not disabled; they're made **non-fixable** in editor mode. They still report, just without a quick-fix action.
 
 Motivation: an unused import you just pasted shouldn't vanish the moment your editor auto-saves. The rules still apply when you run `eslint` in the terminal or through [Lint Staged](#lint-staged). If you prefer the uniform behaviour across editor and CLI, opt out:
 
@@ -592,7 +592,7 @@ export function greet(name: string) {
 export const greet = (name: string) => `Hello, ${name}`
 ```
 
-Arrow functions are still fine inside function bodies, as callbacks, or for inline JSX handlers — the rule only targets top-level declarations. If you disagree with this choice, override it:
+Arrow functions are still fine inside function bodies, as callbacks, or for inline JSX handlers; the rule only targets top-level declarations. If you disagree with this choice, override it:
 
 ```ts
 import pleaseai from '@pleaseai/eslint-config'
@@ -606,10 +606,10 @@ export default pleaseai({
 
 ### Curly braces style?
 
-PleaseAI defaults to `lessOpinionated: true`, which enforces `curly: ['error', 'all']` — always require braces around control flow bodies:
+PleaseAI defaults to `lessOpinionated: true`, which enforces `curly: ['error', 'all']`, always requiring braces around control flow bodies:
 
 ```js
-// PleaseAI style — always requires braces
+// PleaseAI style: always requires braces
 function example() {
   if (foo) {
     return true

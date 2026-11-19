@@ -26,8 +26,8 @@
 | 세미콜론 | 없음 |
 | TypeScript | 활성화 |
 | Gitignore | 활성화 |
-| `lessOpinionated` | `true` — `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
-| `antfu/top-level-function` | 재활성화 — 최상위 레벨에서는 `function` 선언 선호 |
+| `lessOpinionated` | `true`: `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
+| `antfu/top-level-function` | 재활성화: 최상위 레벨에서는 `function` 선언 선호 |
 
 추가로 `test/prefer-lowercase-title`은 비활성화되어 있습니다.
 
@@ -224,7 +224,7 @@ export default pleaseai({
 - `slop/no-em-dash`는 Markdown 파일에서는 경고, 그 외 파일에서는 오류입니다. 자동 수정은 지원하지 않습니다.
 - CSS, HTML, Vue, JSON, YAML, TOML, Markdown 같은 non-JS 파일에서는 다른 설정이 이미 파싱하는 파일에만 규칙이 동작합니다. 따라서 `antislop`을 켜도 ESLint가 새로운 파일 유형을 검사하지 않으며, CSS나 HTML에서 파싱 오류가 나지 않습니다.
 
-antislop을 켜면 이 저장소에서 193건이 보고됩니다(현재 이 저장소의 `eslint.config.ts`는 `antislop: false`로 끕니다). `slop/no-em-dash` 174건(Markdown 136건), `sonarjs/cognitive-complexity` 8건, `slop/prefer-jsdoc` 7건(자동 수정 가능), `slop/max-comment-length` 3건, `slop/no-trivial-functions` 1건입니다. 측정 결과는 [이슈 #76](https://github.com/pleaseai/code-style/issues/76)에 있습니다.
+이 저장소에서 antislop을 처음 켰을 때 193건이 보고되었습니다. `slop/no-em-dash` 174건(Markdown 136건), `sonarjs/cognitive-complexity` 8건, `slop/prefer-jsdoc` 7건(자동 수정 가능), `slop/max-comment-length` 3건, `slop/no-trivial-functions` 1건입니다. 지금은 모두 고쳤고, 이 저장소도 antislop을 켠 상태로 린트합니다. 측정 결과는 [이슈 #76](https://github.com/pleaseai/code-style/issues/76)에 있습니다.
 
 ## 선택적 설정
 
@@ -338,17 +338,17 @@ export default pleaseai({
 bun add -D @angular-eslint/eslint-plugin @angular-eslint/eslint-plugin-template @angular-eslint/template-parser
 ```
 
-### 선택적 규칙 — `command`
+### 선택적 규칙: `command`
 
-`@antfu/eslint-config`에는 [`eslint-plugin-command`](https://github.com/antfu/eslint-plugin-command)가 포함되어 있으며, `@pleaseai/eslint-config`도 이를 상속합니다. 일반적인 린트 규칙이 **아니라** — 특정 triple-slash 주석에 반응하는 온디맨드 마이크로 codemod입니다.
+`@antfu/eslint-config`에는 [`eslint-plugin-command`](https://github.com/antfu/eslint-plugin-command)가 포함되어 있으며, `@pleaseai/eslint-config`도 이를 상속합니다. 일반적인 린트 규칙이 **아니라** 특정 triple-slash 주석에 반응하는 온디맨드 마이크로 codemod입니다.
 
 기본 제공되는 트리거 몇 가지:
 
-- `/// to-function` — arrow function을 `function` 선언으로 변환
-- `/// to-arrow` — `function` 선언을 arrow function으로 변환
-- `/// to-for-each` — `for` 루프를 `.forEach()`로 변환
-- `/// to-for-of` — `.forEach()`를 `for-of`로 변환
-- `/// keep-sorted` — 다음 객체/배열/인터페이스를 정렬
+- `/// to-function`: arrow function을 `function` 선언으로 변환
+- `/// to-arrow`: `function` 선언을 arrow function으로 변환
+- `/// to-for-each`: `for` 루프를 `.forEach()`로 변환
+- `/// to-for-of`: `.forEach()`를 `for-of`로 변환
+- `/// keep-sorted`: 다음 객체/배열/인터페이스를 정렬
 - …전체 목록은 [플러그인 문서](https://github.com/antfu/eslint-plugin-command#built-in-commands)에서 확인하세요
 
 변환하려는 코드 한 줄 위에 트리거를 배치합니다:
@@ -400,8 +400,8 @@ bun add -D eslint-plugin-format
 import { recommended, stylistic } from '@pleaseai/eslint-config/package-json'
 ```
 
-- `recommended` — `eslint-plugin-package-json` recommended-publishable 설정
-- `stylistic` — `eslint-plugin-package-json` stylistic 설정
+- `recommended`: `eslint-plugin-package-json` recommended-publishable 설정
+- `stylistic`: `eslint-plugin-package-json` stylistic 설정
 
 ## IDE 지원 (저장 시 자동 수정)
 
@@ -592,7 +592,7 @@ export function greet(name: string) {
 export const greet = (name: string) => `Hello, ${name}`
 ```
 
-함수 본문 내부, 콜백, 인라인 JSX 핸들러의 arrow function은 여전히 문제없습니다 — 이 규칙은 최상위 선언만 대상으로 합니다. 이 선택에 동의하지 않는다면 오버라이드할 수 있습니다:
+함수 본문 내부, 콜백, 인라인 JSX 핸들러의 arrow function은 여전히 문제없습니다. 이 규칙은 최상위 선언만 대상으로 합니다. 이 선택에 동의하지 않는다면 오버라이드할 수 있습니다:
 
 ```ts
 import pleaseai from '@pleaseai/eslint-config'
@@ -606,10 +606,10 @@ export default pleaseai({
 
 ### 중괄호 스타일?
 
-PleaseAI의 기본값은 `lessOpinionated: true`이며, 이는 `curly: ['error', 'all']`을 강제합니다 — 제어문 본문에는 항상 중괄호를 요구합니다:
+PleaseAI의 기본값은 `lessOpinionated: true`이며, 이는 `curly: ['error', 'all']`을 강제합니다. 제어문 본문에는 항상 중괄호를 요구합니다:
 
 ```js
-// PleaseAI 스타일 — 항상 중괄호 필요
+// PleaseAI 스타일: 항상 중괄호 필요
 function example() {
   if (foo) {
     return true
