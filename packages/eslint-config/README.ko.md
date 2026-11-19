@@ -209,7 +209,7 @@ bun add -D eslint-plugin-slop eslint-plugin-sonarjs
 
 `antislop`을 지정하지 않으면 설치된 플러그인의 규칙만 켜집니다. 플러그인 없이 업그레이드하면 아무것도 바뀌지 않으며, `please-style`은 새 프로젝트에 두 플러그인을 함께 설치합니다.
 
-`antislop: true`는 두 플러그인이 모두 필요합니다. 객체를 넘기면 명시해서 켠 플러그인(`slop: true` 또는 `slop: { ... }`)만 필요하고, 언급하지 않은 플러그인은 설치 여부를 따릅니다. 필요한 플러그인이 없으면 오류가 발생합니다: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` 일부만 끄려면 `{ sonarjs: false }` 또는 `{ slop: false }`를, 전부 끄려면 `false`를 지정합니다.
+`antislop: true`는 두 플러그인이 모두 필요합니다. 객체를 넘기면 명시해서 켠 플러그인(`slop: true` 또는 `slop: { ... }`. `cognitiveComplexity`에 숫자를 지정하면 `sonarjs`를 켠 것으로 봅니다)만 필요하고, 언급하지 않은 플러그인은 설치 여부를 따릅니다. 결과적으로 두 플러그인이 모두 꺼지면 antislop도 꺼집니다. 필요한 플러그인이 없으면 오류가 발생합니다: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` 일부만 끄려면 `{ sonarjs: false }` 또는 `{ slop: false }`를, 전부 끄려면 `false`를 지정합니다.
 
 ```js
 import pleaseai from '@pleaseai/eslint-config'
@@ -224,7 +224,7 @@ export default pleaseai({
 - `slop/no-em-dash`는 Markdown 파일에서는 경고, 그 외 파일에서는 오류입니다. 자동 수정은 지원하지 않습니다.
 - CSS, HTML, Vue, JSON, YAML, TOML, Markdown 같은 non-JS 파일에서는 다른 설정이 이미 파싱하는 파일에만 규칙이 동작합니다. 따라서 `antislop`을 켜도 ESLint가 새로운 파일 유형을 검사하지 않으며, CSS나 HTML에서 파싱 오류가 나지 않습니다.
 
-이 저장소에서는 193건이 보고됩니다. `slop/no-em-dash` 174건(Markdown 136건), `sonarjs/cognitive-complexity` 8건, `slop/prefer-jsdoc` 7건(자동 수정 가능), `slop/max-comment-length` 3건, `slop/no-trivial-functions` 1건입니다. 측정 결과는 [이슈 #76](https://github.com/pleaseai/code-style/issues/76)에 있습니다.
+antislop을 켜면 이 저장소에서 193건이 보고됩니다(현재 이 저장소의 `eslint.config.ts`는 `antislop: false`로 끕니다). `slop/no-em-dash` 174건(Markdown 136건), `sonarjs/cognitive-complexity` 8건, `slop/prefer-jsdoc` 7건(자동 수정 가능), `slop/max-comment-length` 3건, `slop/no-trivial-functions` 1건입니다. 측정 결과는 [이슈 #76](https://github.com/pleaseai/code-style/issues/76)에 있습니다.
 
 ## 선택적 설정
 

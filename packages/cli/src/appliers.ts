@@ -305,7 +305,8 @@ export const TOOLS: Tool[] = [
   {
     id: 'eslint-config',
     label: '@pleaseai/eslint-config (eslint.config.mjs)',
-    packages: ['@pleaseai/eslint-config', 'eslint', 'eslint-plugin-slop', 'eslint-plugin-sonarjs'],
+    packages: ['@pleaseai/eslint-config', 'eslint'],
+    optionalPackages: ['eslint-plugin-slop', 'eslint-plugin-sonarjs'],
     apply: applyEslintConfig,
   },
   {

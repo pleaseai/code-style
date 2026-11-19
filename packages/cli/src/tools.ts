@@ -32,6 +32,8 @@ export interface Tool {
   id: ToolId
   label: string
   packages: string[]
+  /** Installed with the tool, but `doctor` does not require them. */
+  optionalPackages?: string[]
   apply: (ctx: ToolContext) => Promise<ToolApplyResult>
 }
 

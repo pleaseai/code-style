@@ -20,20 +20,22 @@ export function resolveAntislop(
     return false
   }
   const settings: OptionsAntislop = option === true ? { slop: true, sonarjs: true } : option ?? {}
-  const { slop = isInstalled(SLOP), sonarjs = isInstalled(SONARJS) } = settings
+  const {
+    slop = isInstalled(SLOP),
+    sonarjs = typeof settings.cognitiveComplexity === 'number' || isInstalled(SONARJS),
+  } = settings
   const enabled = pluginsOf({ slop, sonarjs })
-  if (option === undefined) {
-    return enabled.length > 0 ? { slop, sonarjs } : false
+  if (enabled.length === 0) {
+    return false
   }
-  const required = enabled.length > 0 ? enabled : pluginsOf(settings)
-  const missing = required.filter(name => !isInstalled(name))
+  const missing = enabled.filter(name => !isInstalled(name))
   if (missing.length > 0) {
     throw new Error(
       `\`antislop\` requires ${missing.map(name => `\`${name}\``).join(' and ')}. `
       + `Install with \`bun add -D ${missing.join(' ')}\`, or set \`antislop: false\`.`,
     )
   }
-  return { ...settings, slop, sonarjs }
+  return option === undefined ? { slop, sonarjs } : { ...settings, slop, sonarjs }
 }
 
 function isOff(severity: Linter.RuleEntry): boolean {

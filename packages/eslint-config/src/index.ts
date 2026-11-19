@@ -10,7 +10,9 @@ export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem
    *
    * Left unset, each plugin's rules turn on when that plugin is installed.
    * `true` requires both plugins. An object requires each plugin it turns on
-   * explicitly, and a plugin it does not mention follows what is installed.
+   * explicitly (a numeric `cognitiveComplexity` turns on `sonarjs`), and a
+   * plugin it does not mention follows what is installed. An object that ends
+   * up turning on neither plugin leaves antislop off.
    * In Markdown, `slop/no-em-dash` is a warning.
    *
    * @default true for each installed plugin, otherwise false
