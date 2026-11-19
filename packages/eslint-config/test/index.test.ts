@@ -78,6 +78,7 @@ describe('antislop', () => {
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
     expect(await eslint.calculateConfigForFile('public/page.html')).toBeUndefined()
     expect(await eslint.calculateConfigForFile('src/legacy/page.html')).toBeUndefined()
+    expect(await eslint.calculateConfigForFile('src/style.css')).toBeUndefined()
   })
 
   test('does not lint other languages for a parser config without files', async () => {
