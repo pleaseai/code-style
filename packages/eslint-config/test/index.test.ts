@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'bun:test'
 import { ESLint } from 'eslint'
 import pluginImport from 'eslint-plugin-import'
+import { resolveAntislop } from '../src/antislop'
 import pleaseai, { parserPlain } from '../src/index'
 
 function pluginNames(configs: TypedFlatConfigItem[]): Set<string> {
@@ -88,6 +89,17 @@ describe('antislop', () => {
     expect(await eslint.calculateConfigForFile('src/style.css')).toBeUndefined()
   })
 
+  test('reports em dashes in Markdown as warnings', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }) })
+
+    const [markdown] = await eslint.lintText('# Title\n\na — b\n', { filePath: 'docs/notes.md' })
+    const [code] = await eslint.lintText('// a — b\nexport const a = 1\n', { filePath: 'src/a.ts' })
+    const severityOf = (result: ESLint.LintResult) => result.messages.find(message => message.ruleId === 'slop/no-em-dash')?.severity
+
+    expect(severityOf(markdown!)).toBe(1)
+    expect(severityOf(code!)).toBe(2)
+  })
+
   test('keeps Vue files when the Vue config parses them', async () => {
     const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true, vue: true }) })
 
@@ -95,6 +107,29 @@ describe('antislop', () => {
 
     expect(result!.messages.filter(message => message.fatal)).toEqual([])
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
+  })
+})
+
+describe('resolveAntislop', () => {
+  const installed = (...names: string[]) => (name: string) => names.includes(name)
+
+  test('is off by default when neither plugin is installed', () => {
+    expect(resolveAntislop(undefined, installed())).toBe(false)
+  })
+
+  test('turns on by default only the installed plugins', () => {
+    expect(resolveAntislop(undefined, installed('eslint-plugin-slop'))).toEqual({ slop: true, sonarjs: false })
+    expect(resolveAntislop(undefined, installed('eslint-plugin-slop', 'eslint-plugin-sonarjs'))).toEqual({ slop: true, sonarjs: true })
+  })
+
+  test('explains how to install the plugins an explicit option needs', () => {
+    expect(() => resolveAntislop(true, installed('eslint-plugin-slop')))
+      .toThrow('`antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`')
+  })
+
+  test('does not require a plugin the option turns off', () => {
+    expect(resolveAntislop({ sonarjs: false }, installed('eslint-plugin-slop'))).toEqual({ sonarjs: false })
+    expect(resolveAntislop(false, installed())).toBe(false)
   })
 })
 
