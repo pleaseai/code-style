@@ -1,6 +1,6 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
-import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
+import antfu, { defaultPluginRenaming, GLOB_GRAPHQL, GLOB_HTML, GLOB_STYLE, GLOB_SVELTE, GLOB_VUE, GLOB_XML } from '@antfu/eslint-config'
 
 export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
   /**
@@ -68,6 +68,34 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
   }
 }
 
+const antislopParserProviders = new Map([
+  [GLOB_STYLE, ['antfu/formatter/css', 'antfu/formatter/scss', 'antfu/formatter/less']],
+  [GLOB_HTML, ['antfu/formatter/html', 'antfu/angular/rules/template']],
+  [GLOB_XML, ['antfu/formatter/xml']],
+  [GLOB_VUE, ['antfu/vue/rules']],
+  [GLOB_SVELTE, ['antfu/svelte/rules']],
+  [GLOB_GRAPHQL, ['antfu/formatter/graphql']],
+])
+
+/**
+ * The universal entry targets antfu's `GLOB_ALL_SRC` plus GraphQL, which
+ * includes stylesheets, HTML, XML, Vue and Svelte. Listing them makes ESLint
+ * lint those files, and without a parser it reads them as JavaScript and
+ * reports parsing errors. Drop the globs that no config parses, so enabling
+ * antislop lints no new file types.
+ */
+function dropUnparsedAntislopFiles(configs: TypedFlatConfigItem[]): void {
+  const universal = configs.find(config => config.name === 'antfu/antislop/rules/universal')
+  if (!universal?.files) {
+    return
+  }
+  const names = new Set(configs.map(config => config.name))
+  universal.files = universal.files.filter((glob) => {
+    const providers = typeof glob === 'string' ? antislopParserProviders.get(glob) : undefined
+    return !providers || providers.some(name => names.has(name))
+  })
+}
+
 export function pleaseai(
   options: PleaseaiOptions = {},
   ...userConfigs: TypedFlatConfigItem[]
@@ -96,7 +124,7 @@ export function pleaseai(
       ...(canonicalPluginNames ? { autoRenamePlugins: false } : {}),
     },
     ...userConfigs,
-  )
+  ).onResolved(dropUnparsedAntislopFiles)
 
   if (!canonicalPluginNames) {
     return composer

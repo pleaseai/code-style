@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'bun:test'
 import { ESLint } from 'eslint'
 import pluginImport from 'eslint-plugin-import'
-import pleaseai from '../src/index'
+import pleaseai, { GLOB_HTML, parserPlain } from '../src/index'
 
 function pluginNames(configs: TypedFlatConfigItem[]): Set<string> {
   return new Set(configs.flatMap(config => Object.keys(config.plugins ?? {})))
@@ -39,6 +39,40 @@ describe('pleaseai', () => {
     expect(ruleEntry(configs, 'no-console')).toBe('error')
     expect(ruleEntry(configs, 'antfu/top-level-function')).toBe('off')
     expect(ruleEntry(configs, 'test/prefer-lowercase-title')).toBe('off')
+  })
+})
+
+describe('antislop', () => {
+  test('does not lint file types that no config parses', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true, vue: false }) })
+    const unparsed = ['src/style.css', 'src/page.html', 'src/feed.xml', 'src/App.vue', 'src/App.svelte', 'src/schema.graphql']
+
+    for (const filePath of unparsed) {
+      expect(await eslint.calculateConfigForFile(filePath)).toBeUndefined()
+    }
+
+    const [result] = await eslint.lintText('// a — b\nexport const a = 1\n', { filePath: 'src/a.ts' })
+
+    expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
+  })
+
+  test('keeps a file type that a config parses', async () => {
+    const htmlFormatter = { name: 'antfu/formatter/html', files: [GLOB_HTML], languageOptions: { parser: parserPlain } }
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }, htmlFormatter) })
+
+    const [result] = await eslint.lintText('<!-- a — b -->\n<p>hi</p>\n', { filePath: 'src/page.html' })
+
+    expect(result!.messages.filter(message => message.fatal)).toEqual([])
+    expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
+  })
+
+  test('keeps Vue files when the Vue config parses them', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true, vue: true }) })
+
+    const [result] = await eslint.lintText('<template>\n  <p>a — b</p>\n</template>\n', { filePath: 'src/App.vue' })
+
+    expect(result!.messages.filter(message => message.fatal)).toEqual([])
+    expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
   })
 })
 
