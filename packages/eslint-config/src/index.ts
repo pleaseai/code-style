@@ -1,6 +1,6 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
-import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
+import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 
 export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
   /**
@@ -68,6 +68,43 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
   }
 }
 
+/**
+ * The universal entry targets every non-JS language antfu knows (stylesheets,
+ * HTML, XML, Vue, Svelte, JSON, Markdown, YAML, TOML, GraphQL). Listing them
+ * makes ESLint lint those files, and where no config parses them it reads them
+ * as JavaScript and reports parsing errors. Keep only the JS/TS glob there, and
+ * run the rule on the other languages only inside the scope (`files`,
+ * `ignores`, `basePath`) of each config that sets a parser or language, so
+ * enabling antislop lints no new files. A nested array in `files` matches a
+ * file only when every glob in it does, so `[pattern, glob]` intersects the
+ * parser's scope with one language. Pairs that can never match (a TS glob and a
+ * CSS glob) are kept: they cost one glob test, while guessing overlap from file
+ * extensions could drop a real match.
+ */
+function scopeAntislopToParsedFiles(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] {
+  const universal = configs.find(config => config.name === 'antfu/antislop/rules/universal')
+  if (!universal?.files) {
+    return configs
+  }
+  const otherLanguages = universal.files.filter(glob => glob !== GLOB_SRC)
+  const parsed = configs.flatMap((config) => {
+    const { basePath, files, ignores, language, languageOptions } = config
+    if (config === universal || !files || !(languageOptions?.parser || language)) {
+      return []
+    }
+    return [{
+      name: 'pleaseai/antislop/rules/parsed',
+      ...(basePath ? { basePath } : {}),
+      files: files.flatMap(pattern => otherLanguages.map(glob => [pattern, glob].flat())),
+      ignores: [...(ignores ?? []), ...(universal.ignores ?? [])],
+      rules: universal.rules,
+    }]
+  })
+  universal.files = universal.files.filter(glob => glob === GLOB_SRC)
+  const index = configs.indexOf(universal)
+  return [...configs.slice(0, index + 1), ...parsed, ...configs.slice(index + 1)]
+}
+
 export function pleaseai(
   options: PleaseaiOptions = {},
   ...userConfigs: TypedFlatConfigItem[]
@@ -96,7 +133,7 @@ export function pleaseai(
       ...(canonicalPluginNames ? { autoRenamePlugins: false } : {}),
     },
     ...userConfigs,
-  )
+  ).onResolved(scopeAntislopToParsedFiles)
 
   if (!canonicalPluginNames) {
     return composer
