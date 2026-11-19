@@ -169,39 +169,10 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
  * Files exempt by convention (`index.ts`, test files, …) never count.
  */
 export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage): { findings: Finding[], notices: string[] } {
-  const byFile = new Map<string, Map<string, number>>()
-  const opaque = new Map<string, Set<OpaqueReason>>()
-  for (const m of matches) {
-    if (lang.opaqueRules?.includes(m.ruleId) === true) {
-      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add(opaqueReason(m)))
-    }
-  }
   // `export { x }` of a name the file imports re-exports it; it is not a local symbol.
   const imported = new Set(matches.filter(m => m.ruleId === 'import-binding').map(m => `${m.file}\0${m.text}`))
-  // `export { Foo as Bar }` where `Foo` is imported: export-name sees the alias `Bar`, so resolve the local name.
-  for (const m of matches) {
-    if (m.ruleId === 'export-local-alias' && imported.has(`${m.file}\0${m.text}`)) {
-      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add('re-export'))
-    }
-  }
-  for (const m of matches) {
-    if (!lang.nameRules.includes(m.ruleId) || !lang.isPublic(m.text)) {
-      continue
-    }
-    if (imported.has(`${m.file}\0${m.text}`)) {
-      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add('re-export'))
-      continue
-    }
-    if (lang.isReserved?.(m.text, m.file) === true) {
-      opaque.set(m.file, (opaque.get(m.file) ?? new Set()).add('framework-reserved export'))
-    }
-    const names = byFile.get(m.file) ?? new Map<string, number>()
-    if (!names.has(m.text)) {
-      names.set(m.text, m.line)
-    }
-    byFile.set(m.file, names)
-  }
-  const findings: Finding[] = []
+  const opaque = opaqueFiles(matches, lang, imported)
+  const byFile = publicNamesByFile(matches, lang, imported, opaque)
   const skipped = new Map<string, Set<OpaqueReason>>()
   for (const [file, reasons] of opaque) {
     // Two or more enumerated names are never judged anyway; fewer leave the opaque exports as the unknown part.
@@ -209,30 +180,91 @@ export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage
       skipped.set(file, reasons)
     }
   }
+  const findings: Finding[] = []
   for (const [file, names] of byFile) {
-    if (names.size !== 1 || opaque.has(file)) {
-      continue
+    const finding = opaque.has(file) ? null : mismatchFinding(file, names, lang)
+    if (finding != null) {
+      findings.push(finding)
     }
-    const stem = lang.stem(file, unitOf(file, lang.units))
-    if (stem == null) {
-      continue
-    }
-    const [[symbol, line]] = [...names]
-    if (nameKey(stem) === nameKey(symbol)) {
-      continue
-    }
-    const ext = baseName(file).slice(stem.length)
-    findings.push({
-      slug: SLUG,
-      kind: 'filename-mismatch',
-      severity: 'warning',
-      language: lang.language,
-      file,
-      line,
-      message: `File name does not match its only public symbol \`${symbol}\`. Rename the file to \`${lang.normalize(symbol)}${ext}\`, or rename the symbol after the file.`,
-    })
   }
   return { findings, notices: skippedNotice(lang, skipped) }
+}
+
+/** file → why its exports cannot be enumerated, from opaque-rule matches and aliased re-exports. */
+function opaqueFiles(matches: ExtractMatch[], lang: FilenameLanguage, imported: Set<string>): Map<string, Set<OpaqueReason>> {
+  const opaque = new Map<string, Set<OpaqueReason>>()
+  for (const m of matches) {
+    if (lang.opaqueRules?.includes(m.ruleId) === true) {
+      addOpaque(opaque, m.file, opaqueReason(m))
+    }
+  }
+  // `export { Foo as Bar }` where `Foo` is imported: export-name sees the alias `Bar`, so resolve the local name.
+  for (const m of matches) {
+    if (m.ruleId === 'export-local-alias' && imported.has(`${m.file}\0${m.text}`)) {
+      addOpaque(opaque, m.file, 're-export')
+    }
+  }
+  return opaque
+}
+
+function addOpaque(opaque: Map<string, Set<OpaqueReason>>, file: string, reason: OpaqueReason): void {
+  opaque.set(file, (opaque.get(file) ?? new Set()).add(reason))
+}
+
+/**
+ * file → public local name → first line, for the matches of `lang.nameRules`.
+ * Re-exported imports and framework-reserved names also mark the file opaque.
+ */
+function publicNamesByFile(
+  matches: ExtractMatch[],
+  lang: FilenameLanguage,
+  imported: Set<string>,
+  opaque: Map<string, Set<OpaqueReason>>,
+): Map<string, Map<string, number>> {
+  const byFile = new Map<string, Map<string, number>>()
+  for (const m of matches) {
+    if (!lang.nameRules.includes(m.ruleId) || !lang.isPublic(m.text)) {
+      continue
+    }
+    if (imported.has(`${m.file}\0${m.text}`)) {
+      addOpaque(opaque, m.file, 're-export')
+      continue
+    }
+    if (lang.isReserved?.(m.text, m.file) === true) {
+      addOpaque(opaque, m.file, 'framework-reserved export')
+    }
+    const names = byFile.get(m.file) ?? new Map<string, number>()
+    if (!names.has(m.text)) {
+      names.set(m.text, m.line)
+    }
+    byFile.set(m.file, names)
+  }
+  return byFile
+}
+
+/** The finding for a file whose only public symbol is not named after the file, else `null`. */
+function mismatchFinding(file: string, names: Map<string, number>, lang: FilenameLanguage): Finding | null {
+  if (names.size !== 1) {
+    return null
+  }
+  const stem = lang.stem(file, unitOf(file, lang.units))
+  if (stem == null) {
+    return null
+  }
+  const [[symbol, line]] = [...names]
+  if (nameKey(stem) === nameKey(symbol)) {
+    return null
+  }
+  const ext = baseName(file).slice(stem.length)
+  return {
+    slug: SLUG,
+    kind: 'filename-mismatch',
+    severity: 'warning',
+    language: lang.language,
+    file,
+    line,
+    message: `File name does not match its only public symbol \`${symbol}\`. Rename the file to \`${lang.normalize(symbol)}${ext}\`, or rename the symbol after the file.`,
+  }
 }
 
 function skippedNotice(lang: FilenameLanguage, skipped: Map<string, Set<OpaqueReason>>): string[] {

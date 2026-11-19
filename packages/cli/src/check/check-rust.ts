@@ -84,6 +84,24 @@ function metadataFor(provider: CargoMetadataProvider, rootDir: string, dir: stri
   return metadata
 }
 
+/** A cargo package's directory and target entry files, relative to the checked root (targets outside it are dropped). */
+function rustPackage(rootDir: string, manifestRel: string, pkg: CargoMetadata['packages'][number]): RustPackage {
+  const roots: string[] = []
+  const testRoots: string[] = []
+  for (const target of pkg.targets) {
+    const src = toRootRelative(rootDir, target.src_path)
+    if (src == null) {
+      continue
+    }
+    roots.push(src)
+    if (target.kind.includes('test')) {
+      testRoots.push(src)
+    }
+  }
+  const pkgDir = posix.dirname(manifestRel)
+  return { dir: pkgDir === '.' ? '' : pkgDir, roots, testRoots }
+}
+
 function loadPackages(
   rootDir: string,
   files: string[],
@@ -99,23 +117,9 @@ function loadPackages(
     const metadata = metadataFor(provider, rootDir, posix.dirname(manifest), notices)
     for (const pkg of metadata?.packages ?? []) {
       const manifestRel = toRootRelative(rootDir, pkg.manifest_path)
-      if (manifestRel == null || seen.has(manifestRel)) {
-        continue
+      if (manifestRel != null && !seen.has(manifestRel)) {
+        seen.set(manifestRel, rustPackage(rootDir, manifestRel, pkg))
       }
-      const roots: string[] = []
-      const testRoots: string[] = []
-      for (const target of pkg.targets) {
-        const src = toRootRelative(rootDir, target.src_path)
-        if (src == null) {
-          continue
-        }
-        roots.push(src)
-        if (target.kind.includes('test')) {
-          testRoots.push(src)
-        }
-      }
-      const pkgDir = posix.dirname(manifestRel)
-      seen.set(manifestRel, { dir: pkgDir === '.' ? '' : pkgDir, roots, testRoots })
     }
   }
   return { packages: [...seen.values()], notices }

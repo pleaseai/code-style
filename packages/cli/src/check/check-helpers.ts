@@ -126,8 +126,6 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
   return { findings, notices }
 }
 
-// --- TypeScript -------------------------------------------------------------
-
 function unquote(text: string): string {
   return text.replace(/^['"`]|['"`]$/g, '')
 }
@@ -152,6 +150,64 @@ function resolveRelative(importer: string, spec: string, fileSet: Set<string>, e
   return options.find(o => fileSet.has(o))
 }
 
+/** The name a TypeScript import binds from its target, by rule id: `*` for a namespace import, `default`; else the imported name. */
+const IMPORTED_NAME: Record<string, string> = { 'import-namespace': '*', 'import-default': 'default' }
+
+/** target file → name (or `*` for a namespace import) → importing test files */
+function tsImportsByTarget(matches: ExtractMatch[], layout: TestLayout, fileSet: Set<string>): Map<string, Map<string, Set<string>>> {
+  const imports = new Map<string, Map<string, Set<string>>>()
+  for (const m of matches) {
+    if (!['import-name', 'import-namespace', 'import-default'].includes(m.ruleId) || !layout.isTestFile(m.file)) {
+      continue
+    }
+    const target = resolveRelative(m.file, unquote(m.vars.SRC ?? ''), fileSet, layout.sourceExtensions)
+    if (target == null) {
+      continue
+    }
+    const name = IMPORTED_NAME[m.ruleId] ?? m.text
+    const byName = imports.get(target) ?? new Map<string, Set<string>>()
+    byName.set(name, (byName.get(name) ?? new Set<string>()).add(m.file))
+    imports.set(target, byName)
+  }
+  return imports
+}
+
+interface TsExports {
+  /** file → local name → names it is exported under (`export { local as exported }`) */
+  aliases: Map<string, Map<string, string[]>>
+  /** file → names it exports under (`export-name` also covers `export { local }` and aliases) */
+  exported: Map<string, Set<string>>
+  /** file → local declarations exported as `export default function|class <name>` (public under `default`) */
+  defaults: Map<string, Set<string>>
+}
+
+function tsExports(matches: ExtractMatch[]): TsExports {
+  const ex: TsExports = { aliases: new Map(), exported: new Map(), defaults: new Map() }
+  for (const m of matches) {
+    if (m.ruleId === 'export-local-alias' && m.vars.ALIAS != null) {
+      const byLocal = ex.aliases.get(m.file) ?? new Map<string, string[]>()
+      byLocal.set(m.text, [...(byLocal.get(m.text) ?? []), m.vars.ALIAS])
+      ex.aliases.set(m.file, byLocal)
+    }
+    else if (m.ruleId === 'export-name') {
+      ex.exported.set(m.file, (ex.exported.get(m.file) ?? new Set<string>()).add(m.text))
+    }
+    else if (m.ruleId === 'export-default-local') {
+      ex.defaults.set(m.file, (ex.defaults.get(m.file) ?? new Set<string>()).add(m.text))
+    }
+  }
+  return ex
+}
+
+/** Names the declaration is public under: its own (when exported directly, not just as another's alias) plus `export { local as alias }`. */
+function tsPublicNames(c: Candidate, ex: TsExports): string[] {
+  const aliased = ex.aliases.get(c.file)?.get(c.name) ?? []
+  const takenByAlias = [...(ex.aliases.get(c.file)?.values() ?? [])].some(names => names.includes(c.name))
+  const direct = (ex.exported.get(c.file)?.has(c.name) ?? false) && !takenByAlias
+  const isDefault = ex.defaults.get(c.file)?.has(c.name) === true
+  return [...(direct ? [c.name] : []), ...aliased, ...(isDefault ? ['default'] : [])]
+}
+
 export function typescriptHelpers(
   layout: TestLayout,
   units: Unit[],
@@ -162,60 +218,58 @@ export function typescriptHelpers(
   lang.candidates = matches
     .filter(m => m.ruleId === 'helper-candidate' && isTestSide(m.file, lang, u => u.testRoots))
     .map(m => ({ file: m.file, line: m.line, name: m.text }))
-  // target file → name (or `*` for a namespace import) → importing test files
-  const imports = new Map<string, Map<string, Set<string>>>()
-  for (const m of matches) {
-    if ((m.ruleId !== 'import-name' && m.ruleId !== 'import-namespace' && m.ruleId !== 'import-default') || !layout.isTestFile(m.file)) {
-      continue
-    }
-    const target = resolveRelative(m.file, unquote(m.vars.SRC ?? ''), fileSet, layout.sourceExtensions)
-    if (target == null) {
-      continue
-    }
-    const name = m.ruleId === 'import-namespace' ? '*' : m.ruleId === 'import-default' ? 'default' : m.text
-    const byName = imports.get(target) ?? new Map<string, Set<string>>()
-    const set = byName.get(name) ?? new Set<string>()
-    set.add(m.file)
-    byName.set(name, set)
-    imports.set(target, byName)
-  }
-  // file → local name → names it is exported under (`export { local as exported }`)
-  const aliases = new Map<string, Map<string, string[]>>()
-  for (const m of matches) {
-    if (m.ruleId === 'export-local-alias' && m.vars.ALIAS != null) {
-      const byLocal = aliases.get(m.file) ?? new Map<string, string[]>()
-      byLocal.set(m.text, [...(byLocal.get(m.text) ?? []), m.vars.ALIAS])
-      aliases.set(m.file, byLocal)
-    }
-  }
-  // file → names it exports under (`export-name` also covers `export { local }` and aliases)
-  const exported = new Map<string, Set<string>>()
-  for (const m of matches) {
-    if (m.ruleId === 'export-name') {
-      exported.set(m.file, (exported.get(m.file) ?? new Set<string>()).add(m.text))
-    }
-  }
-  // file → local declarations exported as `export default function|class <name>` (public under `default`)
-  const defaults = new Map<string, Set<string>>()
-  for (const m of matches) {
-    if (m.ruleId === 'export-default-local') {
-      defaults.set(m.file, (defaults.get(m.file) ?? new Set<string>()).add(m.text))
-    }
-  }
+  const imports = tsImportsByTarget(matches, layout, fileSet)
+  const ex = tsExports(matches)
   lang.importers = (c) => {
     const byName = imports.get(c.file)
-    // Names the declaration is public under: its own (when exported directly, not just as another's alias) plus `export { local as alias }`.
-    const aliased = aliases.get(c.file)?.get(c.name) ?? []
-    const takenByAlias = [...(aliases.get(c.file)?.values() ?? [])].some(names => names.includes(c.name))
-    const direct = (exported.get(c.file)?.has(c.name) ?? false) && !takenByAlias
-    const publicNames = [...(direct ? [c.name] : []), ...aliased, ...(defaults.get(c.file)?.has(c.name) === true ? ['default'] : [])]
+    const publicNames = tsPublicNames(c, ex)
     // A namespace import only sees exports; the candidate extraction also lists private declarations.
     return new Set([...publicNames.flatMap(n => [...(byName?.get(n) ?? [])]), ...(publicNames.length > 0 ? [...(byName?.get('*') ?? [])] : [])])
   }
   return lang
 }
 
-// --- Dart -------------------------------------------------------------------
+/** Combinators per (importer, uri text) key, and how often each key's uri is imported. */
+interface DartCombinators {
+  shown: Map<string, Set<string>>
+  hidden: Map<string, Set<string>>
+  showCombinators: Map<string, number>
+  uriCount: Map<string, number>
+}
+
+function dartCombinators(matches: ExtractMatch[]): DartCombinators {
+  const cs: DartCombinators = { shown: new Map(), hidden: new Map(), showCombinators: new Map(), uriCount: new Map() }
+  for (const m of matches) {
+    const key = `${m.file}\0${m.vars.SRC ?? ''}`
+    if (m.ruleId === 'import-show') {
+      cs.shown.set(key, (cs.shown.get(key) ?? new Set()).add(m.text))
+    }
+    else if (m.ruleId === 'import-hide') {
+      cs.hidden.set(key, (cs.hidden.get(key) ?? new Set()).add(m.text))
+    }
+    else if (m.ruleId === 'import-show-combinator') {
+      cs.showCombinators.set(key, (cs.showCombinators.get(key) ?? 0) + 1)
+    }
+    else if (m.ruleId === 'import-uri') {
+      const uriKey = `${m.file}\0${m.text}`
+      cs.uriCount.set(uriKey, (cs.uriCount.get(uriKey) ?? 0) + 1)
+    }
+  }
+  return cs
+}
+
+/** Extraction keeps no per-import identity, so a library imported more than once with combinators, or an import with successive `show` clauses (which intersect), cannot be evaluated: withhold it. */
+function dartAmbiguous(cs: DartCombinators, key: string): boolean {
+  return (cs.showCombinators.get(key) ?? 0) > 1 || ((cs.uriCount.get(key) ?? 0) > 1 && (cs.shown.has(key) || cs.hidden.has(key)))
+}
+
+/** The checked file a Dart import uri points at; `package:` and `dart:` uris are never resolved. */
+function dartImportTarget(importer: string, uri: string, fileSet: Set<string>): string | undefined {
+  if (uri.startsWith('package:') || uri.startsWith('dart:')) {
+    return undefined
+  }
+  return resolveRelative(importer, uri.startsWith('.') ? uri : `./${uri}`, fileSet, [])
+}
 
 export function dartHelpers(
   layout: TestLayout,
@@ -228,51 +282,25 @@ export function dartHelpers(
     .filter(m => (m.ruleId === 'top-level-name' || m.ruleId === 'top-level-type-alias') && HELPER_NAME.test(m.text) && isTestSide(m.file, lang, u => u.testRoots))
     .map(m => ({ file: m.file, line: m.line, name: m.text }))
   // `show`/`hide` lists per (importer, uri text); an import without `show` imports everything.
-  const shown = new Map<string, Set<string>>()
-  const hidden = new Map<string, Set<string>>()
-  const showCombinators = new Map<string, number>()
-  const uriCount = new Map<string, number>()
-  const keyOf = (m: ExtractMatch): string => `${m.file}\0${m.vars.SRC ?? ''}`
-  for (const m of matches) {
-    if (m.ruleId === 'import-show') {
-      shown.set(keyOf(m), (shown.get(keyOf(m)) ?? new Set()).add(m.text))
-    }
-    else if (m.ruleId === 'import-hide') {
-      hidden.set(keyOf(m), (hidden.get(keyOf(m)) ?? new Set()).add(m.text))
-    }
-    else if (m.ruleId === 'import-show-combinator') {
-      showCombinators.set(keyOf(m), (showCombinators.get(keyOf(m)) ?? 0) + 1)
-    }
-    else if (m.ruleId === 'import-uri') {
-      const key = `${m.file}\0${m.text}`
-      uriCount.set(key, (uriCount.get(key) ?? 0) + 1)
-    }
-  }
-  // Extraction keeps no per-import identity, so a library imported more than once with combinators,
-  // or an import with successive `show` clauses (which intersect), cannot be evaluated: withhold it.
+  const cs = dartCombinators(matches)
   const withheld = new Set<string>()
-  const ambiguous = (key: string): boolean =>
-    (showCombinators.get(key) ?? 0) > 1 || ((uriCount.get(key) ?? 0) > 1 && (shown.has(key) || hidden.has(key)))
   lang.withheld = { files: withheld, reason: 'repeated imports of one library with show/hide, or successive `show` clauses' }
   const imports = new Map<string, Array<{ importer: string, names: Set<string> | null, hides: Set<string> }>>()
   for (const m of matches) {
     if (m.ruleId !== 'import-uri' || !layout.isTestFile(m.file)) {
       continue
     }
-    const uri = unquote(m.text)
-    const target = uri.startsWith('package:') || uri.startsWith('dart:')
-      ? undefined
-      : resolveRelative(m.file, uri.startsWith('.') ? uri : `./${uri}`, fileSet, [])
+    const target = dartImportTarget(m.file, unquote(m.text), fileSet)
     if (target == null) {
       continue
     }
     const key = `${m.file}\0${m.text}`
-    if (ambiguous(key)) {
+    if (dartAmbiguous(cs, key)) {
       withheld.add(m.file)
       continue
     }
     const list = imports.get(target) ?? []
-    list.push({ importer: m.file, names: shown.get(key) ?? null, hides: hidden.get(key) ?? new Set() })
+    list.push({ importer: m.file, names: cs.shown.get(key) ?? null, hides: cs.hidden.get(key) ?? new Set() })
     imports.set(target, list)
   }
   lang.importers = c => new Set(
@@ -280,8 +308,6 @@ export function dartHelpers(
   )
   return lang
 }
-
-// --- Kotlin / Java ----------------------------------------------------------
 
 /** The other JVM language of a mixed Kotlin/Java module: its tests may import this language's helpers. */
 export interface JvmSibling {
@@ -349,6 +375,54 @@ function usesName(text: string, name: string, qualifiers: string[]): boolean {
   return false
 }
 
+/** A JVM helper candidate as the importer check sees it. */
+interface JvmTarget {
+  name: string
+  pkg: string
+  fqn: string
+  facadeFqn: string | undefined
+  /** Qualifiers a use of the name may carry (package, Kotlin facade). */
+  qualifiers: string[]
+}
+
+/** Per-file package, import and source facts of the JVM test files. */
+interface JvmIndex {
+  packageOf: Map<string, string>
+  importsOf: Map<string, string[]>
+  aliasOf: Map<string, string>
+  bindingsOf: Map<string, Map<string, string>>
+  /** Code without comments, strings, imports and package lines, or `null` when unreadable. */
+  codeOf: (file: string) => string | null
+}
+
+/** Whether test `file` uses helper `t`: through an explicit import, a wildcard import, or the same package. */
+function jvmFileUsesHelper(file: string, t: JvmTarget, ix: JvmIndex): boolean {
+  const specs = ix.importsOf.get(file) ?? []
+  const explicit = specs.find(s => s === t.fqn || s.startsWith(`${t.fqn}.`) || (t.facadeFqn != null && s === `${t.facadeFqn}.${t.name}`))
+  if (explicit != null) {
+    // A file declaring the imported local name itself does not use the helper.
+    const local = ix.aliasOf.get(`${file}\0${explicit}`) ?? explicit.slice(explicit.lastIndexOf('.') + 1)
+    const text = ix.codeOf(file)
+    return text != null && !declaresName(text, local, file)
+  }
+  // A wildcard import brings in every name of the package (or facade): the file must still mention the helper.
+  const wildcard = specs.some(s => (t.pkg !== '' && s === `${t.pkg}.*`) || (t.facadeFqn != null && s === `${t.facadeFqn}.*`))
+  // Same package: Kotlin and Java use the name without an import.
+  const samePackage = (ix.packageOf.get(file) ?? '') === t.pkg
+  return (wildcard || samePackage) && jvmMentions(file, t, ix)
+}
+
+/** A reference outside import lines, in a file that does not declare the name itself. */
+function jvmMentions(file: string, t: JvmTarget, ix: JvmIndex): boolean {
+  const bound = ix.bindingsOf.get(file)?.get(t.name)
+  // An explicit import binding the name to another FQN shadows wildcard and same-package candidates.
+  if (bound != null && bound !== t.fqn && !(t.facadeFqn != null && bound === `${t.facadeFqn}.${t.name}`)) {
+    return false
+  }
+  const text = ix.codeOf(file)
+  return text != null && usesName(text, t.name, t.qualifiers) && !declaresName(text, t.name, file)
+}
+
 export function jvmHelpers(
   layout: TestLayout,
   units: Unit[],
@@ -409,49 +483,15 @@ export function jvmHelpers(
   }
   const testFiles = files.filter(f => layout.isTestFile(f) || sibling?.layout.isTestFile(f) === true)
   const allUnits = [...units, ...(sibling?.units ?? [])]
+  const index: JvmIndex = { packageOf, importsOf, aliasOf, bindingsOf, codeOf }
   lang.importers = (c) => {
     const pkg = packageOf.get(c.file) ?? ''
-    const fqn = pkg === '' ? c.name : `${pkg}.${c.name}`
-    const out = new Set<string>()
-    // Another module can declare the same fully qualified name; only the owning module's tests use this helper.
-    const owner = unitOf(c.file, units)?.dir
     const facadeFqn = kotlinFacade(c.file, pkg, rootDir)
     const qualifiers = [pkg, facadeFqn].filter((q): q is string => q != null && q !== '')
-    for (const file of testFiles) {
-      if (unitOf(file, allUnits)?.dir !== owner) {
-        continue
-      }
-      const specs = importsOf.get(file) ?? []
-      const bound = bindingsOf.get(file)?.get(c.name)
-      // An explicit import binding the name to another FQN shadows wildcard and same-package candidates.
-      const shadowed = bound != null && bound !== fqn && !(facadeFqn != null && bound === `${facadeFqn}.${c.name}`)
-      // A reference outside import lines, in a file that does not declare the name itself.
-      const mentions = (): boolean => {
-        if (shadowed) {
-          return false
-        }
-        const text = codeOf(file)
-        return text != null && usesName(text, c.name, qualifiers) && !declaresName(text, c.name, file)
-      }
-      const explicit = specs.find(s => s === fqn || s.startsWith(`${fqn}.`) || (facadeFqn != null && s === `${facadeFqn}.${c.name}`))
-      if (explicit != null) {
-        // A file declaring the imported local name itself does not use the helper.
-        const local = aliasOf.get(`${file}\0${explicit}`) ?? explicit.slice(explicit.lastIndexOf('.') + 1)
-        const text = codeOf(file)
-        if (text != null && !declaresName(text, local, file)) {
-          out.add(file)
-        }
-      }
-      // A wildcard import brings in every name of the package (or facade): the file must still mention the helper.
-      else if (specs.some(s => (pkg !== '' && s === `${pkg}.*`) || (facadeFqn != null && s === `${facadeFqn}.*`)) && mentions()) {
-        out.add(file)
-      }
-      // Same package: Kotlin and Java use the name without an import.
-      else if ((packageOf.get(file) ?? '') === pkg && mentions()) {
-        out.add(file)
-      }
-    }
-    return out
+    const target: JvmTarget = { name: c.name, pkg, fqn: pkg === '' ? c.name : `${pkg}.${c.name}`, facadeFqn, qualifiers }
+    // Another module can declare the same fully qualified name; only the owning module's tests use this helper.
+    const owner = unitOf(c.file, units)?.dir
+    return new Set(testFiles.filter(file => unitOf(file, allUnits)?.dir === owner && jvmFileUsesHelper(file, target, index)))
   }
   return lang
 }
