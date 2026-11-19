@@ -1,6 +1,6 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
-import antfu, { defaultPluginRenaming, GLOB_GRAPHQL, GLOB_HTML, GLOB_STYLE, GLOB_SVELTE, GLOB_VUE, GLOB_XML } from '@antfu/eslint-config'
+import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 
 export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
   /**
@@ -68,32 +68,33 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
   }
 }
 
-const antislopParserProviders = new Map([
-  [GLOB_STYLE, ['antfu/formatter/css', 'antfu/formatter/scss', 'antfu/formatter/less']],
-  [GLOB_HTML, ['antfu/formatter/html', 'antfu/angular/rules/template']],
-  [GLOB_XML, ['antfu/formatter/xml']],
-  [GLOB_VUE, ['antfu/vue/rules']],
-  [GLOB_SVELTE, ['antfu/svelte/rules']],
-  [GLOB_GRAPHQL, ['antfu/formatter/graphql']],
-])
-
 /**
- * The universal entry targets antfu's `GLOB_ALL_SRC` plus GraphQL, which
- * includes stylesheets, HTML, XML, Vue and Svelte. Listing them makes ESLint
- * lint those files, and without a parser it reads them as JavaScript and
- * reports parsing errors. Drop the globs that no config parses, so enabling
- * antislop lints no new file types.
+ * The universal entry targets every non-JS language antfu knows (stylesheets,
+ * HTML, XML, Vue, Svelte, JSON, Markdown, YAML, TOML, GraphQL). Listing them
+ * makes ESLint lint those files, and where no config parses them it reads them
+ * as JavaScript and reports parsing errors. Keep only the JS/TS glob there, and
+ * run the rule on the other languages only inside the scope (`files`,
+ * `ignores`, `basePath`) of each config that sets a parser or language, so
+ * enabling antislop lints no new files.
  */
-function dropUnparsedAntislopFiles(configs: TypedFlatConfigItem[]): void {
-  const universal = configs.find(config => config.name === 'antfu/antislop/rules/universal')
+function scopeAntislopToParsedFiles(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] | void {
+  const index = configs.findIndex(config => config.name === 'antfu/antislop/rules/universal')
+  const universal = configs[index]
   if (!universal?.files) {
     return
   }
-  const names = new Set(configs.map(config => config.name))
-  universal.files = universal.files.filter((glob) => {
-    const providers = typeof glob === 'string' ? antislopParserProviders.get(glob) : undefined
-    return !providers || providers.some(name => names.has(name))
-  })
+  const otherLanguages = universal.files.filter(glob => glob !== GLOB_SRC)
+  const parsed = configs
+    .filter(config => config !== universal && config.files && (config.languageOptions?.parser || config.language))
+    .map(config => ({
+      name: 'pleaseai/antislop/rules/parsed',
+      ...(config.basePath ? { basePath: config.basePath } : {}),
+      files: config.files!.flatMap(pattern => otherLanguages.map(glob => [pattern, glob].flat())),
+      ignores: [...(config.ignores ?? []), ...(universal.ignores ?? [])],
+      rules: universal.rules,
+    }))
+  universal.files = universal.files.filter(glob => glob === GLOB_SRC)
+  return [...configs.slice(0, index + 1), ...parsed, ...configs.slice(index + 1)]
 }
 
 export function pleaseai(
@@ -124,7 +125,7 @@ export function pleaseai(
       ...(canonicalPluginNames ? { autoRenamePlugins: false } : {}),
     },
     ...userConfigs,
-  ).onResolved(dropUnparsedAntislopFiles)
+  ).onResolved(scopeAntislopToParsedFiles)
 
   if (!canonicalPluginNames) {
     return composer

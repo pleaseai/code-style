@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'bun:test'
 import { ESLint } from 'eslint'
 import pluginImport from 'eslint-plugin-import'
-import pleaseai, { GLOB_HTML, parserPlain } from '../src/index'
+import pleaseai, { parserPlain } from '../src/index'
 
 function pluginNames(configs: TypedFlatConfigItem[]): Set<string> {
   return new Set(configs.flatMap(config => Object.keys(config.plugins ?? {})))
@@ -44,8 +44,20 @@ describe('pleaseai', () => {
 
 describe('antislop', () => {
   test('does not lint file types that no config parses', async () => {
-    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true, vue: false }) })
-    const unparsed = ['src/style.css', 'src/page.html', 'src/feed.xml', 'src/App.vue', 'src/App.svelte', 'src/schema.graphql']
+    const options = { antislop: true, vue: false, jsonc: false, markdown: false, yaml: false, toml: false }
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
+    const unparsed = [
+      'src/style.css',
+      'src/page.html',
+      'src/feed.xml',
+      'src/App.vue',
+      'src/App.svelte',
+      'src/schema.graphql',
+      'src/data.json',
+      'src/notes.md',
+      'src/config.yaml',
+      'src/config.toml',
+    ]
 
     for (const filePath of unparsed) {
       expect(await eslint.calculateConfigForFile(filePath)).toBeUndefined()
@@ -56,14 +68,16 @@ describe('antislop', () => {
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
   })
 
-  test('keeps a file type that a config parses', async () => {
-    const htmlFormatter = { name: 'antfu/formatter/html', files: [GLOB_HTML], languageOptions: { parser: parserPlain } }
-    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }, htmlFormatter) })
+  test('lints a file type only within the scope of the config that parses it', async () => {
+    const htmlParser = { files: ['src/**/*.html'], ignores: ['src/legacy/**'], languageOptions: { parser: parserPlain } }
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }, htmlParser) })
 
     const [result] = await eslint.lintText('<!-- a — b -->\n<p>hi</p>\n', { filePath: 'src/page.html' })
 
     expect(result!.messages.filter(message => message.fatal)).toEqual([])
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
+    expect(await eslint.calculateConfigForFile('public/page.html')).toBeUndefined()
+    expect(await eslint.calculateConfigForFile('src/legacy/page.html')).toBeUndefined()
   })
 
   test('keeps Vue files when the Vue config parses them', async () => {
