@@ -77,23 +77,27 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
  * `ignores`, `basePath`) of each config that sets a parser or language, so
  * enabling antislop lints no new files.
  */
-function scopeAntislopToParsedFiles(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] | void {
-  const index = configs.findIndex(config => config.name === 'antfu/antislop/rules/universal')
-  const universal = configs[index]
+function scopeAntislopToParsedFiles(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] {
+  const universal = configs.find(config => config.name === 'antfu/antislop/rules/universal')
   if (!universal?.files) {
-    return
+    return configs
   }
   const otherLanguages = universal.files.filter(glob => glob !== GLOB_SRC)
-  const parsed = configs
-    .filter(config => config !== universal && config.files && (config.languageOptions?.parser || config.language))
-    .map(config => ({
+  const parsed = configs.flatMap((config) => {
+    const { basePath, files, ignores, language, languageOptions } = config
+    if (config === universal || !files || !(languageOptions?.parser || language)) {
+      return []
+    }
+    return [{
       name: 'pleaseai/antislop/rules/parsed',
-      ...(config.basePath ? { basePath: config.basePath } : {}),
-      files: config.files!.flatMap(pattern => otherLanguages.map(glob => [pattern, glob].flat())),
-      ignores: [...(config.ignores ?? []), ...(universal.ignores ?? [])],
+      ...(basePath ? { basePath } : {}),
+      files: files.flatMap(pattern => otherLanguages.map(glob => [pattern, glob].flat())),
+      ignores: [...(ignores ?? []), ...(universal.ignores ?? [])],
       rules: universal.rules,
-    }))
+    }]
+  })
   universal.files = universal.files.filter(glob => glob === GLOB_SRC)
+  const index = configs.indexOf(universal)
   return [...configs.slice(0, index + 1), ...parsed, ...configs.slice(index + 1)]
 }
 
