@@ -99,7 +99,7 @@ when the CLI's own cannot be resolved (it exists to provide the lint `rules/`
 that `sgconfig.yml` points at).
 The binary resolves from the checked project first, so the project's pinned
 ast-grep version wins, then falls back to the CLI's own install. `@ast-grep/cli`
-is an optional peer dependency of this package, so install it in the project,
+is an optional peer dependency of this package, so install it in the project;
 the **ast-grep** tool in `init` does this:
 
 ```bash
