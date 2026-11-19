@@ -126,7 +126,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
 
   // 1. Install packages (de-duped) for selected tools.
   const packagesToInstall = Array.from(
-    new Set(selectedTools.flatMap(tool => tool.packages)),
+    new Set(selectedTools.flatMap(tool => [...tool.packages, ...(tool.optionalPackages ?? [])])),
   )
 
   if (pm != null && packagesToInstall.length > 0) {

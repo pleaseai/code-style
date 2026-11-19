@@ -100,6 +100,20 @@ const V011_BODY = [
   'read `node_modules/@pleaseai/code-style/rules.md`.',
 ].join('\n')
 
+describe('doctor', () => {
+  test('reports @pleaseai/eslint-config as OK without its optional antislop plugins', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-doctor-'))
+    try {
+      writeFileSync(join(dir, 'package.json'), JSON.stringify({ devDependencies: { '@pleaseai/eslint-config': '*', 'eslint': '*' } }))
+      const res = run(['doctor'], dir)
+      expect(res.stdout).toContain('@pleaseai/eslint-config (eslint.config.mjs) — OK')
+    }
+    finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
 describe('projects without a package.json', () => {
   const MARKERS = [
     { marker: 'build.gradle.kts', language: 'java' },

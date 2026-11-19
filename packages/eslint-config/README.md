@@ -199,6 +199,33 @@ Before you turn it on:
 
 See [issue #56](https://github.com/pleaseai/code-style/issues/56) for the measurements.
 
+### Anti-slop Rules
+
+`antislop` turns on rules from [`eslint-plugin-slop`](https://github.com/antfu/eslint-plugin-slop) and a curated subset of [`eslint-plugin-sonarjs`](https://github.com/SonarSource/SonarJS) through `@antfu/eslint-config`'s `antislop` option. Both plugins are optional peer dependencies:
+
+```bash
+bun add -D eslint-plugin-slop eslint-plugin-sonarjs
+```
+
+When you leave `antislop` unset, each plugin's rules turn on if that plugin is installed. Upgrading without the plugins changes nothing, and `please-style` installs both for new projects.
+
+`antislop: true` requires both plugins. An object requires each plugin it turns on explicitly (`slop: true` or `slop: { ... }`; a numeric `cognitiveComplexity` turns on `sonarjs`), and a plugin it does not mention follows what is installed. An object that ends up turning on neither plugin leaves antislop off. A missing required plugin throws: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` Turn off one part with `{ sonarjs: false }` or `{ slop: false }`, or everything with `false`.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  antislop: { cognitiveComplexity: 20 },
+})
+```
+
+- `cognitiveComplexity` sets the `sonarjs/cognitive-complexity` threshold (default 15). `false` disables it.
+- `slop: { cwd, inspection }` sets which changes the `slop` rules report: the whole file, uncommitted lines, or lines from recent commits. `inspection` is `'full'` (default), `'uncommitted'` or `'recent-changes'`. Keep `'full'` in CI: the other modes depend on git state (shallow clones, clean checkouts) and give different results locally and in CI.
+- `slop/no-em-dash` is a warning in Markdown files and an error elsewhere. It has no autofix.
+- On non-JS files (CSS, HTML, Vue, JSON, YAML, TOML, Markdown, and so on), the rule runs only where another config already parses them. Enabling `antislop` never makes ESLint lint new file types, so you get no parsing errors on CSS or HTML.
+
+With antislop turned on, this repository reports 193 findings (its own `eslint.config.ts` sets `antislop: false` for now): 174 `slop/no-em-dash` (136 in Markdown), 8 `sonarjs/cognitive-complexity`, 7 `slop/prefer-jsdoc` (autofixable), 3 `slop/max-comment-length` and 1 `slop/no-trivial-functions`. See [issue #76](https://github.com/pleaseai/code-style/issues/76) for the measurements.
+
 ## Optional Configs
 
 ### React
