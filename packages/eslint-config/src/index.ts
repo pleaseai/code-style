@@ -75,7 +75,11 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
  * as JavaScript and reports parsing errors. Keep only the JS/TS glob there, and
  * run the rule on the other languages only inside the scope (`files`,
  * `ignores`, `basePath`) of each config that sets a parser or language, so
- * enabling antislop lints no new files.
+ * enabling antislop lints no new files. A nested array in `files` matches a
+ * file only when every glob in it does, so `[pattern, glob]` intersects the
+ * parser's scope with one language. Pairs that can never match (a TS glob and a
+ * CSS glob) are kept: they cost one glob test, while guessing overlap from file
+ * extensions could drop a real match.
  */
 function scopeAntislopToParsedFiles(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] {
   const universal = configs.find(config => config.name === 'antfu/antislop/rules/universal')
