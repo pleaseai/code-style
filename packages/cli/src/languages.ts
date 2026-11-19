@@ -19,10 +19,6 @@ const MARKERS: Array<{ language: Language, files: string[] }> = [
   { language: 'python', files: ['pyproject.toml'] },
 ]
 
-function isLanguage(value: string): value is Language {
-  return (LANGUAGES as readonly string[]).includes(value)
-}
-
 function inOrder(languages: Iterable<Language>): Language[] {
   const set = new Set(languages)
   return LANGUAGES.filter(language => set.has(language))
@@ -49,7 +45,7 @@ export function parseLangFlag(value: string | boolean | undefined): LangFlag {
     return { kind: 'invalid', value: '' }
   }
   const items = value.split(',').map(item => item.trim()).filter(item => item !== '')
-  if (items.length === 0 || !items.every(isLanguage)) {
+  if (items.length === 0 || !items.every((item): item is Language => (LANGUAGES as readonly string[]).includes(item))) {
     return { kind: 'invalid', value }
   }
   return { kind: 'languages', languages: inOrder(items) }

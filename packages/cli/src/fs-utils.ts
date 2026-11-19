@@ -26,7 +26,7 @@ export function detectPackageManager(cwd: string = process.cwd()): PackageManage
       return pm
     }
   }
-  // PleaseAI default — this CLI is Bun-first.
+  // PleaseAI default: this CLI is Bun-first.
   return 'bun'
 }
 
@@ -60,7 +60,7 @@ export function isPackageInstalled(pkg: PackageJson, name: string): boolean {
 /**
  * Marker block helpers for AGENTS.md (and any other marker-managed markdown).
  *
- * The CLI owns only the content *between* the markers — anything else in the
+ * The CLI owns only the content *between* the markers; anything else in the
  * file is user content and is preserved verbatim.
  */
 const BEGIN_MARKER = '<!-- pleaseai-code-style:start -->'
@@ -92,7 +92,7 @@ export function upsertMarkerBlock(existing: string | null, body: string): string
     const after = existing.slice(end + END_MARKER.length)
     return `${before}${block}${after}`
   }
-  // No marker block yet — append with spacing.
+  // No marker block yet, so append with spacing.
   const sep = existing.endsWith('\n') ? '\n' : '\n\n'
   return `${existing}${sep}${block}\n`
 }

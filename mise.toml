@@ -1,4 +1,4 @@
-# mise.toml — single source of tool versions (replaces .nvmrc)
+# mise.toml: single source of tool versions (replaces .nvmrc)
 # Setup: `mise trust && mise install`
 # Keep `bun` in sync with `packageManager` in package.json (Turborepo requires that field).
 

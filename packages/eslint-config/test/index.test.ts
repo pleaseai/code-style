@@ -64,7 +64,7 @@ describe('antislop', () => {
       expect(await eslint.calculateConfigForFile(filePath)).toBeUndefined()
     }
 
-    const [result] = await eslint.lintText('// a — b\nexport const a = 1\n', { filePath: 'src/a.ts' })
+    const [result] = await eslint.lintText('// a \u2014 b\nexport const a = 1\n', { filePath: 'src/a.ts' })
 
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
   })
@@ -73,7 +73,7 @@ describe('antislop', () => {
     const htmlParser = { files: ['src/**/*.html'], ignores: ['src/legacy/**'], languageOptions: { parser: parserPlain } }
     const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }, htmlParser) })
 
-    const [result] = await eslint.lintText('<!-- a — b -->\n<p>hi</p>\n', { filePath: 'src/page.html' })
+    const [result] = await eslint.lintText('<!-- a \u2014 b -->\n<p>hi</p>\n', { filePath: 'src/page.html' })
 
     expect(result!.messages.filter(message => message.fatal)).toEqual([])
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
@@ -92,8 +92,8 @@ describe('antislop', () => {
   test('reports em dashes in Markdown as warnings', async () => {
     const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }) })
 
-    const [markdown] = await eslint.lintText('# Title\n\na — b\n', { filePath: 'docs/notes.md' })
-    const [code] = await eslint.lintText('// a — b\nexport const a = 1\n', { filePath: 'src/a.ts' })
+    const [markdown] = await eslint.lintText('# Title\n\na \u2014 b\n', { filePath: 'docs/notes.md' })
+    const [code] = await eslint.lintText('// a \u2014 b\nexport const a = 1\n', { filePath: 'src/a.ts' })
     const severityOf = (result: ESLint.LintResult) => result.messages.find(message => message.ruleId === 'slop/no-em-dash')?.severity
 
     expect(severityOf(markdown!)).toBe(1)
@@ -103,7 +103,7 @@ describe('antislop', () => {
   test('keeps Vue files when the Vue config parses them', async () => {
     const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true, vue: true }) })
 
-    const [result] = await eslint.lintText('<template>\n  <p>a — b</p>\n</template>\n', { filePath: 'src/App.vue' })
+    const [result] = await eslint.lintText('<template>\n  <p>a \u2014 b</p>\n</template>\n', { filePath: 'src/App.vue' })
 
     expect(result!.messages.filter(message => message.fatal)).toEqual([])
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
