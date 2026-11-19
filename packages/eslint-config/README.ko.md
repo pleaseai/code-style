@@ -199,6 +199,33 @@ bun add -D eslint-plugin-import
 
 측정 결과는 [이슈 #56](https://github.com/pleaseai/code-style/issues/56)에 있습니다.
 
+### Anti-slop 규칙
+
+`antislop`은 `@antfu/eslint-config`의 `antislop` 옵션을 통해 [`eslint-plugin-slop`](https://github.com/antfu/eslint-plugin-slop)의 규칙과 [`eslint-plugin-sonarjs`](https://github.com/SonarSource/SonarJS)에서 골라 둔 일부 규칙을 켭니다. 두 플러그인은 모두 선택적 peer dependency입니다:
+
+```bash
+bun add -D eslint-plugin-slop eslint-plugin-sonarjs
+```
+
+`antislop`을 지정하지 않으면 설치된 플러그인의 규칙만 켜집니다. 플러그인 없이 업그레이드하면 아무것도 바뀌지 않으며, `please-style`은 새 프로젝트에 두 플러그인을 함께 설치합니다.
+
+`antislop: true`(또는 객체)를 명시하면 켜지는 모든 플러그인이 필요합니다. 하나라도 없으면 오류가 발생합니다: `` `antislop` requires `eslint-plugin-sonarjs`. Install with `bun add -D eslint-plugin-sonarjs`, or set `antislop: false`. `` 일부만 끄려면 `{ sonarjs: false }` 또는 `{ slop: false }`를, 전부 끄려면 `false`를 지정합니다.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  antislop: { cognitiveComplexity: 20 },
+})
+```
+
+- `cognitiveComplexity`는 `sonarjs/cognitive-complexity`의 임계값입니다(기본값 15). `false`로 끌 수 있습니다.
+- `slop: { cwd, inspection }`은 `slop` 규칙이 보고할 변경의 범위(파일 전체, 커밋하지 않은 줄, 최근 커밋의 줄)를 정합니다. `inspection`은 `'full'`(기본값), `'uncommitted'`, `'recent-changes'` 중 하나입니다. CI에서는 `'full'`을 유지하세요. 나머지 모드는 git 상태(shallow clone, 깨끗한 checkout)에 좌우되어 로컬과 CI의 결과가 달라집니다.
+- `slop/no-em-dash`는 Markdown 파일에서는 경고, 그 외 파일에서는 오류입니다. 자동 수정은 지원하지 않습니다.
+- CSS, HTML, Vue, JSON, YAML, TOML, Markdown 같은 non-JS 파일에서는 다른 설정이 이미 파싱하는 파일에만 규칙이 동작합니다. 따라서 `antislop`을 켜도 ESLint가 새로운 파일 유형을 검사하지 않으며, CSS나 HTML에서 파싱 오류가 나지 않습니다.
+
+이 저장소에서는 193건이 보고됩니다. `slop/no-em-dash` 174건(Markdown 136건), `sonarjs/cognitive-complexity` 8건, `slop/prefer-jsdoc` 7건(자동 수정 가능), `slop/max-comment-length` 3건, `slop/no-trivial-functions` 1건입니다. 측정 결과는 [이슈 #76](https://github.com/pleaseai/code-style/issues/76)에 있습니다.
+
 ## 선택적 설정
 
 ### React
