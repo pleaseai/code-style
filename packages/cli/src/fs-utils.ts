@@ -26,7 +26,6 @@ export function detectPackageManager(cwd: string = process.cwd()): PackageManage
       return pm
     }
   }
-  // PleaseAI default — this CLI is Bun-first.
   return 'bun'
 }
 
@@ -57,12 +56,6 @@ export function isPackageInstalled(pkg: PackageJson, name: string): boolean {
   return Boolean(pkg.dependencies?.[name] ?? pkg.devDependencies?.[name])
 }
 
-/**
- * Marker block helpers for AGENTS.md (and any other marker-managed markdown).
- *
- * The CLI owns only the content *between* the markers — anything else in the
- * file is user content and is preserved verbatim.
- */
 const BEGIN_MARKER = '<!-- pleaseai-code-style:start -->'
 const END_MARKER = '<!-- pleaseai-code-style:end -->'
 
@@ -79,6 +72,12 @@ export function readMarkerBlock(content: string): string | undefined {
   return content.slice(begin + BEGIN_MARKER.length, end)
 }
 
+/**
+ * Writes `body` into the marker block of AGENTS.md (or any other
+ * marker-managed markdown), appending a block when there is none. The CLI
+ * owns only the content *between* the markers; anything else in the file is
+ * user content and is preserved verbatim.
+ */
 export function upsertMarkerBlock(existing: string | null, body: string): string {
   const block = buildMarkerBlock(body)
   if (existing == null) {
@@ -92,7 +91,6 @@ export function upsertMarkerBlock(existing: string | null, body: string): string
     const after = existing.slice(end + END_MARKER.length)
     return `${before}${block}${after}`
   }
-  // No marker block yet — append with spacing.
   const sep = existing.endsWith('\n') ? '\n' : '\n\n'
   return `${existing}${sep}${block}\n`
 }

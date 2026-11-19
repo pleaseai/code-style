@@ -28,8 +28,6 @@ async function confirmOverwrite(file: string, auto: boolean): Promise<boolean> {
   return answer === true
 }
 
-// --- eslint-config ----------------------------------------------------------
-
 const ESLINT_CONFIG_TEMPLATE = `import pleaseai from '@pleaseai/eslint-config'
 
 export default pleaseai()
@@ -56,15 +54,12 @@ async function applyEslintConfig(ctx: ToolContext): Promise<ToolApplyResult> {
   return result
 }
 
-// --- prettier-config --------------------------------------------------------
-
 async function applyPrettierConfig(ctx: ToolContext): Promise<ToolApplyResult> {
   const result: ToolApplyResult = { created: [], updated: [], skipped: [] }
   const pkg = readPackageJson(ctx.cwd)
   const label = 'package.json#prettier'
 
   if (pkg.prettier === '@pleaseai/prettier-config') {
-    // Already configured — nothing to do.
     return result
   }
 
@@ -102,8 +97,6 @@ function usesPlugNPlay(cwd: string, installed: string): boolean {
   }
 }
 
-// --- editorconfig -----------------------------------------------------------
-
 const EDITORCONFIG_SOURCE = 'node_modules/@pleaseai/editorconfig/.editorconfig'
 
 async function applyEditorConfig(ctx: ToolContext): Promise<ToolApplyResult> {
@@ -137,19 +130,17 @@ async function applyEditorConfig(ctx: ToolContext): Promise<ToolApplyResult> {
   return result
 }
 
-// --- AGENTS.md --------------------------------------------------------------
-
 const AGENTS_INTRO = `# Passion Factory Code Style
 
 These rules are managed by \`@pleaseai/code-style\`. Run \`pleaseai-code-style update\`
-to refresh this block. Do not edit between the marker comments — your changes
+to refresh this block. Do not edit between the marker comments: your changes
 will be overwritten.
 
 `
 
 const AGENTS_TYPESCRIPT = `- Formatter: \`@pleaseai/eslint-config\` (wraps \`@antfu/eslint-config\`)
 - No semicolons, single quotes, 2-space indent, trailing commas, LF line endings
-- ESM only — never emit \`require\`/\`module.exports\`
+- ESM only: never emit \`require\`/\`module.exports\`
 - TypeScript: \`strict: true\`, prefer \`type\` over \`interface\`, no implicit \`any\`
 - Prefer named exports, early returns, \`async\`/\`await\`, optional chaining
 - Tests live under the package's \`test/\` (or \`tests/\`) root, mirroring the source path
@@ -212,7 +203,6 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   }
 
   if (existing === next) {
-    // No-op — already up to date.
     return result
   }
 
@@ -221,11 +211,9 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   return result
 }
 
-// --- ast-grep ---------------------------------------------------------------
-
 const AST_GREP_RULES = 'node_modules/@pleaseai/ast-grep-config/rules'
 
-const SGCONFIG_TEMPLATE = `# ast-grep config — managed by @pleaseai/code-style (ast-grep).
+const SGCONFIG_TEMPLATE = `# ast-grep config, managed by @pleaseai/code-style (ast-grep).
 # Run \`ast-grep scan\` for the structural rules and \`please-style check\`
 # for file-name and test-path rules. Every rule is a warning.
 ruleDirs:
@@ -285,7 +273,6 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   }
 
   if (listsAstGrepRules(existing)) {
-    // Already lists the rules in `ruleDirs` — keep the user's other settings.
     return result
   }
 
@@ -298,8 +285,6 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   result.updated.push(label)
   return result
 }
-
-// --- Registry ---------------------------------------------------------------
 
 export const TOOLS: Tool[] = [
   {

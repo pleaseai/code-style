@@ -17,16 +17,16 @@ The documentation site (`https://code-style.pages.dev`) ran on **Docus**
 (Nuxt 4 + Nuxt Content) from `docs/`, deployed to the Cloudflare Pages project
 `code-style`. Keeping it working required a stack of workarounds:
 
-- **Bun linker** — Docus ships raw `.ts` server files that Nitro's
+- **Bun linker**: Docus ships raw `.ts` server files that Nitro's
   `rollup-plugin-inject` cannot parse under Bun's isolated linker, so the root
   `bunfig.toml` switched the whole workspace to `linker = "hoisted"`
   (ADR-0001).
-- **MCP toolkit** — `@nuxtjs/mcp-toolkit` imports `agents/mcp`, which breaks
+- **MCP toolkit**: `@nuxtjs/mcp-toolkit` imports `agents/mcp`, which breaks
   the `cloudflare_pages` Nitro preset, so it had to be disabled.
-- **D1 database** — Nuxt Content needed a D1 binding plus `nodejs_compat` and
+- **D1 database**: Nuxt Content needed a D1 binding plus `nodejs_compat` and
   `NUXT_*` vars on Cloudflare, for a site whose content never changes at
   runtime.
-- **i18n routing** — Docus's `/:lang?` routes collide with `@nuxtjs/i18n`'s
+- **i18n routing**: Docus's `/:lang?` routes collide with `@nuxtjs/i18n`'s
   prefix strategy; an inline Nuxt module rewrote the route table after Docus
   registered it (ADR-0002).
 
@@ -51,17 +51,17 @@ existing Cloudflare Pages project.
 
 ### Why Nimbus
 
-- **Agent-first outputs by default** — `/llms.txt`, `/llms-full.txt`,
+- **Agent-first outputs by default**: `/llms.txt`, `/llms-full.txt`,
   per-section `/<section>/llms.txt`, a Markdown and an MDX version of every
   page, sitemap, `robots.txt`, and OG images, with no extra modules.
-- **Owned source** — the scaffolder writes the layouts, components, routes,
+- **Owned source**: the scaffolder writes the layouts, components, routes,
   and styles into the repository. Only the plumbing (content schemas, sidebar,
   Markdown generation, build hooks) ships as the `@cloudflare/nimbus-docs`
   package, so site-specific behaviour such as i18n is plain source code
   rather than a patch against framework internals.
-- **Static Astro output** — `astro build` writes plain files to
+- **Static Astro output**: `astro build` writes plain files to
   `apps/docs/dist/`. No database, no server runtime, no compatibility flags.
-- **Drops the Docus workarounds** — no Nitro preset, no MCP toolkit, no D1,
+- **Drops the Docus workarounds**: no Nitro preset, no MCP toolkit, no D1,
   no route-table rewriting.
 
 ### i18n wired by hand

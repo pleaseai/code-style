@@ -1,5 +1,5 @@
 /**
- * Name normalization — one function per language naming convention
+ * Name normalization: one function per language naming convention
  * (ADR-0022 §3: the only language-specific code besides path derivation).
  */
 

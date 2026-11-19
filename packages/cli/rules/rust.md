@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — Rust
+# Passion Factory Code Style Rules: Rust
 
 Rust rules for `@pleaseai/code-style`, condensed from the Google Rust Style
 Guide with the Chromium, Android, and Fuchsia parts removed. `rustfmt` sets the

@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — HTML/CSS
+# Passion Factory Code Style Rules: HTML/CSS
 
 HTML and CSS rules for `@pleaseai/code-style`, condensed from the Google
 HTML/CSS Style Guide. The guide names no formatter or linter, so match the

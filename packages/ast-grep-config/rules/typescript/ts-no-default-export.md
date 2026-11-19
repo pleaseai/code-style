@@ -5,7 +5,7 @@
 | Slug | `code-greppable-public-symbols` |
 | Language | TypeScript (`.ts`, `.mts`, `.cts`) |
 | Severity | `warning` |
-| Enforcement layer | 2 (ast-grep) — [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
+| Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why
 

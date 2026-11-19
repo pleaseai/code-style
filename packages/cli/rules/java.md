@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — Java
+# Passion Factory Code Style Rules: Java
 
 Java rules for `@pleaseai/code-style`, condensed from the Google Java Style
 Guide. `google-java-format` produces the layout the guide describes. Read it

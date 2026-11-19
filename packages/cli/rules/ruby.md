@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — Ruby
+# Passion Factory Code Style Rules: Ruby
 
 Ruby rules for `@pleaseai/code-style`, condensed from the community Ruby Style
 Guide. `rubocop` enforces it. Read it together with `general.md` in this

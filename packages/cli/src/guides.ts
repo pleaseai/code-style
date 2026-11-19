@@ -30,7 +30,6 @@ function guideNames(languages: Language[]): string[] {
   return ['general.md', ...languages.map(language => `${language}.md`), ...ATTRIBUTION_FILES]
 }
 
-// Removing a deselected guide only unlinks a symlink, so only the written paths are checked.
 export function assertGuidesWritable(cwd: string, languages: Language[]): void {
   for (const path of ['.agents', GUIDES_DIR, ...guideNames(languages).map(name => `${GUIDES_DIR}/${name}`)]) {
     assertNotSymlink(cwd, path)

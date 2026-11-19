@@ -37,33 +37,18 @@ function candidateSources(inner: string, unit: Unit, layout: TestLayout, withAlt
   if (mirror.length > 1 && envSegments.has(mirror[0] ?? '')) {
     readings.push(mirror.slice(1))
   }
-  const bases: string[] = []
-  for (const reading of readings) {
-    const rel = reading.join('/')
-    if (unit.keepRootName) {
-      // Several roots: the root name is part of the test path.
-      if (unit.rootMirror === true || unit.sourceRoots.some(root => isUnder(rel, root) && rel !== root)) {
-        bases.push(joinPath(unit.dir, rel))
-      }
-    }
-    else {
-      for (const root of [...unit.sourceRoots, ...(withAlternates ? unit.alternateSourceRoots ?? [] : [])]) {
-        bases.push(joinPath(unit.dir, root, rel))
-      }
-    }
+  const bases = readings.flatMap(reading => sourceBases(reading.join('/'), unit, withAlternates))
+  return bases.flatMap(base => [
+    ...layout.sourceExtensions.map(ext => `${base}${ext}`),
+    ...(layout.allowIndex ? layout.sourceExtensions.map(ext => `${base}/index${ext}`) : []),
+  ])
+}
+
+function sourceBases(rel: string, unit: Unit, withAlternates: boolean): string[] {
+  if (unit.keepRootName) {
+    return unit.rootMirror === true || unit.sourceRoots.some(root => isUnder(rel, root) && rel !== root) ? [joinPath(unit.dir, rel)] : []
   }
-  const out: string[] = []
-  for (const base of bases) {
-    for (const ext of layout.sourceExtensions) {
-      out.push(`${base}${ext}`)
-    }
-    if (layout.allowIndex) {
-      for (const ext of layout.sourceExtensions) {
-        out.push(`${base}/index${ext}`)
-      }
-    }
-  }
-  return out
+  return [...unit.sourceRoots, ...(withAlternates ? unit.alternateSourceRoots ?? [] : [])].map(root => joinPath(unit.dir, root, rel))
 }
 
 function describeExpected(candidates: string[], unit: Unit, layout: TestLayout): string {

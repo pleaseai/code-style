@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — C#
+# Passion Factory Code Style Rules: C#
 
 C# rules for `@pleaseai/code-style`, condensed from the Google C# Style Guide.
 The guide names no formatter or linter, so match the project's existing

@@ -2,7 +2,7 @@
 
 [English](./README.md) | 한국어
 
-PleaseAI의 공유 코드 스타일을 어떤 프로젝트에도 적용해 주는 CLI입니다 —
+PleaseAI의 공유 코드 스타일을 어떤 프로젝트에도 적용해 주는 CLI입니다.
 eslint/prettier/editorconfig/ast-grep 패키지를 설치하고, AI 코딩 어시스턴트가
 처음부터 린트를 통과하는 코드를 작성할 수 있도록 `AGENTS.md`의 규칙 블록을
 관리합니다. `please-style check`로 파일 이름과 테스트 경로를 검사합니다.
@@ -42,7 +42,7 @@ bunx @pleaseai/code-style check   # 파일 이름과 테스트 경로 검사 (AD
 | eslint-config | `@pleaseai/eslint-config`, `eslint` | `eslint.config.mjs` |
 | prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
 | editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (`node_modules`에서 복사) |
-| agents-md | — | `AGENTS.md` (마커로 관리되는 블록) |
+| agents-md | - | `AGENTS.md` (마커로 관리되는 블록) |
 | ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
 
 ## ast-grep 규칙
@@ -201,7 +201,7 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
 
 ## `AGENTS.md` 블록
 
-`AGENTS.md`에서 CLI는 아래 마커 사이의 내용만 관리합니다 — 나머지 내용은
+`AGENTS.md`에서 CLI는 아래 마커 사이의 내용만 관리합니다. 나머지 내용은
 사용자의 것이며 그대로 보존됩니다:
 
 ```md

@@ -1,4 +1,4 @@
-# Passion Factory Code Style Rules — General
+# Passion Factory Code Style Rules: General
 
 Rules for `@pleaseai/code-style` that apply to every language. Read this file
 together with the guide for the language you are writing (for example
@@ -7,7 +7,7 @@ together with the guide for the language you are writing (for example
 ## Principles
 
 - Write for the reader: plain constructs over clever or obscure ones.
-- Follow the patterns already in the codebase — naming, structure, and
+- Follow the patterns already in the codebase: naming, structure, and
   formatting stay consistent with the surrounding code.
 - Prefer the simple solution; break a complex problem into smaller parts.
 - Keep dependencies and coupling low so code stays easy to change.
@@ -45,4 +45,4 @@ that explains the fix.
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
   `chore:`, `build:`, `ci:`, `perf:`, `style:`, `revert:`.
 - Subject ≤ 72 chars, imperative mood, no trailing period.
-- Body explains **why**, not **what** — the diff already shows the what.
+- Body explains **why**, not **what**; the diff already shows the what.

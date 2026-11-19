@@ -108,7 +108,7 @@ export default pleaseai({
 - `slop/no-em-dash` is a warning in Markdown files and an error elsewhere. It has no autofix.
 - On non-JS files (CSS, HTML, Vue, JSON, YAML, TOML, Markdown, and so on), the rule runs only where another config already parses them. Enabling `antislop` never makes ESLint lint new file types, so you get no parsing errors on CSS or HTML.
 
-With antislop turned on, this repository reports 193 findings (its own `eslint.config.ts` sets `antislop: false` for now): 174 `slop/no-em-dash` (136 in Markdown), 8 `sonarjs/cognitive-complexity`, 7 `slop/prefer-jsdoc` (autofixable), 3 `slop/max-comment-length` and 1 `slop/no-trivial-functions`. See [issue #76](https://github.com/pleaseai/code-style/issues/76) for the measurements.
+When this repository first turned antislop on, it reported 193 findings: 174 `slop/no-em-dash` (136 in Markdown), 8 `sonarjs/cognitive-complexity`, 7 `slop/prefer-jsdoc` (autofixable), 3 `slop/max-comment-length` and 1 `slop/no-trivial-functions`. They are fixed, and this repository now lints itself with antislop on. See [issue #76](https://github.com/pleaseai/code-style/issues/76) for the measurements.
 
 ## Plugins Renaming
 

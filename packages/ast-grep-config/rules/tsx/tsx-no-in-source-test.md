@@ -5,7 +5,7 @@
 | Slug | `test-path-derivable-from-source` |
 | Language | TSX (`.tsx`) |
 | Severity | `warning` |
-| Enforcement layer | 2 (ast-grep) — [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
+| Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why
 
@@ -62,7 +62,7 @@ describe('add', () => {
 
 1. Work out the test path: take the source path relative to the package, drop
    a single source root (`src/`), and put the result under the package's test
-   root with a `.test.tsx` (or `.test.ts`) suffix — `src/math/add.tsx` becomes
+   root with a `.test.tsx` (or `.test.ts`) suffix: `src/math/add.tsx` becomes
    `test/math/add.test.tsx`. If the package has several source roots (Nuxt
    `app/`, `server/`, `shared/`), keep the root name:
    `app/components/card.tsx` becomes `test/app/components/card.test.tsx`. Use the test
