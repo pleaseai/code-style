@@ -80,6 +80,13 @@ describe('antislop', () => {
     expect(await eslint.calculateConfigForFile('src/legacy/page.html')).toBeUndefined()
   })
 
+  test('does not lint other languages for a parser config without files', async () => {
+    const globalParser = { languageOptions: { parser: parserPlain } }
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true }, globalParser) })
+
+    expect(await eslint.calculateConfigForFile('src/style.css')).toBeUndefined()
+  })
+
   test('keeps Vue files when the Vue config parses them', async () => {
     const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ antislop: true, vue: true }) })
 
