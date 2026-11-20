@@ -676,6 +676,26 @@ All exports from `@antfu/eslint-config` are re-exported, so you can import fine-
 import { combine, javascript, typescript, vue } from '@pleaseai/eslint-config'
 ```
 
+## References
+
+This config builds on the first five projects below. The last one is listed for reference only; no rules come from it yet.
+
+| Project                                      | License    | Used as                                                             |
+| -------------------------------------------- | ---------- | ------------------------------------------------------------------- |
+| [`antfu/eslint-config`][ref-antfu]           | MIT        | Base preset, wrapped by `pleaseai()`                                |
+| [`antfu/eslint-plugin-slop`][ref-slop]       | MIT        | `slop/*` rules behind the `antislop` option                         |
+| [`SonarSource/SonarJS`][ref-sonarjs]         | LGPL-3.0   | Curated `sonarjs/*` subset behind the `antislop` option             |
+| [`nkzw-tech/oxlint-config`][ref-nkzw]        | MIT        | Source of the vendored `quality/*` rules                            |
+| [`dmmulroy/anti-slop`][ref-anti-slop]        | MIT        | Origin of the `quality/*` rules                                     |
+| [`cloudflare/oxlint-config`][ref-cloudflare] | Apache-2.0 | Reference only: Cloudflare's shared Oxlint rules for JS/TS projects |
+
+[ref-antfu]: https://github.com/antfu/eslint-config
+[ref-slop]: https://github.com/antfu/eslint-plugin-slop
+[ref-sonarjs]: https://github.com/SonarSource/SonarJS
+[ref-nkzw]: https://github.com/nkzw-tech/oxlint-config
+[ref-anti-slop]: https://github.com/dmmulroy/anti-slop
+[ref-cloudflare]: https://github.com/cloudflare/oxlint-config
+
 ## License
 
 [MIT](./LICENSE)

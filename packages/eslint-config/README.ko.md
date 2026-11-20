@@ -676,6 +676,26 @@ antfu 기본값(`lessOpinionated: false`)은 개행이 있는 중괄호 없는 �
 import { combine, javascript, typescript, vue } from '@pleaseai/eslint-config'
 ```
 
+## 참고 자료
+
+이 설정은 아래 표의 앞 다섯 프로젝트를 기반으로 합니다. 마지막 항목은 참고용으로만 기록해 두었고, 아직 가져온 규칙은 없습니다.
+
+| 프로젝트                                     | 라이선스   | 용도                                                   |
+| -------------------------------------------- | ---------- | ------------------------------------------------------ |
+| [`antfu/eslint-config`][ref-antfu]           | MIT        | 기본 preset, `pleaseai()`가 감쌈                       |
+| [`antfu/eslint-plugin-slop`][ref-slop]       | MIT        | `antislop` 옵션의 `slop/*` 규칙                        |
+| [`SonarSource/SonarJS`][ref-sonarjs]         | LGPL-3.0   | `antislop` 옵션의 `sonarjs/*` 규칙 일부                |
+| [`nkzw-tech/oxlint-config`][ref-nkzw]        | MIT        | vendoring한 `quality/*` 규칙의 출처                    |
+| [`dmmulroy/anti-slop`][ref-anti-slop]        | MIT        | `quality/*` 규칙의 원본                                |
+| [`cloudflare/oxlint-config`][ref-cloudflare] | Apache-2.0 | 참고용: Cloudflare의 JS/TS 프로젝트용 공유 Oxlint 규칙 |
+
+[ref-antfu]: https://github.com/antfu/eslint-config
+[ref-slop]: https://github.com/antfu/eslint-plugin-slop
+[ref-sonarjs]: https://github.com/SonarSource/SonarJS
+[ref-nkzw]: https://github.com/nkzw-tech/oxlint-config
+[ref-anti-slop]: https://github.com/dmmulroy/anti-slop
+[ref-cloudflare]: https://github.com/cloudflare/oxlint-config
+
 ## 라이선스
 
 [MIT](./LICENSE)
