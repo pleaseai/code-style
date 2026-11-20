@@ -220,6 +220,23 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
 가이드는 삭제합니다(디렉터리의 다른 파일은 건드리지 않습니다). `doctor`는 블록이 가리키는
 가이드가 모두 있는지 확인합니다.
 
+## antislop 플러그인
+
+`@pleaseai/eslint-config`는 `eslint-plugin-slop`과 `eslint-plugin-sonarjs`가 설치되어 있으면
+antislop을 켭니다. `init`이 두 플러그인을 설치하며, 기존 프로젝트에서는 다음과 같이 동작합니다.
+
+- `doctor`는 플러그인별로 `정상` 또는 `없음, antislop 규칙이 꺼져 있습니다`를 보여 주고,
+  감지한 패키지 매니저의 설치 명령을 함께 출력합니다. `@pleaseai/eslint-config`나 `package.json`이
+  없으면 플러그인에 대해 아무것도 출력하지 않습니다.
+- `update`는 AGENTS.md 블록을 갱신한 뒤 빠진 플러그인을 설치할지 묻습니다. 대화형으로 실행하면
+  먼저 확인하고(기본값: 예), `--yes`를 주면 묻지 않고 설치하며, TTY가 없으면 명령만 출력합니다.
+  설치에 실패하면 0이 아닌 코드로 종료합니다.
+- 설치가 끝나면 `update`가 기존 코드를 위한 다음 단계를 안내합니다. `eslint . --fix`를 실행하고,
+  남은 위반은 `eslint . --suppress-all`로 `eslint-suppressions.json`(ESLint 벌크 억제)에 옮기며,
+  위반을 고칠 때마다 `eslint . --prune-suppressions`를 실행합니다.
+- `eslint.config.*`에 `antislop: false`가 있는 프로젝트는 두 명령 모두 건너뜁니다(단순 텍스트
+  검색이라 계산해서 만든 설정은 감지하지 못합니다).
+
 ## 옵션
 
 | 플래그 | 설명 |

@@ -48,7 +48,7 @@ pleaseai-code-style init --yes   # non-interactive, accept defaults
 
 ### `update`
 
-Refresh the `AGENTS.md` rules block and the guides in `.agents/code-style/` without touching packages or other config files. Use this after bumping `@pleaseai/code-style` to pull in the latest rules.
+Refresh the `AGENTS.md` rules block and the guides in `.agents/code-style/` without touching other config files. Use this after bumping `@pleaseai/code-style` to pull in the latest rules. If `@pleaseai/eslint-config` is installed without its antislop plugins, it then offers to install them (see antislop plugins below).
 
 ```bash
 pleaseai-code-style update
@@ -56,7 +56,7 @@ pleaseai-code-style update
 
 ### `doctor`
 
-Report the current project configuration status — which packages are installed, which config files exist.
+Report the current project configuration status — which packages are installed, which config files exist, and whether the antislop plugins are present.
 
 ```bash
 pleaseai-code-style doctor
@@ -125,6 +125,25 @@ My own content stays here untouched.
 In `AGENTS.md`, the CLI **only** owns the content between the two marker comments — everything else is preserved verbatim. Running `update` twice in a row is a no-op; the block never duplicates.
 
 The full canonical rules are copied into your project per language for AI assistants that prefer to read the long version, so they resolve without `node_modules`: start with `.agents/code-style/general.md` (every language), then the guide of your language (for example, `.agents/code-style/typescript.md` for TypeScript and JavaScript). `NOTICE.md` and `LICENSE-Apache-2.0.txt` in the same directory carry the attribution for the adapted guides. Commit `.agents/code-style/`: `init` and `update` rewrite it, overwrite its files and remove the guide of a language that is no longer selected (other files there are never touched). `doctor` checks that every guide the block links exists.
+
+## antislop plugins
+
+`@pleaseai/eslint-config` turns antislop on when `eslint-plugin-slop` and
+`eslint-plugin-sonarjs` are installed. `init` installs them; for an existing
+project:
+
+- `doctor` reports each plugin (`OK` or `missing, antislop rules are off`) and
+  the install command for your package manager. It prints nothing about them
+  without `@pleaseai/eslint-config` or a `package.json`.
+- `update` offers to install the missing plugins after it refreshes the AGENTS.md
+  block. Interactive runs ask first (default: yes), `--yes` installs without asking,
+  and without a TTY it only prints the command. An install failure exits non-zero.
+- After installing, `update` prints the follow-up for existing code: run
+  `eslint . --fix`, then `eslint . --suppress-all` to move the remaining violations
+  into `eslint-suppressions.json` (ESLint bulk suppressions), and
+  `eslint . --prune-suppressions` as you fix them.
+- A project that sets `antislop: false` in its `eslint.config.*` (a plain text
+  search, so computed configs are not detected) is skipped by both commands.
 
 ## Options
 
