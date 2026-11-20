@@ -226,6 +226,28 @@ export default pleaseai({
 
 When this repository first turned antislop on, it reported 193 findings: 174 `slop/no-em-dash` (136 in Markdown), 8 `sonarjs/cognitive-complexity`, 7 `slop/prefer-jsdoc` (autofixable), 3 `slop/max-comment-length` and 1 `slop/no-trivial-functions`. They are fixed, and this repository now lints itself with antislop on. See [issue #76](https://github.com/pleaseai/code-style/issues/76) for the measurements.
 
+### Quality Rules
+
+`quality: true` turns on 12 `quality/*` rules from [anti-slop](https://github.com/dmmulroy/anti-slop), vendored through [`@nkzw/oxlint-config`](https://github.com/nkzw-tech/oxlint-config). They reject types that the code gives no evidence for: a known value widened to `unknown` and asserted back, chained type assertions, `unknown` returns and type aliases, unsafe dictionary value types, `object` parameters, adjacent `filter`/`map` passes, reducer accumulator copies, `Reflect.get` / `Reflect.apply`, and conditional empty-object spreads. The option is off by default and needs no extra packages.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  quality: true,
+  rules: {
+    'quality/no-object-parameters': 'off',
+  },
+})
+```
+
+- Every rule is an error on JS and TS files. Code blocks in Markdown are skipped.
+- `no-object-parameters` and `no-unknown-returns` are the most opinionated. Turn them off in `rules` if they do not fit your code.
+- `quality/no-chained-type-assertions` reports the same code as `slop/no-chained-type-assertions` from `antislop`. If both are on, turn one off.
+- None of the rules has an autofix.
+
+With `quality: true`, this repository reports 29 findings: 13 `no-known-value-widening`, 10 `no-array-filter-map`, 3 `no-unsafe-dictionary-type`, 2 `no-conditional-empty-object-spread` and 1 `no-unknown-returns`. A larger private monorepo (2,669 files) reports 4,396 findings in 1,172 files, 61% of them in tests. The most frequent are `no-chained-type-assertions` (1,282), `no-unsafe-dictionary-type` (1,240), `no-known-value-widening` (745) and `no-conditional-empty-object-spread` (658). That volume is why the option is off by default. See [issue #77](https://github.com/pleaseai/code-style/issues/77).
+
 ## Optional Configs
 
 ### React
