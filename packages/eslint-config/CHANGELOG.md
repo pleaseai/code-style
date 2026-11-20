@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/pleaseai/code-style/compare/eslint-config-v0.1.0...eslint-config-v0.1.1) (2026-11-19)
+
+
+### Features
+
+* **eslint-config:** add opt-in canonicalPluginNames for bun lint native rules ([#61](https://github.com/pleaseai/code-style/issues/61)) ([5454e2d](https://github.com/pleaseai/code-style/commit/5454e2d9b40a6feb3ca63637226c6215e866d72c))
+* **eslint-config:** turn antislop on by default when its plugins are installed ([#79](https://github.com/pleaseai/code-style/issues/79)) ([f3b618c](https://github.com/pleaseai/code-style/commit/f3b618c215acfaed7a585d5470d605aae9d17545)), closes [#76](https://github.com/pleaseai/code-style/issues/76)
+
+
+### Bug Fixes
+
+* **eslint-config:** skip antislop no-em-dash on file types without a parser ([#78](https://github.com/pleaseai/code-style/issues/78)) ([21bf0d3](https://github.com/pleaseai/code-style/commit/21bf0d31882ff66e4d0497b8bd9043da9ee8759c)), closes [#76](https://github.com/pleaseai/code-style/issues/76)
+
 ## [0.1.0](https://github.com/pleaseai/code-style/compare/eslint-config-v0.0.4...eslint-config-v0.1.0) (2026-10-13)
 
 
