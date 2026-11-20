@@ -41,9 +41,17 @@ interface Messages {
   doctorAntislopOff: string
   antislopConfirm: (pkgs: string, cmd: string) => string
   antislopNotInstalled: (cmd: string) => string
-  antislopNextSteps: string
+  antislopNextSteps: (exec: string) => string
   usage: string
   checkUsage: string
+}
+
+const NEXT_STEP_FLAGS = ['--fix', '--suppress-all', '--prune-suppressions']
+
+function nextSteps(exec: string, heading: string, notes: string[]): string {
+  const commands = NEXT_STEP_FLAGS.map(flag => `${exec} eslint . ${flag}`)
+  const width = Math.max(...commands.map(command => command.length)) + 3
+  return [heading, ...commands.map((command, i) => `  ${command.padEnd(width)}${notes[i]}`)].join('\n')
 }
 
 const messages: Record<Locale, Messages> = {
@@ -85,10 +93,11 @@ const messages: Record<Locale, Messages> = {
     doctorAntislopOff: 'antislop: off (antislop: false in eslint.config)',
     antislopConfirm: (pkgs, cmd) => `Install ${pkgs} to turn antislop on? (${cmd})`,
     antislopNotInstalled: cmd => `antislop plugins are not installed. Install them with: ${cmd}`,
-    antislopNextSteps: `antislop is on. The new rules can fail on existing code, so run:
-  eslint . --fix                  fix what can be fixed automatically
-  eslint . --suppress-all         move the remaining violations into eslint-suppressions.json
-  eslint . --prune-suppressions   drop suppressions as you fix the violations`,
+    antislopNextSteps: exec => nextSteps(exec, 'antislop is on. The new rules can fail on existing code, so run:', [
+      'fix what can be fixed automatically',
+      'move the remaining violations into eslint-suppressions.json',
+      'drop suppressions as you fix the violations',
+    ]),
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -159,10 +168,11 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     doctorAntislopOff: 'antislop: 꺼짐 (eslint.config의 antislop: false)',
     antislopConfirm: (pkgs, cmd) => `antislop을 켜려면 ${pkgs}을(를) 설치해야 합니다. 설치할까요? (${cmd})`,
     antislopNotInstalled: cmd => `antislop 플러그인을 설치하지 않았습니다. 다음 명령으로 설치하세요: ${cmd}`,
-    antislopNextSteps: `antislop을 켰습니다. 새 규칙 때문에 기존 코드에서 lint가 실패할 수 있으니 다음 순서로 실행하세요:
-  eslint . --fix                  자동으로 고칠 수 있는 위반 수정
-  eslint . --suppress-all         남은 위반을 eslint-suppressions.json으로 이동
-  eslint . --prune-suppressions   위반을 고칠 때마다 억제 항목 정리`,
+    antislopNextSteps: exec => nextSteps(exec, 'antislop을 켰습니다. 새 규칙 때문에 기존 코드에서 lint가 실패할 수 있으니 다음 순서로 실행하세요:', [
+      '자동으로 고칠 수 있는 위반 수정',
+      '남은 위반을 eslint-suppressions.json으로 이동',
+      '위반을 고칠 때마다 억제 항목 정리',
+    ]),
     usage: `사용법:
   pleaseai-code-style <command> [options]
 

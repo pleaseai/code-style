@@ -10,6 +10,7 @@ import { antislopStatus } from './antislop.js'
 import { applyAgentsMd, TOOLS } from './appliers.js'
 import {
   detectPackageManager,
+  execCommand,
   installCommand,
   isPackageInstalled,
   readFileOrNull,
@@ -85,7 +86,7 @@ function installPackages(pm: PackageManager, packages: string[], cwd: string): v
   if (packages.length === 0) {
     return
   }
-  const [cmd, args] = installCommand(pm, packages)
+  const [cmd, args] = installCommand(pm, packages, cwd)
   const spin = spinner()
   spin.start(t('installing'))
   const res = spawnSync(cmd, args, {
@@ -105,8 +106,8 @@ function installToolPackages(pm: PackageManager, tools: Tool[], cwd: string): vo
   ), cwd)
 }
 
-function formatInstallCommand(pm: PackageManager, packages: string[]): string {
-  const [cmd, args] = installCommand(pm, packages)
+function formatInstallCommand(pm: PackageManager, packages: string[], cwd: string): string {
+  const [cmd, args] = installCommand(pm, packages, cwd)
   return [cmd, ...args].join(' ')
 }
 
@@ -116,7 +117,7 @@ async function offerAntislopInstall(opts: CommandOptions): Promise<void> {
     return
   }
   const pm = detectPackageManager(opts.cwd)
-  const command = formatInstallCommand(pm, missing)
+  const command = formatInstallCommand(pm, missing, opts.cwd)
   let install = opts.autoAccept
   if (!install && process.stdin.isTTY) {
     const answer = await confirm({
@@ -130,7 +131,7 @@ async function offerAntislopInstall(opts: CommandOptions): Promise<void> {
     return
   }
   installPackages(pm, missing, opts.cwd)
-  log.info(t('antislopNextSteps'))
+  log.info(t('antislopNextSteps')(execCommand(pm)))
 }
 
 export async function runInit(opts: CommandOptions): Promise<void> {
@@ -234,7 +235,7 @@ function logAntislop(cwd: string): void {
     log.info(`  ${installed ? `${name} (antislop): ${t('doctorOk')}` : t('doctorAntislopMissing')(name)}`)
   }
   if (missing.length > 0) {
-    log.info(`  ${t('doctorAntislopInstall')(formatInstallCommand(detectPackageManager(cwd), missing))}`)
+    log.info(`  ${t('doctorAntislopInstall')(formatInstallCommand(detectPackageManager(cwd), missing, cwd))}`)
   }
 }
 

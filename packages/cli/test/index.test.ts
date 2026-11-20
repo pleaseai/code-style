@@ -168,6 +168,14 @@ describe('doctor antislop plugins', () => {
     })
   })
 
+  test('reports only the plugins the eslint config leaves on', () => {
+    withProject({ devDependencies: ESLINT_CONFIG_DEPS }, { 'eslint.config.ts': 'export default pleaseai({ antislop: { sonarjs: false } })\n' }, (dir) => {
+      const res = run(['doctor'], dir)
+      expect(res.stdout).toContain('eslint-plugin-slop (antislop): missing')
+      expect(res.stdout).not.toContain('eslint-plugin-sonarjs')
+    })
+  })
+
   test('prints nothing about the plugins without a package.json', () => {
     withProject(null, {}, (dir) => {
       expect(run(['doctor'], dir).stdout).not.toContain('antislop')
@@ -176,12 +184,12 @@ describe('doctor antislop plugins', () => {
 })
 
 describe('update antislop plugins', () => {
-  function withFakePnpm(body: (dir: string, env: Record<string, string>, argsFile: string) => void, opts: { pkg?: object, files?: Record<string, string> } = {}): void {
+  function withFakePnpm(body: (dir: string, env: Record<string, string>, argsFile: string) => void, opts: { pkg?: object | null, files?: Record<string, string> } = {}): void {
     const bin = mkdtempSync(join(tmpdir(), 'pleaseai-cli-bin-'))
     const argsFile = join(bin, 'args.txt')
     writeFileSync(join(bin, 'pnpm'), `#!/bin/sh\necho "$@" > "${argsFile}"\n`, { mode: 0o755 })
     try {
-      const pkg = opts.pkg ?? { devDependencies: { ...ESLINT_CONFIG_DEPS, 'eslint-plugin-sonarjs': '*' } }
+      const pkg = opts.pkg === undefined ? { devDependencies: { ...ESLINT_CONFIG_DEPS, 'eslint-plugin-sonarjs': '*' } } : opts.pkg
       withProject(pkg, { 'pnpm-lock.yaml': '', ...opts.files }, (dir) => {
         body(dir, { PATH: `${bin}:${process.env.PATH}` }, argsFile)
       })
@@ -196,9 +204,50 @@ describe('update antislop plugins', () => {
       const res = run(['update', '--yes'], dir, env)
       expect(res.status).toBe(0)
       expect(readFileSync(argsFile, 'utf-8').trim()).toBe('add -D eslint-plugin-slop')
-      expect(res.stdout).toContain('eslint . --suppress-all')
-      expect(res.stdout).toContain('eslint . --prune-suppressions')
+      expect(res.stdout).toContain('pnpm exec eslint . --suppress-all')
+      expect(res.stdout).toContain('pnpm exec eslint . --prune-suppressions')
     })
+  })
+
+  test('--yes at a pnpm workspace root installs with -w', () => {
+    withFakePnpm((dir, env, argsFile) => {
+      expect(run(['update', '--yes'], dir, env).status).toBe(0)
+      expect(readFileSync(argsFile, 'utf-8').trim()).toBe('add -D -w eslint-plugin-slop')
+    }, { files: { 'pnpm-workspace.yaml': 'packages: []\n' } })
+  })
+
+  for (const content of ['{ not json', 'null']) {
+    test(`skips the plugin check when package.json is ${content}`, () => {
+      withProject(null, { 'package.json': content }, (dir) => {
+        const res = run(['update', '--yes'], dir)
+        expect(res.status).toBe(0)
+        expect(existsSync(join(dir, 'AGENTS.md'))).toBe(true)
+      })
+    })
+  }
+
+  const NOTHING_TO_INSTALL = [
+    { name: 'every plugin is installed', pkg: { devDependencies: { ...ESLINT_CONFIG_DEPS, 'eslint-plugin-slop': '*', 'eslint-plugin-sonarjs': '*' } } },
+    { name: '@pleaseai/eslint-config is not installed', pkg: { devDependencies: { eslint: '*' } } },
+    { name: 'there is no package.json', pkg: null },
+  ]
+  for (const { name, pkg } of NOTHING_TO_INSTALL) {
+    test(`installs nothing and prints no next steps when ${name}`, () => {
+      withFakePnpm((dir, env, argsFile) => {
+        const res = run(['update', '--yes'], dir, env)
+        expect(res.status).toBe(0)
+        expect(existsSync(argsFile)).toBe(false)
+        expect(res.stdout).not.toContain('--suppress-all')
+      }, { pkg })
+    })
+  }
+
+  test('does not offer a plugin the eslint config turns off', () => {
+    withFakePnpm((dir, env, argsFile) => {
+      const res = run(['update', '--yes'], dir, env)
+      expect(res.status).toBe(0)
+      expect(existsSync(argsFile)).toBe(false)
+    }, { files: { 'eslint.config.ts': 'export default pleaseai({ antislop: { slop: false } })\n' } })
   })
 
   test('without a TTY and without --yes it prints the command and installs nothing', () => {

@@ -230,12 +230,15 @@ antislop을 켭니다. `init`이 두 플러그인을 설치하며, 기존 프로
   없으면 플러그인에 대해 아무것도 출력하지 않습니다.
 - `update`는 AGENTS.md 블록을 갱신한 뒤 빠진 플러그인을 설치할지 묻습니다. 대화형으로 실행하면
   먼저 확인하고(기본값: 예), `--yes`를 주면 묻지 않고 설치하며, TTY가 없으면 명령만 출력합니다.
-  설치에 실패하면 0이 아닌 코드로 종료합니다.
-- 설치가 끝나면 `update`가 기존 코드를 위한 다음 단계를 안내합니다. `eslint . --fix`를 실행하고,
+  pnpm workspace 루트에서는 `pnpm add -D -w`로 설치합니다. 설치에 실패하면 0이 아닌 코드로 종료합니다.
+- 설치가 끝나면 `update`가 기존 코드를 위한 다음 단계를 안내합니다. ESLint는 프로젝트의 패키지
+  매니저(`bunx`, `pnpm exec`, `yarn`, `npx`)로 실행합니다. `eslint . --fix`를 실행하고,
   남은 위반은 `eslint . --suppress-all`로 `eslint-suppressions.json`(ESLint 벌크 억제)에 옮기며,
   위반을 고칠 때마다 `eslint . --prune-suppressions`를 실행합니다.
-- `eslint.config.*`에 `antislop: false`가 있는 프로젝트는 두 명령 모두 건너뜁니다(단순 텍스트
-  검색이라 계산해서 만든 설정은 감지하지 못합니다).
+- `eslint.config.*`에 `antislop: false`가 있는 프로젝트에서는 `doctor`가 플러그인 줄 대신
+  `antislop: off`를 출력하고, `update`는 설치를 제안하지 않습니다. `antislop: { slop: false }`나
+  `{ sonarjs: false }`는 해당 플러그인만 두 명령에서 뺍니다. 단순 텍스트 검색이라 계산해서 만든 값은
+  감지하지 못합니다.
 
 ## 옵션
 

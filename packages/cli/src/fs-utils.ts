@@ -29,16 +29,31 @@ export function detectPackageManager(cwd: string = process.cwd()): PackageManage
   return 'bun'
 }
 
-export function installCommand(pm: PackageManager, packages: string[]): [string, string[]] {
+export function installCommand(pm: PackageManager, packages: string[], cwd: string = process.cwd()): [string, string[]] {
   switch (pm) {
     case 'bun':
       return ['bun', ['add', '-d', ...packages]]
     case 'pnpm':
-      return ['pnpm', ['add', '-D', ...packages]]
+      return readFileOrNull(resolve(cwd, 'pnpm-workspace.yaml')) == null
+        ? ['pnpm', ['add', '-D', ...packages]]
+        : ['pnpm', ['add', '-D', '-w', ...packages]]
     case 'yarn':
       return ['yarn', ['add', '-D', ...packages]]
     case 'npm':
       return ['npm', ['install', '-D', ...packages]]
+  }
+}
+
+export function execCommand(pm: PackageManager): string {
+  switch (pm) {
+    case 'bun':
+      return 'bunx'
+    case 'pnpm':
+      return 'pnpm exec'
+    case 'yarn':
+      return 'yarn'
+    case 'npm':
+      return 'npx'
   }
 }
 
