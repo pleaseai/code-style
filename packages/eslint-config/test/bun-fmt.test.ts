@@ -86,6 +86,16 @@ describe('formatters.markdown: bun', () => {
     }
   })
 
+  test('does not route unrelated rules from the rules option onto Markdown or MDX', async () => {
+    const configs = await pleaseai({ formatters: { markdown: 'bun' }, rules: { 'style/semi': ['error', 'never'] } })
+    const eslint = new ESLint({ cwd: scratch, overrideConfigFile: true, overrideConfig: configs })
+
+    for (const [file, code] of [['README.md', '# Title\n'], ['docs/a.mdx', '# Title\n']] as const) {
+      const [result] = await eslint.lintText(code, { filePath: join(scratch, file) })
+      expect(result!.messages.filter(message => message.fatal)).toEqual([])
+    }
+  })
+
   test('registers no eslint-plugin-format config when bun is the only formatter', async () => {
     const configs = await pleaseai({ formatters: { markdown: 'bun' } })
     const names = configs.map(config => config.name)

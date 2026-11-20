@@ -195,7 +195,9 @@ export function bunFmt(markdownLanguage: boolean, rules?: TypedFlatConfigItem['r
       languageOptions: { parser: parserPlain },
       rules: { 'pleaseai/bun-fmt': 'error' },
     },
-    // Scoped by `files` so the top-level `rules` option wins over the severities above.
-    ...(rules ? [{ name: 'pleaseai/formatter/bun/rules', files: [GLOB_MARKDOWN, GLOB_MDX], rules }] : []),
+    // Only this rule is forwarded: a config with `files` would otherwise route every user rule onto Markdown.
+    ...(rules && 'pleaseai/bun-fmt' in rules
+      ? [{ name: 'pleaseai/formatter/bun/rules', files: [GLOB_MARKDOWN, GLOB_MDX], rules: { 'pleaseai/bun-fmt': rules['pleaseai/bun-fmt'] } }]
+      : []),
   ]
 }
