@@ -86,6 +86,20 @@ describe('formatters.markdown: bun', () => {
     }
   })
 
+  test('applies a pleaseai/bun-fmt severity to Markdown and MDX only', async () => {
+    const configs = await pleaseai({ formatters: { markdown: 'bun' }, rules: { 'pleaseai/bun-fmt': 'warn' } })
+    const eslint = new ESLint({ cwd: scratch, overrideConfigFile: true, overrideConfig: configs })
+
+    for (const file of ['README.md', 'docs/a.mdx']) {
+      const config = await eslint.calculateConfigForFile(join(scratch, file))
+      expect(config?.rules?.['pleaseai/bun-fmt']).toEqual([1])
+    }
+    for (const file of ['src/index.ts', 'README.md/0.md', 'README.md/0.mdx']) {
+      const config = await eslint.calculateConfigForFile(join(scratch, file))
+      expect(config?.rules?.['pleaseai/bun-fmt']?.[0] ?? 0).toBe(0)
+    }
+  })
+
   test('does not route unrelated rules from the rules option onto Markdown or MDX', async () => {
     const configs = await pleaseai({ formatters: { markdown: 'bun' }, rules: { 'style/semi': ['error', 'never'] } })
     const eslint = new ESLint({ cwd: scratch, overrideConfigFile: true, overrideConfig: configs })
@@ -152,6 +166,14 @@ describe('formatWithBun', () => {
     chmodSync(mysteryBun, 0o755)
 
     expect(() => formatWithBun(mysteryBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('needs Bun 1.4.4 or later')
+  })
+
+  test('reports why `bun --version` failed', () => {
+    const brokenBun = join(scratch, 'broken-bun')
+    writeFileSync(brokenBun, '#!/bin/sh\necho \'dyld: missing library\' >&2\nexit 3\n')
+    chmodSync(brokenBun, 0o755)
+
+    expect(() => formatWithBun(brokenBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('dyld: missing library')
   })
 
   test('formats output larger than the default spawnSync buffer', () => {

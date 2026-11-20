@@ -121,7 +121,10 @@ export function pleaseai(
   const { canonicalPluginNames = false, formatters, quality: enableQuality = false, ...antfuOptions } = options
   const autoRenamePlugins = antfuOptions.autoRenamePlugins ?? true
   const { antfu: antfuFormatters, bun: enableBunFmt } = splitBunFormatter(formatters)
-  const formatterConfigs = enableBunFmt ? bunFmt(antfuOptions.markdown !== false, antfuOptions.rules) : []
+  // The severity moves onto the Markdown and MDX configs: in antfu's files-less `rules` config it would run bun fmt on every file.
+  const { 'pleaseai/bun-fmt': bunFmtSeverity, ...otherRules } = antfuOptions.rules ?? {}
+  const antfuRules = enableBunFmt ? otherRules : antfuOptions.rules
+  const formatterConfigs = enableBunFmt ? bunFmt(antfuOptions.markdown !== false, bunFmtSeverity) : []
 
   const composer = antfu(
     {
@@ -139,7 +142,7 @@ export function pleaseai(
       rules: {
         'antfu/top-level-function': 'error',
         'test/prefer-lowercase-title': 'off',
-        ...antfuOptions.rules,
+        ...antfuRules,
       },
       // antfu's renaming maps `@typescript-eslint` to `ts`, which would undo
       // the rename below for configs that register the canonical name.

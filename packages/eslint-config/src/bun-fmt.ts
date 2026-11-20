@@ -1,5 +1,5 @@
 import type { OptionsConfig, OptionsFormatters, TypedFlatConfigItem } from '@antfu/eslint-config'
-import type { Rule } from 'eslint'
+import type { Linter, Rule } from 'eslint'
 import { spawnSync } from 'node:child_process'
 import process from 'node:process'
 import { GLOB_MARKDOWN, GLOB_MARKDOWN_IN_MARKDOWN, parserPlain } from '@antfu/eslint-config'
@@ -62,6 +62,23 @@ function isSupportedBunVersion(version: string): boolean {
   return true
 }
 
+/** Runs `bin --version`; throws with the real cause when that cannot be done. */
+function readBunVersion(bin: string): string {
+  const result = spawnSync(bin, ['--version'], { encoding: 'utf8' })
+  if (result.error) {
+    const code = 'code' in result.error ? result.error.code : undefined
+    if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
+      throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
+    }
+    throw new Error(`\`formatters.markdown: 'bun'\` could not determine the version of \`${bin}\`: ${result.error.message}`)
+  }
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || (result.signal ? `killed by ${result.signal}` : `exited with ${result.status}`)
+    throw new Error(`\`formatters.markdown: 'bun'\` could not determine the version of \`${bin}\`: ${detail}`)
+  }
+  return result.stdout
+}
+
 /**
  * Bun before 1.4.4 ignores `--no-script` and runs the project's `fmt` script,
  * whose output would be applied as the fix, so the version is checked first.
@@ -70,23 +87,8 @@ function assertBunSupportsFmt(bin: string): void {
   if (checkedBunBinaries.has(bin)) {
     return
   }
-  let version: string | undefined
-  if (bin === process.execPath && process.versions.bun) {
-    version = process.versions.bun
-  }
-  else {
-    const result = spawnSync(bin, ['--version'], { encoding: 'utf8' })
-    if (result.error) {
-      const code = 'code' in result.error ? result.error.code : undefined
-      if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
-        throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
-      }
-    }
-    else if (result.status === 0) {
-      version = result.stdout
-    }
-  }
-  if (version === undefined || !isSupportedBunVersion(version)) {
+  const version = bin === process.execPath && process.versions.bun ? process.versions.bun : readBunVersion(bin)
+  if (!isSupportedBunVersion(version)) {
     throw new Error(OUTDATED_BUN_MESSAGE)
   }
   checkedBunBinaries.add(bin)
@@ -172,12 +174,12 @@ export function splitBunFormatter(formatters: boolean | PleaseaiFormatters | und
  * `.mdx` (plain text) with `pleaseai/bun-fmt`. Markdown and MDX code blocks
  * inside Markdown are skipped: they are part of the file that contains them.
  */
-export function bunFmt(markdownLanguage: boolean, rules?: TypedFlatConfigItem['rules']): TypedFlatConfigItem[] {
+export function bunFmt(markdownLanguage: boolean, severity: Linter.RuleEntry = 'error'): TypedFlatConfigItem[] {
   const markdown: TypedFlatConfigItem = {
     name: 'pleaseai/formatter/bun/markdown',
     files: [GLOB_MARKDOWN],
     ignores: [GLOB_MARKDOWN_IN_MARKDOWN],
-    rules: { 'pleaseai/bun-fmt': 'error' },
+    rules: { 'pleaseai/bun-fmt': severity },
   }
   if (!markdownLanguage) {
     markdown.languageOptions = { parser: parserPlain }
@@ -193,11 +195,7 @@ export function bunFmt(markdownLanguage: boolean, rules?: TypedFlatConfigItem['r
       files: [GLOB_MDX],
       ignores: [GLOB_MDX_IN_MARKDOWN],
       languageOptions: { parser: parserPlain },
-      rules: { 'pleaseai/bun-fmt': 'error' },
+      rules: { 'pleaseai/bun-fmt': severity },
     },
-    // Only this rule is forwarded: a config with `files` would otherwise route every user rule onto Markdown.
-    ...(rules && 'pleaseai/bun-fmt' in rules
-      ? [{ name: 'pleaseai/formatter/bun/rules', files: [GLOB_MARKDOWN, GLOB_MDX], rules: { 'pleaseai/bun-fmt': rules['pleaseai/bun-fmt'] } }]
-      : []),
   ]
 }
