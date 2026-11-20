@@ -6,7 +6,6 @@ import { pluginQuality } from '../../src/quality'
 
 ESLintRuleTester.describe = describe
 ESLintRuleTester.it = it
-ESLintRuleTester.itOnly = it.only
 
 export class RuleTester extends ESLintRuleTester {
   constructor(_config?: unknown) {
