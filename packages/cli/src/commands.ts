@@ -5,10 +5,12 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
-import { cancel, intro, isCancel, log, multiselect, outro, spinner } from '@clack/prompts'
+import { cancel, confirm, intro, isCancel, log, multiselect, outro, spinner } from '@clack/prompts'
+import { antislopStatus } from './antislop.js'
 import { applyAgentsMd, TOOLS } from './appliers.js'
 import {
   detectPackageManager,
+  execCommand,
   installCommand,
   isPackageInstalled,
   readFileOrNull,
@@ -80,14 +82,11 @@ async function chooseLanguages(opts: CommandOptions): Promise<Language[]> {
   return chosen
 }
 
-function installToolPackages(pm: PackageManager, tools: Tool[], cwd: string): void {
-  const packagesToInstall = Array.from(
-    new Set(tools.flatMap(tool => [...tool.packages, ...(tool.optionalPackages ?? [])])),
-  )
-  if (packagesToInstall.length === 0) {
+function installPackages(pm: PackageManager, packages: string[], cwd: string): void {
+  if (packages.length === 0) {
     return
   }
-  const [cmd, args] = installCommand(pm, packagesToInstall)
+  const [cmd, args] = installCommand(pm, packages, cwd)
   const spin = spinner()
   spin.start(t('installing'))
   const res = spawnSync(cmd, args, {
@@ -99,6 +98,40 @@ function installToolPackages(pm: PackageManager, tools: Tool[], cwd: string): vo
     process.exit(1)
   }
   spin.stop(t('installDone'))
+}
+
+function installToolPackages(pm: PackageManager, tools: Tool[], cwd: string): void {
+  installPackages(pm, Array.from(
+    new Set(tools.flatMap(tool => [...tool.packages, ...(tool.optionalPackages ?? [])])),
+  ), cwd)
+}
+
+function formatInstallCommand(pm: PackageManager, packages: string[], cwd: string): string {
+  const [cmd, args] = installCommand(pm, packages, cwd)
+  return [cmd, ...args].join(' ')
+}
+
+async function offerAntislopInstall(opts: CommandOptions): Promise<void> {
+  const { applies, missing } = antislopStatus(opts.cwd)
+  if (!applies || missing.length === 0) {
+    return
+  }
+  const pm = detectPackageManager(opts.cwd)
+  const command = formatInstallCommand(pm, missing, opts.cwd)
+  let install = opts.autoAccept
+  if (!install && process.stdin.isTTY) {
+    const answer = await confirm({
+      message: t('antislopConfirm')(missing.join(', '), command),
+      initialValue: true,
+    })
+    install = !isCancel(answer) && answer
+  }
+  if (!install) {
+    log.info(t('antislopNotInstalled')(command))
+    return
+  }
+  installPackages(pm, missing, opts.cwd)
+  log.info(t('antislopNextSteps')(execCommand(pm)))
 }
 
 export async function runInit(opts: CommandOptions): Promise<void> {
@@ -169,6 +202,7 @@ export async function runUpdate(opts: CommandOptions): Promise<void> {
   const result = await applyAgentsMd({ cwd: opts.cwd, autoAccept: true, selectedToolIds: [], languages: opts.languages })
   reportResults(result)
   log.success(t('agentsBlockUpdated'))
+  await offerAntislopInstall(opts)
   outro(t('done'))
 }
 
@@ -191,6 +225,20 @@ function logPackageTools(cwd: string): void {
   }
 }
 
+function logAntislop(cwd: string): void {
+  const { optedOut, plugins, missing } = antislopStatus(cwd)
+  if (optedOut) {
+    log.info(`  ${t('doctorAntislopOff')}`)
+    return
+  }
+  for (const { name, installed } of plugins) {
+    log.info(`  ${installed ? `${name} (antislop): ${t('doctorOk')}` : t('doctorAntislopMissing')(name)}`)
+  }
+  if (missing.length > 0) {
+    log.info(`  ${t('doctorAntislopInstall')(formatInstallCommand(detectPackageManager(cwd), missing, cwd))}`)
+  }
+}
+
 function logLanguages(opts: CommandOptions): void {
   if (opts.languages != null) {
     log.info(`  ${t('doctorSelectedLanguages')(opts.languages.join(', '))}`)
@@ -206,6 +254,7 @@ export function runDoctor(opts: CommandOptions): void {
   const packageBased = hasPackageJson(opts.cwd)
   if (packageBased) {
     logPackageTools(opts.cwd)
+    logAntislop(opts.cwd)
   }
 
   logLanguages(opts)

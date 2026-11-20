@@ -403,6 +403,30 @@ rewrite it, overwrite the files and remove the guide of a language that is no
 longer selected (other files in the directory are never touched). `doctor`
 checks that every guide the block links exists.
 
+## antislop plugins
+
+`@pleaseai/eslint-config` turns antislop on when `eslint-plugin-slop` and
+`eslint-plugin-sonarjs` are installed. `init` installs them; for an existing
+project:
+
+- `doctor` reports each plugin (`OK` or `missing, antislop rules are off`) and
+  the install command for your package manager. It prints nothing about them
+  without `@pleaseai/eslint-config` or a `package.json`.
+- `update` offers to install the missing plugins after it refreshes the AGENTS.md
+  block. Interactive runs ask first (default: yes), `--yes` installs without asking,
+  and without a TTY it only prints the command. At a pnpm workspace root it installs
+  with `pnpm add -D -w`. An install failure exits non-zero.
+- After installing, `update` prints the follow-up for existing code, with ESLint run
+  through the project's package manager (`bunx`, `pnpm exec`, `yarn`, or `npx`):
+  `eslint . --fix`, then `eslint . --suppress-all` to move the remaining violations
+  into `eslint-suppressions.json` (ESLint bulk suppressions), and
+  `eslint . --prune-suppressions` as you fix them.
+- For a project that sets `antislop: false` in its `eslint.config.*`, `doctor`
+  prints `antislop: off` instead of the plugin lines and `update` does not offer
+  the install. `antislop: { slop: false }` or `{ sonarjs: false }` drops only that
+  plugin from both commands. This is a plain text search, so a computed value is not
+  detected.
+
 ## Options
 
 | Flag | Description |

@@ -36,8 +36,30 @@ interface Messages {
   doctorLanguages: (languages: string) => string
   doctorNoLanguages: string
   doctorSelectedLanguages: (languages: string) => string
+  doctorAntislopMissing: (pkg: string) => string
+  doctorAntislopInstall: (cmd: string) => string
+  doctorAntislopOff: string
+  antislopConfirm: (pkgs: string, cmd: string) => string
+  antislopNotInstalled: (cmd: string) => string
+  antislopNextSteps: (exec: string) => string
   usage: string
   checkUsage: string
+}
+
+interface NextStepNotes {
+  fix: string
+  suppressAll: string
+  prune: string
+}
+
+function nextSteps(exec: string, heading: string, notes: NextStepNotes): string {
+  const steps = [
+    [`${exec} eslint . --fix`, notes.fix],
+    [`${exec} eslint . --suppress-all`, notes.suppressAll],
+    [`${exec} eslint . --prune-suppressions`, notes.prune],
+  ] as const
+  const width = Math.max(...steps.map(([command]) => command.length)) + 3
+  return [heading, ...steps.map(([command, note]) => `  ${command.padEnd(width)}${note}`)].join('\n')
 }
 
 const messages: Record<Locale, Messages> = {
@@ -74,6 +96,16 @@ const messages: Record<Locale, Messages> = {
     doctorLanguages: languages => `Detected languages: ${languages}`,
     doctorNoLanguages: 'Detected languages: none',
     doctorSelectedLanguages: languages => `Selected languages (--lang): ${languages}`,
+    doctorAntislopMissing: pkg => `${pkg} (antislop): missing, antislop rules are off`,
+    doctorAntislopInstall: cmd => `Install the missing antislop plugins: ${cmd}`,
+    doctorAntislopOff: 'antislop: off (antislop: false in eslint.config)',
+    antislopConfirm: (pkgs, cmd) => `Install ${pkgs} to turn antislop on? (${cmd})`,
+    antislopNotInstalled: cmd => `antislop plugins are not installed. Install them with: ${cmd}`,
+    antislopNextSteps: exec => nextSteps(exec, 'antislop is on. The new rules can fail on existing code, so run:', {
+      fix: 'fix what can be fixed automatically',
+      suppressAll: 'move the remaining violations into eslint-suppressions.json',
+      prune: 'drop suppressions as you fix the violations',
+    }),
     usage: `Usage:
   pleaseai-code-style <command> [options]
 
@@ -139,6 +171,16 @@ Exit codes: 0 ok or warnings only, 1 findings with --strict, 2 usage or config e
     doctorLanguages: languages => `감지된 언어: ${languages}`,
     doctorNoLanguages: '감지된 언어: 없음',
     doctorSelectedLanguages: languages => `선택한 언어(--lang): ${languages}`,
+    doctorAntislopMissing: pkg => `${pkg} (antislop): 없음, antislop 규칙이 꺼져 있습니다`,
+    doctorAntislopInstall: cmd => `빠진 antislop 플러그인을 설치하세요: ${cmd}`,
+    doctorAntislopOff: 'antislop: 꺼짐 (eslint.config의 antislop: false)',
+    antislopConfirm: (pkgs, cmd) => `antislop을 켜려면 ${pkgs}을(를) 설치해야 합니다. 설치할까요? (${cmd})`,
+    antislopNotInstalled: cmd => `antislop 플러그인을 설치하지 않았습니다. 다음 명령으로 설치하세요: ${cmd}`,
+    antislopNextSteps: exec => nextSteps(exec, 'antislop을 켰습니다. 새 규칙 때문에 기존 코드에서 lint가 실패할 수 있으니 다음 순서로 실행하세요:', {
+      fix: '자동으로 고칠 수 있는 위반 수정',
+      suppressAll: '남은 위반을 eslint-suppressions.json으로 이동',
+      prune: '위반을 고칠 때마다 억제 항목 정리',
+    }),
     usage: `사용법:
   pleaseai-code-style <command> [options]
 
