@@ -36,7 +36,7 @@ const AST_GREP = astGrepBinary()
 let cleanup = (): void => {}
 afterEach(() => cleanup())
 
-function createFixture(files: Record<string, string>): { root: string, cleanup: () => void } {
+function createFixture(files: Record<string, string>) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'ast-grep-config-test-')))
   for (const [path, contents] of Object.entries(files)) {
     mkdirSync(dirname(join(root, path)), { recursive: true })

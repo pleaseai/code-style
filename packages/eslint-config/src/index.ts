@@ -55,7 +55,7 @@ export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem
 const { '@typescript-eslint': _ts, 'import-lite': _importLite, ...keptPluginRenaming } = defaultPluginRenaming
 
 /** antfu's renaming, with typescript-eslint back under its own name. */
-const canonicalPluginRenaming: Record<string, string> = {
+const canonicalPluginRenaming = {
   ...keptPluginRenaming,
   ts: '@typescript-eslint',
 }
@@ -125,7 +125,7 @@ export function pleaseai(
       },
       // antfu's renaming maps `@typescript-eslint` to `ts`, which would undo
       // the rename below for configs that register the canonical name.
-      ...(canonicalPluginNames ? { autoRenamePlugins: false } : {}),
+      autoRenamePlugins: !canonicalPluginNames && autoRenamePlugins,
     },
     ...userConfigs,
   ).onResolved(scopeAntislopToParsedFiles)

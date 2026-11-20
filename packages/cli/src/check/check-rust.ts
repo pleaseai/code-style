@@ -101,11 +101,16 @@ function rustPackage(rootDir: string, manifestRel: string, pkg: CargoMetadata['p
   return { dir: pkgDir === '.' ? '' : pkgDir, roots, testRoots }
 }
 
+interface LoadedPackages {
+  packages: RustPackage[]
+  notices: string[]
+}
+
 function loadPackages(
   rootDir: string,
   files: string[],
   provider: CargoMetadataProvider,
-): { packages: RustPackage[], notices: string[] } {
+): LoadedPackages {
   const manifests = files.filter(f => posix.basename(f) === 'Cargo.toml').sort((a, b) => a.split('/').length - b.split('/').length)
   const seen = new Map<string, RustPackage>()
   const notices: string[] = []
@@ -265,23 +270,25 @@ function indexMatches(matches: ExtractMatch[]): RustMatchIndex {
 
 type WithheldDirs = Array<{ file: string, dir: string }>
 
+interface WithheldDirsResult {
+  unknownDirs: WithheldDirs
+  loadDirs: WithheldDirs
+}
+
 /** Subtrees whose reachability is unknown: `mod x;` in nested modules (`unknownDirs`) and `include!`/macro-body `mod x;` (`loadDirs`). */
 function withheldDirs(
   pkg: RustPackage,
   roots: Set<string>,
   owned: (f: string) => boolean,
   index: RustMatchIndex,
-): { unknownDirs: WithheldDirs, loadDirs: WithheldDirs } {
+): WithheldDirsResult {
   // `mod x;` inside an inline module or fn body is not followed: withhold judgement only for the subtree it could load from.
   // A nested `#[path]` can load a file anywhere in the crate, so it withholds the whole package.
-  const unknownDirs = [...index.nestedDeclFiles]
-    .filter(owned)
-    .map(f => ({ file: f, dir: index.nestedPathFiles.has(f) ? pkg.dir : nestedModDir(f, roots.has(f), index.pathLoaded) }))
+  const unknownDirs: WithheldDirs = [...index.nestedDeclFiles]
+    .flatMap(f => (owned(f) ? [{ file: f, dir: index.nestedPathFiles.has(f) ? pkg.dir : nestedModDir(f, roots.has(f), index.pathLoaded) }] : []))
   // `include!` and `mod x;` in macro bodies load files without a `mod` item: withhold the subtree (or the crate) they can reach.
-  const loadDirs = [
-    ...[...index.macroModFiles].filter(owned).map(f => ({ file: f, dir: pkg.dir })),
-    ...[...index.includeFiles].filter(owned).map(f => ({ file: f, dir: pkg.dir })),
-  ]
+  const loadDirs: WithheldDirs = [...index.macroModFiles, ...index.includeFiles]
+    .flatMap(f => (owned(f) ? [{ file: f, dir: pkg.dir }] : []))
   return { unknownDirs, loadDirs }
 }
 
@@ -296,12 +303,17 @@ function pushWithheldNotices(notices: string[], pkg: RustPackage, unknownDirs: W
   }
 }
 
+interface ReachMapsResult {
+  fromTarget: Map<string, Set<string>>
+  reachedByAny: Set<string>
+}
+
 /** Which files each target reaches through `mod` declarations: per test target, and across all targets. */
 function reachMaps(
   pkg: RustPackage,
   decls: Map<string, ModDecl[]>,
   fileSet: Set<string>,
-): { fromTarget: Map<string, Set<string>>, reachedByAny: Set<string> } {
+): ReachMapsResult {
   const fromTarget = new Map<string, Set<string>>()
   const reachedByAny = new Set<string>()
   for (const root of pkg.roots) {
@@ -459,10 +471,13 @@ export function checkRust(
   }
   const fileSet = new Set(files)
   const index = indexMatches(matches)
-  const manifestDirs = files
-    .filter(f => posix.basename(f) === 'Cargo.toml')
-    .map(f => posix.dirname(f))
-    .map(d => (d === '.' ? '' : d))
+  const manifestDirs = files.flatMap((f) => {
+    if (posix.basename(f) !== 'Cargo.toml') {
+      return []
+    }
+    const dir = posix.dirname(f)
+    return [dir === '.' ? '' : dir]
+  })
   const state: ScanState = { findings: [], runtimeLoadable: new Set(), fixtureUnitTests: new Set() }
   for (const pkg of loaded.packages) {
     const ctx = buildPackageContext(rootDir, pkg, manifestDirs, fileSet, index, loaded.notices)

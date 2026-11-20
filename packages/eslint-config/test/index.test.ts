@@ -1,3 +1,4 @@
+import type { Linter } from 'eslint'
 import type { TypedFlatConfigItem } from '../src/index'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -21,7 +22,7 @@ function resolveWithoutEslintPluginImport(...args: string[]) {
   return Bun.spawnSync([process.execPath, fixture, ...args], { stdout: 'ignore', stderr: 'pipe' })
 }
 
-function ruleEntry(configs: TypedFlatConfigItem[], id: string): unknown {
+function ruleEntry(configs: TypedFlatConfigItem[], id: string): Linter.RuleEntry | undefined {
   return configs.filter(config => config.rules?.[id] !== undefined).at(-1)?.rules?.[id]
 }
 

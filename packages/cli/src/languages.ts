@@ -25,9 +25,7 @@ function inOrder(languages: Iterable<Language>): Language[] {
 }
 
 export function detectLanguages(cwd: string): Language[] {
-  return inOrder(MARKERS
-    .filter(({ files }) => files.some(f => existsSync(resolve(cwd, f))))
-    .map(({ language }) => language))
+  return inOrder(MARKERS.flatMap(({ files, language }) => (files.some(f => existsSync(resolve(cwd, f))) ? [language] : [])))
 }
 
 export type LangFlag

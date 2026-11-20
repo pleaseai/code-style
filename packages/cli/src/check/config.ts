@@ -1,3 +1,4 @@
+import type { JsonValue } from '../fs-utils.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ConfigError } from './errors.js'
@@ -65,7 +66,7 @@ export function readConfigFile(file: string): CodeOrganizationConfig {
   if (!existsSync(file)) {
     return { sourceRoots: [], envSegments: [] }
   }
-  let raw: unknown
+  let raw: JsonValue
   try {
     raw = JSON.parse(readFileSync(file, 'utf-8'))
   }
@@ -75,7 +76,7 @@ export function readConfigFile(file: string): CodeOrganizationConfig {
   if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new ConfigError(`${file}: expected a JSON object`)
   }
-  const record = raw as Record<string, unknown>
+  const record = raw
   for (const key of Object.keys(record)) {
     if (!ALLOWED_KEYS.has(key)) {
       throw new ConfigError(`${file}: unknown key "${key}" (allowed: sourceRoots, envSegments)`)

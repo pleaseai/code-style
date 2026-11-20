@@ -279,7 +279,7 @@ describe('test-helpers-in-dedicated-location (Dart, Kotlin, Java)', () => {
     expect(findings).toEqual([])
   })
 
-  const jvmHelperFixture = (a: string, b: string): Record<string, string> => ({
+  const jvmHelperFixture = (a: string, b: string) => ({
     'src/main/kotlin/com/acme/Invoice.kt': 'package com.acme',
     'src/test/kotlin/support/Support.kt': 'package support\nfun mockUser() = 1',
     'src/test/kotlin/com/acme/ATest.kt': a,

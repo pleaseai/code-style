@@ -1,6 +1,6 @@
 import type { CodeOrganizationConfig } from './config.js'
 import type { TestLayout, Unit } from './layouts.js'
-import type { Finding } from './types.js'
+import type { Finding, InspectionResult } from './types.js'
 import { DEFAULT_ENV_SEGMENTS, E2E_SEGMENTS } from './config.js'
 import { isUnder, joinPath, relativeTo, unitOf } from './layouts.js'
 
@@ -134,7 +134,7 @@ export function inspectTestPaths(
   layouts: readonly TestLayout[],
   base: CodeOrganizationConfig,
   rootDir: string,
-): { findings: Finding[], notices: string[] } {
+): InspectionResult {
   const fileSet = new Set(files)
   const findings: Finding[] = []
   const notices: string[] = []
