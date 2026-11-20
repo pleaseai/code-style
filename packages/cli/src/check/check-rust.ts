@@ -101,11 +101,16 @@ function rustPackage(rootDir: string, manifestRel: string, pkg: CargoMetadata['p
   return { dir: pkgDir === '.' ? '' : pkgDir, roots, testRoots }
 }
 
+interface LoadedPackages {
+  packages: RustPackage[]
+  notices: string[]
+}
+
 function loadPackages(
   rootDir: string,
   files: string[],
   provider: CargoMetadataProvider,
-) {
+): LoadedPackages {
   const manifests = files.filter(f => posix.basename(f) === 'Cargo.toml').sort((a, b) => a.split('/').length - b.split('/').length)
   const seen = new Map<string, RustPackage>()
   const notices: string[] = []
@@ -265,13 +270,18 @@ function indexMatches(matches: ExtractMatch[]): RustMatchIndex {
 
 type WithheldDirs = Array<{ file: string, dir: string }>
 
+interface WithheldDirsResult {
+  unknownDirs: WithheldDirs
+  loadDirs: WithheldDirs
+}
+
 /** Subtrees whose reachability is unknown: `mod x;` in nested modules (`unknownDirs`) and `include!`/macro-body `mod x;` (`loadDirs`). */
 function withheldDirs(
   pkg: RustPackage,
   roots: Set<string>,
   owned: (f: string) => boolean,
   index: RustMatchIndex,
-) {
+): WithheldDirsResult {
   // `mod x;` inside an inline module or fn body is not followed: withhold judgement only for the subtree it could load from.
   // A nested `#[path]` can load a file anywhere in the crate, so it withholds the whole package.
   const unknownDirs: WithheldDirs = [...index.nestedDeclFiles]
@@ -293,12 +303,17 @@ function pushWithheldNotices(notices: string[], pkg: RustPackage, unknownDirs: W
   }
 }
 
+interface ReachMapsResult {
+  fromTarget: Map<string, Set<string>>
+  reachedByAny: Set<string>
+}
+
 /** Which files each target reaches through `mod` declarations: per test target, and across all targets. */
 function reachMaps(
   pkg: RustPackage,
   decls: Map<string, ModDecl[]>,
   fileSet: Set<string>,
-) {
+): ReachMapsResult {
   const fromTarget = new Map<string, Set<string>>()
   const reachedByAny = new Set<string>()
   for (const root of pkg.roots) {
