@@ -19,6 +19,9 @@ const UNRUNNABLE_BUN_ERRORS = new Set(['ENOENT', 'EACCES'])
  */
 const BUN_FMT_ARGS = ['fmt', '--no-script', '--embedded-language-formatting=off']
 
+/** How long one Bun call may run before it is killed, so a stalled Bun cannot hang ESLint. */
+const BUN_TIMEOUT_MS = 30_000
+
 /**
  * A plain-parsed file reaches antfu's files-less JavaScript configs, but its
  * AST is empty, so only these rules, which read the raw text, ever report.
@@ -85,11 +88,22 @@ function throwIfBunUnrunnable(bin: string, error: Error): void {
   }
 }
 
+/**
+ * Throws when a `spawn` error means `bin` ran past `timeout`. A stalled Bun
+ * would stall every later file the same way, so the run stops here.
+ */
+function throwIfBunTimedOut(bin: string, args: string, error: Error, timeout: number): void {
+  if ('code' in error && error.code === 'ETIMEDOUT') {
+    throw new Error(`\`formatters.markdown: 'bun'\` stopped \`${bin} ${args}\` after ${timeout} ms without a result.`)
+  }
+}
+
 /** Runs `bin --version`; throws with the real cause when that cannot be done. */
-function readBunVersion(bin: string): string {
-  const result = spawnSync(bin, ['--version'], { encoding: 'utf8' })
+function readBunVersion(bin: string, timeout: number): string {
+  const result = spawnSync(bin, ['--version'], { encoding: 'utf8', timeout })
   if (result.error) {
     throwIfBunUnrunnable(bin, result.error)
+    throwIfBunTimedOut(bin, '--version', result.error, timeout)
     throw new Error(`\`formatters.markdown: 'bun'\` could not determine the version of \`${bin}\`: ${result.error.message}`)
   }
   if (result.status !== 0) {
@@ -103,11 +117,11 @@ function readBunVersion(bin: string): string {
  * Bun before 1.4.4 ignores `--no-script` and runs the project's `fmt` script,
  * whose output would be applied as the fix, so the version is checked first.
  */
-function assertBunSupportsFmt(bin: string): void {
+function assertBunSupportsFmt(bin: string, timeout: number): void {
   if (checkedBunBinaries.has(bin)) {
     return
   }
-  const version = bin === process.execPath && process.versions.bun ? process.versions.bun : readBunVersion(bin)
+  const version = bin === process.execPath && process.versions.bun ? process.versions.bun : readBunVersion(bin, timeout)
   if (!isSupportedBunVersion(version)) {
     throw new Error(OUTDATED_BUN_MESSAGE)
   }
@@ -118,13 +132,15 @@ function assertBunSupportsFmt(bin: string): void {
  * Formats `text` as `filename` with `bun fmt`. `bun fmt` reads `bunfig.toml`
  * from `cwd`, not from the file's directory. Throws when Bun cannot format at
  * all, so a missing or outdated Bun fails once instead of on every file.
+ * A call that runs longer than `timeout` ms is killed, and the run stops.
  */
-export function formatWithBun(bin: string, filename: string, text: string, cwd: string): BunFmtResult {
-  assertBunSupportsFmt(bin)
+export function formatWithBun(bin: string, filename: string, text: string, cwd: string, timeout = BUN_TIMEOUT_MS): BunFmtResult {
+  assertBunSupportsFmt(bin, timeout)
   // The default 1 MiB `maxBuffer` would fail a large Markdown file with ENOBUFS.
-  const result = spawnSync(bin, [...BUN_FMT_ARGS, '--stdin-filepath', filename], { cwd, encoding: 'utf8', input: text, maxBuffer: Infinity })
+  const result = spawnSync(bin, [...BUN_FMT_ARGS, '--stdin-filepath', filename], { cwd, encoding: 'utf8', input: text, maxBuffer: Infinity, timeout })
   if (result.error) {
     throwIfBunUnrunnable(bin, result.error)
+    throwIfBunTimedOut(bin, 'fmt', result.error, timeout)
     return { ok: false, message: result.error.message }
   }
   if (result.status === 0) {
@@ -171,7 +187,8 @@ export const bunFmtRule: Rule.RuleModule = {
  * `eslint-plugin-format` for any formatters object.
  */
 export function splitBunFormatter(formatters: boolean | PleaseaiFormatters | undefined): SplitFormatters {
-  if (typeof formatters !== 'object') {
+  // `typeof null` is 'object', and a JavaScript config can pass `null`.
+  if (!formatters || typeof formatters !== 'object') {
     return { antfu: formatters, bun: false }
   }
   const { markdown, ...rest } = formatters

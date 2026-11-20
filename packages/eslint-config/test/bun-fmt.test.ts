@@ -138,6 +138,14 @@ describe('splitBunFormatter', () => {
     expect(splitBunFormatter({ css: true, markdown: 'prettier' })).toEqual({ antfu: { css: true, markdown: 'prettier' }, bun: false })
   })
 
+  test('passes a null formatters option from a JavaScript config to antfu', () => {
+    // A JavaScript config is not type-checked, so the value arrives untyped.
+    const fromJavaScript: undefined = JSON.parse('null')
+
+    expect(splitBunFormatter(fromJavaScript)).toEqual({ antfu: fromJavaScript, bun: false })
+    expect(fromJavaScript).toBeNull()
+  })
+
   test('explains that slidev cannot be combined with bun', () => {
     expect(() => splitBunFormatter({ markdown: 'bun', slidev: true })).toThrow('cannot be combined with `markdown: \'bun\'`')
   })
@@ -185,6 +193,15 @@ describe('formatWithBun', () => {
     chmodSync(brokenBun, 0o755)
 
     expect(() => formatWithBun(brokenBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('dyld: missing library')
+  })
+
+  test('stops the run when bun fmt runs past the timeout', () => {
+    const stalledBun = join(scratch, 'stalled-bun')
+    writeFileSync(stalledBun, '#!/bin/sh\n[ "$1" = --version ] && { echo 1.4.4; exit 0; }\nexec sleep 5\n')
+    chmodSync(stalledBun, 0o755)
+
+    expect(() => formatWithBun(stalledBun, 'a.md', UNALIGNED_TABLE, scratch, 200))
+      .toThrow(`stopped \`${stalledBun} fmt\` after 200 ms`)
   })
 
   test('formats output larger than the default spawnSync buffer', () => {
