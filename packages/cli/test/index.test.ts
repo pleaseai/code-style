@@ -1,3 +1,4 @@
+import type { PackageJson } from '../src/fs-utils.js'
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -116,7 +117,7 @@ describe('doctor', () => {
 
 const ESLINT_CONFIG_DEPS = { '@pleaseai/eslint-config': '*', 'eslint': '*' }
 
-function withProject(pkg: object | null, files: Record<string, string>, body: (dir: string) => void): void {
+function withProject(pkg: PackageJson | null, files: Record<string, string>, body: (dir: string) => void): void {
   const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-antislop-'))
   try {
     if (pkg != null) {
@@ -184,7 +185,7 @@ describe('doctor antislop plugins', () => {
 })
 
 describe('update antislop plugins', () => {
-  function withFakePnpm(body: (dir: string, env: Record<string, string>, argsFile: string) => void, opts: { pkg?: object | null, files?: Record<string, string> } = {}): void {
+  function withFakePnpm(body: (dir: string, env: Record<string, string>, argsFile: string) => void, opts: { pkg?: PackageJson | null, files?: Record<string, string> } = {}): void {
     const bin = mkdtempSync(join(tmpdir(), 'pleaseai-cli-bin-'))
     const argsFile = join(bin, 'args.txt')
     writeFileSync(join(bin, 'pnpm'), `#!/bin/sh\necho "$@" > "${argsFile}"\n`, { mode: 0o755 })
