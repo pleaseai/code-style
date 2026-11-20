@@ -130,6 +130,13 @@ function unquote(text: string): string {
   return text.replace(/^['"`]|['"`]$/g, '')
 }
 
+const JS_TO_SOURCE = new Map([
+  ['.js', ['.ts', '.tsx']],
+  ['.jsx', ['.tsx']],
+  ['.mjs', ['.mts']],
+  ['.cjs', ['.cts']],
+])
+
 function resolveRelative(importer: string, spec: string, fileSet: Set<string>, exts: string[]): string | undefined {
   if (!spec.startsWith('.')) {
     return undefined
@@ -139,13 +146,7 @@ function resolveRelative(importer: string, spec: string, fileSet: Set<string>, e
   // runtime suffix maps to its own source flavor (`.mjs` → `.mts`, `.cjs` → `.cts`).
   const jsMatch = /\.(?:[cm]?js|jsx)$/.exec(base)
   const stripped = jsMatch == null ? base : base.slice(0, jsMatch.index)
-  const jsToSource = new Map([
-    ['.js', ['.ts', '.tsx']],
-    ['.jsx', ['.tsx']],
-    ['.mjs', ['.mts']],
-    ['.cjs', ['.cts']],
-  ])
-  const mapped = jsMatch == null ? [] : (jsToSource.get(jsMatch[0]) ?? []).map(e => `${stripped}${e}`)
+  const mapped = jsMatch == null ? [] : (JS_TO_SOURCE.get(jsMatch[0]) ?? []).map(e => `${stripped}${e}`)
   const options = [base, ...mapped, ...exts.map(e => `${base}${e}`), ...exts.map(e => `${base}/index${e}`)]
   return options.find(o => fileSet.has(o))
 }

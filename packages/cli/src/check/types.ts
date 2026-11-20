@@ -29,6 +29,12 @@ export interface Finding {
   message: string
 }
 
+/** What one inspection pass reports. */
+export interface InspectionResult {
+  findings: Finding[]
+  notices: string[]
+}
+
 export interface CheckResult {
   /** Checked root (absolute). */
   root: string

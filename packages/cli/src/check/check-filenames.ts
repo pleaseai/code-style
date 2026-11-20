@@ -1,6 +1,6 @@
 import type { ExtractMatch } from './ast-grep.js'
 import type { Unit } from './layouts.js'
-import type { Finding, Language } from './types.js'
+import type { Finding, InspectionResult, Language } from './types.js'
 import { Buffer } from 'node:buffer'
 import { closeSync, openSync, readSync } from 'node:fs'
 import { join } from 'node:path'
@@ -168,7 +168,7 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
  * would have judged but skipped because their exports cannot be enumerated.
  * Files exempt by convention (`index.ts`, test files, …) never count.
  */
-export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage) {
+export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage): InspectionResult {
   const imported = new Set(matches.flatMap(m => (m.ruleId === 'import-binding' ? [`${m.file}\0${m.text}`] : [])))
   const opaque = opaqueFiles(matches, lang, imported)
   const byFile = publicNamesByFile(matches, lang, imported, opaque)
