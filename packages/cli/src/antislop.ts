@@ -14,9 +14,13 @@ export interface AntislopStatus {
   missing: string[]
 }
 
+const PLUGIN_OPT_OUT = new Map<string, RegExp>([
+  ['eslint-plugin-slop', /\bslop\s*:\s*false\b/],
+  ['eslint-plugin-sonarjs', /\bsonarjs\s*:\s*false\b/],
+])
+
 function isPluginOptedOut(config: string, name: string): boolean {
-  const option = name.replace(/^eslint-plugin-/, '')
-  return new RegExp(`\\b${option}\\s*:\\s*false\\b`).test(config)
+  return PLUGIN_OPT_OUT.get(name)?.test(config) ?? false
 }
 
 function readPackageJsonOrNull(cwd: string): PackageJson | null {
