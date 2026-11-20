@@ -69,11 +69,12 @@ const checkedBunBinaries = new Set<string>()
 
 /**
  * Accepts the `bun --revision` output of a stable release, `1.4.4+<sha>` (or
- * a bare `1.4.4`). Canary and debug builds print a pre-release tag there
+ * a bare `1.4.4`, or any SemVer build metadata after the `+`). Canary and
+ * debug builds print a pre-release tag before the `+`
  * (`1.4.4-canary.12+<sha>`) and are rejected whatever their version.
  */
 function isSupportedBunVersion(revision: string): boolean {
-  const parts = /^(\d+)\.(\d+)\.(\d+)(?:\+[\da-f]+)?$/.exec(revision.trim())?.slice(1).map(Number)
+  const parts = /^(\d+)\.(\d+)\.(\d+)(?:\+[\da-z.-]+)?$/i.exec(revision.trim())?.slice(1).map(Number)
   if (!parts) {
     return false
   }

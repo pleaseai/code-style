@@ -209,6 +209,7 @@ describe('formatWithBun', () => {
   test.each([
     ['the minimum release', '1.4.4+38afee6c8'],
     ['a release built without a revision', '1.4.4'],
+    ['a release with custom build metadata', '1.4.4+38afee6c8-dirty'],
     ['a later minor release', '1.10.0+38afee6c8'],
     ['a later major release', '2.0.0+38afee6c8'],
   ])('accepts %s (%s)', (_, revision) => {
