@@ -8,8 +8,8 @@ import { describe, expect, test } from 'bun:test'
 
 const CLI = fileURLToPath(new URL('../src/index.ts', import.meta.url))
 
-function run(args: string[], cwd?: string): { status: number | null, stdout: string, stderr: string } {
-  const env = { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8', LC_MESSAGES: 'en_US.UTF-8' }
+function run(args: string[], cwd?: string, extraEnv: Record<string, string> = {}): { status: number | null, stdout: string, stderr: string } {
+  const env = { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8', LC_MESSAGES: 'en_US.UTF-8', ...extraEnv }
   const res = spawnSync('bun', [CLI, ...args], { encoding: 'utf-8', env, cwd, stdio: ['ignore', 'pipe', 'pipe'] })
   return { status: res.status, stdout: res.stdout, stderr: res.stderr }
 }
@@ -111,6 +111,117 @@ describe('doctor', () => {
     finally {
       rmSync(dir, { recursive: true, force: true })
     }
+  })
+})
+
+const ESLINT_CONFIG_DEPS = { '@pleaseai/eslint-config': '*', 'eslint': '*' }
+
+function withProject(pkg: object | null, files: Record<string, string>, body: (dir: string) => void): void {
+  const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-antislop-'))
+  try {
+    if (pkg != null) {
+      writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg))
+    }
+    for (const [name, content] of Object.entries(files)) {
+      writeFileSync(join(dir, name), content)
+    }
+    body(dir)
+  }
+  finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
+describe('doctor antislop plugins', () => {
+  test('reports missing plugins and the install command for the detected package manager', () => {
+    withProject({ devDependencies: ESLINT_CONFIG_DEPS }, { 'pnpm-lock.yaml': '' }, (dir) => {
+      const res = run(['doctor'], dir)
+      expect(res.status).toBe(0)
+      expect(res.stdout).toContain('eslint-plugin-slop (antislop): missing, antislop rules are off')
+      expect(res.stdout).toContain('eslint-plugin-sonarjs (antislop): missing, antislop rules are off')
+      expect(res.stdout).toContain('pnpm add -D eslint-plugin-slop eslint-plugin-sonarjs')
+    })
+  })
+
+  test('reports installed plugins as OK without an install command', () => {
+    const devDependencies = { ...ESLINT_CONFIG_DEPS, 'eslint-plugin-slop': '*', 'eslint-plugin-sonarjs': '*' }
+    withProject({ devDependencies }, {}, (dir) => {
+      const res = run(['doctor'], dir)
+      expect(res.stdout).toContain('eslint-plugin-slop (antislop): OK')
+      expect(res.stdout).toContain('eslint-plugin-sonarjs (antislop): OK')
+      expect(res.stdout).not.toContain('Install the missing')
+    })
+  })
+
+  test('prints nothing about the plugins without @pleaseai/eslint-config', () => {
+    withProject({ devDependencies: { eslint: '*' } }, {}, (dir) => {
+      expect(run(['doctor'], dir).stdout).not.toContain('antislop')
+    })
+  })
+
+  test('prints only that antislop is off when the eslint config sets antislop: false', () => {
+    withProject({ devDependencies: ESLINT_CONFIG_DEPS }, { 'eslint.config.ts': 'export default pleaseai({ antislop: false })\n' }, (dir) => {
+      const res = run(['doctor'], dir)
+      expect(res.stdout).toContain('antislop: off')
+      expect(res.stdout).not.toContain('missing, antislop rules are off')
+      expect(res.stdout).not.toContain('Install the missing')
+    })
+  })
+
+  test('prints nothing about the plugins without a package.json', () => {
+    withProject(null, {}, (dir) => {
+      expect(run(['doctor'], dir).stdout).not.toContain('antislop')
+    })
+  })
+})
+
+describe('update antislop plugins', () => {
+  function withFakePnpm(body: (dir: string, env: Record<string, string>, argsFile: string) => void, opts: { pkg?: object, files?: Record<string, string> } = {}): void {
+    const bin = mkdtempSync(join(tmpdir(), 'pleaseai-cli-bin-'))
+    const argsFile = join(bin, 'args.txt')
+    writeFileSync(join(bin, 'pnpm'), `#!/bin/sh\necho "$@" > "${argsFile}"\n`, { mode: 0o755 })
+    try {
+      const pkg = opts.pkg ?? { devDependencies: { ...ESLINT_CONFIG_DEPS, 'eslint-plugin-sonarjs': '*' } }
+      withProject(pkg, { 'pnpm-lock.yaml': '', ...opts.files }, (dir) => {
+        body(dir, { PATH: `${bin}:${process.env.PATH}` }, argsFile)
+      })
+    }
+    finally {
+      rmSync(bin, { recursive: true, force: true })
+    }
+  }
+
+  test('--yes installs exactly the missing plugins and prints the suppression next steps', () => {
+    withFakePnpm((dir, env, argsFile) => {
+      const res = run(['update', '--yes'], dir, env)
+      expect(res.status).toBe(0)
+      expect(readFileSync(argsFile, 'utf-8').trim()).toBe('add -D eslint-plugin-slop')
+      expect(res.stdout).toContain('eslint . --suppress-all')
+      expect(res.stdout).toContain('eslint . --prune-suppressions')
+    })
+  })
+
+  test('without a TTY and without --yes it prints the command and installs nothing', () => {
+    withFakePnpm((dir, env, argsFile) => {
+      const res = run(['update'], dir, env)
+      expect(res.status).toBe(0)
+      expect(existsSync(argsFile)).toBe(false)
+      expect(res.stdout).toContain('pnpm add -D eslint-plugin-slop')
+    })
+  })
+
+  test('installs nothing when the eslint config sets antislop: false', () => {
+    withFakePnpm((dir, env, argsFile) => {
+      expect(run(['update', '--yes'], dir, env).status).toBe(0)
+      expect(existsSync(argsFile)).toBe(false)
+    }, { files: { 'eslint.config.mjs': 'export default pleaseai({ antislop: false })\n' } })
+  })
+
+  test('exits non-zero when the install fails', () => {
+    withFakePnpm((dir, env) => {
+      writeFileSync(join(env.PATH.split(':')[0]!, 'pnpm'), '#!/bin/sh\nexit 1\n', { mode: 0o755 })
+      expect(run(['update', '--yes'], dir, env).status).toBe(1)
+    })
   })
 })
 
