@@ -6,6 +6,11 @@ import { GLOB_MARKDOWN, GLOB_MARKDOWN_IN_MARKDOWN, parserPlain } from '@antfu/es
 import { messages, reportDifferences } from 'eslint-formatting-reporter'
 
 const GLOB_MDX = '**/*.mdx'
+/** MDX code blocks that antfu's Markdown processor extracts from `.md` files. */
+const GLOB_MDX_IN_MARKDOWN = `${GLOB_MARKDOWN}/*.mdx`
+
+/** `spawn` errors that mean the Bun binary itself cannot be started. */
+const UNRUNNABLE_BUN_ERRORS = new Set(['ENOENT', 'EACCES'])
 
 /**
  * Code blocks and MDX JSX stay with the ESLint rules that already lint them,
@@ -44,9 +49,14 @@ function bunBinary(): string {
  * all, so a missing or outdated Bun fails once instead of on every file.
  */
 export function formatWithBun(bin: string, filename: string, text: string, cwd: string): BunFmtResult {
-  const result = spawnSync(bin, [...BUN_FMT_ARGS, '--stdin-filepath', filename], { cwd, encoding: 'utf8', input: text })
+  // The default 1 MiB `maxBuffer` would fail a large Markdown file with ENOBUFS.
+  const result = spawnSync(bin, [...BUN_FMT_ARGS, '--stdin-filepath', filename], { cwd, encoding: 'utf8', input: text, maxBuffer: Infinity })
   if (result.error) {
-    throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
+    const code = 'code' in result.error ? result.error.code : undefined
+    if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
+      throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
+    }
+    return { ok: false, message: result.error.message }
   }
   if (result.status === 0) {
     return { ok: true, code: result.stdout }
@@ -54,7 +64,8 @@ export function formatWithBun(bin: string, filename: string, text: string, cwd: 
   if (result.stderr.includes('Script not found "fmt"')) {
     throw new Error(`\`formatters.markdown: 'bun'\` needs Bun 1.4.4 or later, which ships \`bun fmt\`. Upgrade Bun or pick another formatter.`)
   }
-  return { ok: false, message: result.stderr.trim() || `bun fmt exited with ${result.status}` }
+  const fallback = result.signal ? `bun fmt was killed by ${result.signal}` : `bun fmt exited with ${result.status}`
+  return { ok: false, message: result.stderr.trim() || fallback }
 }
 
 export const bunFmtRule: Rule.RuleModule = {
@@ -99,14 +110,17 @@ export function splitBunFormatter(formatters: boolean | PleaseaiFormatters | und
     return { antfu: { ...rest, markdown }, bun: false }
   }
   const { astro, css, graphql, html, slidev, svg, xml } = rest
-  const othersOn = [astro, css, graphql, html, slidev, svg, xml].some(Boolean)
+  if (slidev) {
+    throw new Error('`formatters.slidev` formats Slidev decks with Prettier, so it needs `markdown: \'prettier\'` and cannot be combined with `markdown: \'bun\'`.')
+  }
+  const othersOn = [astro, css, graphql, html, svg, xml].some(Boolean)
   return { antfu: othersOn ? rest : false, bun: true }
 }
 
 /**
  * Lints `.md` (antfu's Markdown language, or plain text when that is off) and
- * `.mdx` (plain text) with `pleaseai/bun-fmt`. Markdown code blocks inside
- * Markdown are skipped: they are part of the file that contains them.
+ * `.mdx` (plain text) with `pleaseai/bun-fmt`. Markdown and MDX code blocks
+ * inside Markdown are skipped: they are part of the file that contains them.
  */
 export function bunFmt(markdownLanguage: boolean): TypedFlatConfigItem[] {
   const markdown: TypedFlatConfigItem = {
@@ -127,6 +141,7 @@ export function bunFmt(markdownLanguage: boolean): TypedFlatConfigItem[] {
     {
       name: 'pleaseai/formatter/bun/mdx',
       files: [GLOB_MDX],
+      ignores: [GLOB_MDX_IN_MARKDOWN],
       languageOptions: { parser: parserPlain },
       rules: { 'pleaseai/bun-fmt': 'error' },
     },

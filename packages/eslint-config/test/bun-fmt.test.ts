@@ -50,6 +50,14 @@ describe('formatters.markdown: bun', () => {
     expect(result.output).toBeUndefined()
   })
 
+  test('leaves MDX code blocks inside Markdown to the ESLint rules', async () => {
+    const code = '# Title\n\n```mdx\n|a|b|\n|-|-|\n```\n'
+    const result = await lintWithBunFmt(code, 'docs/a.md')
+
+    expect(bunFmtMessages(result)).toEqual([])
+    expect(result.output).toBeUndefined()
+  })
+
   test('formats Markdown read as plain text when the Markdown config is off', async () => {
     const result = await lintWithBunFmt(UNALIGNED_TABLE, 'docs/a.md', { markdown: false })
 
@@ -85,6 +93,10 @@ describe('splitBunFormatter', () => {
     expect(splitBunFormatter({ css: true, markdown: 'prettier' })).toEqual({ antfu: { css: true, markdown: 'prettier' }, bun: false })
   })
 
+  test('explains that slidev cannot be combined with bun', () => {
+    expect(() => splitBunFormatter({ markdown: 'bun', slidev: true })).toThrow('cannot be combined with `markdown: \'bun\'`')
+  })
+
   test('keeps the other formatters for antfu', () => {
     expect(splitBunFormatter({ markdown: 'bun' })).toEqual({ antfu: false, bun: true })
     expect(splitBunFormatter({ markdown: 'bun', css: true, prettierOptions: { printWidth: 100 } }))
@@ -104,6 +116,20 @@ describe('formatWithBun', () => {
     chmodSync(oldBun, 0o755)
 
     expect(() => formatWithBun(oldBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('needs Bun 1.4.4 or later')
+  })
+
+  test('formats output larger than the default spawnSync buffer', () => {
+    const large = `# Title\n\n${'A paragraph of text.\n\n'.repeat(60_000).trimEnd()}\n`
+
+    expect(formatWithBun(process.execPath, join(scratch, 'large.md'), large, scratch)).toEqual({ ok: true, code: large })
+  })
+
+  test('names the signal that killed bun fmt', () => {
+    const killedBun = join(scratch, 'killed-bun')
+    writeFileSync(killedBun, '#!/bin/sh\nkill -9 $$\n')
+    chmodSync(killedBun, 0o755)
+
+    expect(formatWithBun(killedBun, 'a.md', UNALIGNED_TABLE, scratch)).toEqual({ ok: false, message: 'bun fmt was killed by SIGKILL' })
   })
 
   test('returns other bun fmt failures for the file', () => {
