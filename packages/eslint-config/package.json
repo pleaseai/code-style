@@ -48,6 +48,7 @@
   "dependencies": {
     "@antfu/eslint-config": "^9.5.1",
     "@oxlint/plugins": "1.94.0",
+    "eslint-formatting-reporter": "^0.0.0",
     "eslint-plugin-package-json": "^1.10.1"
   },
   "devDependencies": {

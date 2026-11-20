@@ -19,15 +19,15 @@ PleaseAI's shared ESLint config, built on top of [@antfu/eslint-config](https://
 
 This config wraps `@antfu/eslint-config` with the following defaults:
 
-| Option | Value |
-|--------|-------|
-| Indent | 2 spaces |
-| Quotes | Single |
-| Semicolons | No |
-| TypeScript | Enabled |
-| Gitignore | Enabled |
-| `lessOpinionated` | `true`: disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
-| `antfu/top-level-function` | Re-enabled: prefer `function` declarations at top level |
+| Option                     | Value                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| Indent                     | 2 spaces                                                                                 |
+| Quotes                     | Single                                                                                   |
+| Semicolons                 | No                                                                                       |
+| TypeScript                 | Enabled                                                                                  |
+| Gitignore                  | Enabled                                                                                  |
+| `lessOpinionated`          | `true`: disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
+| `antfu/top-level-function` | Re-enabled: prefer `function` declarations at top level                                  |
 
 Additionally, `test/prefer-lowercase-title` is disabled.
 
@@ -414,6 +414,31 @@ export default pleaseai({
 bun add -D eslint-plugin-format
 ```
 
+#### Markdown with `bun fmt`
+
+`markdown: 'bun'` formats `.md` and `.mdx` files with [`bun fmt`](https://bun.com/docs/format) through the `pleaseai/bun-fmt` rule, so `eslint --fix` and fix on save apply it. It needs Bun 1.4.4 or later on `PATH` and no extra package; `eslint-plugin-format` is only needed when another formatter is on.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  formatters: {
+    markdown: 'bun',
+  },
+})
+```
+
+- Code blocks and MDX JSX are not formatted. The existing ESLint rules keep linting code blocks in `.md` files, but code and JSX in `.mdx` files are neither formatted nor linted.
+- `bun fmt` reads the `[fmt]` section of `bunfig.toml` in ESLint's working directory, for example `printWidth`, `proseWrap` or `ignorePatterns`. A project `fmt` script does not run in its place.
+- It cannot be combined with `slidev`, which formats Slidev decks with Prettier and needs `markdown: 'prettier'`.
+- ESLint's `--cache` does not track `bunfig.toml`. Delete `.eslintcache` after changing its `[fmt]` section.
+
+```toml
+[fmt]
+proseWrap = "always"
+printWidth = 100
+```
+
 ## Package JSON Linting
 
 This package also exports `eslint-plugin-package-json` configs:
@@ -558,14 +583,14 @@ npx @eslint/config-inspector
 
 This config inherits `@antfu/eslint-config`'s plugin renaming for a consistent DX:
 
-| New Prefix | Original Prefix | Source Plugin |
-|------------|-----------------|---------------|
-| `import/*` | `import-lite/*` | [eslint-plugin-import-lite](https://github.com/9romise/eslint-plugin-import-lite) |
-| `node/*` | `n/*` | [eslint-plugin-n](https://github.com/eslint-community/eslint-plugin-n) |
-| `yaml/*` | `yml/*` | [eslint-plugin-yml](https://github.com/ota-meshi/eslint-plugin-yml) |
-| `ts/*` | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
-| `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
-| `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
+| New Prefix | Original Prefix        | Source Plugin                                                                              |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| `import/*` | `import-lite/*`        | [eslint-plugin-import-lite](https://github.com/9romise/eslint-plugin-import-lite)          |
+| `node/*`   | `n/*`                  | [eslint-plugin-n](https://github.com/eslint-community/eslint-plugin-n)                     |
+| `yaml/*`   | `yml/*`                | [eslint-plugin-yml](https://github.com/ota-meshi/eslint-plugin-yml)                        |
+| `ts/*`     | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
+| `style/*`  | `@stylistic/*`         | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic)           |
+| `test/*`   | `vitest/*`             | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest)                |
 
 With [`canonicalPluginNames`](#canonical-plugin-names), typescript-eslint keeps `@typescript-eslint/*`, and `import/*` comes from `eslint-plugin-import`.
 

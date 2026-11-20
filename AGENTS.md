@@ -6,8 +6,8 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 
 ## Tech Stack
 
-- Tool versions: mise (`mise.toml` pins node 24 + bun 1.3.14; `mise trust && mise install`)
-- Package manager: bun (>=1.3.14)
+- Tool versions: mise (`mise.toml` pins node 24 + bun 1.4.4; `mise trust && mise install`)
+- Package manager: bun (>=1.4.4)
 - Build orchestration: Turborepo
 - Module system: ESM only (`"type": "module"`)
 - Node: >=22.0.0
@@ -15,12 +15,12 @@ Monorepo providing shared code style configurations for PleaseAI projects.
 
 ## Packages
 
-| Package | Path | Build |
-|---------|------|-------|
-| `@pleaseai/code-style` | `packages/cli` | tsdown |
-| `@pleaseai/eslint-config` | `packages/eslint-config` | tsdown |
-| `@pleaseai/prettier-config` | `packages/perttier-config` | none (JSON only) |
-| `@pleaseai/editorconfig` | `packages/editorconfig` | none (static file) |
+| Package                     | Path                       | Build                      |
+| --------------------------- | -------------------------- | -------------------------- |
+| `@pleaseai/code-style`      | `packages/cli`             | tsdown                     |
+| `@pleaseai/eslint-config`   | `packages/eslint-config`   | tsdown                     |
+| `@pleaseai/prettier-config` | `packages/perttier-config` | none (JSON only)           |
+| `@pleaseai/editorconfig`    | `packages/editorconfig`    | none (static file)         |
 | `@pleaseai/ast-grep-config` | `packages/ast-grep-config` | none (ast-grep YAML rules) |
 
 ## Commands

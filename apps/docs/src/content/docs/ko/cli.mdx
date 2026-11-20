@@ -4,6 +4,7 @@ description: "PleaseAI 코드 스타일을 한 번의 명령으로 설정 — �
 sidebar:
   order: 4
 ---
+
 `@pleaseai/code-style`는 PleaseAI의 공유 코드 스타일을 어떤 프로젝트에도 적용해 주는 제로 설정 CLI입니다. ESLint / Prettier / EditorConfig 패키지를 설치하고, AI 코딩 어시스턴트가 처음부터 린트를 통과하는 코드를 작성할 수 있도록 `AGENTS.md` 규칙 블록을 관리합니다.
 
 [ultracite](https://github.com/haydenbleasel/ultracite)와 네이버페이의 [`@naverpay/code-style-cli`](https://github.com/NaverPayDev/code-style)에서 영감을 받았습니다.
@@ -79,11 +80,11 @@ please-style check --json       # 기계가 읽는 출력
 please-style check --strict     # 발견 사항이 있으면 exit 1 (위반을 없앤 뒤 CI용)
 ```
 
-| 플래그 | 설명 |
-| --- | --- |
-| `[path]` | 검사할 디렉터리 (기본값: 현재 디렉터리) |
-| `--json` | 결과를 JSON(`root`, `findings`, `notices`)으로 출력 |
-| `--strict` | 발견 사항이 하나라도 있으면 exit 1 (기본: 경고만) |
+| 플래그            | 설명                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `[path]`          | 검사할 디렉터리 (기본값: 현재 디렉터리)                                                                               |
+| `--json`          | 결과를 JSON(`root`, `findings`, `notices`)으로 출력                                                                   |
+| `--strict`        | 발견 사항이 하나라도 있으면 exit 1 (기본: 경고만)                                                                     |
 | `--config <file>` | 설정 파일 (기본값: 둘러싼 프로젝트 루트의 `code-organization.json`, 위쪽에 프로젝트 표지 파일이 없으면 `<path>`의 것) |
 
 종료 코드: `0` 발견 사항 없음 또는 경고만, `1` `--strict`에서 발견 사항 있음, `2` 사용법 오류, 설정 오류, 또는 추출이 필요한 파일이 있는데 `@ast-grep/cli`를 찾지 못함.
@@ -92,13 +93,13 @@ please-style check --strict     # 발견 사항이 있으면 exit 1 (위반을 �
 
 ## 지원 도구
 
-| 도구 | npm 패키지 | 설정 파일 |
-| --- | --- | --- |
-| eslint-config | `@pleaseai/eslint-config`, `eslint` | `eslint.config.mjs` |
-| prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
-| editorconfig | `@pleaseai/editorconfig` | `.editorconfig` |
-| agents-md | — | `AGENTS.md` (마커로 관리되는 블록) |
-| ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| 도구            | npm 패키지                                   | 설정 파일                          |
+| --------------- | -------------------------------------------- | ---------------------------------- |
+| eslint-config   | `@pleaseai/eslint-config`, `eslint`          | `eslint.config.mjs`                |
+| prettier-config | `@pleaseai/prettier-config`, `prettier`      | `package.json#prettier`            |
+| editorconfig    | `@pleaseai/editorconfig`                     | `.editorconfig`                    |
+| agents-md       | —                                            | `AGENTS.md` (마커로 관리되는 블록) |
+| ast-grep        | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml`                     |
 
 ## `AGENTS.md` 규칙 블록
 
@@ -148,13 +149,13 @@ antislop을 켭니다. `init`이 두 플러그인을 설치하며, 기존 프로
 
 ## 옵션
 
-| 플래그 | 설명 |
-| --- | --- |
-| `--yes`, `-y` | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀 |
-| `--lang <list>` | AGENTS.md 룰 블록에 넣을 언어, 쉼표로 구분 (`init`/`doctor`: 자동 감지, `update`: 블록에 이미 있는 언어, 아래 참고) |
-| `--locale <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LC_ALL` / `$LANG`) |
-| `--help`, `-h` | 도움말 출력 |
-| `--version`, `-v` | CLI 버전 출력 |
+| 플래그              | 설명                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `--yes`, `-y`       | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀                                                                      |
+| `--lang <list>`     | AGENTS.md 룰 블록에 넣을 언어, 쉼표로 구분 (`init`/`doctor`: 자동 감지, `update`: 블록에 이미 있는 언어, 아래 참고) |
+| `--locale <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LC_ALL` / `$LANG`)                                                                   |
+| `--help`, `-h`      | 도움말 출력                                                                                                         |
+| `--version`, `-v`   | CLI 버전 출력                                                                                                       |
 
 ## 언어
 

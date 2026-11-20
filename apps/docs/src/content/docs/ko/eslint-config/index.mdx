@@ -4,6 +4,7 @@ description: "PleaseAI 프로젝트를 위한 의견이 반영된 ESLint flat co
 sidebar:
   order: 1
 ---
+
 `@pleaseai/eslint-config`는 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 위에 구축된 의견이 반영된 ESLint flat config입니다. 단일 `pleaseai()` 함수만으로 JS/TS/JSX/Vue/JSON/YAML/Markdown에 대한 린팅 **과 포매팅**을 기본 제공 — Prettier가 필요하지 않습니다.
 
 ## 주요 기능
@@ -147,16 +148,16 @@ export default pleaseai({
 
 이 설정은 `@antfu/eslint-config`를 다음 PleaseAI 전용 기본값으로 감쌉니다:
 
-| 옵션 | 값 | 설명 |
-| --- | --- | --- |
-| `stylistic.indent` | `2` | 공백 2칸 들여쓰기 |
-| `stylistic.quotes` | `single` | 홑따옴표 |
-| `stylistic.semi` | `false` | 세미콜론 없음 |
-| `typescript` | `true` | 기본 활성화 |
-| `gitignore` | `true` | `.gitignore`의 모든 항목 무시 |
-| `lessOpinionated` | `true` | `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
-| `antfu/top-level-function` | 재활성화 | 최상위 레벨에서는 `function` 선언 선호 |
-| `test/prefer-lowercase-title` | 비활성화 | 테스트 제목은 어떤 대소문자로도 시작 가능 |
+| 옵션                          | 값       | 설명                                                                                 |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `stylistic.indent`            | `2`      | 공백 2칸 들여쓰기                                                                    |
+| `stylistic.quotes`            | `single` | 홑따옴표                                                                             |
+| `stylistic.semi`              | `false`  | 세미콜론 없음                                                                        |
+| `typescript`                  | `true`   | 기본 활성화                                                                          |
+| `gitignore`                   | `true`   | `.gitignore`의 모든 항목 무시                                                        |
+| `lessOpinionated`             | `true`   | `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
+| `antfu/top-level-function`    | 재활성화 | 최상위 레벨에서는 `function` 선언 선호                                               |
+| `test/prefer-lowercase-title` | 비활성화 | 테스트 제목은 어떤 대소문자로도 시작 가능                                            |
 
 `lessOpinionated: true` + `curly: ['error', 'all']` 조합이 antfu 기본값과의 핵심 차이입니다: 제어문 본문은 항상 중괄호를 사용해야 하지만, antfu의 최상위 함수 선호는 그대로 유지됩니다.
 
@@ -195,6 +196,31 @@ npm install -D eslint-plugin-format
 :::note
 `formatters`는 포매팅만 처리하며 린트는 하지 않습니다. 제대로 된 CSS **린트**가 필요하다면 [Stylelint](https://stylelint.io/)를 함께 사용하세요.
 :::
+
+### `bun fmt`로 Markdown 포매팅
+
+`markdown: 'bun'`을 지정하면 `pleaseai/bun-fmt` 규칙이 `.md`와 `.mdx` 파일을 [`bun fmt`](https://bun.com/docs/format)로 포매팅합니다. 그래서 `eslint --fix`와 저장 시 자동 수정에 그대로 적용됩니다. `PATH`에 Bun 1.4.4 이상이 있어야 하고, 추가 패키지는 필요 없습니다. `eslint-plugin-format`은 다른 포매터를 함께 켤 때만 설치합니다.
+
+```ts title="eslint.config.ts"
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  formatters: {
+    markdown: 'bun',
+  },
+})
+```
+
+- 코드 블록과 MDX의 JSX는 포매팅하지 않습니다. `.md` 파일의 코드 블록은 기존 ESLint 규칙이 계속 린트하지만, `.mdx` 파일의 코드와 JSX는 포매팅도 린트도 하지 않습니다.
+- `bun fmt`는 ESLint 작업 디렉터리에 있는 `bunfig.toml`의 `[fmt]` 섹션을 읽습니다. 예를 들어 `printWidth`, `proseWrap`, `ignorePatterns`를 여기서 설정합니다. 프로젝트에 `fmt` 스크립트가 있어도 포매터 대신 실행되지 않습니다.
+- `slidev`와 함께 쓸 수 없습니다. `slidev`는 Slidev 덱을 Prettier로 포매팅하므로 `markdown: 'prettier'`가 필요합니다.
+- ESLint의 `--cache`는 `bunfig.toml` 변경을 감지하지 못합니다. `[fmt]` 섹션을 바꾼 뒤에는 `.eslintcache`를 지우세요.
+
+```toml title="bunfig.toml"
+[fmt]
+proseWrap = "always"
+printWidth = 100
+```
 
 ## 타입 인지 규칙
 

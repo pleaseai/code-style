@@ -21,9 +21,8 @@ directory.
   required even when optional.
 - Put `using` directives at the top of the file, outside namespaces, with
   `System` first and the rest alphabetical.
-- Write modifiers in this order: `public protected internal private new
-  abstract virtual override sealed static readonly extern unsafe volatile
-  async`.
+- Write modifiers in this order:
+  `public protected internal private new abstract virtual override sealed static readonly extern unsafe volatile async`.
 - Always write access modifiers explicitly.
 
 ## Declaration Order

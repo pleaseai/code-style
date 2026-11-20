@@ -1,10 +1,10 @@
 # `dart-error-outside-errors-file`
 
-| | |
-| --- | --- |
-| Slug | `code-error-types-in-dedicated-module` |
-| Language | Dart / Flutter (`.dart`) |
-| Severity | `warning` |
+|                   |                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slug              | `code-error-types-in-dedicated-module`                                                                                                              |
+| Language          | Dart / Flutter (`.dart`)                                                                                                                            |
+| Severity          | `warning`                                                                                                                                           |
 | Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why

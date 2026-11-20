@@ -1,10 +1,10 @@
 # `rust-no-glob-reexport`
 
-| | |
-| --- | --- |
-| Slug | `code-greppable-public-symbols` |
-| Language | Rust (`.rs`) |
-| Severity | `warning` |
+|                   |                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slug              | `code-greppable-public-symbols`                                                                                                                     |
+| Language          | Rust (`.rs`)                                                                                                                                        |
+| Severity          | `warning`                                                                                                                                           |
 | Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why

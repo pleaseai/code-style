@@ -37,13 +37,13 @@ The `init` command:
 
 ### Supported tools
 
-| Tool | npm package(s) | Config file |
-| --- | --- | --- |
-| eslint-config | `@pleaseai/eslint-config`, `eslint` | `eslint.config.mjs` |
-| prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
-| editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (copied from `node_modules`) |
-| agents-md | - | `AGENTS.md` (marker-managed block) |
-| ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| Tool            | npm package(s)                               | Config file                                  |
+| --------------- | -------------------------------------------- | -------------------------------------------- |
+| eslint-config   | `@pleaseai/eslint-config`, `eslint`          | `eslint.config.mjs`                          |
+| prettier-config | `@pleaseai/prettier-config`, `prettier`      | `package.json#prettier`                      |
+| editorconfig    | `@pleaseai/editorconfig`                     | `.editorconfig` (copied from `node_modules`) |
+| agents-md       | -                                            | `AGENTS.md` (marker-managed block)           |
+| ast-grep        | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml`                               |
 
 ## ast-grep rules
 
@@ -113,19 +113,19 @@ bunx @pleaseai/code-style check --json     # machine-readable output
 bunx @pleaseai/code-style check --strict   # exit 1 on any finding
 ```
 
-| Flag | Description |
-| --- | --- |
-| `[path]` | Directory to check (default: the current directory). Findings are limited to it, but packages are discovered from the enclosing project: the outermost marker (`package.json`, `pubspec.yaml`, `Cargo.toml`, Gradle or Maven file) up to the git top-level (outside git, the nearest marker below the home directory), so `check src/` still knows the test root. Finding paths stay relative to `[path]`; message paths and notice examples are relative to the project root |
-| `--json` | Print the result as JSON (`root`, `findings`, `notices`) |
-| `--strict` | Exit 1 when there is any finding (default: warn only) |
-| `--config <file>` | Config file (default: `code-organization.json` in the enclosing project root, which is `<path>` when no marker is found above it) |
-| `--help`, `-h` | Print the `check` usage |
+| Flag              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[path]`          | Directory to check (default: the current directory). Findings are limited to it, but packages are discovered from the enclosing project: the outermost marker (`package.json`, `pubspec.yaml`, `Cargo.toml`, Gradle or Maven file) up to the git top-level (outside git, the nearest marker below the home directory), so `check src/` still knows the test root. Finding paths stay relative to `[path]`; message paths and notice examples are relative to the project root |
+| `--json`          | Print the result as JSON (`root`, `findings`, `notices`)                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `--strict`        | Exit 1 when there is any finding (default: warn only)                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `--config <file>` | Config file (default: `code-organization.json` in the enclosing project root, which is `<path>` when no marker is found above it)                                                                                                                                                                                                                                                                                                                                             |
+| `--help`, `-h`    | Print the `check` usage                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
-| Exit code | Meaning |
-| --- | --- |
-| `0` | No findings, or warnings only (the default) |
-| `1` | Findings, with `--strict` |
-| `2` | Usage or config error, or `@ast-grep/cli` cannot be resolved while a file needs extraction (a tree with no matching sources never needs it) |
+| Exit code | Meaning                                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`       | No findings, or warnings only (the default)                                                                                                 |
+| `1`       | Findings, with `--strict`                                                                                                                   |
+| `2`       | Usage or config error, or `@ast-grep/cli` cannot be resolved while a file needs extraction (a tree with no matching sources never needs it) |
 
 What it checks:
 
@@ -185,10 +185,10 @@ or the exit code; only findings do, with `--strict`.
 Checked files: TypeScript `.ts`/`.mts`/`.cts`/`.tsx` and Dart `.dart` (plain
 `.js` and `.vue` files are not read). Only **top-level** declarations count.
 
-| Language | Counts as a public symbol |
-| --- | --- |
+| Language        | Counts as a public symbol                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | TypeScript, TSX | `export` of a `function`, generator function, `class`, `abstract class`, `interface`, `type`, `enum`, function overload signature, `namespace`/`module` (the namespace, not its members; for a dotted `namespace Foo.Bar` the outermost name `Foo`), `const`/`let`/`var` binding; the same with `export declare`; `export { local }` and `export { local as name }` without a `from` clause, where `local` is declared in the file (a binding the file imports, as in `import { foo } from './foo'; export { foo }`, is a re-export) |
-| Dart | Non-underscore `class`, `mixin`, `enum`, named `extension`, function, getter, setter, `typedef`, and top-level variable (`var`, `final`, `const`) |
+| Dart            | Non-underscore `class`, `mixin`, `enum`, named `extension`, function, getter, setter, `typedef`, and top-level variable (`var`, `final`, `const`)                                                                                                                                                                                                                                                                                                                                                                                    |
 
 A file is judged only when it has exactly one such symbol. Several symbols, or
 none, are not checked.
@@ -196,15 +196,15 @@ none, are not checked.
 Files skipped **with a notice** (the check would otherwise judge them, but
 their exports cannot be enumerated):
 
-| Language | Skipped form | Reason in the notice |
-| --- | --- | --- |
-| TypeScript, TSX | `export { a } from '…'`, `export * from '…'`, `export * as ns from '…'`, `export import a = b.c`, `export { a }` of an imported binding | `re-export` |
-| TypeScript, TSX | `export default …`, `export { x as default }`, `export { default }` | `default export` |
-| TypeScript, TSX | `export const { a } = obj`, `export const [a] = arr` | `destructured export` |
-| TypeScript, TSX | `export { x as "string name" }` | `string-literal export name` |
-| TypeScript, TSX | a file under a `routes/` or `pages/` directory whose only export is a framework-reserved name: `Route` (TanStack Router), `GET`/`POST`/`PUT`/`PATCH`/`DELETE`/`HEAD`/`OPTIONS`/`ALL` (route handlers), `loader`, `action`. Elsewhere these names are judged like any other export | `framework-reserved export` |
-| Dart | `export 'other.dart';` | `re-export` |
-| Dart | `part 'other.dart';` (generated `*.g.dart`/`*.freezed.dart` parts excluded; any other suffix such as `*.custom.dart` counts) | `library with parts` |
+| Language        | Skipped form                                                                                                                                                                                                                                                                      | Reason in the notice         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| TypeScript, TSX | `export { a } from '…'`, `export * from '…'`, `export * as ns from '…'`, `export import a = b.c`, `export { a }` of an imported binding                                                                                                                                           | `re-export`                  |
+| TypeScript, TSX | `export default …`, `export { x as default }`, `export { default }`                                                                                                                                                                                                               | `default export`             |
+| TypeScript, TSX | `export const { a } = obj`, `export const [a] = arr`                                                                                                                                                                                                                              | `destructured export`        |
+| TypeScript, TSX | `export { x as "string name" }`                                                                                                                                                                                                                                                   | `string-literal export name` |
+| TypeScript, TSX | a file under a `routes/` or `pages/` directory whose only export is a framework-reserved name: `Route` (TanStack Router), `GET`/`POST`/`PUT`/`PATCH`/`DELETE`/`HEAD`/`OPTIONS`/`ALL` (route handlers), `loader`, `action`. Elsewhere these names are judged like any other export | `framework-reserved export`  |
+| Dart            | `export 'other.dart';`                                                                                                                                                                                                                                                            | `re-export`                  |
+| Dart            | `part 'other.dart';` (generated `*.g.dart`/`*.freezed.dart` parts excluded; any other suffix such as `*.custom.dart` counts)                                                                                                                                                      | `library with parts`         |
 
 The notice is aggregated per language, with the count and up to three sorted
 example paths:
@@ -282,19 +282,19 @@ snake_case (Dart), for example `parseURL` → `parse-url.ts`.
 
 Rust module resolution (to find test files Cargo never compiles):
 
-| Form | Handling |
-| --- | --- |
-| `mod x;` | Loads `x.rs` or `x/mod.rs` next to the declaring file; from a plain `foo.rs` the base directory is `foo/`, from a crate root or `mod.rs` it is the file's directory |
-| `#[path = "…"] mod x;` | Resolved relative to the declaring file's directory; plain, `r"…"` and `r#"…"#` strings |
-| `#[cfg_attr(…, path = "…")] mod x;` | Both the `path` file and the default `x.rs`/`x/mod.rs` count as possible targets; with several such attributes on one `mod`, every `path` file counts |
-| `mod r#async;` | Loads `async.rs` |
-| `mod x;` inside an inline `mod { … }` or a function body | Not followed. Reachability checks are **skipped for the directory it could load from, with a notice** |
-| The same, carrying `#[path]` or `#[cfg_attr(…, path = …)]` | It can load a file anywhere in the crate, so reachability checks are **skipped for the whole crate, with a notice** |
-| A crate whose `cargo metadata` fails | **Skipped with a notice**; its directory is still a boundary for the parent crate |
-| `cargo` missing | Rust **skipped with a notice** |
-| `include!(…)` (any form, also inside a `macro_rules!` body or macro invocation) | The included file can declare modules anywhere in the crate (`#[path = "../x.rs"]`), so reachability checks are **skipped for the whole crate, with a notice** |
-| A file with `#[test]` that no target reaches, outside `tests/`, under a directory named `ui`, `compile-fail`, `compile-pass`, `fixtures`, `testdata`, `test-data` or `test_data`, or named in a string literal of a `tests/*.rs` target | A test may load it at runtime, so `unreachable-unit-test` is **withheld with an aggregated notice** |
-| A file under `tests/<subdir>/` that no target reaches, where `<subdir>` is `ui`, `compile-fail`, `compile-pass`, `fixtures`, `testdata`, `test-data` or `test_data`, or a path segment of a string literal in a `tests/*.rs` target (trybuild/compiletest inputs such as `t.compile_fail("tests/ui/*.rs")`) | A test target may load it at runtime, so `undiscovered-integration-test` is **withheld with an aggregated notice** (count and up to three sorted example paths) |
+| Form                                                                                                                                                                                                                                                                                                        | Handling                                                                                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mod x;`                                                                                                                                                                                                                                                                                                    | Loads `x.rs` or `x/mod.rs` next to the declaring file; from a plain `foo.rs` the base directory is `foo/`, from a crate root or `mod.rs` it is the file's directory |
+| `#[path = "…"] mod x;`                                                                                                                                                                                                                                                                                      | Resolved relative to the declaring file's directory; plain, `r"…"` and `r#"…"#` strings                                                                             |
+| `#[cfg_attr(…, path = "…")] mod x;`                                                                                                                                                                                                                                                                         | Both the `path` file and the default `x.rs`/`x/mod.rs` count as possible targets; with several such attributes on one `mod`, every `path` file counts               |
+| `mod r#async;`                                                                                                                                                                                                                                                                                              | Loads `async.rs`                                                                                                                                                    |
+| `mod x;` inside an inline `mod { … }` or a function body                                                                                                                                                                                                                                                    | Not followed. Reachability checks are **skipped for the directory it could load from, with a notice**                                                               |
+| The same, carrying `#[path]` or `#[cfg_attr(…, path = …)]`                                                                                                                                                                                                                                                  | It can load a file anywhere in the crate, so reachability checks are **skipped for the whole crate, with a notice**                                                 |
+| A crate whose `cargo metadata` fails                                                                                                                                                                                                                                                                        | **Skipped with a notice**; its directory is still a boundary for the parent crate                                                                                   |
+| `cargo` missing                                                                                                                                                                                                                                                                                             | Rust **skipped with a notice**                                                                                                                                      |
+| `include!(…)` (any form, also inside a `macro_rules!` body or macro invocation)                                                                                                                                                                                                                             | The included file can declare modules anywhere in the crate (`#[path = "../x.rs"]`), so reachability checks are **skipped for the whole crate, with a notice**      |
+| A file with `#[test]` that no target reaches, outside `tests/`, under a directory named `ui`, `compile-fail`, `compile-pass`, `fixtures`, `testdata`, `test-data` or `test_data`, or named in a string literal of a `tests/*.rs` target                                                                     | A test may load it at runtime, so `unreachable-unit-test` is **withheld with an aggregated notice**                                                                 |
+| A file under `tests/<subdir>/` that no target reaches, where `<subdir>` is `ui`, `compile-fail`, `compile-pass`, `fixtures`, `testdata`, `test-data` or `test_data`, or a path segment of a string literal in a `tests/*.rs` target (trybuild/compiletest inputs such as `t.compile_fail("tests/ui/*.rs")`) | A test target may load it at runtime, so `undiscovered-integration-test` is **withheld with an aggregated notice** (count and up to three sorted example paths)     |
 
 #### `test-helpers-in-dedicated-location`
 
@@ -309,11 +309,11 @@ belongs to no package or module is **withheld with an aggregated notice**
 declaration is never a candidate (it is visible only in its own file). Imports
 are followed per language:
 
-| Language | Import forms followed |
-| --- | --- |
-| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export), `import x from` (the `default` export). `export default function`, `export default class` or `export default <name>` of a helper is public under `default`, so default and namespace imports credit it. Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers |
-| Dart | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice** |
-| Kotlin, Java | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*` (the importing file must also mention the name as a word outside its import lines, and an explicit import of the same simple name from another package shadows it), `import static …` (an `as` alias is ignored; a Kotlin top-level function is also followed through its file facade, `import static pkg.<File>Kt.name` / `pkg.<File>Kt.*`, or the `@file:JvmName("…")` value), and same-package test files that mention the name as a word. A file that declares the name itself (`val`/`var`/`fun`/`class`, a typed parameter, or a Java field, local or method) does not count. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
+| Language        | Import forms followed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript, TSX | Relative specifiers (`./`, `../`) in test files: `import { x }`, `import * as ns` (counts as importing every export), `import x from` (the `default` export). `export default function`, `export default class` or `export default <name>` of a helper is public under `default`, so default and namespace imports credit it. Resolution tries the path as written, then `.js` → `.ts`/`.tsx`, `.jsx` → `.tsx`, `.mjs` → `.mts`, `.cjs` → `.cts`, then the source extensions, then `<path>/index.<ext>`. A helper exported as `export { local as alias }` is matched under the alias (and under its own name only when it is also exported directly); a private declaration is never credited by an import of an unrelated export of the same name. Files inside a fixture project are neither helpers nor importers                                                                                           |
+| Dart            | Relative `import 'x.dart';` (with or without `./`). `show` limits the imported names, `hide` removes them; no combinator imports everything. Successive `show` clauses in one import, or a library imported more than once where any import has `show`/`hide`, cannot be evaluated: those test files are **withheld with an aggregated notice**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Kotlin, Java    | `import pkg.Name`, `import pkg.Name.member`, `import pkg.*` (the importing file must also mention the name as a word outside its import lines, and an explicit import of the same simple name from another package shadows it), `import static …` (an `as` alias is ignored; a Kotlin top-level function is also followed through its file facade, `import static pkg.<File>Kt.name` / `pkg.<File>Kt.*`, or the `@file:JvmName("…")` value), and same-package test files that mention the name as a word. A file that declares the name itself (`val`/`var`/`fun`/`class`, a typed parameter, or a Java field, local or method) does not count. Only test files of the module that owns the helper count, because other modules can declare the same fully qualified name. Tests of both JVM languages count: Kotlin tests importing a Java helper and Java tests importing a Kotlin helper in the same module |
 
 #### Not supported
 
@@ -367,10 +367,10 @@ next to sources or to turn a check off.
 }
 ```
 
-| Key | Effect |
-| --- | --- |
+| Key           | Effect                                                                                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sourceRoots` | Extra TypeScript source roots, for example a Nuxt project with a custom `srcDir`. Adding a root makes the package multi-root, so root names stay in test paths. |
-| `envSegments` | Extra environment segment names allowed directly under a test root. |
+| `envSegments` | Extra environment segment names allowed directly under a test root.                                                                                             |
 
 Use `--config <file>` to read a config from somewhere else.
 
@@ -429,13 +429,13 @@ project:
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `--yes`, `-y` | Accept defaults, overwrite existing files without prompting |
-| `--lang <list>` | Languages for the AGENTS.md rules block, comma-separated (`init`/`doctor`: detected; `update`: the languages already in the block; see below) |
-| `--locale <ko\|en>` | Force the CLI locale (defaults to `$LANG`) |
-| `--help`, `-h` | Print help |
-| `--version`, `-v` | Print version |
+| Flag                | Description                                                                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--yes`, `-y`       | Accept defaults, overwrite existing files without prompting                                                                                   |
+| `--lang <list>`     | Languages for the AGENTS.md rules block, comma-separated (`init`/`doctor`: detected; `update`: the languages already in the block; see below) |
+| `--locale <ko\|en>` | Force the CLI locale (defaults to `$LANG`)                                                                                                    |
+| `--help`, `-h`      | Print help                                                                                                                                    |
+| `--version`, `-v`   | Print version                                                                                                                                 |
 
 ## Languages
 

@@ -1,10 +1,10 @@
 # `tsx-no-default-export`
 
-| | |
-| --- | --- |
-| Slug | `code-greppable-public-symbols` |
-| Language | TSX (`.tsx`) |
-| Severity | `warning` |
+|                   |                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slug              | `code-greppable-public-symbols`                                                                                                                     |
+| Language          | TSX (`.tsx`)                                                                                                                                        |
+| Severity          | `warning`                                                                                                                                           |
 | Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why

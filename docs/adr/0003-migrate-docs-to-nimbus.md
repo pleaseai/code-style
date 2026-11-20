@@ -102,15 +102,15 @@ the owned source instead of adopting a third-party plugin:
 
 ## Options
 
-| Criteria | Nimbus | Starlight | Keep Docus |
-| --- | --- | --- | --- |
-| **Framework** | Astro 7 | Astro | Nuxt 4 |
-| **Output on CF Pages** | Static | Static | SSR + D1 |
-| **Bun workspace** | Works | Works | Needs hoisted linker |
-| **Agent outputs** | Built in (`llms.txt`, per-page Markdown/MDX) | Plugin | Built in (`llms.txt`, raw Markdown) |
-| **UI ownership** | Owned source in the repo | Theme + component overrides | Theme + app config |
-| **i18n** | None (wire Astro i18n by hand) | Built in | `@nuxtjs/i18n` + route workaround |
-| **Maturity** | Pre-1.0 | Stable | Stable, but fragile here |
+| Criteria               | Nimbus                                       | Starlight                   | Keep Docus                          |
+| ---------------------- | -------------------------------------------- | --------------------------- | ----------------------------------- |
+| **Framework**          | Astro 7                                      | Astro                       | Nuxt 4                              |
+| **Output on CF Pages** | Static                                       | Static                      | SSR + D1                            |
+| **Bun workspace**      | Works                                        | Works                       | Needs hoisted linker                |
+| **Agent outputs**      | Built in (`llms.txt`, per-page Markdown/MDX) | Plugin                      | Built in (`llms.txt`, raw Markdown) |
+| **UI ownership**       | Owned source in the repo                     | Theme + component overrides | Theme + app config                  |
+| **i18n**               | None (wire Astro i18n by hand)               | Built in                    | `@nuxtjs/i18n` + route workaround   |
+| **Maturity**           | Pre-1.0                                      | Stable                      | Stable, but fragile here            |
 
 ### Option 1: Nimbus (chosen)
 

@@ -4,6 +4,7 @@ description: "Config Composer, 타입 인지 규칙, command codemod, 플러그�
 sidebar:
   order: 5
 ---
+
 ## 타입 인지 규칙
 
 가장 강력한 TypeScript 린트 규칙 일부는 타입 정보가 필요합니다 — 로컬 구문이 어떻게 보이느냐가 아니라 런타임에 어떤 값인지 실제로 resolve해야 합니다. `tsconfig.json`을 가리켜 [타입 인지 린트](https://typescript-eslint.io/linting/typed-linting/)를 opt-in 하세요:
@@ -136,14 +137,14 @@ export default pleaseai({
 
 `@pleaseai/eslint-config`는 더 짧고 일관된 DX를 위해 `@antfu/eslint-config`의 플러그인 이름 변경을 상속받습니다:
 
-| 새 prefix | 원본 prefix | 소스 플러그인 |
-| --- | --- | --- |
-| `import/*` | `import-lite/*` | [`eslint-plugin-import-lite`](https://github.com/9romise/eslint-plugin-import-lite) |
-| `node/*` | `n/*` | [`eslint-plugin-n`](https://github.com/eslint-community/eslint-plugin-n) |
-| `yaml/*` | `yml/*` | [`eslint-plugin-yml`](https://github.com/ota-meshi/eslint-plugin-yml) |
-| `ts/*` | `@typescript-eslint/*` | [`@typescript-eslint/eslint-plugin`](https://github.com/typescript-eslint/typescript-eslint) |
-| `style/*` | `@stylistic/*` | [`@stylistic/eslint-plugin`](https://github.com/eslint-stylistic/eslint-stylistic) |
-| `test/*` | `vitest/*` | [`@vitest/eslint-plugin`](https://github.com/vitest-dev/eslint-plugin-vitest) |
+| 새 prefix  | 원본 prefix            | 소스 플러그인                                                                                |
+| ---------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| `import/*` | `import-lite/*`        | [`eslint-plugin-import-lite`](https://github.com/9romise/eslint-plugin-import-lite)          |
+| `node/*`   | `n/*`                  | [`eslint-plugin-n`](https://github.com/eslint-community/eslint-plugin-n)                     |
+| `yaml/*`   | `yml/*`                | [`eslint-plugin-yml`](https://github.com/ota-meshi/eslint-plugin-yml)                        |
+| `ts/*`     | `@typescript-eslint/*` | [`@typescript-eslint/eslint-plugin`](https://github.com/typescript-eslint/typescript-eslint) |
+| `style/*`  | `@stylistic/*`         | [`@stylistic/eslint-plugin`](https://github.com/eslint-stylistic/eslint-stylistic)           |
+| `test/*`   | `vitest/*`             | [`@vitest/eslint-plugin`](https://github.com/vitest-dev/eslint-plugin-vitest)                |
 
 따라서 규칙을 오버라이드할 때는 새 prefix를 사용하세요:
 

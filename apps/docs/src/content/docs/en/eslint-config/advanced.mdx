@@ -4,6 +4,7 @@ description: "Config Composer, type-aware rules, command codemods, plugin renami
 sidebar:
   order: 5
 ---
+
 ## Type Aware Rules
 
 Some of the strongest TypeScript lint rules require type information — they need to resolve what a value actually is at runtime, not just what its local syntax looks like. Opt into [type-aware linting](https://typescript-eslint.io/linting/typed-linting/) by pointing at your `tsconfig.json`:
@@ -136,14 +137,14 @@ When `quality: true` was first turned on, this repository reported 29 findings: 
 
 `@pleaseai/eslint-config` inherits `@antfu/eslint-config`'s plugin renaming for a shorter, consistent DX:
 
-| New prefix | Original prefix | Source plugin |
-| --- | --- | --- |
-| `import/*` | `import-lite/*` | [`eslint-plugin-import-lite`](https://github.com/9romise/eslint-plugin-import-lite) |
-| `node/*` | `n/*` | [`eslint-plugin-n`](https://github.com/eslint-community/eslint-plugin-n) |
-| `yaml/*` | `yml/*` | [`eslint-plugin-yml`](https://github.com/ota-meshi/eslint-plugin-yml) |
-| `ts/*` | `@typescript-eslint/*` | [`@typescript-eslint/eslint-plugin`](https://github.com/typescript-eslint/typescript-eslint) |
-| `style/*` | `@stylistic/*` | [`@stylistic/eslint-plugin`](https://github.com/eslint-stylistic/eslint-stylistic) |
-| `test/*` | `vitest/*` | [`@vitest/eslint-plugin`](https://github.com/vitest-dev/eslint-plugin-vitest) |
+| New prefix | Original prefix        | Source plugin                                                                                |
+| ---------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| `import/*` | `import-lite/*`        | [`eslint-plugin-import-lite`](https://github.com/9romise/eslint-plugin-import-lite)          |
+| `node/*`   | `n/*`                  | [`eslint-plugin-n`](https://github.com/eslint-community/eslint-plugin-n)                     |
+| `yaml/*`   | `yml/*`                | [`eslint-plugin-yml`](https://github.com/ota-meshi/eslint-plugin-yml)                        |
+| `ts/*`     | `@typescript-eslint/*` | [`@typescript-eslint/eslint-plugin`](https://github.com/typescript-eslint/typescript-eslint) |
+| `style/*`  | `@stylistic/*`         | [`@stylistic/eslint-plugin`](https://github.com/eslint-stylistic/eslint-stylistic)           |
+| `test/*`   | `vitest/*`             | [`@vitest/eslint-plugin`](https://github.com/vitest-dev/eslint-plugin-vitest)                |
 
 So when you override a rule, use the new prefix:
 

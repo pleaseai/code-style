@@ -1,10 +1,14 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
+import type { PleaseaiFormatters } from './bun-fmt'
 import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
+import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
 
-export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
+export type { PleaseaiFormatters } from './bun-fmt'
+
+export interface PleaseaiOptions extends Omit<OptionsConfig, 'formatters'>, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
   /**
    * Enable the anti-slop rules from `eslint-plugin-slop` and a curated subset
    * of `eslint-plugin-sonarjs`. Both plugins are optional peer dependencies.
@@ -35,6 +39,17 @@ export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem
    * @default false
    */
   canonicalPluginNames?: boolean
+  /**
+   * Format files that ESLint cannot handle natively. Same as antfu's
+   * `formatters`, plus `markdown: 'bun'`: `.md` and `.mdx` are formatted with
+   * `bun fmt` (Bun 1.4.4 or later on `PATH`) through the `pleaseai/bun-fmt`
+   * rule. Code blocks and MDX JSX are not formatted, `bun fmt` reads the
+   * `[fmt]` section of `bunfig.toml` in ESLint's working directory, and
+   * `eslint-plugin-format` is only needed for the other formatters.
+   *
+   * @default false
+   */
+  formatters?: boolean | PleaseaiFormatters
   /**
    * Enable the `quality/*` rules vendored from
    * [anti-slop](https://github.com/dmmulroy/anti-slop). They reject
@@ -103,8 +118,13 @@ export function pleaseai(
   options: PleaseaiOptions = {},
   ...userConfigs: TypedFlatConfigItem[]
 ): ReturnType<typeof antfu> {
-  const { canonicalPluginNames = false, quality: enableQuality = false, ...antfuOptions } = options
+  const { canonicalPluginNames = false, formatters, quality: enableQuality = false, ...antfuOptions } = options
   const autoRenamePlugins = antfuOptions.autoRenamePlugins ?? true
+  const { antfu: antfuFormatters, bun: enableBunFmt } = splitBunFormatter(formatters)
+  // The severity moves onto the Markdown and MDX configs: in antfu's files-less `rules` config it would run bun fmt on every file.
+  const { 'pleaseai/bun-fmt': bunFmtSeverity, ...otherRules } = antfuOptions.rules ?? {}
+  const antfuRules = enableBunFmt ? otherRules : antfuOptions.rules
+  const formatterConfigs = enableBunFmt ? bunFmt(antfuOptions.markdown !== false, bunFmtSeverity) : []
 
   const composer = antfu(
     {
@@ -117,16 +137,18 @@ export function pleaseai(
       typescript: true,
       gitignore: true,
       ...antfuOptions,
+      formatters: antfuFormatters,
       antislop: resolveAntislop(antfuOptions.antislop),
       rules: {
         'antfu/top-level-function': 'error',
         'test/prefer-lowercase-title': 'off',
-        ...antfuOptions.rules,
+        ...antfuRules,
       },
       // antfu's renaming maps `@typescript-eslint` to `ts`, which would undo
       // the rename below for configs that register the canonical name.
       autoRenamePlugins: !canonicalPluginNames && autoRenamePlugins,
     },
+    ...formatterConfigs,
     ...userConfigs,
   ).onResolved(scopeAntislopToParsedFiles)
 

@@ -1,10 +1,10 @@
 # `ts-no-in-source-test`
 
-| | |
-| --- | --- |
-| Slug | `test-path-derivable-from-source` |
-| Language | TypeScript (`.ts`, `.mts`, `.cts`) |
-| Severity | `warning` |
+|                   |                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slug              | `test-path-derivable-from-source`                                                                                                                   |
+| Language          | TypeScript (`.ts`, `.mts`, `.cts`)                                                                                                                  |
+| Severity          | `warning`                                                                                                                                           |
 | Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why
