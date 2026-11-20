@@ -246,7 +246,7 @@ export default pleaseai({
 - `quality/no-chained-type-assertions` reports the same code as `slop/no-chained-type-assertions` from `antislop`. If both are on, turn one off.
 - None of the rules has an autofix.
 
-With `quality: true`, this repository reports 29 findings: 13 `no-known-value-widening`, 10 `no-array-filter-map`, 3 `no-unsafe-dictionary-type`, 2 `no-conditional-empty-object-spread` and 1 `no-unknown-returns`. A larger private monorepo (2,669 files) reports 4,396 findings in 1,172 files, 61% of them in tests. The most frequent are `no-chained-type-assertions` (1,282), `no-unsafe-dictionary-type` (1,240), `no-known-value-widening` (745) and `no-conditional-empty-object-spread` (658). That volume is why the option is off by default. See [issue #77](https://github.com/pleaseai/code-style/issues/77).
+When `quality: true` was first turned on, this repository reported 29 findings: 13 `no-known-value-widening`, 10 `no-array-filter-map`, 3 `no-unsafe-dictionary-type`, 2 `no-conditional-empty-object-spread` and 1 `no-unknown-returns`. A larger private monorepo (2,669 files) reports 4,396 findings in 1,172 files, 61% of them in tests. The most frequent are `no-chained-type-assertions` (1,282), `no-unsafe-dictionary-type` (1,240), `no-known-value-widening` (745) and `no-conditional-empty-object-spread` (658). That volume is why the option is off by default. The findings in this repository are fixed, and it now lints itself with `quality: true`. See [issue #77](https://github.com/pleaseai/code-style/issues/77).
 
 ## Optional Configs
 
