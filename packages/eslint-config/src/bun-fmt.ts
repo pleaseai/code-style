@@ -62,14 +62,19 @@ function isSupportedBunVersion(version: string): boolean {
   return true
 }
 
+/** Throws when a `spawn` error means the Bun binary itself cannot be started. */
+function throwIfBunUnrunnable(bin: string, error: Error): void {
+  const code = 'code' in error ? error.code : undefined
+  if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
+    throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${error.message}`)
+  }
+}
+
 /** Runs `bin --version`; throws with the real cause when that cannot be done. */
 function readBunVersion(bin: string): string {
   const result = spawnSync(bin, ['--version'], { encoding: 'utf8' })
   if (result.error) {
-    const code = 'code' in result.error ? result.error.code : undefined
-    if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
-      throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
-    }
+    throwIfBunUnrunnable(bin, result.error)
     throw new Error(`\`formatters.markdown: 'bun'\` could not determine the version of \`${bin}\`: ${result.error.message}`)
   }
   if (result.status !== 0) {
@@ -104,10 +109,7 @@ export function formatWithBun(bin: string, filename: string, text: string, cwd: 
   // The default 1 MiB `maxBuffer` would fail a large Markdown file with ENOBUFS.
   const result = spawnSync(bin, [...BUN_FMT_ARGS, '--stdin-filepath', filename], { cwd, encoding: 'utf8', input: text, maxBuffer: Infinity })
   if (result.error) {
-    const code = 'code' in result.error ? result.error.code : undefined
-    if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
-      throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
-    }
+    throwIfBunUnrunnable(bin, result.error)
     return { ok: false, message: result.error.message }
   }
   if (result.status === 0) {
