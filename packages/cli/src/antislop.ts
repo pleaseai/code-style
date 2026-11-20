@@ -1,7 +1,7 @@
-import { existsSync } from 'node:fs'
+import type { PackageJson } from './fs-utils.js'
 import { resolve } from 'node:path'
 import { TOOLS } from './appliers.js'
-import { isPackageInstalled, readFileOrNull, readPackageJson } from './fs-utils.js'
+import { isPackageInstalled, readFileOrNull } from './fs-utils.js'
 
 const ESLINT_CONFIG_NAMES = ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'].map(ext => `eslint.config.${ext}`)
 const ANTISLOP_OPT_OUT = /\bantislop\s*:\s*false\b/
@@ -20,10 +20,11 @@ function isOptedOut(cwd: string): boolean {
 
 export function antislopStatus(cwd: string): AntislopStatus {
   const none: AntislopStatus = { applies: false, optedOut: false, plugins: [], missing: [] }
-  if (!existsSync(resolve(cwd, 'package.json'))) {
+  const raw = readFileOrNull(resolve(cwd, 'package.json'))
+  if (raw == null) {
     return none
   }
-  const pkg = readPackageJson(cwd)
+  const pkg = JSON.parse(raw) as PackageJson
   if (!isPackageInstalled(pkg, '@pleaseai/eslint-config')) {
     return none
   }
