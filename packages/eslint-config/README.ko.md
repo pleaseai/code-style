@@ -434,7 +434,8 @@ export default pleaseai({
 
 ```toml
 [fmt]
-ignorePatterns = [ "**/CHANGELOG.md" ]
+proseWrap = "always"
+printWidth = 100
 ```
 
 ## Package JSON 린트
