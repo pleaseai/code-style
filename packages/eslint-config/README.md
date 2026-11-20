@@ -19,15 +19,15 @@ PleaseAI's shared ESLint config, built on top of [@antfu/eslint-config](https://
 
 This config wraps `@antfu/eslint-config` with the following defaults:
 
-| Option | Value |
-|--------|-------|
-| Indent | 2 spaces |
-| Quotes | Single |
-| Semicolons | No |
-| TypeScript | Enabled |
-| Gitignore | Enabled |
-| `lessOpinionated` | `true`: disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
-| `antfu/top-level-function` | Re-enabled: prefer `function` declarations at top level |
+| Option                     | Value                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| Indent                     | 2 spaces                                                                                 |
+| Quotes                     | Single                                                                                   |
+| Semicolons                 | No                                                                                       |
+| TypeScript                 | Enabled                                                                                  |
+| Gitignore                  | Enabled                                                                                  |
+| `lessOpinionated`          | `true`: disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
+| `antfu/top-level-function` | Re-enabled: prefer `function` declarations at top level                                  |
 
 Additionally, `test/prefer-lowercase-title` is disabled.
 
@@ -582,14 +582,14 @@ npx @eslint/config-inspector
 
 This config inherits `@antfu/eslint-config`'s plugin renaming for a consistent DX:
 
-| New Prefix | Original Prefix | Source Plugin |
-|------------|-----------------|---------------|
-| `import/*` | `import-lite/*` | [eslint-plugin-import-lite](https://github.com/9romise/eslint-plugin-import-lite) |
-| `node/*` | `n/*` | [eslint-plugin-n](https://github.com/eslint-community/eslint-plugin-n) |
-| `yaml/*` | `yml/*` | [eslint-plugin-yml](https://github.com/ota-meshi/eslint-plugin-yml) |
-| `ts/*` | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
-| `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
-| `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
+| New Prefix | Original Prefix        | Source Plugin                                                                              |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| `import/*` | `import-lite/*`        | [eslint-plugin-import-lite](https://github.com/9romise/eslint-plugin-import-lite)          |
+| `node/*`   | `n/*`                  | [eslint-plugin-n](https://github.com/eslint-community/eslint-plugin-n)                     |
+| `yaml/*`   | `yml/*`                | [eslint-plugin-yml](https://github.com/ota-meshi/eslint-plugin-yml)                        |
+| `ts/*`     | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
+| `style/*`  | `@stylistic/*`         | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic)           |
+| `test/*`   | `vitest/*`             | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest)                |
 
 With [`canonicalPluginNames`](#canonical-plugin-names), typescript-eslint keeps `@typescript-eslint/*`, and `import/*` comes from `eslint-plugin-import`.
 

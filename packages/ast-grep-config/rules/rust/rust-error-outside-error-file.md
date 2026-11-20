@@ -1,10 +1,10 @@
 # `rust-error-outside-error-file`
 
-| | |
-| --- | --- |
-| Slug | `code-error-types-in-dedicated-module` |
-| Language | Rust (`.rs`) |
-| Severity | `warning` |
+|                   |                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slug              | `code-error-types-in-dedicated-module`                                                                                                              |
+| Language          | Rust (`.rs`)                                                                                                                                        |
+| Severity          | `warning`                                                                                                                                           |
 | Enforcement layer | 2 (ast-grep): [ADR-0022](https://github.com/chatbot-pf/engineering-standards/blob/main/docs/adr/0022-agent-navigable-code-organization-standard.md) |
 
 ## Why

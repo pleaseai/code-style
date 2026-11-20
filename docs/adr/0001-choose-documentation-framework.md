@@ -27,24 +27,25 @@ The Bun workspace build issue (Nitro's esbuild excludes `node_modules/`, causing
 
 ## Options
 
-| Criteria | Docus | VitePress | Starlight | Fumadocs | Nextra |
-|---|---|---|---|---|---|
-| **Framework** | Nuxt 4 | Vite + Vue | Astro | Next.js | Next.js |
-| **CF Pages** | SSR (D1 required) | SSG (official guide) | SSG (official adapter) | SSG (static export) | SSG (static export) |
-| **Bun compat** | Broken (inject + .ts) | Excellent | Good | Good | Good |
-| **Monorepo** | Poor (Bun symlinks) | Excellent | Good | Good | Good |
-| **Setup** | Medium | Low | Low | Medium | Low-Medium |
-| **Content** | Markdown + MDC | Markdown + Vue | Markdown + MDX | MDX | MDX |
-| **Search** | Built-in | Pagefind / Algolia | Pagefind (built-in) | Orama (built-in) | Flexsearch |
-| **i18n** | Plugin | Plugin | 30+ languages | Built-in | Limited |
-| **Dark mode** | Yes | Yes | Yes | Yes | Yes |
-| **GitHub stars** | ~3k | ~14k | ~7.7k | ~10.9k | ~12k |
+| Criteria         | Docus                 | VitePress            | Starlight              | Fumadocs            | Nextra              |
+| ---------------- | --------------------- | -------------------- | ---------------------- | ------------------- | ------------------- |
+| **Framework**    | Nuxt 4                | Vite + Vue           | Astro                  | Next.js             | Next.js             |
+| **CF Pages**     | SSR (D1 required)     | SSG (official guide) | SSG (official adapter) | SSG (static export) | SSG (static export) |
+| **Bun compat**   | Broken (inject + .ts) | Excellent            | Good                   | Good                | Good                |
+| **Monorepo**     | Poor (Bun symlinks)   | Excellent            | Good                   | Good                | Good                |
+| **Setup**        | Medium                | Low                  | Low                    | Medium              | Low-Medium          |
+| **Content**      | Markdown + MDC        | Markdown + Vue       | Markdown + MDX         | MDX                 | MDX                 |
+| **Search**       | Built-in              | Pagefind / Algolia   | Pagefind (built-in)    | Orama (built-in)    | Flexsearch          |
+| **i18n**         | Plugin                | Plugin               | 30+ languages          | Built-in            | Limited             |
+| **Dark mode**    | Yes                   | Yes                  | Yes                    | Yes                 | Yes                 |
+| **GitHub stars** | ~3k                   | ~14k                 | ~7.7k                  | ~10.9k              | ~12k                |
 
 ### Option 1: VitePress
 
 Vite-based, Vue-powered static site generator optimized for documentation.
 
 **Pros:**
+
 - Simplest setup, lowest overhead
 - Official Cloudflare Pages deployment guide
 - Excellent Bun and monorepo compatibility
@@ -52,6 +53,7 @@ Vite-based, Vue-powered static site generator optimized for documentation.
 - Extremely fast (Vite-based, lightweight output)
 
 **Cons:**
+
 - Vue-centric (this repo is framework-agnostic)
 - i18n requires third-party plugin
 - Markdown only (no MDX)
@@ -61,6 +63,7 @@ Vite-based, Vue-powered static site generator optimized for documentation.
 Astro-based documentation framework with batteries included.
 
 **Pros:**
+
 - SSG mode works cleanly on Cloudflare Pages
 - Built-in Pagefind search, 30+ language i18n
 - Bun + CF Pages verified by community
@@ -68,6 +71,7 @@ Astro-based documentation framework with batteries included.
 - Accessible typography, good defaults
 
 **Cons:**
+
 - Astro is an additional framework to learn
 - Smaller plugin ecosystem than VitePress
 
@@ -76,12 +80,14 @@ Astro-based documentation framework with batteries included.
 React/Next.js documentation framework with composable architecture.
 
 **Pros:**
+
 - Modern App Router, composable (Content -> Core -> UI)
 - Built-in OpenAPI and TypeScript Twoslash
 - Active development (10.9k stars)
 - MDX support
 
 **Cons:**
+
 - Next.js dependency (heavy for a simple docs site)
 - CF Pages requires `@cloudflare/next-on-pages` adapter
 - `fumadocs-mdx` uses webpack (not Bun's bundler)
@@ -91,11 +97,13 @@ React/Next.js documentation framework with composable architecture.
 Keep the Nuxt-based Docus with a custom Rollup plugin to strip TypeScript from `.bun/` paths.
 
 **Pros:**
+
 - Already partially set up
 - Rich Nuxt UI components, Nuxt Content integration
 - Consistent with `ask` repo's Nuxt ecosystem
 
 **Cons:**
+
 - Requires custom Rollup plugin workaround for Bun
 - `defineAppConfig` prerender issue (additional fix needed)
 - D1 database required for SSR on Cloudflare
@@ -106,10 +114,12 @@ Keep the Nuxt-based Docus with a custom Rollup plugin to strip TypeScript from `
 Next.js documentation framework (MDX-based).
 
 **Pros:**
+
 - Simple setup, mature (12k stars)
 - MDX + React components
 
 **Cons:**
+
 - Next.js dependency
 - Similar CF Pages adapter concerns as Fumadocs
 - Less actively developed than alternatives

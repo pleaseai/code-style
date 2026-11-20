@@ -12,9 +12,9 @@ behaviours:
 
 1. **`https://code-style.pages.dev/ko/cli` rendered the Korean landing page**
    (the content of `content/ko/index.md`) instead of the Korean CLI docs
-   (`content/ko/4.cli.md`). The `<title>` was `PleaseAI Code Style - PleaseAI
-   Code Style` and the body contained the hero section, not the CLI
-   reference.
+   (`content/ko/4.cli.md`). The `<title>` was
+   `PleaseAI Code Style - PleaseAI Code Style` and the body contained the
+   hero section, not the CLI reference.
 2. **`/en/cli`, `/en/eslint-config`, etc. returned 404**, and no English
    sub-pages were prerendered to `dist/en/`.
 
@@ -28,12 +28,12 @@ workaround that keeps the site correct until Docus ships a fix.
 
 ### Timeline of the upstream regression
 
-| Docus version | Date        | Relevant change                                                                 |
-| ------------- | ----------- | ------------------------------------------------------------------------------- |
-| pre-v5.0.0    | n/a         | `layer/app/pages/[[lang]]/index.vue`: file-based landing page                   |
-| **v5.0.0**    | 2025-09-24  | Commit [`d97a793`](https://github.com/nuxt-content/docus/commit/d97a793) renamed `[[lang]]/index.vue` → `templates/landing.vue` and introduced `layer/modules/routing.ts` which pushes `lang-index` at path `/:lang?` programmatically |
-| v5.6.0        | 2026-02-17  | [PR #1274](https://github.com/nuxt-content/docus/pull/1274) wraps the push in a `landingPageExists()` check but leaves the `/:lang?` path unchanged |
-| v5.9.0        | 2026-04-02  | Current installed version, bug still present                                    |
+| Docus version | Date       | Relevant change                                                                                                                                                                                                                        |
+| ------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pre-v5.0.0    | n/a        | `layer/app/pages/[[lang]]/index.vue`: file-based landing page                                                                                                                                                                          |
+| **v5.0.0**    | 2025-09-24 | Commit [`d97a793`](https://github.com/nuxt-content/docus/commit/d97a793) renamed `[[lang]]/index.vue` → `templates/landing.vue` and introduced `layer/modules/routing.ts` which pushes `lang-index` at path `/:lang?` programmatically |
+| v5.6.0        | 2026-02-17 | [PR #1274](https://github.com/nuxt-content/docus/pull/1274) wraps the push in a `landingPageExists()` check but leaves the `/:lang?` path unchanged                                                                                    |
+| v5.9.0        | 2026-04-02 | Current installed version, bug still present                                                                                                                                                                                           |
 
 Before v5.0.0, the landing page lived as a real file at
 `pages/[[lang]]/index.vue`, which `@nuxtjs/i18n` could rewrite cleanly per
@@ -131,23 +131,23 @@ All docs live at 3-or-more segments (`/en/concepts/edition`,
 whose path is exactly `/LOCALE/X`) is empty, so the routing collision
 never surfaces. Probing `docus.dev` confirms this:
 
-| URL | Status | Notes |
-| --- | --- | --- |
-| `/en/concepts/edition` (3 seg) | 200 ✓ | Renders correctly (via `[[lang]]/[...slug]`) |
-| `/en/concepts` (2 seg) | 404 | No `content/en/2.concepts/index.md` |
-| `/en/introduction` (2 seg) | 404 | No matching file |
+| URL                            | Status | Notes                                        |
+| ------------------------------ | ------ | -------------------------------------------- |
+| `/en/concepts/edition` (3 seg) | 200 ✓  | Renders correctly (via `[[lang]]/[...slug]`) |
+| `/en/concepts` (2 seg)         | 404    | No `content/en/2.concepts/index.md`          |
+| `/en/introduction` (2 seg)     | 404    | No matching file                             |
 
 This project's `content/ko/` has files at exactly the affected 2-segment
 boundary:
 
-| Content file | URL | Affected? |
-| --- | --- | --- |
-| `content/ko/index.md` | `/ko` | No (1 segment, handled by design) |
-| `content/ko/4.cli.md` | `/ko/cli` | **Yes** |
-| `content/ko/2.prettier-config.md` | `/ko/prettier-config` | **Yes** |
-| `content/ko/3.editorconfig.md` | `/ko/editorconfig` | **Yes** |
-| `content/ko/1.eslint-config/1.index.md` | `/ko/eslint-config` | **Yes** (sub-dir `index.md` also maps to 2 segments) |
-| `content/ko/1.eslint-config/5.advanced.md` | `/ko/eslint-config/advanced` | No (3 segments) |
+| Content file                               | URL                          | Affected?                                            |
+| ------------------------------------------ | ---------------------------- | ---------------------------------------------------- |
+| `content/ko/index.md`                      | `/ko`                        | No (1 segment, handled by design)                    |
+| `content/ko/4.cli.md`                      | `/ko/cli`                    | **Yes**                                              |
+| `content/ko/2.prettier-config.md`          | `/ko/prettier-config`        | **Yes**                                              |
+| `content/ko/3.editorconfig.md`             | `/ko/editorconfig`           | **Yes**                                              |
+| `content/ko/1.eslint-config/1.index.md`    | `/ko/eslint-config`          | **Yes** (sub-dir `index.md` also maps to 2 segments) |
+| `content/ko/1.eslint-config/5.advanced.md` | `/ko/eslint-config/advanced` | No (3 segments)                                      |
 
 ### Secondary issue: unprefixed landing links
 
@@ -187,7 +187,7 @@ modules: [
 ```
 
 Why an inline module instead of `nuxt.config.ts → hooks['pages:extend']`:
-config-level hooks register during config loading, *before* any module
+config-level hooks register during config loading, _before_ any module
 setup runs. Docus pushes its pages during `modules/routing.ts` setup, so
 a config-level hook would execute before those pages exist and find
 nothing to modify. An inline module listed after `@nuxtjs/i18n` is set up
@@ -197,13 +197,13 @@ so its `pages:extend` callback runs last and sees the final page list.
 After the rewrite, `@nuxtjs/i18n` prefixes the cleaned paths per locale
 and produces a conflict-free route table:
 
-| Route name | Path |
-| --- | --- |
-| `lang-index` | `/` |
-| `lang-index___en` | `/en` |
-| `lang-index___ko` | `/ko` |
-| `lang-slug___en` | `/en/:slug(.*)*` |
-| `lang-slug___ko` | `/ko/:slug(.*)*` |
+| Route name        | Path             |
+| ----------------- | ---------------- |
+| `lang-index`      | `/`              |
+| `lang-index___en` | `/en`            |
+| `lang-index___ko` | `/ko`            |
+| `lang-slug___en`  | `/en/:slug(.*)*` |
+| `lang-slug___ko`  | `/ko/:slug(.*)*` |
 
 The landing route matches only the locale root, and the slug route
 handles all sub-pages. Bug 1 is eliminated.

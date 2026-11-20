@@ -4,6 +4,7 @@ description: "One-command setup for PleaseAI code style — installs packages an
 sidebar:
   order: 4
 ---
+
 `@pleaseai/code-style` is a zero-config CLI that wires PleaseAI's shared code style into any project. It installs the ESLint / Prettier / EditorConfig packages and manages an `AGENTS.md` rules block so AI coding assistants know how to write code that passes lint on the first try.
 
 Inspired by [ultracite](https://github.com/haydenbleasel/ultracite) and NaverPay's [`@naverpay/code-style-cli`](https://github.com/NaverPayDev/code-style).
@@ -79,11 +80,11 @@ please-style check --json       # machine-readable output
 please-style check --strict     # exit 1 on any finding (for CI once clean)
 ```
 
-| Flag | Description |
-| --- | --- |
-| `[path]` | Directory to check (default: the current directory) |
-| `--json` | Print the result as JSON (`root`, `findings`, `notices`) |
-| `--strict` | Exit 1 when there is any finding (default: warn only) |
+| Flag              | Description                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `[path]`          | Directory to check (default: the current directory)                                                                                    |
+| `--json`          | Print the result as JSON (`root`, `findings`, `notices`)                                                                               |
+| `--strict`        | Exit 1 when there is any finding (default: warn only)                                                                                  |
 | `--config <file>` | Config file (default: `code-organization.json` in the enclosing project root, or in `<path>` when no project marker is found above it) |
 
 Exit codes: `0` no findings or warnings only, `1` findings with `--strict`, `2` usage or config error, or `@ast-grep/cli` cannot be resolved while a file needs extraction.
@@ -92,13 +93,13 @@ An optional `code-organization.json` can only **add** names — extra TypeScript
 
 ## Supported Tools
 
-| Tool | npm package(s) | Config file |
-| --- | --- | --- |
-| eslint-config | `@pleaseai/eslint-config`, `eslint` | `eslint.config.mjs` |
-| prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
-| editorconfig | `@pleaseai/editorconfig` | `.editorconfig` |
-| agents-md | — | `AGENTS.md` (marker-managed block) |
-| ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| Tool            | npm package(s)                               | Config file                        |
+| --------------- | -------------------------------------------- | ---------------------------------- |
+| eslint-config   | `@pleaseai/eslint-config`, `eslint`          | `eslint.config.mjs`                |
+| prettier-config | `@pleaseai/prettier-config`, `prettier`      | `package.json#prettier`            |
+| editorconfig    | `@pleaseai/editorconfig`                     | `.editorconfig`                    |
+| agents-md       | —                                            | `AGENTS.md` (marker-managed block) |
+| ast-grep        | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml`                     |
 
 ## The `AGENTS.md` Rules Block
 
@@ -152,13 +153,13 @@ project:
 
 ## Options
 
-| Flag | Description |
-| --- | --- |
-| `--yes`, `-y` | Accept defaults and overwrite existing files without prompting |
-| `--lang <list>` | Languages for the AGENTS.md rules block, comma-separated (`init`/`doctor`: detected; `update`: the languages already in the block; see below) |
-| `--locale <ko\|en>` | Force the CLI locale (defaults to `$LC_ALL` / `$LANG`) |
-| `--help`, `-h` | Print help |
-| `--version`, `-v` | Print the CLI version |
+| Flag                | Description                                                                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--yes`, `-y`       | Accept defaults and overwrite existing files without prompting                                                                                |
+| `--lang <list>`     | Languages for the AGENTS.md rules block, comma-separated (`init`/`doctor`: detected; `update`: the languages already in the block; see below) |
+| `--locale <ko\|en>` | Force the CLI locale (defaults to `$LC_ALL` / `$LANG`)                                                                                        |
+| `--help`, `-h`      | Print help                                                                                                                                    |
+| `--version`, `-v`   | Print the CLI version                                                                                                                         |
 
 ## Languages
 

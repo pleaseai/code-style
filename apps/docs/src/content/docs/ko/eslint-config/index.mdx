@@ -4,6 +4,7 @@ description: "PleaseAI 프로젝트를 위한 의견이 반영된 ESLint flat co
 sidebar:
   order: 1
 ---
+
 `@pleaseai/eslint-config`는 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config) 위에 구축된 의견이 반영된 ESLint flat config입니다. 단일 `pleaseai()` 함수만으로 JS/TS/JSX/Vue/JSON/YAML/Markdown에 대한 린팅 **과 포매팅**을 기본 제공 — Prettier가 필요하지 않습니다.
 
 ## 주요 기능
@@ -147,16 +148,16 @@ export default pleaseai({
 
 이 설정은 `@antfu/eslint-config`를 다음 PleaseAI 전용 기본값으로 감쌉니다:
 
-| 옵션 | 값 | 설명 |
-| --- | --- | --- |
-| `stylistic.indent` | `2` | 공백 2칸 들여쓰기 |
-| `stylistic.quotes` | `single` | 홑따옴표 |
-| `stylistic.semi` | `false` | 세미콜론 없음 |
-| `typescript` | `true` | 기본 활성화 |
-| `gitignore` | `true` | `.gitignore`의 모든 항목 무시 |
-| `lessOpinionated` | `true` | `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
-| `antfu/top-level-function` | 재활성화 | 최상위 레벨에서는 `function` 선언 선호 |
-| `test/prefer-lowercase-title` | 비활성화 | 테스트 제목은 어떤 대소문자로도 시작 가능 |
+| 옵션                          | 값       | 설명                                                                                 |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `stylistic.indent`            | `2`      | 공백 2칸 들여쓰기                                                                    |
+| `stylistic.quotes`            | `single` | 홑따옴표                                                                             |
+| `stylistic.semi`              | `false`  | 세미콜론 없음                                                                        |
+| `typescript`                  | `true`   | 기본 활성화                                                                          |
+| `gitignore`                   | `true`   | `.gitignore`의 모든 항목 무시                                                        |
+| `lessOpinionated`             | `true`   | `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
+| `antfu/top-level-function`    | 재활성화 | 최상위 레벨에서는 `function` 선언 선호                                               |
+| `test/prefer-lowercase-title` | 비활성화 | 테스트 제목은 어떤 대소문자로도 시작 가능                                            |
 
 `lessOpinionated: true` + `curly: ['error', 'all']` 조합이 antfu 기본값과의 핵심 차이입니다: 제어문 본문은 항상 중괄호를 사용해야 하지만, antfu의 최상위 함수 선호는 그대로 유지됩니다.
 

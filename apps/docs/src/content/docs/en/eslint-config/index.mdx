@@ -4,6 +4,7 @@ description: "Opinionated ESLint flat config for PleaseAI projects — built on 
 sidebar:
   order: 1
 ---
+
 `@pleaseai/eslint-config` is an opinionated ESLint flat config built on top of [`@antfu/eslint-config`](https://github.com/antfu/eslint-config). It gives you a single `pleaseai()` function that wires up linting **and formatting** for JS/TS/JSX/Vue/JSON/YAML/Markdown out of the box — no Prettier required.
 
 ## Features
@@ -147,16 +148,16 @@ Run `npm run lint` to check, or `npm run lint:fix` to auto-fix.
 
 This config wraps `@antfu/eslint-config` with these PleaseAI-specific defaults:
 
-| Option | Value | Note |
-| --- | --- | --- |
-| `stylistic.indent` | `2` | Two-space indent |
-| `stylistic.quotes` | `single` | Single quotes |
-| `stylistic.semi` | `false` | No trailing semicolons |
-| `typescript` | `true` | Enabled out of the box |
-| `gitignore` | `true` | Ignores anything in `.gitignore` |
-| `lessOpinionated` | `true` | Disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
-| `antfu/top-level-function` | Re-enabled | Prefer `function` declarations at top level |
-| `test/prefer-lowercase-title` | Disabled | Test titles can start with any case |
+| Option                        | Value      | Note                                                                             |
+| ----------------------------- | ---------- | -------------------------------------------------------------------------------- |
+| `stylistic.indent`            | `2`        | Two-space indent                                                                 |
+| `stylistic.quotes`            | `single`   | Single quotes                                                                    |
+| `stylistic.semi`              | `false`    | No trailing semicolons                                                           |
+| `typescript`                  | `true`     | Enabled out of the box                                                           |
+| `gitignore`                   | `true`     | Ignores anything in `.gitignore`                                                 |
+| `lessOpinionated`             | `true`     | Disables `antfu/if-newline` and `antfu/curly`, enables `curly: ['error', 'all']` |
+| `antfu/top-level-function`    | Re-enabled | Prefer `function` declarations at top level                                      |
+| `test/prefer-lowercase-title` | Disabled   | Test titles can start with any case                                              |
 
 The `lessOpinionated: true` + `curly: ['error', 'all']` combination is the key PleaseAI divergence from antfu's defaults: control-flow statements must always use braces, but antfu's top-level-function preference is still honoured.
 

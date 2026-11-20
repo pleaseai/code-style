@@ -8,11 +8,11 @@ By participating, you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.
 
 This is a [bun](https://bun.sh) monorepo orchestrated by [Turborepo](https://turbo.build).
 
-| Package                     | Path                                                  | Notes                                            |
-| --------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
-| `@pleaseai/eslint-config`   | [`packages/eslint-config`](./packages/eslint-config)   | ESLint flat config, built with tsdown            |
-| `@pleaseai/prettier-config` | [`packages/perttier-config`](./packages/perttier-config) | Shared Prettier config (JSON, no build)          |
-| `@pleaseai/editorconfig`    | [`packages/editorconfig`](./packages/editorconfig)     | Shared `.editorconfig` (static file, no build)   |
+| Package                     | Path                                                     | Notes                                          |
+| --------------------------- | -------------------------------------------------------- | ---------------------------------------------- |
+| `@pleaseai/eslint-config`   | [`packages/eslint-config`](./packages/eslint-config)     | ESLint flat config, built with tsdown          |
+| `@pleaseai/prettier-config` | [`packages/perttier-config`](./packages/perttier-config) | Shared Prettier config (JSON, no build)        |
+| `@pleaseai/editorconfig`    | [`packages/editorconfig`](./packages/editorconfig)       | Shared `.editorconfig` (static file, no build) |
 
 The `packages/perttier-config` directory is intentionally misspelled. Do not rename it without coordinating the release-please config, CI workflows, and the npm package name.
 
@@ -65,8 +65,8 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/): `type(sc
 
 ## Reporting bugs and requesting features
 
-| You want to...                   | File it as...    | Humans                                                                              | Agents                                                                           |
-| -------------------------------- | ---------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| You want to...                   | File it as...    | Humans                                                                                | Agents                                                                           |
+| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Report a bug or propose a fix    | an **Issue**     | [New issue](https://github.com/pleaseai/code-style/issues/new/choose)                 | [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE)                              |
 | Request a feature or enhancement | a **Discussion** | [New discussion](https://github.com/pleaseai/code-style/discussions/categories/ideas) | [`.github/DISCUSSION_TEMPLATE/ideas.yml`](.github/DISCUSSION_TEMPLATE/ideas.yml) |
 

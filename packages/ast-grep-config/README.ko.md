@@ -32,13 +32,13 @@ bun을 쓴다면 `package.json`에 `"trustedDependencies": ["@ast-grep/cli"]`를
 
 ## 다섯 가지 원칙
 
-| Slug | 원칙 |
-| --- | --- |
-| `code-greppable-public-symbols` | 공개 심볼은 이름 있는 선언으로 정의하고 노출해, 이름 검색 한 번으로 정의와 사용처를 모두 찾는다. |
-| `code-filename-matches-primary-symbol` | 공개 심볼이 하나인 파일은 언어의 파일 이름 규약으로 정규화했을 때 그 심볼 이름과 일치한다. |
-| `code-error-types-in-dedicated-module` | 모듈의 에러 타입은 지정된 에러 파일이나 패키지에 모은다. |
-| `test-path-derivable-from-source` | 테스트는 툴체인이 정한 테스트 루트 아래, 대상 소스 경로를 미러링한 위치에 둔다. |
-| `test-helpers-in-dedicated-location` | 여러 테스트가 공유하는 헬퍼는 지정된 위치에 둔다. |
+| Slug                                   | 원칙                                                                                             |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `code-greppable-public-symbols`        | 공개 심볼은 이름 있는 선언으로 정의하고 노출해, 이름 검색 한 번으로 정의와 사용처를 모두 찾는다. |
+| `code-filename-matches-primary-symbol` | 공개 심볼이 하나인 파일은 언어의 파일 이름 규약으로 정규화했을 때 그 심볼 이름과 일치한다.       |
+| `code-error-types-in-dedicated-module` | 모듈의 에러 타입은 지정된 에러 파일이나 패키지에 모은다.                                         |
+| `test-path-derivable-from-source`      | 테스트는 툴체인이 정한 테스트 루트 아래, 대상 소스 경로를 미러링한 위치에 둔다.                  |
+| `test-helpers-in-dedicated-location`   | 여러 테스트가 공유하는 헬퍼는 지정된 위치에 둔다.                                                |
 
 검사는 두 층으로 나뉩니다. 2층은 이 패키지의 ast-grep 규칙이고, 3층은
 ast-grep이 보지 못하는 것(파일 이름, 테스트 경로, 헬퍼 공유 여부)을 맡는 경로
@@ -64,19 +64,19 @@ bunx ast-grep scan
 bunx ast-grep scan -c node_modules/@pleaseai/ast-grep-config/sgconfig.yml
 ```
 
-| 규칙 | Slug | 언어 |
-| --- | --- | --- |
-| [`ts-no-default-export`](./rules/typescript/ts-no-default-export.md) | `code-greppable-public-symbols` | TypeScript |
-| [`tsx-no-default-export`](./rules/tsx/tsx-no-default-export.md) | `code-greppable-public-symbols` | TSX |
-| [`rust-no-glob-reexport`](./rules/rust/rust-no-glob-reexport.md) | `code-greppable-public-symbols` | Rust |
-| [`ts-error-outside-errors-file`](./rules/typescript/ts-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | TypeScript |
-| [`tsx-error-outside-errors-file`](./rules/tsx/tsx-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | TSX |
-| [`dart-error-outside-errors-file`](./rules/dart/dart-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Dart |
-| [`kotlin-error-outside-errors-file`](./rules/kotlin/kotlin-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Kotlin |
-| [`java-error-outside-error-package`](./rules/java/java-error-outside-error-package.md) | `code-error-types-in-dedicated-module` | Java |
-| [`rust-error-outside-error-file`](./rules/rust/rust-error-outside-error-file.md) | `code-error-types-in-dedicated-module` | Rust |
-| [`ts-no-in-source-test`](./rules/typescript/ts-no-in-source-test.md) | `test-path-derivable-from-source` | TypeScript |
-| [`tsx-no-in-source-test`](./rules/tsx/tsx-no-in-source-test.md) | `test-path-derivable-from-source` | TSX |
+| 규칙                                                                                     | Slug                                   | 언어       |
+| ---------------------------------------------------------------------------------------- | -------------------------------------- | ---------- |
+| [`ts-no-default-export`](./rules/typescript/ts-no-default-export.md)                     | `code-greppable-public-symbols`        | TypeScript |
+| [`tsx-no-default-export`](./rules/tsx/tsx-no-default-export.md)                          | `code-greppable-public-symbols`        | TSX        |
+| [`rust-no-glob-reexport`](./rules/rust/rust-no-glob-reexport.md)                         | `code-greppable-public-symbols`        | Rust       |
+| [`ts-error-outside-errors-file`](./rules/typescript/ts-error-outside-errors-file.md)     | `code-error-types-in-dedicated-module` | TypeScript |
+| [`tsx-error-outside-errors-file`](./rules/tsx/tsx-error-outside-errors-file.md)          | `code-error-types-in-dedicated-module` | TSX        |
+| [`dart-error-outside-errors-file`](./rules/dart/dart-error-outside-errors-file.md)       | `code-error-types-in-dedicated-module` | Dart       |
+| [`kotlin-error-outside-errors-file`](./rules/kotlin/kotlin-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Kotlin     |
+| [`java-error-outside-error-package`](./rules/java/java-error-outside-error-package.md)   | `code-error-types-in-dedicated-module` | Java       |
+| [`rust-error-outside-error-file`](./rules/rust/rust-error-outside-error-file.md)         | `code-error-types-in-dedicated-module` | Rust       |
+| [`ts-no-in-source-test`](./rules/typescript/ts-no-in-source-test.md)                     | `test-path-derivable-from-source`      | TypeScript |
+| [`tsx-no-in-source-test`](./rules/tsx/tsx-no-in-source-test.md)                          | `test-path-derivable-from-source`      | TSX        |
 
 규칙마다 옆에 README가 있고, 규칙의 이유, 틀린 예와 올바른 예, 위반을 고치는
 단계를 적어 두었습니다(영문). 경고 메시지에 slug와 README 경로가 들어 있어

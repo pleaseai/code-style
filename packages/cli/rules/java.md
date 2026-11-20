@@ -32,9 +32,8 @@ together with `general.md` in this directory.
 - Keep annotations on class, method, and constructor declarations one per line
   (a single parameterless annotation may share the signature line). Field
   annotations may share a line.
-- Write modifiers in JLS order: `public protected private abstract default
-  static final sealed non-sealed transient volatile synchronized native
-  strictfp`.
+- Write modifiers in JLS order:
+  `public protected private abstract default static final sealed non-sealed transient volatile synchronized native strictfp`.
 - Write long literals with an uppercase `L`.
 - Every `switch` is exhaustive, adding an empty `default` if needed. Use
   arrow-form `switch` for switch expressions. Mark intentional fall-through in

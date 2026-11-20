@@ -37,13 +37,13 @@ bunx @pleaseai/code-style check   # 파일 이름과 테스트 경로 검사 (AD
 
 ### 지원 도구
 
-| 도구 | npm 패키지 | 설정 파일 |
-| --- | --- | --- |
-| eslint-config | `@pleaseai/eslint-config`, `eslint` | `eslint.config.mjs` |
-| prettier-config | `@pleaseai/prettier-config`, `prettier` | `package.json#prettier` |
-| editorconfig | `@pleaseai/editorconfig` | `.editorconfig` (`node_modules`에서 복사) |
-| agents-md | - | `AGENTS.md` (마커로 관리되는 블록) |
-| ast-grep | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml` |
+| 도구            | npm 패키지                                   | 설정 파일                                 |
+| --------------- | -------------------------------------------- | ----------------------------------------- |
+| eslint-config   | `@pleaseai/eslint-config`, `eslint`          | `eslint.config.mjs`                       |
+| prettier-config | `@pleaseai/prettier-config`, `prettier`      | `package.json#prettier`                   |
+| editorconfig    | `@pleaseai/editorconfig`                     | `.editorconfig` (`node_modules`에서 복사) |
+| agents-md       | -                                            | `AGENTS.md` (마커로 관리되는 블록)        |
+| ast-grep        | `@pleaseai/ast-grep-config`, `@ast-grep/cli` | `sgconfig.yml`                            |
 
 ## ast-grep 규칙
 
@@ -111,19 +111,19 @@ bunx @pleaseai/code-style check --json     # 기계가 읽는 출력
 bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있으면 exit 1
 ```
 
-| 플래그 | 설명 |
-| --- | --- |
-| `[path]` | 검사할 디렉터리 (기본값: 현재 디렉터리) |
-| `--json` | 결과를 JSON(`root`, `findings`, `notices`)으로 출력 |
-| `--strict` | 발견 사항이 하나라도 있으면 exit 1 (기본: 경고만) |
+| 플래그            | 설명                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `[path]`          | 검사할 디렉터리 (기본값: 현재 디렉터리)                                                                               |
+| `--json`          | 결과를 JSON(`root`, `findings`, `notices`)으로 출력                                                                   |
+| `--strict`        | 발견 사항이 하나라도 있으면 exit 1 (기본: 경고만)                                                                     |
 | `--config <file>` | 설정 파일 (기본값: 둘러싼 프로젝트 루트의 `code-organization.json`, 위쪽에 프로젝트 표지 파일이 없으면 `<path>`의 것) |
-| `--help`, `-h` | `check` 사용법 출력 |
+| `--help`, `-h`    | `check` 사용법 출력                                                                                                   |
 
-| 종료 코드 | 의미 |
-| --- | --- |
-| `0` | 발견 사항 없음, 또는 경고만 있음(기본) |
-| `1` | `--strict`에서 발견 사항 있음 |
-| `2` | 사용법 오류, 설정 오류, 또는 추출이 필요한 파일이 있는데 `@ast-grep/cli`를 찾지 못함 (맞는 소스가 없는 트리는 추출이 필요 없음) |
+| 종료 코드 | 의미                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `0`       | 발견 사항 없음, 또는 경고만 있음(기본)                                                                                          |
+| `1`       | `--strict`에서 발견 사항 있음                                                                                                   |
+| `2`       | 사용법 오류, 설정 오류, 또는 추출이 필요한 파일이 있는데 `@ast-grep/cli`를 찾지 못함 (맞는 소스가 없는 트리는 추출이 필요 없음) |
 
 검사 내용은 다음과 같습니다.
 
@@ -185,10 +185,10 @@ bunx @pleaseai/code-style check --strict   # 발견 사항이 하나라도 있�
 }
 ```
 
-| 키 | 효과 |
-| --- | --- |
+| 키            | 효과                                                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `sourceRoots` | TypeScript 소스 루트 추가. 예: `srcDir`를 바꾼 Nuxt 프로젝트. 루트를 추가하면 루트가 여럿이 되므로 테스트 경로에 루트 이름이 남습니다. |
-| `envSegments` | 테스트 루트 바로 아래에 둘 수 있는 환경 구간 이름 추가. |
+| `envSegments` | 테스트 루트 바로 아래에 둘 수 있는 환경 구간 이름 추가.                                                                                |
 
 다른 위치의 설정 파일은 `--config <file>`로 지정합니다.
 
@@ -242,13 +242,13 @@ antislop을 켭니다. `init`이 두 플러그인을 설치하며, 기존 프로
 
 ## 옵션
 
-| 플래그 | 설명 |
-| --- | --- |
-| `--yes`, `-y` | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀 |
-| `--lang <list>` | AGENTS.md 룰 블록에 넣을 언어, 쉼표로 구분 (`init`/`doctor`: 자동 감지, `update`: 블록에 이미 있는 언어, 아래 참고) |
-| `--locale <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LANG`) |
-| `--help`, `-h` | 도움말 출력 |
-| `--version`, `-v` | 버전 출력 |
+| 플래그              | 설명                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `--yes`, `-y`       | 기본값을 수락하고 기존 파일을 확인 없이 덮어씀                                                                      |
+| `--lang <list>`     | AGENTS.md 룰 블록에 넣을 언어, 쉼표로 구분 (`init`/`doctor`: 자동 감지, `update`: 블록에 이미 있는 언어, 아래 참고) |
+| `--locale <ko\|en>` | CLI 언어 강제 지정 (기본값은 `$LANG`)                                                                               |
+| `--help`, `-h`      | 도움말 출력                                                                                                         |
+| `--version`, `-v`   | 버전 출력                                                                                                           |
 
 ## 언어
 

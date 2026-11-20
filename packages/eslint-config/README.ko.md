@@ -19,15 +19,15 @@
 
 이 설정은 `@antfu/eslint-config`를 다음 기본값으로 감쌉니다:
 
-| 옵션 | 값 |
-|------|-----|
-| 들여쓰기 | 공백 2칸 |
-| 따옴표 | 홑따옴표 |
-| 세미콜론 | 없음 |
-| TypeScript | 활성화 |
-| Gitignore | 활성화 |
-| `lessOpinionated` | `true`: `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
-| `antfu/top-level-function` | 재활성화: 최상위 레벨에서는 `function` 선언 선호 |
+| 옵션                       | 값                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| 들여쓰기                   | 공백 2칸                                                                                     |
+| 따옴표                     | 홑따옴표                                                                                     |
+| 세미콜론                   | 없음                                                                                         |
+| TypeScript                 | 활성화                                                                                       |
+| Gitignore                  | 활성화                                                                                       |
+| `lessOpinionated`          | `true`: `antfu/if-newline`과 `antfu/curly`를 비활성화하고 `curly: ['error', 'all']`을 활성화 |
+| `antfu/top-level-function` | 재활성화: 최상위 레벨에서는 `function` 선언 선호                                             |
 
 추가로 `test/prefer-lowercase-title`은 비활성화되어 있습니다.
 
@@ -582,14 +582,14 @@ npx @eslint/config-inspector
 
 이 설정은 일관된 DX를 위해 `@antfu/eslint-config`의 플러그인 이름 변경을 상속받습니다:
 
-| 새 Prefix | 원본 Prefix | 소스 플러그인 |
-|------------|-----------------|---------------|
-| `import/*` | `import-lite/*` | [eslint-plugin-import-lite](https://github.com/9romise/eslint-plugin-import-lite) |
-| `node/*` | `n/*` | [eslint-plugin-n](https://github.com/eslint-community/eslint-plugin-n) |
-| `yaml/*` | `yml/*` | [eslint-plugin-yml](https://github.com/ota-meshi/eslint-plugin-yml) |
-| `ts/*` | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
-| `style/*` | `@stylistic/*` | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic) |
-| `test/*` | `vitest/*` | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest) |
+| 새 Prefix  | 원본 Prefix            | 소스 플러그인                                                                              |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| `import/*` | `import-lite/*`        | [eslint-plugin-import-lite](https://github.com/9romise/eslint-plugin-import-lite)          |
+| `node/*`   | `n/*`                  | [eslint-plugin-n](https://github.com/eslint-community/eslint-plugin-n)                     |
+| `yaml/*`   | `yml/*`                | [eslint-plugin-yml](https://github.com/ota-meshi/eslint-plugin-yml)                        |
+| `ts/*`     | `@typescript-eslint/*` | [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint) |
+| `style/*`  | `@stylistic/*`         | [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic)           |
+| `test/*`   | `vitest/*`             | [@vitest/eslint-plugin](https://github.com/vitest-dev/eslint-plugin-vitest)                |
 
 [`canonicalPluginNames`](#표준-플러그인-이름canonical-plugin-names)를 켜면 typescript-eslint는 `@typescript-eslint/*`를 유지하고, `import/*`는 `eslint-plugin-import`에서 가져옵니다.
 

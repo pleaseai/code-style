@@ -32,13 +32,13 @@ fallback warning on every call (the path checker is unaffected).
 
 ## The five principles
 
-| Slug | Principle |
-| --- | --- |
-| `code-greppable-public-symbols` | Public symbols are named declarations, so one name search finds the definition and every use. |
+| Slug                                   | Principle                                                                                            |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `code-greppable-public-symbols`        | Public symbols are named declarations, so one name search finds the definition and every use.        |
 | `code-filename-matches-primary-symbol` | A file with one public symbol is named after it (normalized to the language's file-name convention). |
-| `code-error-types-in-dedicated-module` | A module's error types live in its designated error file or package. |
-| `test-path-derivable-from-source` | Tests live under the toolchain's test root, at a path mirrored from the source they test. |
-| `test-helpers-in-dedicated-location` | Helpers shared by several tests live in the designated helper location. |
+| `code-error-types-in-dedicated-module` | A module's error types live in its designated error file or package.                                 |
+| `test-path-derivable-from-source`      | Tests live under the toolchain's test root, at a path mirrored from the source they test.            |
+| `test-helpers-in-dedicated-location`   | Helpers shared by several tests live in the designated helper location.                              |
 
 The checks run in two layers. Layer 2 is the ast-grep rules in this package;
 layer 3 is `please-style check`, a path checker for what ast-grep cannot see
@@ -64,19 +64,19 @@ Or use the package's own config without adding one:
 bunx ast-grep scan -c node_modules/@pleaseai/ast-grep-config/sgconfig.yml
 ```
 
-| Rule | Slug | Language |
-| --- | --- | --- |
-| [`ts-no-default-export`](./rules/typescript/ts-no-default-export.md) | `code-greppable-public-symbols` | TypeScript |
-| [`tsx-no-default-export`](./rules/tsx/tsx-no-default-export.md) | `code-greppable-public-symbols` | TSX |
-| [`rust-no-glob-reexport`](./rules/rust/rust-no-glob-reexport.md) | `code-greppable-public-symbols` | Rust |
-| [`ts-error-outside-errors-file`](./rules/typescript/ts-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | TypeScript |
-| [`tsx-error-outside-errors-file`](./rules/tsx/tsx-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | TSX |
-| [`dart-error-outside-errors-file`](./rules/dart/dart-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Dart |
-| [`kotlin-error-outside-errors-file`](./rules/kotlin/kotlin-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Kotlin |
-| [`java-error-outside-error-package`](./rules/java/java-error-outside-error-package.md) | `code-error-types-in-dedicated-module` | Java |
-| [`rust-error-outside-error-file`](./rules/rust/rust-error-outside-error-file.md) | `code-error-types-in-dedicated-module` | Rust |
-| [`ts-no-in-source-test`](./rules/typescript/ts-no-in-source-test.md) | `test-path-derivable-from-source` | TypeScript |
-| [`tsx-no-in-source-test`](./rules/tsx/tsx-no-in-source-test.md) | `test-path-derivable-from-source` | TSX |
+| Rule                                                                                     | Slug                                   | Language   |
+| ---------------------------------------------------------------------------------------- | -------------------------------------- | ---------- |
+| [`ts-no-default-export`](./rules/typescript/ts-no-default-export.md)                     | `code-greppable-public-symbols`        | TypeScript |
+| [`tsx-no-default-export`](./rules/tsx/tsx-no-default-export.md)                          | `code-greppable-public-symbols`        | TSX        |
+| [`rust-no-glob-reexport`](./rules/rust/rust-no-glob-reexport.md)                         | `code-greppable-public-symbols`        | Rust       |
+| [`ts-error-outside-errors-file`](./rules/typescript/ts-error-outside-errors-file.md)     | `code-error-types-in-dedicated-module` | TypeScript |
+| [`tsx-error-outside-errors-file`](./rules/tsx/tsx-error-outside-errors-file.md)          | `code-error-types-in-dedicated-module` | TSX        |
+| [`dart-error-outside-errors-file`](./rules/dart/dart-error-outside-errors-file.md)       | `code-error-types-in-dedicated-module` | Dart       |
+| [`kotlin-error-outside-errors-file`](./rules/kotlin/kotlin-error-outside-errors-file.md) | `code-error-types-in-dedicated-module` | Kotlin     |
+| [`java-error-outside-error-package`](./rules/java/java-error-outside-error-package.md)   | `code-error-types-in-dedicated-module` | Java       |
+| [`rust-error-outside-error-file`](./rules/rust/rust-error-outside-error-file.md)         | `code-error-types-in-dedicated-module` | Rust       |
+| [`ts-no-in-source-test`](./rules/typescript/ts-no-in-source-test.md)                     | `test-path-derivable-from-source`      | TypeScript |
+| [`tsx-no-in-source-test`](./rules/tsx/tsx-no-in-source-test.md)                          | `test-path-derivable-from-source`      | TSX        |
 
 Each rule has a README next to it with the reason, a wrong and a right
 example, and the steps to fix a violation. The warning message names the slug

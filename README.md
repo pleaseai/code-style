@@ -8,11 +8,11 @@ See the [code-style documentation site](https://code-style.pages.dev) for full g
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| [`@pleaseai/eslint-config`](./packages/eslint-config) | ESLint flat config wrapping `@antfu/eslint-config` with PleaseAI defaults |
-| [`@pleaseai/prettier-config`](./packages/perttier-config) | Shared Prettier config (JSON) |
-| [`@pleaseai/editorconfig`](./packages/editorconfig) | Shared `.editorconfig` for consistent editor settings |
+| Package                                                   | Description                                                                                  |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [`@pleaseai/eslint-config`](./packages/eslint-config)     | ESLint flat config wrapping `@antfu/eslint-config` with PleaseAI defaults                    |
+| [`@pleaseai/prettier-config`](./packages/perttier-config) | Shared Prettier config (JSON)                                                                |
+| [`@pleaseai/editorconfig`](./packages/editorconfig)       | Shared `.editorconfig` for consistent editor settings                                        |
 | [`@pleaseai/ast-grep-config`](./packages/ast-grep-config) | ast-grep rules for agent-navigable code (ADR-0022); the path checker is `please-style check` |
 
 ## `@pleaseai/eslint-config`
