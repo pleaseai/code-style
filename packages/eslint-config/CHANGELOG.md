@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/pleaseai/code-style/compare/eslint-config-v0.1.1...eslint-config-v0.1.2) (2026-11-20)
+
+
+### Features
+
+* **eslint-config:** vendor anti-slop quality rules as an opt-in option ([#85](https://github.com/pleaseai/code-style/issues/85)) ([6d7129b](https://github.com/pleaseai/code-style/commit/6d7129b6e84648ea01354a90a10b7feafb89ca92)), closes [#77](https://github.com/pleaseai/code-style/issues/77)
+
 ## [0.1.1](https://github.com/pleaseai/code-style/compare/eslint-config-v0.1.0...eslint-config-v0.1.1) (2026-11-19)
 
 
