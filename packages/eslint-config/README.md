@@ -414,6 +414,29 @@ export default pleaseai({
 bun add -D eslint-plugin-format
 ```
 
+#### Markdown with `bun fmt`
+
+`markdown: 'bun'` formats `.md` and `.mdx` files with [`bun fmt`](https://bun.com/docs/format) through the `pleaseai/bun-fmt` rule, so `eslint --fix` and fix on save apply it. It needs Bun 1.4.4 or later on `PATH` and no extra package; `eslint-plugin-format` is only needed when another formatter is on.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  formatters: {
+    markdown: 'bun',
+  },
+})
+```
+
+- Code blocks and MDX JSX are not formatted. The existing ESLint rules keep linting them.
+- `bun fmt` reads the `[fmt]` section of `bunfig.toml` in ESLint's working directory, for example `printWidth`, `proseWrap` or `ignorePatterns`. A project `fmt` script does not run in its place.
+- ESLint's `--cache` does not track `bunfig.toml`. Delete `.eslintcache` after changing its `[fmt]` section.
+
+```toml
+[fmt]
+ignorePatterns = [ "**/CHANGELOG.md" ]
+```
+
 ## Package JSON Linting
 
 This package also exports `eslint-plugin-package-json` configs:

@@ -414,6 +414,29 @@ export default pleaseai({
 bun add -D eslint-plugin-format
 ```
 
+#### `bun fmt`로 Markdown 포매팅
+
+`markdown: 'bun'`을 지정하면 `pleaseai/bun-fmt` 규칙이 `.md`와 `.mdx` 파일을 [`bun fmt`](https://bun.com/docs/format)로 포매팅합니다. 그래서 `eslint --fix`와 저장 시 자동 수정에 그대로 적용됩니다. `PATH`에 Bun 1.4.4 이상이 있어야 하고, 추가 패키지는 필요 없습니다. `eslint-plugin-format`은 다른 포매터를 함께 켤 때만 설치합니다.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  formatters: {
+    markdown: 'bun',
+  },
+})
+```
+
+- 코드 블록과 MDX의 JSX는 포매팅하지 않습니다. 이 부분은 기존 ESLint 규칙이 계속 린트합니다.
+- `bun fmt`는 ESLint 작업 디렉터리에 있는 `bunfig.toml`의 `[fmt]` 섹션을 읽습니다. 예를 들어 `printWidth`, `proseWrap`, `ignorePatterns`를 여기서 설정합니다. 프로젝트에 `fmt` 스크립트가 있어도 포매터 대신 실행되지 않습니다.
+- ESLint의 `--cache`는 `bunfig.toml` 변경을 감지하지 못합니다. `[fmt]` 섹션을 바꾼 뒤에는 `.eslintcache`를 지우세요.
+
+```toml
+[fmt]
+ignorePatterns = [ "**/CHANGELOG.md" ]
+```
+
 ## Package JSON 린트
 
 이 패키지는 `eslint-plugin-package-json` 설정도 함께 export합니다:

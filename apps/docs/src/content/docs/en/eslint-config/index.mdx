@@ -196,6 +196,29 @@ npm install -D eslint-plugin-format
 `formatters` only handles formatting, not linting. For proper CSS **linting** use [Stylelint](https://stylelint.io/) alongside it.
 :::
 
+### Markdown with `bun fmt`
+
+`markdown: 'bun'` formats `.md` and `.mdx` files with [`bun fmt`](https://bun.com/docs/format) through the `pleaseai/bun-fmt` rule, so `eslint --fix` and fix on save apply it. It needs Bun 1.4.4 or later on `PATH` and no extra package; `eslint-plugin-format` is only needed when another formatter is on.
+
+```ts title="eslint.config.ts"
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  formatters: {
+    markdown: 'bun',
+  },
+})
+```
+
+- Code blocks and MDX JSX are not formatted. The existing ESLint rules keep linting them.
+- `bun fmt` reads the `[fmt]` section of `bunfig.toml` in ESLint's working directory, for example `printWidth`, `proseWrap` or `ignorePatterns`. A project `fmt` script does not run in its place.
+- ESLint's `--cache` does not track `bunfig.toml`. Delete `.eslintcache` after changing its `[fmt]` section.
+
+```toml title="bunfig.toml"
+[fmt]
+ignorePatterns = ["**/CHANGELOG.md"]
+```
+
 ## Type Aware Rules
 
 The strongest TypeScript rules require type information. Opt in by pointing at your `tsconfig.json`:
