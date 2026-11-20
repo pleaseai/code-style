@@ -1,6 +1,7 @@
 import pleaseai from '@pleaseai/eslint-config'
 
 export default pleaseai({
+  quality: true,
   // Lint the docs site's Astro components (apps/docs).
   astro: true,
   ignores: [
