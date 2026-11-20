@@ -168,8 +168,8 @@ export function checkFilenames(matches: ExtractMatch[], lang: FilenameLanguage):
  * would have judged but skipped because their exports cannot be enumerated.
  * Files exempt by convention (`index.ts`, test files, …) never count.
  */
-export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage): { findings: Finding[], notices: string[] } {
-  const imported = new Set(matches.filter(m => m.ruleId === 'import-binding').map(m => `${m.file}\0${m.text}`))
+export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage) {
+  const imported = new Set(matches.flatMap(m => (m.ruleId === 'import-binding' ? [`${m.file}\0${m.text}`] : [])))
   const opaque = opaqueFiles(matches, lang, imported)
   const byFile = publicNamesByFile(matches, lang, imported, opaque)
   const skipped = new Map<string, Set<OpaqueReason>>()

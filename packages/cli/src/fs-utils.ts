@@ -2,13 +2,15 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
+
 export interface PackageJson {
   name?: string
   version?: string
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
-  prettier?: string | Record<string, unknown>
-  [key: string]: unknown
+  prettier?: string | { [key: string]: JsonValue }
+  [key: string]: JsonValue | undefined
 }
 
 export type PackageManager = 'bun' | 'pnpm' | 'yarn' | 'npm'

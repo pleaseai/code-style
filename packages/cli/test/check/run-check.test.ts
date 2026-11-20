@@ -6,7 +6,7 @@ import { createFixture } from '../test-utils/fixture.js'
 
 const CLI = fileURLToPath(new URL('../../src/index.ts', import.meta.url))
 
-function run(files: Record<string, string>, args: string[]): { status: number | null, stdout: string, stderr: string } {
+function run(files: Record<string, string>, args: string[]) {
   const fixture = createFixture(files)
   try {
     // English messages whatever the machine's locale.

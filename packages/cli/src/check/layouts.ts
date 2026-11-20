@@ -90,7 +90,7 @@ function withConfig(rootDir: string, dir: string, base: CodeOrganizationConfig):
  * test root is test data (a fixture project), not a unit: `kept` are the unit
  * dirs, `fixtures` maps each owner to its fixture dirs relative to it.
  */
-function splitFixtureProjects(markerDirs: string[], testRoots: string[]): { kept: string[], fixtures: Map<string, string[]> } {
+function splitFixtureProjects(markerDirs: string[], testRoots: string[]) {
   const kept: string[] = []
   const fixtures = new Map<string, string[]>()
   for (const dir of [...markerDirs].sort((a, b) => a.length - b.length)) {

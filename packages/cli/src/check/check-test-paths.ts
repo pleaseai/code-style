@@ -134,7 +134,7 @@ export function inspectTestPaths(
   layouts: readonly TestLayout[],
   base: CodeOrganizationConfig,
   rootDir: string,
-): { findings: Finding[], notices: string[] } {
+) {
   const fileSet = new Set(files)
   const findings: Finding[] = []
   const notices: string[] = []
