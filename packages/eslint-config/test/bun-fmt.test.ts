@@ -76,6 +76,16 @@ describe('formatters.markdown: bun', () => {
     expect(ignored).toEqual({ ok: true, code: UNALIGNED_TABLE })
   })
 
+  test('lets the rules option turn pleaseai/bun-fmt off', async () => {
+    const configs = await pleaseai({ formatters: { markdown: 'bun' }, rules: { 'pleaseai/bun-fmt': 'off' } })
+    const eslint = new ESLint({ cwd: scratch, overrideConfigFile: true, overrideConfig: configs })
+
+    for (const file of ['README.md', 'docs/a.mdx']) {
+      const config = await eslint.calculateConfigForFile(join(scratch, file))
+      expect(config?.rules?.['pleaseai/bun-fmt']).toEqual([0])
+    }
+  })
+
   test('registers no eslint-plugin-format config when bun is the only formatter', async () => {
     const configs = await pleaseai({ formatters: { markdown: 'bun' } })
     const names = configs.map(config => config.name)
@@ -112,10 +122,26 @@ describe('formatWithBun', () => {
 
   test('explains the version needed when Bun has no fmt command', () => {
     const oldBun = join(scratch, 'old-bun')
-    writeFileSync(oldBun, '#!/bin/sh\necho \'error: Script not found "fmt"\' >&2\nexit 1\n')
+    writeFileSync(oldBun, '#!/bin/sh\n[ \"$1\" = --version ] && { echo 1.4.4; exit 0; }\necho \'error: Script not found "fmt"\' >&2\nexit 1\n')
     chmodSync(oldBun, 0o755)
 
     expect(() => formatWithBun(oldBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('needs Bun 1.4.4 or later')
+  })
+
+  test('rejects an old Bun before running its fmt script', () => {
+    const hijackedBun = join(scratch, 'hijacked-bun')
+    writeFileSync(hijackedBun, '#!/bin/sh\n[ "$1" = --version ] && { echo 1.3.14; exit 0; }\ncat >/dev/null\necho HIJACKED\n')
+    chmodSync(hijackedBun, 0o755)
+
+    expect(() => formatWithBun(hijackedBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('needs Bun 1.4.4 or later')
+  })
+
+  test('rejects a Bun whose version cannot be determined', () => {
+    const mysteryBun = join(scratch, 'mystery-bun')
+    writeFileSync(mysteryBun, '#!/bin/sh\necho HIJACKED\n')
+    chmodSync(mysteryBun, 0o755)
+
+    expect(() => formatWithBun(mysteryBun, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('needs Bun 1.4.4 or later')
   })
 
   test('formats output larger than the default spawnSync buffer', () => {
@@ -126,7 +152,7 @@ describe('formatWithBun', () => {
 
   test('names the signal that killed bun fmt', () => {
     const killedBun = join(scratch, 'killed-bun')
-    writeFileSync(killedBun, '#!/bin/sh\nkill -9 $$\n')
+    writeFileSync(killedBun, '#!/bin/sh\n[ \"$1\" = --version ] && { echo 1.4.4; exit 0; }\nkill -9 $$\n')
     chmodSync(killedBun, 0o755)
 
     expect(formatWithBun(killedBun, 'a.md', UNALIGNED_TABLE, scratch)).toEqual({ ok: false, message: 'bun fmt was killed by SIGKILL' })
@@ -134,7 +160,7 @@ describe('formatWithBun', () => {
 
   test('returns other bun fmt failures for the file', () => {
     const failingBun = join(scratch, 'failing-bun')
-    writeFileSync(failingBun, '#!/bin/sh\necho \'error: Unexpected token\' >&2\nexit 2\n')
+    writeFileSync(failingBun, '#!/bin/sh\n[ \"$1\" = --version ] && { echo 1.4.4; exit 0; }\necho \'error: Unexpected token\' >&2\nexit 2\n')
     chmodSync(failingBun, 0o755)
 
     expect(formatWithBun(failingBun, 'a.md', UNALIGNED_TABLE, scratch)).toEqual({ ok: false, message: 'error: Unexpected token' })

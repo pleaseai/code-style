@@ -121,7 +121,7 @@ export function pleaseai(
   const { canonicalPluginNames = false, formatters, quality: enableQuality = false, ...antfuOptions } = options
   const autoRenamePlugins = antfuOptions.autoRenamePlugins ?? true
   const { antfu: antfuFormatters, bun: enableBunFmt } = splitBunFormatter(formatters)
-  const formatterConfigs = enableBunFmt ? bunFmt(antfuOptions.markdown !== false) : []
+  const formatterConfigs = enableBunFmt ? bunFmt(antfuOptions.markdown !== false, antfuOptions.rules) : []
 
   const composer = antfu(
     {

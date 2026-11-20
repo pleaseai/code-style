@@ -43,12 +43,62 @@ function bunBinary(): string {
   return process.versions.bun ? process.execPath : 'bun'
 }
 
+const MIN_BUN_VERSION = [1, 4, 4]
+const OUTDATED_BUN_MESSAGE = '`formatters.markdown: \'bun\'` needs Bun 1.4.4 or later, which ships `bun fmt`. Upgrade Bun or pick another formatter.'
+
+/** Binaries already confirmed to be new enough, so `--version` runs once per binary. */
+const checkedBunBinaries = new Set<string>()
+
+function isSupportedBunVersion(version: string): boolean {
+  const parts = /^(\d+)\.(\d+)\.(\d+)/.exec(version.trim())?.slice(1).map(Number)
+  if (!parts) {
+    return false
+  }
+  for (const [index, min] of MIN_BUN_VERSION.entries()) {
+    if (parts[index]! !== min) {
+      return parts[index]! > min
+    }
+  }
+  return true
+}
+
+/**
+ * Bun before 1.4.4 ignores `--no-script` and runs the project's `fmt` script,
+ * whose output would be applied as the fix, so the version is checked first.
+ */
+function assertBunSupportsFmt(bin: string): void {
+  if (checkedBunBinaries.has(bin)) {
+    return
+  }
+  let version: string | undefined
+  if (bin === process.execPath && process.versions.bun) {
+    version = process.versions.bun
+  }
+  else {
+    const result = spawnSync(bin, ['--version'], { encoding: 'utf8' })
+    if (result.error) {
+      const code = 'code' in result.error ? result.error.code : undefined
+      if (typeof code === 'string' && UNRUNNABLE_BUN_ERRORS.has(code)) {
+        throw new Error(`\`formatters.markdown: 'bun'\` needs Bun on PATH, but \`${bin}\` could not be run: ${result.error.message}`)
+      }
+    }
+    else if (result.status === 0) {
+      version = result.stdout
+    }
+  }
+  if (version === undefined || !isSupportedBunVersion(version)) {
+    throw new Error(OUTDATED_BUN_MESSAGE)
+  }
+  checkedBunBinaries.add(bin)
+}
+
 /**
  * Formats `text` as `filename` with `bun fmt`. `bun fmt` reads `bunfig.toml`
  * from `cwd`, not from the file's directory. Throws when Bun cannot format at
  * all, so a missing or outdated Bun fails once instead of on every file.
  */
 export function formatWithBun(bin: string, filename: string, text: string, cwd: string): BunFmtResult {
+  assertBunSupportsFmt(bin)
   // The default 1 MiB `maxBuffer` would fail a large Markdown file with ENOBUFS.
   const result = spawnSync(bin, [...BUN_FMT_ARGS, '--stdin-filepath', filename], { cwd, encoding: 'utf8', input: text, maxBuffer: Infinity })
   if (result.error) {
@@ -62,7 +112,7 @@ export function formatWithBun(bin: string, filename: string, text: string, cwd: 
     return { ok: true, code: result.stdout }
   }
   if (result.stderr.includes('Script not found "fmt"')) {
-    throw new Error(`\`formatters.markdown: 'bun'\` needs Bun 1.4.4 or later, which ships \`bun fmt\`. Upgrade Bun or pick another formatter.`)
+    throw new Error(OUTDATED_BUN_MESSAGE)
   }
   const fallback = result.signal ? `bun fmt was killed by ${result.signal}` : `bun fmt exited with ${result.status}`
   return { ok: false, message: result.stderr.trim() || fallback }
@@ -122,7 +172,7 @@ export function splitBunFormatter(formatters: boolean | PleaseaiFormatters | und
  * `.mdx` (plain text) with `pleaseai/bun-fmt`. Markdown and MDX code blocks
  * inside Markdown are skipped: they are part of the file that contains them.
  */
-export function bunFmt(markdownLanguage: boolean): TypedFlatConfigItem[] {
+export function bunFmt(markdownLanguage: boolean, rules?: TypedFlatConfigItem['rules']): TypedFlatConfigItem[] {
   const markdown: TypedFlatConfigItem = {
     name: 'pleaseai/formatter/bun/markdown',
     files: [GLOB_MARKDOWN],
@@ -145,5 +195,7 @@ export function bunFmt(markdownLanguage: boolean): TypedFlatConfigItem[] {
       languageOptions: { parser: parserPlain },
       rules: { 'pleaseai/bun-fmt': 'error' },
     },
+    // Scoped by `files` so the top-level `rules` option wins over the severities above.
+    ...(rules ? [{ name: 'pleaseai/formatter/bun/rules', files: [GLOB_MARKDOWN, GLOB_MDX], rules }] : []),
   ]
 }

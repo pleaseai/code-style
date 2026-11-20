@@ -428,7 +428,7 @@ export default pleaseai({
 })
 ```
 
-- 코드 블록과 MDX의 JSX는 포매팅하지 않습니다. 이 부분은 기존 ESLint 규칙이 계속 린트합니다.
+- 코드 블록과 MDX의 JSX는 포매팅하지 않습니다. `.md` 파일의 코드 블록은 기존 ESLint 규칙이 계속 린트하지만, `.mdx` 파일의 코드와 JSX는 포매팅도 린트도 하지 않습니다.
 - `bun fmt`는 ESLint 작업 디렉터리에 있는 `bunfig.toml`의 `[fmt]` 섹션을 읽습니다. 예를 들어 `printWidth`, `proseWrap`, `ignorePatterns`를 여기서 설정합니다. 프로젝트에 `fmt` 스크립트가 있어도 포매터 대신 실행되지 않습니다.
 - `slidev`와 함께 쓸 수 없습니다. `slidev`는 Slidev 덱을 Prettier로 포매팅하므로 `markdown: 'prettier'`가 필요합니다.
 - ESLint의 `--cache`는 `bunfig.toml` 변경을 감지하지 못합니다. `[fmt]` 섹션을 바꾼 뒤에는 `.eslintcache`를 지우세요.

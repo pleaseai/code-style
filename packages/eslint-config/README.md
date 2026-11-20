@@ -428,7 +428,7 @@ export default pleaseai({
 })
 ```
 
-- Code blocks and MDX JSX are not formatted. The existing ESLint rules keep linting them.
+- Code blocks and MDX JSX are not formatted. The existing ESLint rules keep linting code blocks in `.md` files, but code and JSX in `.mdx` files are neither formatted nor linted.
 - `bun fmt` reads the `[fmt]` section of `bunfig.toml` in ESLint's working directory, for example `printWidth`, `proseWrap` or `ignorePatterns`. A project `fmt` script does not run in its place.
 - It cannot be combined with `slidev`, which formats Slidev decks with Prettier and needs `markdown: 'prettier'`.
 - ESLint's `--cache` does not track `bunfig.toml`. Delete `.eslintcache` after changing its `[fmt]` section.
