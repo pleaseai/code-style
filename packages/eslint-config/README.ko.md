@@ -416,7 +416,7 @@ bun add -D eslint-plugin-format
 
 #### `bun fmt`로 Markdown 포매팅
 
-`markdown: 'bun'`을 지정하면 `pleaseai/bun-fmt` 규칙이 `.md`와 `.mdx` 파일을 [`bun fmt`](https://bun.com/docs/format)로 포매팅합니다. 그래서 `eslint --fix`와 저장 시 자동 수정에 그대로 적용됩니다. `PATH`에 Bun 1.4.4 이상이 있어야 하고, 추가 패키지는 필요 없습니다. `eslint-plugin-format`은 다른 포매터를 함께 켤 때만 설치합니다.
+`markdown: 'bun'`을 지정하면 `pleaseai/bun-fmt` 규칙이 `.md`와 `.mdx` 파일을 [`bun fmt`](https://bun.com/docs/format)로 포매팅합니다. 그래서 `eslint --fix`와 저장 시 자동 수정에 그대로 적용됩니다. `PATH`에 Bun 1.4.4 이상의 정식 릴리스가 있어야 하고(canary·debug 빌드는 거부합니다), 추가 패키지는 필요 없습니다. `eslint-plugin-format`은 다른 포매터를 함께 켤 때만 설치합니다.
 
 ```js
 import pleaseai from '@pleaseai/eslint-config'

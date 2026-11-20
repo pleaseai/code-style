@@ -42,7 +42,7 @@ export interface PleaseaiOptions extends Omit<OptionsConfig, 'formatters'>, Omit
   /**
    * Format files that ESLint cannot handle natively. Same as antfu's
    * `formatters`, plus `markdown: 'bun'`: `.md` and `.mdx` are formatted with
-   * `bun fmt` (Bun 1.4.4 or later on `PATH`) through the `pleaseai/bun-fmt`
+   * `bun fmt` (a stable Bun 1.4.4 or later on `PATH`) through the `pleaseai/bun-fmt`
    * rule. Code blocks and MDX JSX are not formatted, `bun fmt` reads the
    * `[fmt]` section of `bunfig.toml` in ESLint's working directory, and
    * `eslint-plugin-format` is only needed for the other formatters.

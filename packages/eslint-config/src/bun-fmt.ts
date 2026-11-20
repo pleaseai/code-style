@@ -41,8 +41,8 @@ export interface PleaseaiFormatters extends Omit<OptionsFormatters, 'markdown'> 
   /**
    * Enable formatting support for Markdown.
    *
-   * `'bun'` formats `.md` and `.mdx` with `bun fmt`, which needs Bun 1.4.4
-   * or later on `PATH`. `'prettier'`, `'dprint'` and `true` go to antfu.
+   * `'bun'` formats `.md` and `.mdx` with `bun fmt`, which needs a stable
+   * Bun 1.4.4 or later on `PATH`. `'prettier'`, `'dprint'` and `true` go to antfu.
    */
   markdown?: OptionsFormatters['markdown'] | 'bun'
 }
@@ -62,19 +62,24 @@ function bunBinary(): string {
 }
 
 const MIN_BUN_VERSION = [1, 4, 4]
-const OUTDATED_BUN_MESSAGE = '`formatters.markdown: \'bun\'` needs Bun 1.4.4 or later, which ships `bun fmt`. Upgrade Bun or pick another formatter.'
+const OUTDATED_BUN_MESSAGE = '`formatters.markdown: \'bun\'` needs Bun 1.4.4 or later, a stable release that ships `bun fmt`. Canary and debug builds are not supported. Upgrade Bun or pick another formatter.'
 
-/** Binaries already confirmed to be new enough, so `--version` runs once per binary. */
+/** Binaries already confirmed to be new enough, so `--revision` runs once per binary. */
 const checkedBunBinaries = new Set<string>()
 
-function isSupportedBunVersion(version: string): boolean {
-  const parts = /^(\d+)\.(\d+)\.(\d+)/.exec(version.trim())?.slice(1).map(Number)
+/**
+ * Accepts the `bun --revision` output of a stable release, `1.4.4+<sha>` (or
+ * a bare `1.4.4`). Canary and debug builds print a pre-release tag there
+ * (`1.4.4-canary.12+<sha>`) and are rejected whatever their version.
+ */
+function isSupportedBunVersion(revision: string): boolean {
+  const parts = /^(\d+)\.(\d+)\.(\d+)(?:\+[\da-f]+)?$/.exec(revision.trim())?.slice(1).map(Number)
   if (!parts) {
     return false
   }
   for (const [index, min] of MIN_BUN_VERSION.entries()) {
-    if (parts[index]! !== min) {
-      return parts[index]! > min
+    if (parts[index] !== min) {
+      return parts[index] > min
     }
   }
   return true
@@ -98,12 +103,16 @@ function throwIfBunTimedOut(bin: string, args: string, error: Error, timeout: nu
   }
 }
 
-/** Runs `bin --version`; throws with the real cause when that cannot be done. */
-function readBunVersion(bin: string, timeout: number): string {
-  const result = spawnSync(bin, ['--version'], { encoding: 'utf8', timeout })
+/**
+ * Runs `bin --revision`; throws with the real cause when that cannot be done.
+ * `--version` and `process.versions.bun` leave out the canary tag, so they
+ * cannot tell a canary build from a release.
+ */
+function readBunRevision(bin: string, timeout: number): string {
+  const result = spawnSync(bin, ['--revision'], { encoding: 'utf8', timeout })
   if (result.error) {
     throwIfBunUnrunnable(bin, result.error)
-    throwIfBunTimedOut(bin, '--version', result.error, timeout)
+    throwIfBunTimedOut(bin, '--revision', result.error, timeout)
     throw new Error(`\`formatters.markdown: 'bun'\` could not determine the version of \`${bin}\`: ${result.error.message}`)
   }
   if (result.status !== 0) {
@@ -121,8 +130,7 @@ function assertBunSupportsFmt(bin: string, timeout: number): void {
   if (checkedBunBinaries.has(bin)) {
     return
   }
-  const version = bin === process.execPath && process.versions.bun ? process.versions.bun : readBunVersion(bin, timeout)
-  if (!isSupportedBunVersion(version)) {
+  if (!isSupportedBunVersion(readBunRevision(bin, timeout))) {
     throw new Error(OUTDATED_BUN_MESSAGE)
   }
   checkedBunBinaries.add(bin)

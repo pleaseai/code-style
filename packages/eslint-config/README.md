@@ -416,7 +416,7 @@ bun add -D eslint-plugin-format
 
 #### Markdown with `bun fmt`
 
-`markdown: 'bun'` formats `.md` and `.mdx` files with [`bun fmt`](https://bun.com/docs/format) through the `pleaseai/bun-fmt` rule, so `eslint --fix` and fix on save apply it. It needs Bun 1.4.4 or later on `PATH` and no extra package; `eslint-plugin-format` is only needed when another formatter is on.
+`markdown: 'bun'` formats `.md` and `.mdx` files with [`bun fmt`](https://bun.com/docs/format) through the `pleaseai/bun-fmt` rule, so `eslint --fix` and fix on save apply it. It needs a stable Bun release, 1.4.4 or later, on `PATH` (canary and debug builds are rejected) and no extra package; `eslint-plugin-format` is only needed when another formatter is on.
 
 ```js
 import pleaseai from '@pleaseai/eslint-config'
