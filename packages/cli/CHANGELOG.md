@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/pleaseai/code-style/compare/code-style-v0.1.2...code-style-v0.1.3) (2026-11-20)
+
+
+### Features
+
+* **cli:** report missing antislop plugins in doctor and offer to install them in update ([#89](https://github.com/pleaseai/code-style/issues/89)) ([e78cb93](https://github.com/pleaseai/code-style/commit/e78cb93a4cce7c11cbf1ec8910c3b5dce4b44151))
+
 ## [0.1.2](https://github.com/pleaseai/code-style/compare/code-style-v0.1.1...code-style-v0.1.2) (2026-11-19)
 
 
