@@ -2,6 +2,7 @@ import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
+import { quality } from './quality'
 
 export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem, 'files' | 'ignores'> {
   /**
@@ -34,6 +35,21 @@ export interface PleaseaiOptions extends OptionsConfig, Omit<TypedFlatConfigItem
    * @default false
    */
   canonicalPluginNames?: boolean
+  /**
+   * Enable the `quality/*` rules vendored from
+   * [anti-slop](https://github.com/dmmulroy/anti-slop). They reject
+   * low-evidence typing: widening known values to `unknown` and asserting
+   * them back, chained type assertions, `unknown` returns and aliases, unsafe
+   * dictionary value types, `object` parameters, filter/map passes, reducer
+   * accumulator copies, `Reflect.get` / `Reflect.apply`, and conditional
+   * empty-object spreads.
+   *
+   * Every rule is an error on JS and TS files, outside Markdown code blocks.
+   * Turn one off with `rules: { 'quality/no-object-parameters': 'off' }`.
+   *
+   * @default false
+   */
+  quality?: boolean
 }
 
 const { '@typescript-eslint': _ts, 'import-lite': _importLite, ...keptPluginRenaming } = defaultPluginRenaming
@@ -87,7 +103,7 @@ export function pleaseai(
   options: PleaseaiOptions = {},
   ...userConfigs: TypedFlatConfigItem[]
 ): ReturnType<typeof antfu> {
-  const { canonicalPluginNames = false, ...antfuOptions } = options
+  const { canonicalPluginNames = false, quality: enableQuality = false, ...antfuOptions } = options
   const autoRenamePlugins = antfuOptions.autoRenamePlugins ?? true
 
   const composer = antfu(
@@ -113,6 +129,10 @@ export function pleaseai(
     },
     ...userConfigs,
   ).onResolved(scopeAntislopToParsedFiles)
+
+  if (enableQuality) {
+    composer.insertBefore('antfu/disables/scripts', quality())
+  }
 
   if (!canonicalPluginNames) {
     return composer

@@ -14,5 +14,7 @@ export default pleaseai({
     // Upstream Nimbus layout, unmodified. Its `<script is:inline>` nested in
     // a JSX expression sends eslint-plugin-astro's indent fixes into a loop.
     'apps/docs/src/layouts/DocsLayout.astro',
+    'packages/eslint-config/src/quality/vendor/**',
+    'packages/eslint-config/test/quality/upstream/**',
   ],
 })

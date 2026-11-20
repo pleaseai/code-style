@@ -226,6 +226,28 @@ export default pleaseai({
 
 이 저장소에서 antislop을 처음 켰을 때 193건이 보고되었습니다. `slop/no-em-dash` 174건(Markdown 136건), `sonarjs/cognitive-complexity` 8건, `slop/prefer-jsdoc` 7건(자동 수정 가능), `slop/max-comment-length` 3건, `slop/no-trivial-functions` 1건입니다. 지금은 모두 고쳤고, 이 저장소도 antislop을 켠 상태로 린트합니다. 측정 결과는 [이슈 #76](https://github.com/pleaseai/code-style/issues/76)에 있습니다.
 
+### Quality 규칙
+
+`quality: true`는 [anti-slop](https://github.com/dmmulroy/anti-slop)의 `quality/*` 규칙 12개를 켭니다. 규칙은 [`@nkzw/oxlint-config`](https://github.com/nkzw-tech/oxlint-config)를 거쳐 이 패키지에 vendoring되어 있습니다. 근거가 부족한 타입과 코드 패턴을 잡는 규칙들로, 이미 아는 값을 `unknown`으로 넓혔다가 다시 단언하는 코드, 연쇄 타입 단언, `unknown` 반환 타입과 타입 별칭, 안전하지 않은 딕셔너리 값 타입, `object` 매개변수, 연달아 쓰는 `filter`/`map`, reducer 누적값 복사, `Reflect.get` / `Reflect.apply`, 조건부 빈 객체 spread를 보고합니다. 기본값은 꺼짐이며 추가 패키지는 필요 없습니다.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  quality: true,
+  rules: {
+    'quality/no-object-parameters': 'off',
+  },
+})
+```
+
+- 모든 규칙은 JS와 TS 파일에서 오류입니다. Markdown의 코드 블록은 검사하지 않습니다.
+- `no-object-parameters`와 `no-unknown-returns`가 가장 주관적인 규칙입니다. 코드에 맞지 않으면 `rules`에서 끄세요.
+- `quality/no-chained-type-assertions`는 `antislop`의 `slop/no-chained-type-assertions`와 같은 코드를 보고합니다. 둘 다 켰다면 하나를 끄세요.
+- 자동 수정을 지원하는 규칙은 없습니다.
+
+이 저장소에서 `quality: true`를 켜면 29건이 보고됩니다. `no-known-value-widening` 13건, `no-array-filter-map` 10건, `no-unsafe-dictionary-type` 3건, `no-conditional-empty-object-spread` 2건, `no-unknown-returns` 1건입니다. 더 큰 private 모노레포(파일 2,669개)에서는 1,172개 파일에서 4,396건이 보고되었고, 그중 61%가 테스트 코드였습니다. 가장 많은 규칙은 `no-chained-type-assertions`(1,282건), `no-unsafe-dictionary-type`(1,240건), `no-known-value-widening`(745건), `no-conditional-empty-object-spread`(658건)입니다. 이 정도 양이라 기본값을 꺼짐으로 두었습니다. 측정 결과는 [이슈 #77](https://github.com/pleaseai/code-style/issues/77)에 있습니다.
+
 ## 선택적 설정
 
 ### React
