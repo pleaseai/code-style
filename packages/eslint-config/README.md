@@ -228,7 +228,7 @@ When this repository first turned antislop on, it reported 193 findings: 174 `sl
 
 ### Quality Rules
 
-`quality: true` turns on 12 `quality/*` rules from [anti-slop](https://github.com/dmmulroy/anti-slop), vendored through [`@nkzw/oxlint-config`](https://github.com/nkzw-tech/oxlint-config). They reject types that the code gives no evidence for: a known value widened to `unknown` and asserted back, chained type assertions, `unknown` returns and type aliases, unsafe dictionary value types, `object` parameters, adjacent `filter`/`map` passes, reducer accumulator copies, `Reflect.get` / `Reflect.apply`, and conditional empty-object spreads. The option is off by default and needs no extra packages.
+`quality: true` turns on 12 `quality/*` rules from [anti-slop](https://github.com/dmmulroy/anti-slop), vendored through [`@nkzw/oxlint-config`](https://github.com/nkzw-tech/oxlint-config). They flag low-evidence typing and code patterns: a known value widened to `unknown` and asserted back, chained type assertions, `unknown` returns and type aliases, unsafe dictionary value types, `object` parameters, adjacent `filter`/`map` passes, reducer accumulator copies, `Reflect.get` / `Reflect.apply`, and conditional empty-object spreads. The option is off by default and needs no extra packages.
 
 ```js
 import pleaseai from '@pleaseai/eslint-config'
