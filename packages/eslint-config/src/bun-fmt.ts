@@ -19,6 +19,21 @@ const UNRUNNABLE_BUN_ERRORS = new Set(['ENOENT', 'EACCES'])
  */
 const BUN_FMT_ARGS = ['fmt', '--no-script', '--embedded-language-formatting=off']
 
+/**
+ * A plain-parsed file reaches antfu's files-less JavaScript configs, but its
+ * AST is empty, so only these rules, which read the raw text, ever report.
+ * `bun fmt` owns that whitespace, and `style/no-trailing-spaces` would delete
+ * Markdown hard breaks. Antfu's Markdown language runs none of them either.
+ */
+const PLAIN_TEXT_RULES_OFF: TypedFlatConfigItem['rules'] = {
+  'no-irregular-whitespace': 'off',
+  'style/eol-last': 'off',
+  'style/no-multiple-empty-lines': 'off',
+  'style/no-tabs': 'off',
+  'style/no-trailing-spaces': 'off',
+  'unicode-bom': 'off',
+}
+
 export interface PleaseaiFormatters extends Omit<OptionsFormatters, 'markdown'> {
   /**
    * Enable formatting support for Markdown.
@@ -185,6 +200,7 @@ export function bunFmt(markdownLanguage: boolean, severity: Linter.RuleEntry = '
   }
   if (!markdownLanguage) {
     markdown.languageOptions = { parser: parserPlain }
+    markdown.rules = { ...PLAIN_TEXT_RULES_OFF, ...markdown.rules }
   }
   return [
     {
@@ -197,7 +213,7 @@ export function bunFmt(markdownLanguage: boolean, severity: Linter.RuleEntry = '
       files: [GLOB_MDX],
       ignores: [GLOB_MDX_IN_MARKDOWN],
       languageOptions: { parser: parserPlain },
-      rules: { 'pleaseai/bun-fmt': severity },
+      rules: { ...PLAIN_TEXT_RULES_OFF, 'pleaseai/bun-fmt': severity },
     },
   ]
 }

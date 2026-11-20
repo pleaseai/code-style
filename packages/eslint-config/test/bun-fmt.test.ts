@@ -65,6 +65,17 @@ describe('formatters.markdown: bun', () => {
     expect(result.output).toBe(ALIGNED_TABLE)
   })
 
+  test('keeps Markdown hard breaks and other whitespace in plain-parsed files', async () => {
+    const code = '# Title\n\nLine one  \nLine two\n\n\n\n-\titem\n- a b'
+
+    for (const [filePath, options] of [['docs/a.mdx', {}], ['docs/a.md', { markdown: false }]] as const) {
+      const result = await lintWithBunFmt(code, filePath, options)
+
+      expect(result.messages.filter(message => message.ruleId !== 'pleaseai/bun-fmt')).toEqual([])
+      expect(result.output).toContain('Line one  \nLine two')
+    }
+  })
+
   test('reads the fmt section of bunfig.toml in the working directory', async () => {
     const project = mkdtempSync(join(scratch, 'project-'))
     writeFileSync(join(project, 'bunfig.toml'), '[fmt]\nignorePatterns = ["**/CHANGELOG.md"]\n')
