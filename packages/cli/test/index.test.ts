@@ -8,7 +8,7 @@ import { describe, expect, test } from 'bun:test'
 
 const CLI = fileURLToPath(new URL('../src/index.ts', import.meta.url))
 
-function run(args: string[], cwd?: string, extraEnv: Record<string, string> = {}): { status: number | null, stdout: string, stderr: string } {
+function run(args: string[], cwd?: string, extraEnv: Record<string, string> = {}) {
   const env = { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8', LC_MESSAGES: 'en_US.UTF-8', ...extraEnv }
   const res = spawnSync('bun', [CLI, ...args], { encoding: 'utf-8', env, cwd, stdio: ['ignore', 'pipe', 'pipe'] })
   return { status: res.status, stdout: res.stdout, stderr: res.stderr }

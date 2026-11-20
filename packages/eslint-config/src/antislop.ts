@@ -90,13 +90,18 @@ export function scopeAntislopToParsedFiles(configs: TypedFlatConfigItem[]): Type
     if (config === universal || !files || !(languageOptions?.parser || language)) {
       return []
     }
-    return groups.map(({ name, globs, rules }) => ({
-      name,
-      ...(basePath ? { basePath } : {}),
-      files: files.flatMap(pattern => globs.map(glob => [pattern, glob].flat())),
-      ignores: [...(ignores ?? []), ...(universal.ignores ?? [])],
-      rules,
-    }))
+    return groups.map(({ name, globs, rules }) => {
+      const scoped: TypedFlatConfigItem = {
+        name,
+        files: files.flatMap(pattern => globs.map(glob => [pattern, glob].flat())),
+        ignores: [...(ignores ?? []), ...(universal.ignores ?? [])],
+        rules,
+      }
+      if (basePath) {
+        scoped.basePath = basePath
+      }
+      return scoped
+    })
   })
   universal.files = universal.files.filter(glob => glob === GLOB_SRC)
   const index = configs.indexOf(universal)

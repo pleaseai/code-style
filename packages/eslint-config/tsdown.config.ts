@@ -11,4 +11,5 @@ export default defineConfig({
   // a tsdown bump could otherwise ship entry points the `exports` map misses
   // (ERR_PACKAGE_PATH_NOT_EXPORTED).
   outExtensions: () => ({ js: '.mjs', dts: '.d.mts' }),
+  copy: [{ from: 'src/quality/vendor/LICENSE', to: 'dist/quality/vendor' }],
 })

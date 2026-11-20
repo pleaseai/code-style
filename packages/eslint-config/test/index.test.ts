@@ -1,3 +1,4 @@
+import type { Linter } from 'eslint'
 import type { TypedFlatConfigItem } from '../src/index'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -21,7 +22,7 @@ function resolveWithoutEslintPluginImport(...args: string[]) {
   return Bun.spawnSync([process.execPath, fixture, ...args], { stdout: 'ignore', stderr: 'pipe' })
 }
 
-function ruleEntry(configs: TypedFlatConfigItem[], id: string): unknown {
+function ruleEntry(configs: TypedFlatConfigItem[], id: string): Linter.RuleEntry | undefined {
   return configs.filter(config => config.rules?.[id] !== undefined).at(-1)?.rules?.[id]
 }
 
@@ -107,6 +108,49 @@ describe('antislop', () => {
 
     expect(result!.messages.filter(message => message.fatal)).toEqual([])
     expect(result!.messages.map(message => message.ruleId)).toContain('slop/no-em-dash')
+  })
+})
+
+describe('quality', () => {
+  const code = 'export function read(owner: object, key: string) {\n  return Reflect.get(owner, key)\n}\n'
+  const lint = async (...args: Parameters<typeof pleaseai>) => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(...args) })
+    const [result] = await eslint.lintText(code, { filePath: 'src/read.ts' })
+    return result!.messages.map(message => message.ruleId)
+  }
+
+  test('is off by default', async () => {
+    expect(pluginNames(await pleaseai())).not.toContain('quality')
+  })
+
+  test('reports the vendored rules as errors on TypeScript files', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ quality: true }) })
+    const [result] = await eslint.lintText(code, { filePath: 'src/read.ts' })
+    const quality = result!.messages.filter(message => message.ruleId?.startsWith('quality/'))
+
+    expect(quality.map(message => [message.ruleId, message.severity])).toEqual([
+      ['quality/no-object-parameters', 2],
+      ['quality/no-reflect-get', 2],
+    ])
+    expect(quality[0]!.message).toContain('Parameter `owner` uses')
+  })
+
+  test('lets options.rules and user configs turn a rule off', async () => {
+    const fromOptions = await lint({ quality: true, rules: { 'quality/no-reflect-get': 'off' } })
+    const fromUserConfig = await lint({ quality: true }, { rules: { 'quality/no-object-parameters': 'off' } })
+
+    expect(fromOptions).not.toContain('quality/no-reflect-get')
+    expect(fromOptions).toContain('quality/no-object-parameters')
+    expect(fromUserConfig).not.toContain('quality/no-object-parameters')
+    expect(fromUserConfig).toContain('quality/no-reflect-get')
+  })
+
+  test('skips code blocks in Markdown', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ quality: true }) })
+    const [result] = await eslint.lintText(`# Example\n\n\`\`\`ts\n${code}\`\`\`\n`, { filePath: 'docs/read.md' })
+
+    expect(result!.messages.filter(message => message.fatal)).toEqual([])
+    expect(result!.messages.map(message => message.ruleId).filter(id => id?.startsWith('quality/'))).toEqual([])
   })
 })
 

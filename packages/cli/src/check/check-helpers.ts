@@ -130,6 +130,13 @@ function unquote(text: string): string {
   return text.replace(/^['"`]|['"`]$/g, '')
 }
 
+const JS_TO_SOURCE = new Map([
+  ['.js', ['.ts', '.tsx']],
+  ['.jsx', ['.tsx']],
+  ['.mjs', ['.mts']],
+  ['.cjs', ['.cts']],
+])
+
 function resolveRelative(importer: string, spec: string, fileSet: Set<string>, exts: string[]): string | undefined {
   if (!spec.startsWith('.')) {
     return undefined
@@ -139,18 +146,12 @@ function resolveRelative(importer: string, spec: string, fileSet: Set<string>, e
   // runtime suffix maps to its own source flavor (`.mjs` → `.mts`, `.cjs` → `.cts`).
   const jsMatch = /\.(?:[cm]?js|jsx)$/.exec(base)
   const stripped = jsMatch == null ? base : base.slice(0, jsMatch.index)
-  const jsToSource: Record<string, string[]> = {
-    '.js': ['.ts', '.tsx'],
-    '.jsx': ['.tsx'],
-    '.mjs': ['.mts'],
-    '.cjs': ['.cts'],
-  }
-  const mapped = jsMatch == null ? [] : (jsToSource[jsMatch[0]] ?? []).map(e => `${stripped}${e}`)
+  const mapped = jsMatch == null ? [] : (JS_TO_SOURCE.get(jsMatch[0]) ?? []).map(e => `${stripped}${e}`)
   const options = [base, ...mapped, ...exts.map(e => `${base}${e}`), ...exts.map(e => `${base}/index${e}`)]
   return options.find(o => fileSet.has(o))
 }
 
-const IMPORTED_NAME: Record<string, string> = { 'import-namespace': '*', 'import-default': 'default' }
+const IMPORTED_NAME = new Map([['import-namespace', '*'], ['import-default', 'default']])
 
 function tsImportsByTarget(matches: ExtractMatch[], layout: TestLayout, fileSet: Set<string>): Map<string, Map<string, Set<string>>> {
   const imports = new Map<string, Map<string, Set<string>>>()
@@ -162,7 +163,7 @@ function tsImportsByTarget(matches: ExtractMatch[], layout: TestLayout, fileSet:
     if (target == null) {
       continue
     }
-    const name = IMPORTED_NAME[m.ruleId] ?? m.text
+    const name = IMPORTED_NAME.get(m.ruleId) ?? m.text
     const byName = imports.get(target) ?? new Map<string, Set<string>>()
     byName.set(name, (byName.get(name) ?? new Set<string>()).add(m.file))
     imports.set(target, byName)
@@ -209,9 +210,9 @@ export function typescriptHelpers(
   fileSet: Set<string>,
 ): HelperLanguage {
   const lang: HelperLanguage = { language: 'typescript', layout, units, candidates: [], importers: () => new Set() }
-  lang.candidates = matches
-    .filter(m => m.ruleId === 'helper-candidate' && isTestSide(m.file, lang, u => u.testRoots))
-    .map(m => ({ file: m.file, line: m.line, name: m.text }))
+  lang.candidates = matches.flatMap(m => (m.ruleId === 'helper-candidate' && isTestSide(m.file, lang, u => u.testRoots)
+    ? [{ file: m.file, line: m.line, name: m.text }]
+    : []))
   const imports = tsImportsByTarget(matches, layout, fileSet)
   const ex = tsExports(matches)
   lang.importers = (c) => {
@@ -268,9 +269,9 @@ export function dartHelpers(
   fileSet: Set<string>,
 ): HelperLanguage {
   const lang: HelperLanguage = { language: 'dart', layout, units, candidates: [], importers: () => new Set() }
-  lang.candidates = matches
-    .filter(m => (m.ruleId === 'top-level-name' || m.ruleId === 'top-level-type-alias') && HELPER_NAME.test(m.text) && isTestSide(m.file, lang, u => u.testRoots))
-    .map(m => ({ file: m.file, line: m.line, name: m.text }))
+  lang.candidates = matches.flatMap(m => ((m.ruleId === 'top-level-name' || m.ruleId === 'top-level-type-alias') && HELPER_NAME.test(m.text) && isTestSide(m.file, lang, u => u.testRoots)
+    ? [{ file: m.file, line: m.line, name: m.text }]
+    : []))
   const cs = dartCombinators(matches)
   const withheld = new Set<string>()
   lang.withheld = { files: withheld, reason: 'repeated imports of one library with show/hide, or successive `show` clauses' }
@@ -414,9 +415,9 @@ export function jvmHelpers(
   const language = layout.language as 'kotlin' | 'java'
   const lang: HelperLanguage = { language, layout, units, candidates: [], importers: () => new Set() }
   const sourceSets = (u: Unit): string[] => [`src/test/${language}`, `src/testFixtures/${language}`].filter(s => s !== u.sourceRoots[0])
-  lang.candidates = matches
-    .filter(m => m.ruleId === 'helper-candidate' && isTestSide(m.file, lang, sourceSets))
-    .map(m => ({ file: m.file, line: m.line, name: m.text }))
+  lang.candidates = matches.flatMap(m => (m.ruleId === 'helper-candidate' && isTestSide(m.file, lang, sourceSets)
+    ? [{ file: m.file, line: m.line, name: m.text }]
+    : []))
   const packageOf = new Map<string, string>()
   const importsOf = new Map<string, string[]>()
   // `file\0spec` → the local name of an `import spec as alias`.

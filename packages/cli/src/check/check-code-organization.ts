@@ -33,7 +33,7 @@ const BATCH_SIZE = 200
  * `node_modules` outside a git work tree. Explicit paths bypass that filtering.
  */
 function extract(root: string, files: string[], fileSet: Set<string>, language: ExtractLanguage, anchorRoots: string[]): ExtractMatch[] {
-  const paths = files.filter(f => EXTENSIONS[language].test(f)).map(f => (f.startsWith('-') ? `./${f}` : f))
+  const paths = files.flatMap(f => (EXTENSIONS[language].test(f) ? [f.startsWith('-') ? `./${f}` : f] : []))
   const out: ExtractMatch[] = []
   for (let i = 0; i < paths.length; i += BATCH_SIZE) {
     out.push(...runExtraction(root, language, paths.slice(i, i + BATCH_SIZE), anchorRoots).filter(m => fileSet.has(m.file)))
