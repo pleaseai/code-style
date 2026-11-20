@@ -200,10 +200,12 @@ describe('formatWithBun', () => {
     ['a canary of the minimum version', '1.4.4-canary.12+38afee6c8'],
     ['a canary of a later version', '1.5.0-canary.1+38afee6c8'],
     ['a debug build', '1.4.4-debug+38afee6c8'],
+    ['malformed build metadata', '1.4.4+38afee6c8..x'],
   ])('rejects %s (%s)', (_, revision) => {
     const bin = echoBun(`rejected-bun-${revision}`, revision)
 
     expect(() => formatWithBun(bin, 'a.md', UNALIGNED_TABLE, scratch)).toThrow('needs Bun 1.4.4 or later')
+    expect(() => formatWithBun(bin, 'a.md', UNALIGNED_TABLE, scratch)).toThrow(`\`${bin} --revision\` printed \`${revision}\``)
   })
 
   test.each([

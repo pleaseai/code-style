@@ -74,7 +74,7 @@ const checkedBunBinaries = new Set<string>()
  * (`1.4.4-canary.12+<sha>`) and are rejected whatever their version.
  */
 function isSupportedBunVersion(revision: string): boolean {
-  const parts = /^(\d+)\.(\d+)\.(\d+)(?:\+[\da-z.-]+)?$/i.exec(revision.trim())?.slice(1).map(Number)
+  const parts = /^(\d+)\.(\d+)\.(\d+)(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?$/i.exec(revision.trim())?.slice(1).map(Number)
   if (!parts) {
     return false
   }
@@ -131,8 +131,9 @@ function assertBunSupportsFmt(bin: string, timeout: number): void {
   if (checkedBunBinaries.has(bin)) {
     return
   }
-  if (!isSupportedBunVersion(readBunRevision(bin, timeout))) {
-    throw new Error(OUTDATED_BUN_MESSAGE)
+  const revision = readBunRevision(bin, timeout).trim()
+  if (!isSupportedBunVersion(revision)) {
+    throw new Error(`${OUTDATED_BUN_MESSAGE} \`${bin} --revision\` printed \`${revision}\`.`)
   }
   checkedBunBinaries.add(bin)
 }
