@@ -682,7 +682,7 @@ import { combine, javascript, typescript, vue } from '@pleaseai/eslint-config'
 
 | 프로젝트                                     | 라이선스   | 용도                                                   |
 | -------------------------------------------- | ---------- | ------------------------------------------------------ |
-| [`antfu/eslint-config`][ref-antfu]           | MIT        | 기본 preset, `pleaseai()`가 감쌈                       |
+| [`antfu/eslint-config`][ref-antfu]           | MIT        | 기본 프리셋, `pleaseai()`가 감쌈                       |
 | [`antfu/eslint-plugin-slop`][ref-slop]       | MIT        | `antislop` 옵션의 `slop/*` 규칙                        |
 | [`SonarSource/SonarJS`][ref-sonarjs]         | LGPL-3.0   | `antislop` 옵션의 `sonarjs/*` 규칙 일부                |
 | [`nkzw-tech/oxlint-config`][ref-nkzw]        | MIT        | vendoring한 `quality/*` 규칙의 출처                    |
