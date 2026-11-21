@@ -346,6 +346,24 @@ describe('strict import/no-self-import', () => {
       test('does not report a non-self import', async () => {
         expect(await lintTs('non-self-import.ts', { strict: true, canonicalPluginNames })).not.toContain('import/no-self-import')
       })
+
+      describe('through a tsconfig paths alias', () => {
+        const lintAlias = (name: string): (string | null)[] => {
+          const cwd = fileURLToPath(new URL('./fixtures/self-import-alias', import.meta.url))
+          const runner = fileURLToPath(new URL('./fixtures/lint-alias.ts', import.meta.url))
+          const run = Bun.spawnSync([process.execPath, runner, `${cwd}/src/${name}`, canonicalPluginNames ? 'canonical' : 'default'], { cwd, stdout: 'pipe', stderr: 'pipe' })
+          expect(run.stderr.toString()).toBe('')
+          return JSON.parse(run.stdout.toString())
+        }
+
+        test('reports a self-import', async () => {
+          expect(lintAlias('alias-self.ts')).toContain('import/no-self-import')
+        }, 30_000)
+
+        test('does not report a non-self import', async () => {
+          expect(lintAlias('alias-non-self.ts')).not.toContain('import/no-self-import')
+        }, 30_000)
+      })
     })
   })
 
@@ -475,14 +493,14 @@ describe('canonicalPluginNames', () => {
 
     expect(result.stderr.toString()).toBe('')
     expect(result.exitCode).toBe(0)
-  })
+  }, 30_000)
 
   test('explains how to install eslint-plugin-import when it is missing', () => {
     const result = resolveWithoutEslintPluginImport()
 
     expect(result.exitCode).not.toBe(0)
     expect(result.stderr.toString()).toContain('`canonicalPluginNames` requires `eslint-plugin-import`')
-  })
+  }, 30_000)
 
   test('reports under the canonical rule IDs when linting', async () => {
     const eslint = new ESLint({

@@ -22,7 +22,7 @@ The languages, tools, and services this repository uses, with the versions pinne
 
 ## Key dependencies
 
-- `@pleaseai/eslint-config`: `@antfu/eslint-config` 9.x, ESLint 10, `@oxlint/plugins` (runs the vendored `quality/*` rules in ESLint), `eslint-plugin-package-json`, `eslint-plugin-import-x` (supplies `import/no-self-import` for the opt-in `strict` option), `eslint-import-resolver-typescript` (TypeScript resolution for that rule under `canonicalPluginNames`); optional peers `eslint-plugin-import`, `eslint-plugin-slop`, `eslint-plugin-sonarjs`
+- `@pleaseai/eslint-config`: `@antfu/eslint-config` 9.x, ESLint 10, `@oxlint/plugins` (runs the vendored `quality/*` rules in ESLint), `eslint-plugin-package-json`, `eslint-plugin-import-x` (supplies `import/no-self-import` for the opt-in `strict` option), `eslint-import-resolver-typescript` (TypeScript resolution for that rule in both plugin modes); optional peers `eslint-plugin-import`, `eslint-plugin-slop`, `eslint-plugin-sonarjs`
 - `@pleaseai/code-style` (CLI): `@clack/prompts`, `@pleaseai/ast-grep-config`; optional peer `@ast-grep/cli`
 
 ## Docs site

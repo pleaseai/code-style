@@ -105,6 +105,7 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
 
 - 2026-11-21: `eslint-plugin-import-x` as a regular dependency for the default mode (user decision). `eslint-plugin-import` was ruled out for its ESLint 10 peer range and its weight.
 - 2026-11-21 (review): import-x's default resolver skips `.ts` files, so extensionless and `.js` self-imports in TypeScript went unreported. The default mode now gives import-x a node resolver with TypeScript extensions and `.js` → `.ts` aliases. For `canonicalPluginNames`, `eslint-import-resolver-typescript` became a regular dependency (user decision, following `nkzw-tech/eslint-config`), wired by absolute path because `eslint-plugin-import` loads resolvers relative to the linted file.
+- 2026-11-21 (review): default mode switched from import-x's node resolver to `eslint-import-resolver-typescript`'s `createTypeScriptImportResolver` (user decision), so tsconfig `paths` aliases resolve the same way in both plugin modes.
 - Decision: The `strict` import rule is always `import/no-self-import`, including with `autoRenamePlugins: false` (task text expected `import-lite/no-self-import`).
   Rationale: antfu registers its import plugin natively as `import` and only renames `import-lite` rules; with `autoRenamePlugins: false` the plugin and its rules are still `import/*`, so the merge targets `replacePlugin('import', ...)` in both modes.
   Date/Author: 2026-11-21 / implement-executor

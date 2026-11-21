@@ -119,31 +119,22 @@ async function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> 
   return { ...original, rules: { ...original.rules, 'no-self-import': importXPlugin.rules!['no-self-import']! } }
 }
 
-/** Lets import-x resolve TypeScript sources: `.ts` extensions, and `.js`-style specifiers that point at `.ts` files. */
+/**
+ * Lets import-x resolve TypeScript sources through `eslint-import-resolver-typescript`: `.ts` extensions,
+ * `.js`-style specifiers that point at `.ts` files, and tsconfig `paths` aliases. Loaded only when `strict` is on.
+ */
 async function typeScriptResolverConfig(): Promise<TypedFlatConfigItem> {
-  const { createNodeResolver } = await import('eslint-plugin-import-x')
+  const { createTypeScriptImportResolver } = await import('eslint-import-resolver-typescript')
   return {
     name: 'pleaseai/strict/import-resolver',
     files: [GLOB_SRC],
-    settings: {
-      'import-x/resolver-next': [
-        createNodeResolver({
-          extensions: ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json', '.node'],
-          extensionAlias: {
-            '.js': ['.ts', '.tsx', '.js'],
-            '.jsx': ['.tsx', '.jsx'],
-            '.mjs': ['.mts', '.mjs'],
-            '.cjs': ['.cts', '.cjs'],
-          },
-        }),
-      ],
-    },
+    settings: { 'import-x/resolver-next': [createTypeScriptImportResolver()] },
   }
 }
 
 /**
- * The same TypeScript resolution for canonical mode's eslint-plugin-import, which loads resolvers by name or path
- * relative to the linted file. An absolute path to this package's own copy works without hoisting.
+ * The same `eslint-import-resolver-typescript` resolution for canonical mode's eslint-plugin-import, which loads
+ * resolvers by name or path relative to the linted file. An absolute path to this package's own copy works without hoisting.
  */
 function canonicalTypeScriptResolverConfig(): TypedFlatConfigItem {
   const resolver = createRequire(import.meta.url).resolve('eslint-import-resolver-typescript')
