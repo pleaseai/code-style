@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/pleaseai/code-style/compare/code-style-v0.1.3...code-style-v0.1.4) (2026-11-21)
+
+
+### Features
+
+* **eslint-config:** opt-in bun fmt Markdown formatter (formatters.markdown: 'bun') ([#92](https://github.com/pleaseai/code-style/issues/92)) ([aa0552c](https://github.com/pleaseai/code-style/commit/aa0552c14c2e7584b09ca56eeb7f15a0ad7967f9))
+
 ## [0.1.3](https://github.com/pleaseai/code-style/compare/code-style-v0.1.2...code-style-v0.1.3) (2026-11-20)
 
 
