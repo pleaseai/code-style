@@ -20,7 +20,7 @@ export default pleaseai({
     'apps/docs/src/layouts/DocsLayout.astro',
     'packages/eslint-config/src/quality/vendor/**',
     'packages/eslint-config/test/quality/upstream/**',
-    // Imports itself on purpose: the fixture for the strict `import/no-self-import` test.
-    'packages/eslint-config/test/fixtures/self-import.mjs',
+    // Import themselves on purpose: the fixtures for the strict `import/no-self-import` test.
+    'packages/eslint-config/test/fixtures/self-import*',
   ],
 })
