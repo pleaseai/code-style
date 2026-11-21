@@ -69,12 +69,14 @@ export interface PleaseaiOptions extends Omit<OptionsConfig, 'formatters'>, Omit
   /**
    * Enable stricter rules that antfu leaves off or loose:
    * `no-promise-executor-return`, `eqeqeq` (`'always'` instead of `'smart'`),
-   * `unicorn/prefer-set-has` and `ts/no-confusing-non-null-assertion`
-   * (`@typescript-eslint/...` with `canonicalPluginNames`).
+   * `unicorn/prefer-set-has`, `ts/no-confusing-non-null-assertion`
+   * (`@typescript-eslint/...` with `canonicalPluginNames`) and
+   * `import/no-self-import`. The last comes from `eslint-plugin-import-x`, or
+   * from `eslint-plugin-import` with `canonicalPluginNames`.
    *
    * Every rule is an error on JS and TS files, outside Markdown code blocks.
-   * A rule is skipped when antfu does not load its plugin (`typescript: false`
-   * or `unicorn: false`). Turn one off with `rules: { eqeqeq: 'off' }`.
+   * A rule is skipped when antfu does not load its plugin (`typescript: false`,
+   * `unicorn: false` or `imports: false`). Turn one off with `rules: { eqeqeq: 'off' }`.
    *
    * @default false
    */

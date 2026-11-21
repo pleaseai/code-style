@@ -60,7 +60,7 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
       Validation: AC-006 and AC-007 hold. With `autoRenamePlugins: false` the finding is `import-lite/no-self-import`. `imports: false` lints without a missing-plugin error. Without `strict`, the import plugin is import-lite's own object. `eslint-plugin-import-x` is in `dependencies` and `bun.lock`.
       Method: `bun test` in `packages/eslint-config`, linting a fixture that imports itself
       STOP: see `### STOP Conditions`
-- [ ] T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts) (depends on T002) [FR-9, AC-010]
+- [x] T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts) (depends on T002) [FR-9, AC-010]
       Validation: AC-010 holds. Each `== null` / `!= null` rewrite keeps its meaning. The first-run counts per rule are recorded in the Decision Log.
       Method: `bun run build && mise exec -- bun run lint` and `bun run test` at the root
       STOP: a comparison whose operand types cannot be read from the code, so a rewrite might change behavior
@@ -98,6 +98,8 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
       Evidence: `cd packages/eslint-config && bun test` → 360 pass, 0 fail (new `strict import/no-self-import` describe: 6 tests, lints test/fixtures/self-import.mjs via `lintFiles`); eslint on src and test → clean; `tsc --noEmit` → clean
 - [x] (2026-11-21 KST) T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts)
       Evidence: `bun run build && bun run lint` → exit 0, no findings; root `bun run test` → 5 turbo tasks successful (eslint-config 360 pass, 0 fail); `tsc --noEmit` on packages/cli and packages/ast-grep-config → clean
+- [x] (2026-11-21 KST) T004 Document `strict` (file: packages/eslint-config/README.md)
+      Evidence: `bun run lint` (root) → exit 0; `bun run typecheck` in apps/docs → 0 errors, 0 warnings, 0 hints; `bun run lint:docs` → 22 files lint clean
 
 ## Decision Log
 
