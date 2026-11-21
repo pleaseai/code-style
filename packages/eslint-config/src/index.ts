@@ -1,7 +1,7 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import type { PleaseaiFormatters } from './bun-fmt'
-import antfu, { defaultPluginRenaming, getOverrides } from '@antfu/eslint-config'
+import antfu, { defaultPluginRenaming, getOverrides, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
@@ -118,6 +118,28 @@ async function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> 
   return { ...original, rules: { ...original.rules, 'no-self-import': importXPlugin.rules!['no-self-import']! } }
 }
 
+/** Lets import-x resolve TypeScript sources: `.ts` extensions, and `.js`-style specifiers that point at `.ts` files. */
+async function typeScriptResolverConfig(): Promise<TypedFlatConfigItem> {
+  const { createNodeResolver } = await import('eslint-plugin-import-x')
+  return {
+    name: 'pleaseai/strict/import-resolver',
+    files: [GLOB_SRC],
+    settings: {
+      'import-x/resolver-next': [
+        createNodeResolver({
+          extensions: ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json', '.node'],
+          extensionAlias: {
+            '.js': ['.ts', '.tsx', '.js'],
+            '.jsx': ['.tsx', '.jsx'],
+            '.mjs': ['.mts', '.mjs'],
+            '.cjs': ['.cts', '.cjs'],
+          },
+        }),
+      ],
+    },
+  }
+}
+
 /** Gives every registration of the same original plugin the identical merged object, so ESLint sees one plugin. */
 function cachedNoSelfImport(): (original: ESLint.Plugin) => Promise<ESLint.Plugin> {
   const merged = new Map<ESLint.Plugin, Promise<ESLint.Plugin>>()
@@ -214,6 +236,8 @@ export function pleaseai(
     if (enableImports && !canonicalPluginNames) {
       // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
       composer.replacePlugin('import', cachedNoSelfImport())
+      // Placed before the user configs, so a consumer's own resolver settings still win.
+      composer.insertBefore('antfu/disables/scripts', typeScriptResolverConfig())
     }
   }
 

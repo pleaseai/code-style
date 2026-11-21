@@ -276,6 +276,26 @@ describe('strict import/no-self-import', () => {
     expect(await lint({ strict: true })).toContain('import/no-self-import')
   })
 
+  describe('in a TypeScript file', () => {
+    const lintTs = async (name: string, options: Parameters<typeof pleaseai>[0]) => {
+      const file = fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url))
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options), cwd: fileURLToPath(new URL('..', import.meta.url)) })
+      const [result] = await eslint.lintFiles([file])
+      return result!.messages.map(message => message.ruleId)
+    }
+
+    test.each([
+      ['extensionless', 'self-import-extensionless.ts'],
+      ['.js specifier', 'self-import-js.ts'],
+    ])('reports a %s self-import', async (_label, name) => {
+      expect(await lintTs(name, { strict: true })).toContain('import/no-self-import')
+    })
+
+    test('does not report a non-self import', async () => {
+      expect(await lintTs('non-self-import.ts', { strict: true })).not.toContain('import/no-self-import')
+    })
+  })
+
   test('reports it with canonicalPluginNames', async () => {
     expect(await lint({ strict: true, canonicalPluginNames: true })).toContain('import/no-self-import')
   })
