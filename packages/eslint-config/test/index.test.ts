@@ -390,14 +390,12 @@ describe('strict import/no-self-import', () => {
       expect(resolverConfigs(configs)).toEqual([])
     })
 
-    test('a file-scoped consumer resolver is excluded from the strict resolver', async () => {
+    test('a file-scoped consumer resolver removes the strict resolver for every file', async () => {
       const user = { files: ['**/other/**'], settings: { 'import/resolver': { node: {} } } }
       const options = { strict: true, canonicalPluginNames: true }
-      const [resolver, ...rest] = resolverConfigs(await pleaseai(options, user))
 
-      expect(rest).toEqual([])
-      expect(resolver!.ignores).toContain('**/other/**')
-      expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
+      expect(resolverConfigs(await pleaseai(options, user))).toEqual([])
+      expect(await lintSelfJs(options, user)).not.toContain('import/no-self-import')
     })
 
     test('default: a consumer import/resolver setting is not read by import-x, so the strict resolver stays', async () => {
@@ -407,18 +405,28 @@ describe('strict import/no-self-import', () => {
       expect(await lintSelfJs({ strict: true }, user)).toContain('import/no-self-import')
     })
 
-    test('canonical: a consumer resolver does not cover the files its own ignores skip', async () => {
+    test('canonical: a consumer resolver with its own ignores removes the strict resolver', async () => {
       const user = { files: ['**/*.ts'], ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
-      const options = { strict: true, canonicalPluginNames: true }
 
-      expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
+      expect(resolverConfigs(await pleaseai({ strict: true, canonicalPluginNames: true }, user))).toEqual([])
     })
 
-    test('canonical: a files-less consumer resolver does not cover the files its own ignores skip', async () => {
+    test('canonical: a files-less consumer resolver with its own ignores removes the strict resolver', async () => {
       const user = { ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
-      const options = { strict: true, canonicalPluginNames: true }
 
-      expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
+      expect(resolverConfigs(await pleaseai({ strict: true, canonicalPluginNames: true }, user))).toEqual([])
+    })
+
+    test('default: a consumer import-x/resolve setting removes the strict resolver', async () => {
+      const configs = await pleaseai({ strict: true }, { settings: { 'import-x/resolve': { extensions: ['.mjs'] } } })
+
+      expect(resolverConfigs(configs)).toEqual([])
+    })
+
+    test('canonical: an import-x resolver setting is not read by eslint-plugin-import, so the strict resolver stays', async () => {
+      const configs = await pleaseai({ strict: true, canonicalPluginNames: true }, { settings: { 'import-x/resolver': { node: true } } })
+
+      expect(resolverConfigs(configs)).toHaveLength(1)
     })
 
     test('canonical: a consumer resolver with negated files removes the strict resolver', async () => {
