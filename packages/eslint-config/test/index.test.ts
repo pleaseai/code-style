@@ -191,6 +191,18 @@ describe('strict', () => {
     }
   })
 
+  test('reports == null, which antfu\'s smart eqeqeq allows', async () => {
+    const source = 'export const f = (v?: string) => v == null\n'
+    const lintSource = async (options: Parameters<typeof pleaseai>[0]) => {
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
+      const [result] = await eslint.lintText(source, { filePath: 'src/null-check.ts' })
+      return result!.messages.map(message => message.ruleId)
+    }
+
+    expect(await lintSource({})).not.toContain('eqeqeq')
+    expect(await lintSource({ strict: true })).toContain('eqeqeq')
+  })
+
   test('reports the TypeScript rule under the canonical name', async () => {
     const found = await ids({ strict: true, canonicalPluginNames: true })
 

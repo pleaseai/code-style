@@ -64,7 +64,7 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
       Validation: AC-010 holds. Each `== null` / `!= null` rewrite keeps its meaning. The first-run counts per rule are recorded in the Decision Log.
       Method: `bun run build && mise exec -- bun run lint` and `bun run test` at the root
       STOP: a comparison whose operand types cannot be read from the code, so a rewrite might change behavior
-- [ ] T004 Document `strict` (file: packages/eslint-config/README.md) (depends on T003) [FR-8]
+- [x] T004 Document `strict` (file: packages/eslint-config/README.md) (depends on T003) [FR-8]
       Validation: FR-8 holds in `README.md`, `README.ko.md` and `apps/docs/src/content/docs/{en,ko}/eslint-config/advanced.mdx`, each in a section after `quality`. It notes that the default mode installs `eslint-plugin-import-x` and the canonical mode uses `eslint-plugin-import`. The `PleaseaiOptions.strict` JSDoc and `docs/knowledge/tech-stack.md` are updated.
       Method: `mise exec -- bun run lint` at the root, then `bun run typecheck && bun run lint:docs` in `apps/docs`
 
