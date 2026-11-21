@@ -235,6 +235,49 @@ describe('strict', () => {
   })
 })
 
+describe('strict import/no-self-import', () => {
+  const fixture = fileURLToPath(new URL('./fixtures/self-import.mjs', import.meta.url))
+  const lint = async (options: Parameters<typeof pleaseai>[0]) => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options), cwd: fileURLToPath(new URL('..', import.meta.url)) })
+    const [result] = await eslint.lintFiles([fixture])
+    return result!.messages.map(message => message.ruleId)
+  }
+
+  test('reports a self-import as import/no-self-import', async () => {
+    expect(await lint({ strict: true })).toContain('import/no-self-import')
+  })
+
+  test('reports it with canonicalPluginNames', async () => {
+    expect(await lint({ strict: true, canonicalPluginNames: true })).toContain('import/no-self-import')
+  })
+
+  test('reports it as import/no-self-import with autoRenamePlugins off', async () => {
+    expect(await lint({ strict: true, autoRenamePlugins: false })).toContain('import/no-self-import')
+  })
+
+  test('lints without a missing-plugin error when imports is off', async () => {
+    const found = await lint({ strict: true, imports: false })
+
+    expect(found).not.toContain(null)
+    expect(found.filter(id => id?.endsWith('no-self-import'))).toEqual([])
+  })
+
+  test('keeps import-lite\'s own plugin object without strict', async () => {
+    const configs = await pleaseai()
+    const plugin = configs.find(config => config.plugins?.import)?.plugins?.import
+
+    expect(plugin?.rules?.['no-self-import']).toBeUndefined()
+    expect(ruleIds(await pleaseai())).not.toContain('import/no-self-import')
+  })
+
+  test('registers one import plugin object under strict', async () => {
+    const configs = await pleaseai({ strict: true })
+    const plugins = new Set(configs.map(config => config.plugins?.import).filter(Boolean))
+
+    expect(plugins.size).toBe(1)
+  })
+})
+
 describe('resolveAntislop', () => {
   const installed = (...names: string[]) => (name: string) => names.includes(name)
 

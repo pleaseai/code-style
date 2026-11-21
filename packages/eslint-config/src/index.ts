@@ -108,6 +108,14 @@ async function loadEslintPluginImport(): Promise<ESLint.Plugin> {
   }
 }
 
+/** Adds `eslint-plugin-import-x`'s `no-self-import` to antfu's import plugin, loading import-x only when needed. */
+async function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> {
+  const { default: importX } = await import('eslint-plugin-import-x')
+  // The rule is typed against import-x's own context, which ESLint's plugin type cannot express.
+  const importXPlugin = importX as ESLint.Plugin
+  return { ...original, rules: { ...original.rules, 'no-self-import': importXPlugin.rules!['no-self-import']! } }
+}
+
 function toPreferTypeSpecifierStyle(entry: Linter.RuleEntry): Linter.RuleEntry {
   if (!Array.isArray(entry) || typeof entry[1] !== 'string') {
     return entry
@@ -172,10 +180,18 @@ export function pleaseai(
 
   if (enableStrict) {
     // Mirrors antfu's own defaults for the plugins the rules need.
+    const enableImports = antfuOptions.imports !== false
+    // antfu registers its import plugin (eslint-plugin-import-lite) as `import`, with or without `autoRenamePlugins`.
+    const importPlugin = enableImports ? 'import' : false
     composer.insertBefore('antfu/disables/scripts', strict({
       typescript: !!(antfuOptions.typescript ?? true),
       unicorn: !!(antfuOptions.unicorn ?? true),
+      importPlugin,
     }))
+    if (enableImports && !canonicalPluginNames) {
+      // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
+      composer.replacePlugin('import', addNoSelfImport)
+    }
   }
 
   if (!canonicalPluginNames) {

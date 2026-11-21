@@ -6,6 +6,8 @@ export interface StrictOptions {
   typescript: boolean
   /** Whether antfu loads the `unicorn` plugin. */
   unicorn: boolean
+  /** Name the import plugin is registered under, or `false` when antfu does not load it. */
+  importPlugin: string | false
 }
 
 /** Rules that antfu leaves off or loose, at `'error'`. A rule is left out when antfu does not load its plugin. */
@@ -19,6 +21,10 @@ export function strict(options: StrictOptions): TypedFlatConfigItem[] {
   }
   if (options.typescript) {
     rules['ts/no-confusing-non-null-assertion'] = 'error'
+  }
+
+  if (options.importPlugin !== false) {
+    rules[`${options.importPlugin}/no-self-import`] = 'error'
   }
 
   return [
