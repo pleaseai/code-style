@@ -51,33 +51,41 @@ function isRecord(value: unknown): value is { overrides?: unknown, overridesType
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-/** Every override map the consumer gave antfu: each option group's `overrides` / `overridesTypeAware`, and the deprecated `overrides.<group>`. */
-function overrideMaps(options: OptionsConfig): Rules[] {
-  const maps: unknown[] = []
+interface OverrideEntry {
+  /** The antfu option group the override was given under; antfu applies it to configs named `antfu/<group>/...`. */
+  group: string
+  id: string
+  value: unknown
+}
+
+/** Every override map the consumer gave antfu, with its option group: each group's `overrides` / `overridesTypeAware`, and the deprecated `overrides.<group>`. */
+function overrideMaps(options: OptionsConfig): { group: string, map: Rules }[] {
+  const maps: { group: string, map: unknown }[] = []
   for (const [key, value] of Object.entries(options)) {
     if (key === 'overrides' && isRecord(value)) {
-      maps.push(...Object.values(value))
+      maps.push(...Object.entries(value).map(([group, map]) => ({ group, map })))
     }
     else if (isRecord(value)) {
-      maps.push(value.overrides, value.overridesTypeAware)
+      maps.push({ group: key, map: value.overrides }, { group: key, map: value.overridesTypeAware })
     }
   }
-  return maps.filter(isRecord) as Rules[]
+  return maps.filter(entry => isRecord(entry.map)) as { group: string, map: Rules }[]
 }
 
-/** The strict-owned entries of the consumer's override maps, keyed by normalized rule ID. */
-function strictOverrideEntries(options: OptionsConfig, strictIds: ReadonlySet<string>): [string, unknown][] {
+/** The strict-owned entries of the consumer's override maps, with normalized rule IDs. */
+function strictOverrideEntries(options: OptionsConfig, strictIds: ReadonlySet<string>): OverrideEntry[] {
   return overrideMaps(options)
-    .flatMap(map => Object.entries(map))
-    .map(([id, value]): [string, unknown] => [normalizeRuleId(id), value])
-    .filter(([id]) => strictIds.has(id))
+    .flatMap(({ group, map }) => Object.entries(map).map(([id, value]): OverrideEntry => ({ group, id: normalizeRuleId(id), value })))
+    .filter(entry => strictIds.has(entry.id))
 }
 
-/** The rules of `source` that hold one of the consumer's override entries, i.e. what antfu applied the override to. */
-function appliedRules(source: Rules, entries: [string, unknown][]): Rules {
-  return Object.fromEntries(Object.entries(source).filter(([id, value]) => {
+/** The rules of `source` that hold one of the consumer's override entries for a group that generated `source`, i.e. what antfu applied the override to. */
+function appliedRules(source: TypedFlatConfigItem, entries: OverrideEntry[]): Rules {
+  const name = source.name ?? ''
+  const own = entries.filter(entry => name.startsWith(`antfu/${entry.group}/`))
+  return Object.fromEntries(Object.entries(source.rules ?? {}).filter(([id, value]) => {
     const normalized = normalizeRuleId(id)
-    return entries.some(([entryId, entryValue]) => entryId === normalized && isDeepStrictEqual(entryValue, value))
+    return own.some(entry => entry.id === normalized && isDeepStrictEqual(entry.value, value))
   }))
 }
 
@@ -95,7 +103,7 @@ export function strictOverrides(configs: TypedFlatConfigItem[], options: Options
   const entries = strictOverrideEntries(options, strictIds)
   const reapplied: TypedFlatConfigItem[] = []
   for (const source of configs.slice(0, strictIndex)) {
-    const rules = appliedRules(source.rules ?? {}, entries)
+    const rules = appliedRules(source, entries)
     if (Object.keys(rules).length > 0) {
       reapplied.push({
         name: `pleaseai/strict/overrides/${source.name ?? 'unnamed'}`,

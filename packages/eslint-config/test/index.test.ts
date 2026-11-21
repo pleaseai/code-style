@@ -255,6 +255,18 @@ describe('strict', () => {
     expect(await lintFile(test, 'src/a.ts')).toContain('no-promise-executor-return')
   })
 
+  test('does not leak a scoped override onto configs of another option group', async () => {
+    const lintFile = async (filePath: string) => {
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, typescript: { overrides: { eqeqeq: ['error', 'smart'] } } }) })
+      const code = filePath.endsWith('.ts') ? 'export const a = (x: unknown) => x == null\n' : 'export const a = x => x == null\n'
+      const [result] = await eslint.lintText(code, { filePath })
+      return result!.messages.map(message => message.ruleId)
+    }
+
+    expect(await lintFile('src/a.js')).toContain('eqeqeq')
+    expect(await lintFile('src/a.ts')).not.toContain('eqeqeq')
+  })
+
   test('lets every antfu option group\'s overrides beat strict', async () => {
     const eqeqeqFor = async (options: Parameters<typeof pleaseai>[0]) => {
       const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, ...options }) })
