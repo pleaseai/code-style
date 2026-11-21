@@ -1,7 +1,7 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import type { PleaseaiFormatters } from './bun-fmt'
-import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
+import antfu, { defaultPluginRenaming, getOverrides } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
@@ -118,6 +118,26 @@ async function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> 
   return { ...original, rules: { ...original.rules, 'no-self-import': importXPlugin.rules!['no-self-import']! } }
 }
 
+/** Gives every registration of the same original plugin the identical merged object, so ESLint sees one plugin. */
+function cachedNoSelfImport(): (original: ESLint.Plugin) => Promise<ESLint.Plugin> {
+  const merged = new Map<ESLint.Plugin, Promise<ESLint.Plugin>>()
+  return (original) => {
+    let plugin = merged.get(original)
+    if (!plugin) {
+      plugin = addNoSelfImport(original)
+      merged.set(original, plugin)
+    }
+    return plugin
+  }
+}
+
+/** Rule IDs the consumer set through antfu's override options, under the names antfu registers them as. */
+function userOverriddenRules(options: OptionsConfig): Set<string> {
+  const ids = (['javascript', 'typescript', 'unicorn', 'imports'] as const)
+    .flatMap(key => Object.keys(getOverrides(options, key)))
+  return new Set(ids.map(id => id.replace(/^@typescript-eslint\//, 'ts/').replace(/^import-lite\//, 'import/')))
+}
+
 function toPreferTypeSpecifierStyle(entry: Linter.RuleEntry): Linter.RuleEntry {
   if (!Array.isArray(entry) || typeof entry[1] !== 'string') {
     return entry
@@ -189,10 +209,11 @@ export function pleaseai(
       typescript: !!(antfuOptions.typescript ?? true),
       unicorn: !!(antfuOptions.unicorn ?? true),
       importPlugin,
+      skip: userOverriddenRules(antfuOptions),
     }))
     if (enableImports && !canonicalPluginNames) {
       // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
-      composer.replacePlugin('import', addNoSelfImport)
+      composer.replacePlugin('import', cachedNoSelfImport())
     }
   }
 

@@ -1,0 +1,1 @@
+{"key":"ec730d7a03320f11","file":"packages/eslint-config/package.json","title":"Make eslint-plugin-import-x optional instead of a hard dependency","reason":"By design: plan.md Decision Log and spec.md record the user decision to ship eslint-plugin-import-x as a regular dependency so strict needs no extra install","rejected_at":"2026-11-21T03:51:17Z","source":"code-review"}

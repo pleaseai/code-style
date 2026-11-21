@@ -222,6 +222,23 @@ describe('strict', () => {
     expect(fromUserConfig).toContain('unicorn/prefer-set-has')
   })
 
+  test('lets antfu\'s plugin override options beat strict', async () => {
+    const fromTypescript = await ids({ strict: true, typescript: { overrides: { 'ts/no-confusing-non-null-assertion': 'off' } } })
+    const fromCanonical = await ids({ strict: true, canonicalPluginNames: true, typescript: { overrides: { '@typescript-eslint/no-confusing-non-null-assertion': 'off' } } })
+    const fromUnicorn = await ids({ strict: true, unicorn: { overrides: { 'unicorn/prefer-set-has': 'off' } } })
+    const fromDeprecated = await ids({ strict: true, overrides: { typescript: { 'ts/no-confusing-non-null-assertion': 'off' } } })
+    const fromJavascript = await ids({ strict: true, javascript: { overrides: { 'no-promise-executor-return': 'off' } } })
+
+    expect(fromTypescript).not.toContain('ts/no-confusing-non-null-assertion')
+    expect(fromTypescript).toContain('eqeqeq')
+    expect(fromCanonical).not.toContain('@typescript-eslint/no-confusing-non-null-assertion')
+    expect(fromUnicorn).not.toContain('unicorn/prefer-set-has')
+    expect(fromUnicorn).toContain('ts/no-confusing-non-null-assertion')
+    expect(fromDeprecated).not.toContain('ts/no-confusing-non-null-assertion')
+    expect(fromJavascript).not.toContain('no-promise-executor-return')
+    expect(fromJavascript).toContain('eqeqeq')
+  })
+
   test('skips a rule whose plugin antfu does not load', async () => {
     const lintJs = async (options: Parameters<typeof pleaseai>[0]) => {
       const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
@@ -280,6 +297,15 @@ describe('strict import/no-self-import', () => {
 
     expect(plugin?.rules?.['no-self-import']).toBeUndefined()
     expect(ruleIds(await pleaseai())).not.toContain('import/no-self-import')
+  })
+
+  test('keeps one import plugin object when a user config registers the same plugin', async () => {
+    const original = (await pleaseai()).find(config => config.plugins?.import)!.plugins!.import!
+    const configs = await pleaseai({ strict: true }, { plugins: { import: original } })
+    const plugins = new Set(configs.map(config => config.plugins?.import).filter(Boolean))
+
+    expect(plugins.size).toBe(1)
+    expect([...plugins][0]!.rules?.['no-self-import']).toBeDefined()
   })
 
   test('registers one import plugin object under strict', async () => {
