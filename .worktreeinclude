@@ -10,3 +10,6 @@
 
 # Claude Code local settings (permissions, env)
 .claude/settings.local.json
+
+# please per-developer config override
+.please/config.local.yml

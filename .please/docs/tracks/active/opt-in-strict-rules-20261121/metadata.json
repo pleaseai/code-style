@@ -1,0 +1,15 @@
+{
+  "track_id": "opt-in-strict-rules-20261121",
+  "type": "feature",
+  "status": "planned",
+  "created_at": "2026-11-21T03:03:00Z",
+  "updated_at": "2026-11-21T03:21:49Z",
+  "issue": "#96",
+  "pr": "https://github.com/pleaseai/code-style/pull/97",
+  "project": "",
+  "project_item_id": "",
+  "issue_linked": false,
+  "code_pr": "https://github.com/pleaseai/code-style/pull/97",
+  "code_branch": "tracks/opt-in-strict-rules-20261121",
+  "stack_tool": "gh-stack"
+}
