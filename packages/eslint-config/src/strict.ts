@@ -1,5 +1,6 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
-import { getOverrides, GLOB_MARKDOWN_CODE, GLOB_SRC, GLOB_TESTS, GLOB_TS, GLOB_TSX, resolveSubOptions } from '@antfu/eslint-config'
+import { isDeepStrictEqual } from 'node:util'
+import { GLOB_MARKDOWN_CODE, GLOB_SRC } from '@antfu/eslint-config'
 
 export interface StrictOptions {
   /** Whether antfu loads the `ts` plugin. */
@@ -8,9 +9,9 @@ export interface StrictOptions {
   unicorn: boolean
   /** Name the import plugin is registered under, or `false` when antfu does not load it. */
   importPlugin: string | false
-  /** Rule IDs the consumer already set through antfu's override options; strict leaves them alone. */
-  skip?: ReadonlySet<string>
 }
+
+const STRICT_NAME = 'pleaseai/strict/rules'
 
 /** Rules that antfu leaves off or loose, at `'error'`. A rule is left out when antfu does not load its plugin. */
 export function strict(options: StrictOptions): TypedFlatConfigItem[] {
@@ -29,13 +30,9 @@ export function strict(options: StrictOptions): TypedFlatConfigItem[] {
     rules[`${options.importPlugin}/no-self-import`] = 'error'
   }
 
-  for (const id of options.skip ?? []) {
-    delete rules[id]
-  }
-
   return [
     {
-      name: 'pleaseai/strict/rules',
+      name: STRICT_NAME,
       files: [GLOB_SRC],
       ignores: [GLOB_MARKDOWN_CODE],
       rules,
@@ -45,55 +42,68 @@ export function strict(options: StrictOptions): TypedFlatConfigItem[] {
 
 type Rules = NonNullable<TypedFlatConfigItem['rules']>
 
-/** The `typescript` options that decide which files antfu's TypeScript configs cover. */
-interface TypeScriptScope {
-  files?: string[]
-  tsconfigPath?: string
-  overridesTypeAware?: Rules
-  filesTypeAware?: string[]
-  ignoresTypeAware?: string[]
-}
-
 /** The name strict registers a rule under, for a rule ID spelled the way a consumer might write it. */
 export function normalizeRuleId(id: string): string {
   return id.replace(/^@typescript-eslint\//, 'ts/').replace(/^import-lite\//, 'import/')
 }
 
-/** Rule IDs the consumer set through antfu's override options that apply to every file strict covers. */
-export function unscopedOverriddenRules(options: OptionsConfig): Set<string> {
-  const ids = (['javascript', 'unicorn', 'imports'] as const)
-    .flatMap(key => Object.keys(getOverrides(options, key)))
-  return new Set(ids.map(normalizeRuleId))
+function isRecord(value: unknown): value is { overrides?: unknown, overridesTypeAware?: unknown } {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function pickStrictRules(overrides: Rules, strictIds: ReadonlySet<string>): Rules {
-  return Object.fromEntries(Object.entries(overrides).filter(([id]) => strictIds.has(normalizeRuleId(id))))
+/** Every override map the consumer gave antfu: each option group's `overrides` / `overridesTypeAware`, and the deprecated `overrides.<group>`. */
+function overrideMaps(options: OptionsConfig): Rules[] {
+  const maps: unknown[] = []
+  for (const [key, value] of Object.entries(options)) {
+    if (key === 'overrides' && isRecord(value)) {
+      maps.push(...Object.values(value))
+    }
+    else if (isRecord(value)) {
+      maps.push(value.overrides, value.overridesTypeAware)
+    }
+  }
+  return maps.filter(isRecord) as Rules[]
+}
+
+/** The strict-owned entries of the consumer's override maps, keyed by normalized rule ID. */
+function strictOverrideEntries(options: OptionsConfig, strictIds: ReadonlySet<string>): [string, unknown][] {
+  return overrideMaps(options)
+    .flatMap(map => Object.entries(map))
+    .map(([id, value]): [string, unknown] => [normalizeRuleId(id), value])
+    .filter(([id]) => strictIds.has(id))
+}
+
+/** The rules of `source` that hold one of the consumer's override entries, i.e. what antfu applied the override to. */
+function appliedRules(source: Rules, entries: [string, unknown][]): Rules {
+  return Object.fromEntries(Object.entries(source).filter(([id, value]) => {
+    const normalized = normalizeRuleId(id)
+    return entries.some(([entryId, entryValue]) => entryId === normalized && isDeepStrictEqual(entryValue, value))
+  }))
 }
 
 /**
- * antfu applies `typescript`, `typescript.overridesTypeAware` and `test` overrides only to its own file globs, so
- * strict re-applies the consumer's entries for strict rules to those same files, after the strict block.
+ * antfu applies each option group's `overrides` to that group's own configs and files, before the strict block. For
+ * every config that took one of the consumer's overrides for a strict rule, re-applies it right after the strict block
+ * on that config's files, so the override still wins but only where antfu applied it. Run on the resolved configs.
  */
-export function strictScopedOverrides(options: OptionsConfig, strictIds: ReadonlySet<string>): TypedFlatConfigItem[] {
-  const configs: TypedFlatConfigItem[] = []
-  const add = (name: string, rules: Rules, files: string[], ignores: string[] = []): void => {
-    const picked = pickStrictRules(rules, strictIds)
-    if (Object.keys(picked).length > 0) {
-      configs.push({ name: `pleaseai/strict/${name}`, files, ignores: [GLOB_MARKDOWN_CODE, ...ignores], rules: picked })
+export function strictOverrides(configs: TypedFlatConfigItem[], options: OptionsConfig): TypedFlatConfigItem[] {
+  const strictIndex = configs.findIndex(config => config.name === STRICT_NAME)
+  if (strictIndex === -1) {
+    return configs
+  }
+  const strictIds = new Set(Object.keys(configs[strictIndex]!.rules ?? {}).map(normalizeRuleId))
+  const entries = strictOverrideEntries(options, strictIds)
+  const reapplied: TypedFlatConfigItem[] = []
+  for (const source of configs.slice(0, strictIndex)) {
+    const rules = appliedRules(source.rules ?? {}, entries)
+    if (Object.keys(rules).length > 0) {
+      reapplied.push({
+        name: `pleaseai/strict/overrides/${source.name ?? 'unnamed'}`,
+        files: source.files ?? [GLOB_SRC],
+        ignores: [GLOB_MARKDOWN_CODE, ...source.ignores ?? []],
+        rules,
+      })
     }
   }
-
-  if (options.typescript ?? true) {
-    const ts: TypeScriptScope = resolveSubOptions(options, 'typescript')
-    const componentExts = [...options.componentExts ?? [], ...options.vue ? ['vue'] : []]
-    add('typescript-overrides', getOverrides(options, 'typescript'), ts.files ?? [GLOB_TS, GLOB_TSX, ...componentExts.map(ext => `**/*.${ext}`)])
-    if (ts.tsconfigPath) {
-      add('typescript-type-aware-overrides', ts.overridesTypeAware ?? {}, ts.filesTypeAware ?? [GLOB_TS, GLOB_TSX], ts.ignoresTypeAware ?? ['**/*.md/**', '**/*.astro/*.ts'])
-    }
-  }
-  if (options.test ?? true) {
-    add('test-overrides', getOverrides(options, 'test'), GLOB_TESTS)
-  }
-
-  return configs
+  return [...configs.slice(0, strictIndex + 1), ...reapplied, ...configs.slice(strictIndex + 1)]
 }

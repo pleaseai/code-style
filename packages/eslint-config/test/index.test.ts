@@ -255,6 +255,26 @@ describe('strict', () => {
     expect(await lintFile(test, 'src/a.ts')).toContain('no-promise-executor-return')
   })
 
+  test('lets every antfu option group\'s overrides beat strict', async () => {
+    const eqeqeqFor = async (options: Parameters<typeof pleaseai>[0]) => {
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, ...options }) })
+      const config = await eslint.calculateConfigForFile('src/a.js')
+      return (config?.rules?.eqeqeq as unknown[] | undefined)?.[0]
+    }
+    const off = { overrides: { eqeqeq: 'off' as const } }
+
+    for (const options of [{ e18e: off }, { regexp: off }, { stylistic: off }]) {
+      expect(await eqeqeqFor(options)).toBe(0)
+    }
+  })
+
+  test('ignores overrides of a plugin group antfu does not load', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, unicorn: false, overrides: { unicorn: { eqeqeq: 'off' } } } as Parameters<typeof pleaseai>[0]) })
+    const config = await eslint.calculateConfigForFile('src/a.js')
+
+    expect(config?.rules?.eqeqeq).toEqual([2, 'always'])
+  })
+
   test('skips a rule whose plugin antfu does not load', async () => {
     const lintJs = async (options: Parameters<typeof pleaseai>[0]) => {
       const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })

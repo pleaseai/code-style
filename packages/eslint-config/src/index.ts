@@ -6,7 +6,7 @@ import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
-import { strict, strictScopedOverrides, unscopedOverriddenRules } from './strict'
+import { strict, strictOverrides } from './strict'
 
 export type { PleaseaiFormatters } from './bun-fmt'
 
@@ -196,10 +196,9 @@ function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConf
     typescript: !!(antfuOptions.typescript ?? true),
     unicorn: !!(antfuOptions.unicorn ?? true),
     importPlugin: enableImports ? 'import' : false,
-    skip: unscopedOverriddenRules(antfuOptions),
   })
-  const strictIds = new Set(strictConfigs.flatMap(config => Object.keys(config.rules ?? {})))
-  composer.insertBefore('antfu/disables/scripts', [...strictConfigs, ...strictScopedOverrides(antfuOptions, strictIds)])
+  composer.insertBefore('antfu/disables/scripts', strictConfigs)
+  composer.onResolved(configs => strictOverrides(configs, antfuOptions))
   if (!enableImports) {
     return
   }
