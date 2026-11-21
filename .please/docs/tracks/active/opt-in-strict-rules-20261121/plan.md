@@ -56,7 +56,7 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
 - [x] T001 Add the `strict` option with the four non-import rules and strict `eqeqeq` (file: packages/eslint-config/src/strict.ts) [FR-1, FR-2, FR-3, FR-4, FR-6, FR-7, NFR-1, NFR-2, AC-001, AC-002, AC-003, AC-004, AC-005, AC-008, AC-009, AC-011, AC-012]
       Validation: AC-001 to AC-005, AC-008, AC-009, AC-011 and AC-012 hold. `strict` with `typescript: false` or `unicorn: false` lints without a missing-plugin error. A user `eqeqeq` setting still wins. Markdown files and code blocks get no strict findings and no language error.
       Method: `bun test` in `packages/eslint-config` (a `describe('strict')` block in `test/index.test.ts`, modeled on the `quality` cases)
-- [ ] T002 Report `import/no-self-import` under `strict` in both plugin modes (file: packages/eslint-config/src/index.ts) (depends on T001) [FR-5, AC-006, AC-007]
+- [x] T002 Report `import/no-self-import` under `strict` in both plugin modes (file: packages/eslint-config/src/index.ts) (depends on T001) [FR-5, AC-006, AC-007]
       Validation: AC-006 and AC-007 hold. With `autoRenamePlugins: false` the finding is `import-lite/no-self-import`. `imports: false` lints without a missing-plugin error. Without `strict`, the import plugin is import-lite's own object. `eslint-plugin-import-x` is in `dependencies` and `bun.lock`.
       Method: `bun test` in `packages/eslint-config`, linting a fixture that imports itself
       STOP: see `### STOP Conditions`
@@ -96,12 +96,17 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
       Evidence: `cd packages/eslint-config && bun test` → 354 pass, 0 fail (new `strict` describe: 6 tests); `bunx eslint packages/eslint-config/src packages/eslint-config/test/index.test.ts` → clean
 - [x] (2026-11-21 KST) T002 Report `import/no-self-import` under `strict` in both plugin modes (file: packages/eslint-config/src/index.ts)
       Evidence: `cd packages/eslint-config && bun test` → 360 pass, 0 fail (new `strict import/no-self-import` describe: 6 tests, lints test/fixtures/self-import.mjs via `lintFiles`); eslint on src and test → clean; `tsc --noEmit` → clean
+- [x] (2026-11-21 KST) T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts)
+      Evidence: `bun run build && bun run lint` → exit 0, no findings; root `bun run test` → 5 turbo tasks successful (eslint-config 360 pass, 0 fail); `tsc --noEmit` on packages/cli and packages/ast-grep-config → clean
 
 ## Decision Log
 
 - 2026-11-21: `eslint-plugin-import-x` as a regular dependency for the default mode (user decision). `eslint-plugin-import` was ruled out for its ESLint 10 peer range and its weight.
 - Decision: The `strict` import rule is always `import/no-self-import`, including with `autoRenamePlugins: false` (task text expected `import-lite/no-self-import`).
   Rationale: antfu registers its import plugin natively as `import` and only renames `import-lite` rules; with `autoRenamePlugins: false` the plugin and its rules are still `import/*`, so the merge targets `replacePlugin('import', ...)` in both modes.
+  Date/Author: 2026-11-21 / implement-executor
+- Decision: First run of `strict: true` on this repository: 89 findings in 19 files: 86 `eqeqeq` (17 files), 2 `unicorn/prefer-set-has` (2 files), 1 `import/no-self-import` (1 file, the intentional self-import test fixture), 0 `no-promise-executor-return`, 0 `ts/no-confusing-non-null-assertion`.
+  Rationale: Counted before fixing, from `eslint . --no-cache -f json`. Every `x == null` / `x != null` was rewritten from the type checker's type for the operand: `=== null` when only `null` is in the type, `=== undefined` when only `undefined` is, both checks for `any`/`unknown` and for values read from runtime data (parsed `package.json`, ast-grep `vars`, `spawnSync().error`). The fixture is excluded in `eslint.config.ts` instead of using an eslint-disable comment.
   Date/Author: 2026-11-21 / implement-executor
 
 ## Surprises & Discoveries

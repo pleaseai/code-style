@@ -65,7 +65,7 @@ function packageDir(name: string, anchor: string): string | null {
  */
 function astGrepBinary(anchor: string): string | null {
   const cliDir = packageDir('@ast-grep/cli', anchor)
-  if (cliDir == null) {
+  if (cliDir === null) {
     return null
   }
   try {
@@ -73,7 +73,7 @@ function astGrepBinary(anchor: string): string | null {
       resolveBinaryPath: () => string | null
     }
     const native = resolveBinaryPath()
-    if (native != null && existsSync(native)) {
+    if (native !== null && existsSync(native)) {
       return native
     }
   }
@@ -87,7 +87,7 @@ function astGrepBinary(anchor: string): string | null {
 function firstResolved(anchors: string[], resolve: (anchor: string) => string | null): string | null {
   for (const anchor of anchors) {
     const found = resolve(anchor)
-    if (found != null) {
+    if (found !== null) {
       return found
     }
   }
@@ -103,11 +103,11 @@ function firstResolved(anchors: string[], resolve: (anchor: string) => string | 
  */
 export function resolveToolchain(anchors: string[]): Toolchain {
   const bin = firstResolved(anchors, astGrepBinary)
-  if (bin == null) {
+  if (bin === null) {
     throw new MissingDependencyError(MISSING_BINARY)
   }
   const configDir = firstResolved([...anchors].reverse(), anchor => packageDir('@pleaseai/ast-grep-config', anchor))
-  if (configDir == null) {
+  if (configDir === null) {
     throw new MissingDependencyError(MISSING_CONFIG)
   }
   return { bin, extractDir: join(configDir, 'extract') }
@@ -139,7 +139,7 @@ export function runExtraction(root: string, language: ExtractLanguage, paths: st
     encoding: 'utf-8',
     maxBuffer: 512 * 1024 * 1024,
   })
-  if (res.error != null) {
+  if (res.error !== null && res.error !== undefined) {
     throw new AstGrepError(`failed to run ast-grep (${bin}): ${res.error.message}`)
   }
   if (res.status !== 0) {

@@ -166,7 +166,7 @@ describe('strict', () => {
     '}',
     '',
   ].join('\n')
-  const strictRules = ['no-promise-executor-return', 'eqeqeq', 'unicorn/prefer-set-has', 'ts/no-confusing-non-null-assertion']
+  const strictRules = new Set(['no-promise-executor-return', 'eqeqeq', 'unicorn/prefer-set-has', 'ts/no-confusing-non-null-assertion'])
   const lint = async (options: Parameters<typeof pleaseai>[0], ...userConfigs: TypedFlatConfigItem[]) => {
     const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options, ...userConfigs) })
     const [result] = await eslint.lintText(code, { filePath: 'src/strict.ts' })
@@ -231,7 +231,7 @@ describe('strict', () => {
     const [result] = await eslint.lintText(`# Example\n\n\`\`\`ts\n${code.replace('v! == w ||', '')}\`\`\`\n`, { filePath: 'docs/strict.md' })
 
     expect(result!.messages.filter(message => message.fatal)).toEqual([])
-    expect(result!.messages.map(message => message.ruleId).filter(id => id && strictRules.includes(id))).toEqual([])
+    expect(result!.messages.map(message => message.ruleId).filter(id => id && strictRules.has(id))).toEqual([])
   })
 })
 

@@ -37,7 +37,7 @@ export interface HelperResult {
 
 function inDesignatedLocation(file: string, lang: HelperLanguage): boolean {
   const unit = unitOf(file, lang.units)
-  if (unit == null) {
+  if (unit === undefined) {
     return false
   }
   const rel = relativeTo(file, unit.dir)
@@ -49,7 +49,7 @@ function isTestSide(file: string, lang: HelperLanguage, roots: (unit: Unit) => s
     return true
   }
   const unit = unitOf(file, lang.units)
-  return unit != null && roots(unit).some(root => isUnder(relativeTo(file, unit.dir), root))
+  return unit !== undefined && roots(unit).some(root => isUnder(relativeTo(file, unit.dir), root))
 }
 
 /**
@@ -91,7 +91,7 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
     }
     const unit = unitOf(candidate.file, lang.units)
     // A unit without a designated helper location (a multiplatform module) has nowhere to move a helper to.
-    if (unit != null && lang.layout.helperDirs(unit).length === 0) {
+    if (unit !== undefined && lang.layout.helperDirs(unit).length === 0) {
       continue
     }
     const importers = new Set([...lang.importers(candidate)].filter(f => !inFixtureProject(f, lang.units)))
@@ -99,7 +99,7 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
     if (importers.size < 2) {
       continue
     }
-    if (unit == null) {
+    if (unit === undefined) {
       unitless.push(candidate.file)
       continue
     }
@@ -120,7 +120,7 @@ export function inspectHelpers(lang: HelperLanguage): HelperResult {
     const files = [...new Set(unitless)]
     notices.push(`${label}: helper check skipped ${files.length} shared helper file(s) outside any package (${UNIT_MARKER[lang.language]}): ${exampleList(files)}`)
   }
-  if (lang.withheld != null && lang.withheld.files.size > 0) {
+  if (lang.withheld !== undefined && lang.withheld.files.size > 0) {
     notices.push(`${label}: helper check withheld judgement for ${lang.withheld.files.size} test file(s) with ${lang.withheld.reason}: ${exampleList(lang.withheld.files)}`)
   }
   return { findings, notices }
@@ -145,8 +145,8 @@ function resolveRelative(importer: string, spec: string, fileSet: Set<string>, e
   // `./helpers.js` written for ESM resolution may point at `helpers.ts`; the
   // runtime suffix maps to its own source flavor (`.mjs` → `.mts`, `.cjs` → `.cts`).
   const jsMatch = /\.(?:[cm]?js|jsx)$/.exec(base)
-  const stripped = jsMatch == null ? base : base.slice(0, jsMatch.index)
-  const mapped = jsMatch == null ? [] : (JS_TO_SOURCE.get(jsMatch[0]) ?? []).map(e => `${stripped}${e}`)
+  const stripped = jsMatch === null ? base : base.slice(0, jsMatch.index)
+  const mapped = jsMatch === null ? [] : (JS_TO_SOURCE.get(jsMatch[0]) ?? []).map(e => `${stripped}${e}`)
   const options = [base, ...mapped, ...exts.map(e => `${base}${e}`), ...exts.map(e => `${base}/index${e}`)]
   return options.find(o => fileSet.has(o))
 }
@@ -160,7 +160,7 @@ function tsImportsByTarget(matches: ExtractMatch[], layout: TestLayout, fileSet:
       continue
     }
     const target = resolveRelative(m.file, unquote(m.vars.SRC ?? ''), fileSet, layout.sourceExtensions)
-    if (target == null) {
+    if (target === undefined) {
       continue
     }
     const name = IMPORTED_NAME.get(m.ruleId) ?? m.text
@@ -180,7 +180,7 @@ interface TsExports {
 function tsExports(matches: ExtractMatch[]): TsExports {
   const ex: TsExports = { aliases: new Map(), exported: new Map(), defaults: new Map() }
   for (const m of matches) {
-    if (m.ruleId === 'export-local-alias' && m.vars.ALIAS != null) {
+    if (m.ruleId === 'export-local-alias' && m.vars.ALIAS !== null && m.vars.ALIAS !== undefined) {
       const byLocal = ex.aliases.get(m.file) ?? new Map<string, string[]>()
       byLocal.set(m.text, [...(byLocal.get(m.text) ?? []), m.vars.ALIAS])
       ex.aliases.set(m.file, byLocal)
@@ -281,7 +281,7 @@ export function dartHelpers(
       continue
     }
     const target = dartImportTarget(m.file, unquote(m.text), fileSet)
-    if (target == null) {
+    if (target === undefined) {
       continue
     }
     const key = `${m.file}\0${m.text}`
@@ -294,7 +294,7 @@ export function dartHelpers(
     imports.set(target, list)
   }
   lang.importers = c => new Set(
-    (imports.get(c.file) ?? []).filter(i => (i.names == null || i.names.has(c.name)) && !i.hides.has(c.name)).map(i => i.importer),
+    (imports.get(c.file) ?? []).filter(i => (i.names === null || i.names.has(c.name)) && !i.hides.has(c.name)).map(i => i.importer),
   )
   return lang
 }
@@ -383,13 +383,13 @@ interface JvmIndex {
 
 function jvmFileUsesHelper(file: string, t: JvmTarget, ix: JvmIndex): boolean {
   const specs = ix.importsOf.get(file) ?? []
-  const explicit = specs.find(s => s === t.fqn || s.startsWith(`${t.fqn}.`) || (t.facadeFqn != null && s === `${t.facadeFqn}.${t.name}`))
-  if (explicit != null) {
+  const explicit = specs.find(s => s === t.fqn || s.startsWith(`${t.fqn}.`) || (t.facadeFqn !== undefined && s === `${t.facadeFqn}.${t.name}`))
+  if (explicit !== undefined) {
     const local = ix.aliasOf.get(`${file}\0${explicit}`) ?? explicit.slice(explicit.lastIndexOf('.') + 1)
     const text = ix.codeOf(file)
-    return text != null && !declaresName(text, local, file)
+    return text !== null && !declaresName(text, local, file)
   }
-  const wildcard = specs.some(s => (t.pkg !== '' && s === `${t.pkg}.*`) || (t.facadeFqn != null && s === `${t.facadeFqn}.*`))
+  const wildcard = specs.some(s => (t.pkg !== '' && s === `${t.pkg}.*`) || (t.facadeFqn !== undefined && s === `${t.facadeFqn}.*`))
   const samePackage = (ix.packageOf.get(file) ?? '') === t.pkg
   return (wildcard || samePackage) && jvmMentions(file, t, ix)
 }
@@ -397,11 +397,11 @@ function jvmFileUsesHelper(file: string, t: JvmTarget, ix: JvmIndex): boolean {
 function jvmMentions(file: string, t: JvmTarget, ix: JvmIndex): boolean {
   const bound = ix.bindingsOf.get(file)?.get(t.name)
   // An explicit import binding the name to another FQN shadows wildcard and same-package candidates.
-  if (bound != null && bound !== t.fqn && !(t.facadeFqn != null && bound === `${t.facadeFqn}.${t.name}`)) {
+  if (bound !== undefined && bound !== t.fqn && !(t.facadeFqn !== undefined && bound === `${t.facadeFqn}.${t.name}`)) {
     return false
   }
   const text = ix.codeOf(file)
-  return text != null && usesName(text, t.name, t.qualifiers) && !declaresName(text, t.name, file)
+  return text !== null && usesName(text, t.name, t.qualifiers) && !declaresName(text, t.name, file)
 }
 
 export function jvmHelpers(
@@ -429,10 +429,10 @@ export function jvmHelpers(
   const codeOf = (file: string): string | null => {
     if (!textCache.has(file)) {
       const source = readSource(rootDir, file)
-      textCache.set(file, source == null ? null : stripNonCode(source, file).replace(/^\s*(?:import|package)\b.*$/gm, ''))
+      textCache.set(file, source === null ? null : stripNonCode(source, file).replace(/^\s*(?:import|package)\b.*$/gm, ''))
     }
     const text = textCache.get(file) ?? null
-    if (text == null) {
+    if (text === null) {
       unreadable.add(file)
     }
     return text
@@ -446,7 +446,7 @@ export function jvmHelpers(
       const spec = bare.replace(/\s+as\s+\w+$/, '')
       importsOf.set(m.file, [...(importsOf.get(m.file) ?? []), spec])
       const alias = /\s+as\s+(\w+)$/.exec(bare)?.[1]
-      if (alias != null) {
+      if (alias !== undefined) {
         aliasOf.set(`${m.file}\0${spec}`, alias)
       }
     }
@@ -468,7 +468,7 @@ export function jvmHelpers(
   lang.importers = (c) => {
     const pkg = packageOf.get(c.file) ?? ''
     const facadeFqn = kotlinFacade(c.file, pkg, rootDir)
-    const qualifiers = [pkg, facadeFqn].filter((q): q is string => q != null && q !== '')
+    const qualifiers = [pkg, facadeFqn].filter((q): q is string => q !== undefined && q !== '')
     const target: JvmTarget = { name: c.name, pkg, fqn: pkg === '' ? c.name : `${pkg}.${c.name}`, facadeFqn, qualifiers }
     const owner = unitOf(c.file, units)?.dir
     return new Set(testFiles.filter(file => unitOf(file, allUnits)?.dir === owner && jvmFileUsesHelper(file, target, index)))

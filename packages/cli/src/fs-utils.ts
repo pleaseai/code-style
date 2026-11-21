@@ -36,7 +36,7 @@ export function installCommand(pm: PackageManager, packages: string[], cwd: stri
     case 'bun':
       return ['bun', ['add', '-d', ...packages]]
     case 'pnpm':
-      return readFileOrNull(resolve(cwd, 'pnpm-workspace.yaml')) == null
+      return readFileOrNull(resolve(cwd, 'pnpm-workspace.yaml')) === null
         ? ['pnpm', ['add', '-D', ...packages]]
         : ['pnpm', ['add', '-D', '-w', ...packages]]
     case 'yarn':
@@ -97,7 +97,7 @@ export function readMarkerBlock(content: string): string | undefined {
  */
 export function upsertMarkerBlock(existing: string | null, body: string): string {
   const block = buildMarkerBlock(body)
-  if (existing == null) {
+  if (existing === null) {
     return `${block}\n`
   }
 

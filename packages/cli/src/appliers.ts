@@ -63,7 +63,7 @@ async function applyPrettierConfig(ctx: ToolContext): Promise<ToolApplyResult> {
     return result
   }
 
-  if (pkg.prettier != null) {
+  if (pkg.prettier !== null && pkg.prettier !== undefined) {
     const ok = await confirmOverwrite(label, ctx.autoAccept)
     if (!ok) {
       result.skipped.push(label)
@@ -161,7 +161,7 @@ const AGENTS_CODE_ORGANIZATION = `- Code organization (named exports, file names
  * at). Without selection info (`selectedToolIds` unset) it is kept.
  */
 function wantsCodeOrganization(ctx: ToolContext): boolean {
-  if (ctx.selectedToolIds == null || ctx.selectedToolIds.includes('ast-grep')) {
+  if (ctx.selectedToolIds === undefined || ctx.selectedToolIds.includes('ast-grep')) {
     return true
   }
   try {
@@ -196,7 +196,7 @@ export async function applyAgentsMd(ctx: ToolContext): Promise<ToolApplyResult> 
   result.created.push(...guides.created)
   result.updated.push(...guides.updated)
 
-  if (existing == null) {
+  if (existing === null) {
     writeFileSync(target, next)
     result.created.push(label)
     return result
@@ -244,7 +244,7 @@ function listsAstGrepRules(yaml: string): boolean {
   else if (inline === '') {
     for (const line of lines.slice(start + 1)) {
       const item = /^\s*-\s+(\S.*)$/.exec(line)
-      if (item != null) {
+      if (item !== null) {
         entries.push(item[1]!)
       }
       else if (line.trim() !== '') {
@@ -266,7 +266,7 @@ export async function applyAstGrep(ctx: ToolContext): Promise<ToolApplyResult> {
   }
   const existing = readFileOrNull(target)
 
-  if (existing == null) {
+  if (existing === null) {
     writeFileSync(target, SGCONFIG_TEMPLATE)
     result.created.push(label)
     return result

@@ -25,12 +25,12 @@ function isPluginOptedOut(config: string, name: string): boolean {
 
 function readPackageJsonOrNull(cwd: string): PackageJson | null {
   const raw = readFileOrNull(resolve(cwd, 'package.json'))
-  if (raw == null) {
+  if (raw === null) {
     return null
   }
   try {
     const parsed: unknown = JSON.parse(raw)
-    return parsed != null && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as PackageJson : null
+    return parsed !== null && parsed !== undefined && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as PackageJson : null
   }
   catch {
     return null
@@ -40,7 +40,7 @@ function readPackageJsonOrNull(cwd: string): PackageJson | null {
 export function antislopStatus(cwd: string): AntislopStatus {
   const none: AntislopStatus = { applies: false, optedOut: false, plugins: [], missing: [] }
   const pkg = readPackageJsonOrNull(cwd)
-  if (pkg == null || !isPackageInstalled(pkg, '@pleaseai/eslint-config')) {
+  if (pkg === null || !isPackageInstalled(pkg, '@pleaseai/eslint-config')) {
     return none
   }
   const config = ESLINT_CONFIG_NAMES.map(name => readFileOrNull(resolve(cwd, name)) ?? '').join('\n')

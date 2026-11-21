@@ -33,10 +33,10 @@ export type LangFlag
     | { kind: 'languages', languages: Language[] }
     | { kind: 'invalid', value: string }
 
-const LEGACY_LOCALE_ALIASES: ReadonlyArray<string | boolean> = ['ko', 'en']
+const LEGACY_LOCALE_ALIASES: ReadonlySet<string | boolean> = new Set(['ko', 'en'])
 
 export function parseLangFlag(value: string | boolean | undefined): LangFlag {
-  if (value === undefined || LEGACY_LOCALE_ALIASES.includes(value)) {
+  if (value === undefined || LEGACY_LOCALE_ALIASES.has(value)) {
     return { kind: 'none' }
   }
   if (typeof value !== 'string') {
@@ -62,7 +62,7 @@ function isLanguageAwareBlock(block: string | undefined): block is string {
 }
 
 export function languagesFromAgentsBlock(content: string | null): Language[] | undefined {
-  const block = content == null ? undefined : readMarkerBlock(content)
+  const block = content === null ? undefined : readMarkerBlock(content)
   if (!isLanguageAwareBlock(block)) {
     return undefined
   }
@@ -70,7 +70,7 @@ export function languagesFromAgentsBlock(content: string | null): Language[] | u
 }
 
 export function guidePathsFromAgentsBlock(content: string | null): string[] | undefined {
-  const block = content == null ? undefined : readMarkerBlock(content)
+  const block = content === null ? undefined : readMarkerBlock(content)
   if (!isLanguageAwareBlock(block)) {
     return undefined
   }

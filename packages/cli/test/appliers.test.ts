@@ -223,7 +223,7 @@ describe('AGENTS.md rules block', () => {
   test('copies every guide the block links into .agents/code-style', async () => {
     for (const languages of [undefined, ['dart', 'rust'], [...LANGUAGES]] as const) {
       rmSync(join(dir, '.agents'), { recursive: true, force: true })
-      await applyAgentsMd({ cwd: dir, autoAccept: true, languages: languages == null ? undefined : [...languages] })
+      await applyAgentsMd({ cwd: dir, autoAccept: true, languages: languages === undefined ? undefined : [...languages] })
       const body = readFileSync(join(dir, 'AGENTS.md'), 'utf-8')
       const linked = [...body.matchAll(/\.agents\/code-style\/[\w./-]+\.md/g)].map(m => m[0])
       expect(linked.length).toBeGreaterThan(1)

@@ -54,7 +54,7 @@ function reportResults(result: ToolApplyResult): void {
 
 function toolOptions(available: Tool[], pkg: PackageJson | undefined): Array<{ value: string, label: string }> {
   return available.map((tool) => {
-    const installed = pkg != null
+    const installed = pkg !== undefined
       && tool.packages.length > 0
       && tool.packages.some(p => isPackageInstalled(pkg, p))
     return {
@@ -140,7 +140,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   const withPackages = hasPackageJson(opts.cwd)
   const pm = withPackages ? detectPackageManager(opts.cwd) : undefined
   const pkg = withPackages ? readPackageJson(opts.cwd) : undefined
-  if (pm != null) {
+  if (pm !== undefined) {
     log.info(t('detectedPm')(pm))
   }
 
@@ -172,7 +172,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
 
   const selectedTools: Tool[] = selectedIds
     .map(id => available.find(tool => tool.id === id))
-    .filter((tool): tool is Tool => tool != null)
+    .filter((tool): tool is Tool => tool !== undefined)
 
   const withGuides = selectedTools.some(tool => tool.id === 'agents-md')
   const languages = opts.languages === undefined && withGuides ? await chooseLanguages(opts) : opts.languages
@@ -182,7 +182,7 @@ export async function runInit(opts: CommandOptions): Promise<void> {
   }
 
   // 1. Install packages (de-duped) for selected tools.
-  if (pm != null) {
+  if (pm !== undefined) {
     installToolPackages(pm, selectedTools, opts.cwd)
   }
 
@@ -240,7 +240,7 @@ function logAntislop(cwd: string): void {
 }
 
 function logLanguages(opts: CommandOptions): void {
-  if (opts.languages != null) {
+  if (opts.languages !== undefined) {
     log.info(`  ${t('doctorSelectedLanguages')(opts.languages.join(', '))}`)
     return
   }

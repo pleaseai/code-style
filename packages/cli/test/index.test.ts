@@ -120,7 +120,7 @@ const ESLINT_CONFIG_DEPS = { '@pleaseai/eslint-config': '*', 'eslint': '*' }
 function withProject(pkg: PackageJson | null, files: Record<string, string>, body: (dir: string) => void): void {
   const dir = mkdtempSync(join(tmpdir(), 'pleaseai-cli-antislop-'))
   try {
-    if (pkg != null) {
+    if (pkg !== null) {
       writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg))
     }
     for (const [name, content] of Object.entries(files)) {
