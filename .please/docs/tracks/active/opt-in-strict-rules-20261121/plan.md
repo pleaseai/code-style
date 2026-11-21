@@ -53,18 +53,18 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
 
 ## Tasks
 
-- [ ] T001 Add the `strict` option with the four non-import rules and strict `eqeqeq` (file: packages/eslint-config/src/strict.ts)
+- [ ] T001 Add the `strict` option with the four non-import rules and strict `eqeqeq` (file: packages/eslint-config/src/strict.ts) [FR-1, FR-2, FR-3, FR-4, FR-6, FR-7, NFR-1, NFR-2, AC-001, AC-002, AC-003, AC-004, AC-005, AC-008, AC-009, AC-011, AC-012]
       Validation: AC-001 to AC-005, AC-008, AC-009, AC-011 and AC-012 hold. `strict` with `typescript: false` or `unicorn: false` lints without a missing-plugin error. A user `eqeqeq` setting still wins. Markdown files and code blocks get no strict findings and no language error.
       Method: `bun test` in `packages/eslint-config` (a `describe('strict')` block in `test/index.test.ts`, modeled on the `quality` cases)
-- [ ] T002 Report `import/no-self-import` under `strict` in both plugin modes (file: packages/eslint-config/src/index.ts) (depends on T001)
+- [ ] T002 Report `import/no-self-import` under `strict` in both plugin modes (file: packages/eslint-config/src/index.ts) (depends on T001) [FR-5, AC-006, AC-007]
       Validation: AC-006 and AC-007 hold. With `autoRenamePlugins: false` the finding is `import-lite/no-self-import`. `imports: false` lints without a missing-plugin error. Without `strict`, the import plugin is import-lite's own object. `eslint-plugin-import-x` is in `dependencies` and `bun.lock`.
       Method: `bun test` in `packages/eslint-config`, linting a fixture that imports itself
       STOP: see `### STOP Conditions`
-- [ ] T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts) (depends on T002)
+- [ ] T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts) (depends on T002) [FR-9, AC-010]
       Validation: AC-010 holds. Each `== null` / `!= null` rewrite keeps its meaning. The first-run counts per rule are recorded in the Decision Log.
       Method: `bun run build && mise exec -- bun run lint` and `bun run test` at the root
       STOP: a comparison whose operand types cannot be read from the code, so a rewrite might change behavior
-- [ ] T004 Document `strict` (file: packages/eslint-config/README.md) (depends on T003)
+- [ ] T004 Document `strict` (file: packages/eslint-config/README.md) (depends on T003) [FR-8]
       Validation: FR-8 holds in `README.md`, `README.ko.md` and `apps/docs/src/content/docs/{en,ko}/eslint-config/advanced.mdx`, each in a section after `quality`. It notes that the default mode installs `eslint-plugin-import-x` and the canonical mode uses `eslint-plugin-import`. The `PleaseaiOptions.strict` JSDoc and `docs/knowledge/tech-stack.md` are updated.
       Method: `mise exec -- bun run lint` at the root, then `bun run typecheck && bun run lint:docs` in `apps/docs`
 
