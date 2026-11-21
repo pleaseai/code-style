@@ -239,6 +239,22 @@ describe('strict', () => {
     expect(fromJavascript).toContain('eqeqeq')
   })
 
+  test('keeps strict outside the files a scoped plugin override applies to', async () => {
+    const source = 'export const a = new Promise(resolve => resolve(1))\n'
+    const lintFile = async (options: Parameters<typeof pleaseai>[0], filePath: string) => {
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
+      const [result] = await eslint.lintText(source, { filePath })
+      return result!.messages.map(message => message.ruleId)
+    }
+    const typescript = { strict: true, typescript: { overrides: { 'no-promise-executor-return': 'off' as const } } }
+    const test = { strict: true, test: { overrides: { 'no-promise-executor-return': 'off' as const } } }
+
+    expect(await lintFile(typescript, 'src/a.ts')).not.toContain('no-promise-executor-return')
+    expect(await lintFile(typescript, 'src/a.js')).toContain('no-promise-executor-return')
+    expect(await lintFile(test, 'src/a.test.ts')).not.toContain('no-promise-executor-return')
+    expect(await lintFile(test, 'src/a.ts')).toContain('no-promise-executor-return')
+  })
+
   test('skips a rule whose plugin antfu does not load', async () => {
     const lintJs = async (options: Parameters<typeof pleaseai>[0]) => {
       const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })

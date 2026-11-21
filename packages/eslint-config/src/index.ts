@@ -2,11 +2,11 @@ import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import type { PleaseaiFormatters } from './bun-fmt'
 import { createRequire } from 'node:module'
-import antfu, { defaultPluginRenaming, getOverrides, GLOB_SRC } from '@antfu/eslint-config'
+import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
-import { strict } from './strict'
+import { strict, strictScopedOverrides, unscopedOverriddenRules } from './strict'
 
 export type { PleaseaiFormatters } from './bun-fmt'
 
@@ -167,13 +167,6 @@ function cachedNoSelfImport(): (original: ESLint.Plugin) => Promise<ESLint.Plugi
   }
 }
 
-/** Rule IDs the consumer set through antfu's override options, under the names antfu registers them as. */
-function userOverriddenRules(options: OptionsConfig): Set<string> {
-  const ids = (['javascript', 'typescript', 'unicorn', 'imports'] as const)
-    .flatMap(key => Object.keys(getOverrides(options, key)))
-  return new Set(ids.map(id => id.replace(/^@typescript-eslint\//, 'ts/').replace(/^import-lite\//, 'import/')))
-}
-
 function toPreferTypeSpecifierStyle(entry: Linter.RuleEntry): Linter.RuleEntry {
   if (!Array.isArray(entry) || typeof entry[1] !== 'string') {
     return entry
@@ -199,12 +192,14 @@ function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConf
   // Mirrors antfu's own defaults for the plugins the rules need.
   const enableImports = antfuOptions.imports !== false
   // antfu registers its import plugin (eslint-plugin-import-lite) as `import`, with or without `autoRenamePlugins`.
-  composer.insertBefore('antfu/disables/scripts', strict({
+  const strictConfigs = strict({
     typescript: !!(antfuOptions.typescript ?? true),
     unicorn: !!(antfuOptions.unicorn ?? true),
     importPlugin: enableImports ? 'import' : false,
-    skip: userOverriddenRules(antfuOptions),
-  }))
+    skip: unscopedOverriddenRules(antfuOptions),
+  })
+  const strictIds = new Set(strictConfigs.flatMap(config => Object.keys(config.rules ?? {})))
+  composer.insertBefore('antfu/disables/scripts', [...strictConfigs, ...strictScopedOverrides(antfuOptions, strictIds)])
   if (!enableImports) {
     return
   }
