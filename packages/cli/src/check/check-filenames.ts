@@ -53,7 +53,7 @@ function baseName(path: string): string {
 }
 
 function underTestRoot(file: string, unit: Unit | undefined): boolean {
-  if (unit == null) {
+  if (unit === undefined) {
     return false
   }
   const rel = relativeTo(file, unit.dir)
@@ -90,7 +90,7 @@ export function generatedDartFiles(rootDir: string, files: Iterable<string>): Se
       // Unreadable: judge it like any other file.
     }
     finally {
-      if (fd != null) {
+      if (fd !== undefined) {
         closeSync(fd)
       }
     }
@@ -139,7 +139,7 @@ export function dartFilenames(units: Unit[], partFiles: Set<string>): FilenameLa
       if (!name.endsWith('.dart') || partFiles.has(file) || underTestRoot(file, unit)) {
         return null
       }
-      const rel = unit == null ? file : relativeTo(file, unit.dir)
+      const rel = unit === undefined ? file : relativeTo(file, unit.dir)
       // Test drivers and Dart entrypoint directories (`dart run <pkg>:<tool>`).
       if (/^(?:integration_test|test_driver|bin|tool|example|web)\//.test(rel)) {
         return null
@@ -174,14 +174,14 @@ export function inspectFilenames(matches: ExtractMatch[], lang: FilenameLanguage
   const byFile = publicNamesByFile(matches, lang, imported, opaque)
   const skipped = new Map<string, Set<OpaqueReason>>()
   for (const [file, reasons] of opaque) {
-    if ((byFile.get(file)?.size ?? 0) <= 1 && lang.stem(file, unitOf(file, lang.units)) != null) {
+    if ((byFile.get(file)?.size ?? 0) <= 1 && lang.stem(file, unitOf(file, lang.units)) !== null) {
       skipped.set(file, reasons)
     }
   }
   const findings: Finding[] = []
   for (const [file, names] of byFile) {
     const finding = opaque.has(file) ? null : mismatchFinding(file, names, lang)
-    if (finding != null) {
+    if (finding !== null) {
       findings.push(finding)
     }
   }
@@ -240,7 +240,7 @@ function mismatchFinding(file: string, names: Map<string, number>, lang: Filenam
     return null
   }
   const stem = lang.stem(file, unitOf(file, lang.units))
-  if (stem == null) {
+  if (stem === null) {
     return null
   }
   const [[symbol, line]] = [...names]

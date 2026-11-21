@@ -3,7 +3,7 @@ import type { CheckResult } from './types.js'
 /** Human-readable report, one line per finding (`file:line: warning[slug] message`). */
 export function formatText(result: CheckResult): string {
   const lines = result.findings.map((f) => {
-    const location = f.line == null ? f.file : `${f.file}:${f.line}`
+    const location = f.line === undefined ? f.file : `${f.file}:${f.line}`
     return `${location}: warning[${f.slug}] ${f.message}`
   })
   for (const notice of result.notices) {

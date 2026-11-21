@@ -15,5 +15,8 @@
     "src/**/*",
     "test/**/*",
     "tsdown.config.ts"
+  ],
+  "exclude": [
+    "test/fixtures/self-import-alias"
   ]
 }

@@ -2,6 +2,7 @@ import pleaseai from '@pleaseai/eslint-config'
 
 export default pleaseai({
   quality: true,
+  strict: true,
   // Lint the docs site's Astro components (apps/docs).
   astro: true,
   // Format .md and .mdx with `bun fmt`, on its defaults: bunfig.toml has no [fmt] section.
@@ -19,5 +20,8 @@ export default pleaseai({
     'apps/docs/src/layouts/DocsLayout.astro',
     'packages/eslint-config/src/quality/vendor/**',
     'packages/eslint-config/test/quality/upstream/**',
+    // Import themselves on purpose: the fixtures for the strict `import/no-self-import` test.
+    'packages/eslint-config/test/fixtures/self-import*',
+    'packages/eslint-config/test/fixtures/self-import*/**',
   ],
 })

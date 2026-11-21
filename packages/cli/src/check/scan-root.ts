@@ -62,12 +62,12 @@ export function findScanRoot(requested: string, homeDir: string = homedir()): st
   const home = canonicalHome(homeDir)
   let found: string | null = null
   for (let dir = requested; ; dir = dirname(dir)) {
-    if (top == null && dir !== requested && (dir === home || dirname(dir) === dir)) {
+    if (top === null && dir !== requested && (dir === home || dirname(dir) === dir)) {
       break
     }
     if (hasMarker(dir)) {
       found = dir
-      if (top == null) {
+      if (top === null) {
         break
       }
     }

@@ -77,3 +77,30 @@ Read `docs/README.md` inside that installed package first, then read the relevan
 
 This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
 <!-- END:turborepo-agent-rules -->
+
+<!-- please:knowledge v1 -->
+
+## Project Knowledge
+
+Consult these files for project context before exploring the codebase.
+For full file listing with workspace artifacts, use `Skill("please:project-knowledge")`.
+
+### Project Documents
+
+- `SECURITY.md`: Security policies, authentication, authorization
+- `CONTRIBUTING.md`: Contribution guide, code review process
+
+### Domain Knowledge (docs/knowledge/)
+
+- `product.md`: Product vision, goals, target users
+- `product-guidelines.md`: Branding, UX principles, design system
+- `tech-stack.md`: Technology choices with rationale
+- `workflow.md`: Task lifecycle, testing policy, quality gates, dev commands
+- `ubiquitous-language.md`: Domain terms glossary (DDD Ubiquitous Language)
+- `gotchas.md`: Known project pitfalls and workarounds
+
+### Decision Records
+
+- `docs/adr/`: Architecture Decision Records (ADR)
+
+<!-- /please:knowledge -->
