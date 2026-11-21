@@ -92,6 +92,9 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
 
 ## Progress
 
+- [x] (2026-11-21 KST) T001 Add the `strict` option with the four non-import rules and strict `eqeqeq` (file: packages/eslint-config/src/strict.ts)
+      Evidence: `cd packages/eslint-config && bun test` → 354 pass, 0 fail (new `strict` describe: 6 tests); `bunx eslint packages/eslint-config/src packages/eslint-config/test/index.test.ts` → clean
+
 ## Decision Log
 
 - 2026-11-21: `eslint-plugin-import-x` as a regular dependency for the default mode (user decision). `eslint-plugin-import` was ruled out for its ESLint 10 peer range and its weight.

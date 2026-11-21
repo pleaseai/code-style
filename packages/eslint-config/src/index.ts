@@ -5,6 +5,7 @@ import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
+import { strict } from './strict'
 
 export type { PleaseaiFormatters } from './bun-fmt'
 
@@ -65,6 +66,19 @@ export interface PleaseaiOptions extends Omit<OptionsConfig, 'formatters'>, Omit
    * @default false
    */
   quality?: boolean
+  /**
+   * Enable stricter rules that antfu leaves off or loose:
+   * `no-promise-executor-return`, `eqeqeq` (`'always'` instead of `'smart'`),
+   * `unicorn/prefer-set-has` and `ts/no-confusing-non-null-assertion`
+   * (`@typescript-eslint/...` with `canonicalPluginNames`).
+   *
+   * Every rule is an error on JS and TS files, outside Markdown code blocks.
+   * A rule is skipped when antfu does not load its plugin (`typescript: false`
+   * or `unicorn: false`). Turn one off with `rules: { eqeqeq: 'off' }`.
+   *
+   * @default false
+   */
+  strict?: boolean
 }
 
 const { '@typescript-eslint': _ts, 'import-lite': _importLite, ...keptPluginRenaming } = defaultPluginRenaming
@@ -118,7 +132,7 @@ export function pleaseai(
   options: PleaseaiOptions = {},
   ...userConfigs: TypedFlatConfigItem[]
 ): ReturnType<typeof antfu> {
-  const { canonicalPluginNames = false, formatters, quality: enableQuality = false, ...antfuOptions } = options
+  const { canonicalPluginNames = false, formatters, quality: enableQuality = false, strict: enableStrict = false, ...antfuOptions } = options
   const autoRenamePlugins = antfuOptions.autoRenamePlugins ?? true
   const { antfu: antfuFormatters, bun: enableBunFmt } = splitBunFormatter(formatters)
   // The severity moves onto the Markdown and MDX configs: in antfu's files-less `rules` config it would run bun fmt on every file.
@@ -154,6 +168,14 @@ export function pleaseai(
 
   if (enableQuality) {
     composer.insertBefore('antfu/disables/scripts', quality())
+  }
+
+  if (enableStrict) {
+    // Mirrors antfu's own defaults for the plugins the rules need.
+    composer.insertBefore('antfu/disables/scripts', strict({
+      typescript: !!(antfuOptions.typescript ?? true),
+      unicorn: !!(antfuOptions.unicorn ?? true),
+    }))
   }
 
   if (!canonicalPluginNames) {

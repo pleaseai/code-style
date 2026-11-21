@@ -154,6 +154,87 @@ describe('quality', () => {
   })
 })
 
+describe('strict', () => {
+  const code = [
+    'export const a = new Promise(resolve => resolve(1))',
+    'export const b = new Promise((resolve) => { return resolve(2) })',
+    'const list = [\'x\', \'y\']',
+    'export const c = list.includes(\'x\')',
+    'export const e = list.includes(\'y\')',
+    'export function d(v: string | undefined, w: string | undefined) {',
+    '  return v! == w || v == null',
+    '}',
+    '',
+  ].join('\n')
+  const strictRules = ['no-promise-executor-return', 'eqeqeq', 'unicorn/prefer-set-has', 'ts/no-confusing-non-null-assertion']
+  const lint = async (options: Parameters<typeof pleaseai>[0], ...userConfigs: TypedFlatConfigItem[]) => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options, ...userConfigs) })
+    const [result] = await eslint.lintText(code, { filePath: 'src/strict.ts' })
+    return result!.messages
+  }
+  const ids = async (...args: Parameters<typeof lint>) => (await lint(...args)).map(message => message.ruleId)
+
+  test('is off by default', async () => {
+    const configs = await pleaseai()
+
+    expect(ruleIds(configs).filter(id => id === 'no-promise-executor-return' || id === 'unicorn/prefer-set-has' || id === 'ts/no-confusing-non-null-assertion')).toEqual([])
+    expect(ruleEntry(configs, 'eqeqeq')).toEqual(['error', 'smart'])
+    expect(await ids({})).not.toContain('no-promise-executor-return')
+  })
+
+  test('reports the rules as errors', async () => {
+    const messages = await lint({ strict: true })
+    const severities = (id: string) => messages.filter(message => message.ruleId === id).map(message => message.severity)
+
+    for (const id of strictRules) {
+      expect(severities(id)).toContain(2)
+    }
+  })
+
+  test('reports the TypeScript rule under the canonical name', async () => {
+    const found = await ids({ strict: true, canonicalPluginNames: true })
+
+    expect(found).toContain('@typescript-eslint/no-confusing-non-null-assertion')
+    expect(found).not.toContain('ts/no-confusing-non-null-assertion')
+  })
+
+  test('lets options.rules and user configs override a rule', async () => {
+    const fromOptions = await ids({ strict: true, rules: { 'unicorn/prefer-set-has': 'off' } })
+    const fromUserConfig = await ids({ strict: true }, { rules: { eqeqeq: 'off' } })
+
+    expect(fromOptions).not.toContain('unicorn/prefer-set-has')
+    for (const id of ['no-promise-executor-return', 'eqeqeq', 'ts/no-confusing-non-null-assertion']) {
+      expect(fromOptions).toContain(id)
+    }
+    expect(fromUserConfig).not.toContain('eqeqeq')
+    expect(fromUserConfig).toContain('unicorn/prefer-set-has')
+  })
+
+  test('skips a rule whose plugin antfu does not load', async () => {
+    const lintJs = async (options: Parameters<typeof pleaseai>[0]) => {
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
+      const [result] = await eslint.lintText(code.replace('v! ==', 'v ==').replaceAll(': string | undefined', ''), { filePath: 'src/strict.js' })
+      return result!.messages.map(message => message.ruleId)
+    }
+    const withoutTs = await lintJs({ strict: true, typescript: false })
+    const withoutUnicorn = await ids({ strict: true, unicorn: false })
+
+    expect(withoutTs).not.toContain('ts/no-confusing-non-null-assertion')
+    expect(withoutTs).toContain('unicorn/prefer-set-has')
+    expect(withoutUnicorn).not.toContain('unicorn/prefer-set-has')
+    expect(withoutUnicorn).toContain('eqeqeq')
+  })
+
+  test('skips code blocks in Markdown', async () => {
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true }) })
+    // `== null` is allowed by antfu's `'smart'` eqeqeq, so only strict would report it.
+    const [result] = await eslint.lintText(`# Example\n\n\`\`\`ts\n${code.replace('v! == w ||', '')}\`\`\`\n`, { filePath: 'docs/strict.md' })
+
+    expect(result!.messages.filter(message => message.fatal)).toEqual([])
+    expect(result!.messages.map(message => message.ruleId).filter(id => id && strictRules.includes(id))).toEqual([])
+  })
+})
+
 describe('resolveAntislop', () => {
   const installed = (...names: string[]) => (name: string) => names.includes(name)
 
