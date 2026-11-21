@@ -367,6 +367,40 @@ describe('strict import/no-self-import', () => {
     })
   })
 
+  describe('with a consumer import resolver', () => {
+    const resolverConfigs = (configs: Linter.Config[]) => configs.filter(config => config.name === 'pleaseai/strict/import-resolver')
+    const lintSelfJs = async (options: Parameters<typeof pleaseai>[0], ...user: TypedFlatConfigItem[]) => {
+      const file = fileURLToPath(new URL('./fixtures/self-import-js.ts', import.meta.url))
+      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options, ...user), cwd: fileURLToPath(new URL('..', import.meta.url)) })
+      const [result] = await eslint.lintFiles([file])
+      return result!.messages.map(message => message.ruleId)
+    }
+
+    test('canonical: a consumer resolver for every file replaces the strict one', async () => {
+      const user = { settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
+      const options = { strict: true, canonicalPluginNames: true }
+
+      expect(resolverConfigs(await pleaseai(options, user))).toEqual([])
+      expect(await lintSelfJs(options, user)).not.toContain('import/no-self-import')
+    })
+
+    test('default: a consumer legacy resolver setting removes the strict resolver', async () => {
+      const configs = await pleaseai({ strict: true }, { settings: { 'import-x/resolver': { node: true } } })
+
+      expect(resolverConfigs(configs)).toEqual([])
+    })
+
+    test('a file-scoped consumer resolver is excluded from the strict resolver', async () => {
+      const user = { files: ['**/other/**'], settings: { 'import/resolver': { node: {} } } }
+      const options = { strict: true, canonicalPluginNames: true }
+      const [resolver, ...rest] = resolverConfigs(await pleaseai(options, user))
+
+      expect(rest).toEqual([])
+      expect(resolver!.ignores).toContain('**/other/**')
+      expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
+    })
+  })
+
   test('reports it with canonicalPluginNames', async () => {
     expect(await lint({ strict: true, canonicalPluginNames: true })).toContain('import/no-self-import')
   })

@@ -115,3 +115,35 @@ export function strictOverrides(configs: TypedFlatConfigItem[], options: Options
   }
   return [...configs.slice(0, strictIndex + 1), ...reapplied, ...configs.slice(strictIndex + 1)]
 }
+
+const RESOLVER_NAME = 'pleaseai/strict/import-resolver'
+const RESOLVER_KEYS = ['import/resolver', 'import-x/resolver', 'import-x/resolver-legacy', 'import-x/resolver-next']
+
+function setsResolver(config: TypedFlatConfigItem): boolean {
+  return config.name !== RESOLVER_NAME && RESOLVER_KEYS.some(key => config.settings !== undefined && key in config.settings)
+}
+
+/**
+ * The strict resolver config is a fallback for consumers who configure no resolver. Run on the resolved configs: drops
+ * it when a consumer config sets a resolver for every file (or for files it cannot express as globs), and otherwise
+ * excludes the files a consumer's resolver config covers, so that resolver owns them.
+ */
+export function yieldImportResolver(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] {
+  const index = configs.findIndex(config => config.name === RESOLVER_NAME)
+  if (index === -1) {
+    return configs
+  }
+  const consumers = configs.filter(setsResolver)
+  if (consumers.length === 0) {
+    return configs
+  }
+  const globs: string[] = []
+  for (const { files } of consumers) {
+    if (!files || files.some(file => typeof file !== 'string')) {
+      return configs.filter((_, i) => i !== index)
+    }
+    globs.push(...files as string[])
+  }
+  const fallback = configs[index]!
+  return configs.map((config, i) => i === index ? { ...fallback, ignores: [...fallback.ignores ?? [], ...globs] } : config)
+}

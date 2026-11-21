@@ -6,7 +6,7 @@ import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
-import { strict, strictOverrides } from './strict'
+import { strict, strictOverrides, yieldImportResolver } from './strict'
 
 export type { PleaseaiFormatters } from './bun-fmt'
 
@@ -190,10 +190,11 @@ function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConf
   })
   composer.insertBefore('antfu/disables/scripts', strictConfigs)
   composer.onResolved(configs => strictOverrides(configs, antfuOptions))
+  composer.onResolved(yieldImportResolver)
   if (!enableImports) {
     return
   }
-  // Placed before the user configs, so a consumer's own resolver settings still win.
+  // A fallback for consumers who configure no resolver: `yieldImportResolver` drops it, or excludes the files, where a consumer's own resolver setting applies.
   composer.insertBefore('antfu/disables/scripts', canonicalPluginNames ? canonicalTypeScriptResolverConfig() : typeScriptResolverConfig())
   if (!canonicalPluginNames) {
     // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
