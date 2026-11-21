@@ -11,11 +11,16 @@ export interface StrictOptions {
   importPlugin: string | false
 }
 
+type Rules = NonNullable<TypedFlatConfigItem['rules']>
+
 const STRICT_NAME = 'pleaseai/strict/rules'
+
+/** Name of the fallback config that gives import-x or eslint-plugin-import a TypeScript resolver. */
+export const RESOLVER_NAME = 'pleaseai/strict/import-resolver'
 
 /** Rules that antfu leaves off or loose, at `'error'`. A rule is left out when antfu does not load its plugin. */
 export function strict(options: StrictOptions): TypedFlatConfigItem[] {
-  const rules: NonNullable<TypedFlatConfigItem['rules']> = {
+  const rules: Rules = {
     'eqeqeq': ['error', 'always'],
     'no-promise-executor-return': 'error',
   }
@@ -40,10 +45,8 @@ export function strict(options: StrictOptions): TypedFlatConfigItem[] {
   ]
 }
 
-type Rules = NonNullable<TypedFlatConfigItem['rules']>
-
 /** The name strict registers a rule under, for a rule ID spelled the way a consumer might write it. */
-export function normalizeRuleId(id: string): string {
+function normalizeRuleId(id: string): string {
   return id.replace(/^@typescript-eslint\//, 'ts/').replace(/^import-lite\//, 'import/')
 }
 
@@ -58,18 +61,21 @@ interface OverrideEntry {
   value: unknown
 }
 
+interface OverrideMap {
+  group: string
+  map: Rules
+}
+
 /** Every override map the consumer gave antfu, with its option group: each group's `overrides` / `overridesTypeAware`, and the deprecated `overrides.<group>`. */
-function overrideMaps(options: OptionsConfig): { group: string, map: Rules }[] {
-  const maps: { group: string, map: unknown }[] = []
-  for (const [key, value] of Object.entries(options)) {
+function overrideMaps(options: OptionsConfig): OverrideMap[] {
+  const maps = (group: string, ...candidates: unknown[]): OverrideMap[] =>
+    candidates.flatMap(map => isRecord(map) ? [{ group, map: map as Rules }] : [])
+  return Object.entries(options).flatMap(([key, value]) => {
     if (key === 'overrides' && isRecord(value)) {
-      maps.push(...Object.entries(value).map(([group, map]) => ({ group, map })))
+      return Object.entries(value).flatMap(([group, map]) => maps(group, map))
     }
-    else if (isRecord(value)) {
-      maps.push({ group: key, map: value.overrides }, { group: key, map: value.overridesTypeAware })
-    }
-  }
-  return maps.filter(entry => isRecord(entry.map)) as { group: string, map: Rules }[]
+    return isRecord(value) ? maps(key, value.overrides, value.overridesTypeAware) : []
+  })
 }
 
 /** The strict-owned entries of the consumer's override maps, with normalized rule IDs. */
@@ -101,25 +107,25 @@ export function strictOverrides(configs: TypedFlatConfigItem[], options: Options
   }
   const strictIds = new Set(Object.keys(configs[strictIndex]!.rules ?? {}).map(normalizeRuleId))
   const entries = strictOverrideEntries(options, strictIds)
-  const reapplied: TypedFlatConfigItem[] = []
-  for (const source of configs.slice(0, strictIndex)) {
-    const rules = appliedRules(source, entries)
-    if (Object.keys(rules).length > 0) {
-      reapplied.push({
-        name: `pleaseai/strict/overrides/${source.name ?? 'unnamed'}`,
-        files: source.files ?? [GLOB_SRC],
-        ignores: [GLOB_MARKDOWN_CODE, ...source.ignores ?? []],
-        rules,
-      })
-    }
+  if (entries.length === 0) {
+    return configs
   }
+  const reapplied = configs.slice(0, strictIndex).flatMap((source): TypedFlatConfigItem[] => {
+    const rules = appliedRules(source, entries)
+    return Object.keys(rules).length > 0
+      ? [{
+          name: `pleaseai/strict/overrides/${source.name ?? 'unnamed'}`,
+          files: source.files ?? [GLOB_SRC],
+          ignores: [GLOB_MARKDOWN_CODE, ...source.ignores ?? []],
+          rules,
+        }]
+      : []
+  })
   return [...configs.slice(0, strictIndex + 1), ...reapplied, ...configs.slice(strictIndex + 1)]
 }
 
-const RESOLVER_NAME = 'pleaseai/strict/import-resolver'
-
-function setsResolver(config: TypedFlatConfigItem, keys: readonly string[]): boolean {
-  return config.name !== RESOLVER_NAME && keys.some(key => config.settings !== undefined && key in config.settings)
+function setsResolver({ name, settings }: TypedFlatConfigItem, keys: readonly string[]): boolean {
+  return name !== RESOLVER_NAME && settings !== undefined && keys.some(key => key in settings)
 }
 
 /**

@@ -6,7 +6,7 @@ import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
-import { strict, strictOverrides, yieldImportResolver } from './strict'
+import { RESOLVER_NAME, strict, strictOverrides, yieldImportResolver } from './strict'
 
 export type { PleaseaiFormatters } from './bun-fmt'
 
@@ -111,51 +111,47 @@ async function loadEslintPluginImport(): Promise<ESLint.Plugin> {
   }
 }
 
-/** Adds `eslint-plugin-import-x`'s `no-self-import` to antfu's import plugin, loading import-x only when needed. */
-async function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> {
-  const { default: importX } = await import('eslint-plugin-import-x')
-  // The rule is typed against import-x's own context, which ESLint's plugin type cannot express.
-  const importXPlugin = importX as ESLint.Plugin
-  return { ...original, rules: { ...original.rules, 'no-self-import': importXPlugin.rules!['no-self-import']! } }
+const noSelfImportMerged = new WeakMap<ESLint.Plugin, Promise<ESLint.Plugin>>()
+
+/**
+ * Adds `eslint-plugin-import-x`'s `no-self-import` to antfu's import plugin, loading import-x only when needed. Every
+ * registration of the same original plugin gets the identical merged object, so ESLint sees one plugin.
+ */
+function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> {
+  const cached = noSelfImportMerged.get(original)
+  if (cached) {
+    return cached
+  }
+  const merged = import('eslint-plugin-import-x/rules/no-self-import').then(({ default: rule }: { default: object }): ESLint.Plugin => ({
+    ...original,
+    // The rule is typed against import-x's own context, which ESLint's plugin type cannot express.
+    rules: { ...original.rules, 'no-self-import': rule as NonNullable<ESLint.Plugin['rules']>[string] },
+  }))
+  noSelfImportMerged.set(original, merged)
+  return merged
 }
 
 /**
- * Lets import-x resolve TypeScript sources through `eslint-import-resolver-typescript`: `.ts` extensions,
- * `.js`-style specifiers that point at `.ts` files, and tsconfig `paths` aliases. Loaded only when `strict` is on.
+ * The strict resolver fallback: lets the import plugin resolve TypeScript sources through
+ * `eslint-import-resolver-typescript` (`.ts` extensions, `.js`-style specifiers that point at `.ts` files, and
+ * tsconfig `paths` aliases). Loaded only when `strict` is on.
  */
-async function typeScriptResolverConfig(): Promise<TypedFlatConfigItem> {
+function resolverConfig(settings: TypedFlatConfigItem['settings']): TypedFlatConfigItem {
+  return { name: RESOLVER_NAME, files: [GLOB_SRC], settings }
+}
+
+async function typeScriptResolverSettings(): Promise<TypedFlatConfigItem['settings']> {
   const { createTypeScriptImportResolver } = await import('eslint-import-resolver-typescript')
-  return {
-    name: 'pleaseai/strict/import-resolver',
-    files: [GLOB_SRC],
-    settings: { 'import-x/resolver-next': [createTypeScriptImportResolver()] },
-  }
+  return { 'import-x/resolver-next': [createTypeScriptImportResolver()] }
 }
 
 /**
- * The same `eslint-import-resolver-typescript` resolution for canonical mode's eslint-plugin-import, which loads
- * resolvers by name or path relative to the linted file. An absolute path to this package's own copy works without hoisting.
+ * Canonical mode's eslint-plugin-import loads resolvers by name or path relative to the linted file. An absolute path
+ * to this package's own copy of the resolver works without hoisting.
  */
-function canonicalTypeScriptResolverConfig(): TypedFlatConfigItem {
+function canonicalResolverSettings(): TypedFlatConfigItem['settings'] {
   const resolver = createRequire(import.meta.url).resolve('eslint-import-resolver-typescript')
-  return {
-    name: 'pleaseai/strict/import-resolver',
-    files: [GLOB_SRC],
-    settings: { 'import/resolver': { [resolver]: {} } },
-  }
-}
-
-/** Gives every registration of the same original plugin the identical merged object, so ESLint sees one plugin. */
-function cachedNoSelfImport(): (original: ESLint.Plugin) => Promise<ESLint.Plugin> {
-  const merged = new Map<ESLint.Plugin, Promise<ESLint.Plugin>>()
-  return (original) => {
-    let plugin = merged.get(original)
-    if (!plugin) {
-      plugin = addNoSelfImport(original)
-      merged.set(original, plugin)
-    }
-    return plugin
-  }
+  return { 'import/resolver': { [resolver]: {} } }
 }
 
 function toPreferTypeSpecifierStyle(entry: Linter.RuleEntry): Linter.RuleEntry {
@@ -190,16 +186,16 @@ function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConf
   })
   composer.insertBefore('antfu/disables/scripts', strictConfigs)
   composer.onResolved(configs => strictOverrides(configs, antfuOptions))
-  const resolverKeys = canonicalPluginNames ? ['import/resolver'] : ['import-x/resolver-next', 'import-x/resolver', 'import-x/resolver-legacy', 'import-x/resolve']
-  composer.onResolved(configs => yieldImportResolver(configs, resolverKeys))
   if (!enableImports) {
     return
   }
+  const resolverKeys = canonicalPluginNames ? ['import/resolver'] : ['import-x/resolver-next', 'import-x/resolver', 'import-x/resolver-legacy', 'import-x/resolve']
+  composer.onResolved(configs => yieldImportResolver(configs, resolverKeys))
   // A fallback for consumers who configure no resolver: `yieldImportResolver` drops it entirely once any config sets a resolver setting the active import plugin reads.
-  composer.insertBefore('antfu/disables/scripts', canonicalPluginNames ? canonicalTypeScriptResolverConfig() : typeScriptResolverConfig())
+  composer.insertBefore('antfu/disables/scripts', canonicalPluginNames ? resolverConfig(canonicalResolverSettings()) : typeScriptResolverSettings().then(resolverConfig))
   if (!canonicalPluginNames) {
     // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
-    composer.replacePlugin('import', cachedNoSelfImport())
+    composer.replacePlugin('import', addNoSelfImport)
   }
 }
 

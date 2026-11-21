@@ -1,12 +1,41 @@
 import type { Linter } from 'eslint'
-import type { TypedFlatConfigItem } from '../src/index'
+import type { PleaseaiOptions, TypedFlatConfigItem } from '../src/index'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, test } from 'bun:test'
+import { beforeAll, describe, expect, test } from 'bun:test'
 import { ESLint } from 'eslint'
 import pluginImport from 'eslint-plugin-import'
 import { resolveAntislop } from '../src/antislop'
 import pleaseai, { parserPlain } from '../src/index'
+import { RESOLVER_NAME } from '../src/strict'
+
+const PACKAGE_ROOT = fileURLToPath(new URL('..', import.meta.url))
+
+interface LintTarget {
+  /** Lints this source as `filePath`; without it, lints the file at `filePath`. */
+  code?: string
+  filePath: string
+  cwd?: string
+  /** Extra configs, appended when `configsOrOptions` is an options object. */
+  userConfigs?: TypedFlatConfigItem[]
+}
+
+/** Lints one source or file with `pleaseai(options, ...userConfigs)`, or with configs that are already resolved. */
+async function lintMessages(configsOrOptions: PleaseaiOptions | TypedFlatConfigItem[], { code, filePath, cwd, userConfigs = [] }: LintTarget): Promise<Linter.LintMessage[]> {
+  const overrideConfig = Array.isArray(configsOrOptions) ? configsOrOptions : await pleaseai(configsOrOptions, ...userConfigs)
+  const eslint = new ESLint({ overrideConfigFile: true, overrideConfig, cwd })
+  const [result] = code === undefined ? await eslint.lintFiles([filePath]) : await eslint.lintText(code, { filePath })
+  return result!.messages
+}
+
+async function lintRuleIds(...args: Parameters<typeof lintMessages>): Promise<(string | null)[]> {
+  return (await lintMessages(...args)).map(message => message.ruleId)
+}
+
+/** A file in `test/fixtures`, linted from the package root. */
+function fixtureFile(name: string): LintTarget {
+  return { filePath: fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), cwd: PACKAGE_ROOT }
+}
 
 function pluginNames(configs: TypedFlatConfigItem[]): Set<string> {
   return new Set(configs.flatMap(config => Object.keys(config.plugins ?? {})))
@@ -167,23 +196,19 @@ describe('strict', () => {
     '',
   ].join('\n')
   const strictRules = new Set(['no-promise-executor-return', 'eqeqeq', 'unicorn/prefer-set-has', 'ts/no-confusing-non-null-assertion'])
-  const lint = async (options: Parameters<typeof pleaseai>[0], ...userConfigs: TypedFlatConfigItem[]) => {
-    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options, ...userConfigs) })
-    const [result] = await eslint.lintText(code, { filePath: 'src/strict.ts' })
-    return result!.messages
-  }
-  const ids = async (...args: Parameters<typeof lint>) => (await lint(...args)).map(message => message.ruleId)
+  const ids = (options: PleaseaiOptions, ...userConfigs: TypedFlatConfigItem[]) => lintRuleIds(options, { code, filePath: 'src/strict.ts', userConfigs })
 
   test('is off by default', async () => {
     const configs = await pleaseai()
 
-    expect(ruleIds(configs).filter(id => id === 'no-promise-executor-return' || id === 'unicorn/prefer-set-has' || id === 'ts/no-confusing-non-null-assertion')).toEqual([])
+    // eqeqeq is configured by antfu already, as `'smart'`; strict only tightens it.
+    expect(ruleIds(configs).filter(id => strictRules.has(id) && id !== 'eqeqeq')).toEqual([])
     expect(ruleEntry(configs, 'eqeqeq')).toEqual(['error', 'smart'])
     expect(await ids({})).not.toContain('no-promise-executor-return')
   })
 
   test('reports the rules as errors', async () => {
-    const messages = await lint({ strict: true })
+    const messages = await lintMessages({ strict: true }, { code, filePath: 'src/strict.ts' })
     const severities = (id: string) => messages.filter(message => message.ruleId === id).map(message => message.severity)
 
     for (const id of strictRules) {
@@ -192,15 +217,11 @@ describe('strict', () => {
   })
 
   test('reports == null, which antfu\'s smart eqeqeq allows', async () => {
-    const source = 'export const f = (v?: string) => v == null\n'
-    const lintSource = async (options: Parameters<typeof pleaseai>[0]) => {
-      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
-      const [result] = await eslint.lintText(source, { filePath: 'src/null-check.ts' })
-      return result!.messages.map(message => message.ruleId)
-    }
+    const source = { code: 'export const f = (v?: string) => v == null\n', filePath: 'src/null-check.ts' }
+    const [lenient, strictFound] = await Promise.all([lintRuleIds({}, source), lintRuleIds({ strict: true }, source)])
 
-    expect(await lintSource({})).not.toContain('eqeqeq')
-    expect(await lintSource({ strict: true })).toContain('eqeqeq')
+    expect(lenient).not.toContain('eqeqeq')
+    expect(strictFound).toContain('eqeqeq')
   })
 
   test('reports the TypeScript rule under the canonical name', async () => {
@@ -211,8 +232,10 @@ describe('strict', () => {
   })
 
   test('lets options.rules and user configs override a rule', async () => {
-    const fromOptions = await ids({ strict: true, rules: { 'unicorn/prefer-set-has': 'off' } })
-    const fromUserConfig = await ids({ strict: true }, { rules: { eqeqeq: 'off' } })
+    const [fromOptions, fromUserConfig] = await Promise.all([
+      ids({ strict: true, rules: { 'unicorn/prefer-set-has': 'off' } }),
+      ids({ strict: true }, { rules: { eqeqeq: 'off' } }),
+    ])
 
     expect(fromOptions).not.toContain('unicorn/prefer-set-has')
     for (const id of ['no-promise-executor-return', 'eqeqeq', 'ts/no-confusing-non-null-assertion']) {
@@ -223,11 +246,13 @@ describe('strict', () => {
   })
 
   test('lets antfu\'s plugin override options beat strict', async () => {
-    const fromTypescript = await ids({ strict: true, typescript: { overrides: { 'ts/no-confusing-non-null-assertion': 'off' } } })
-    const fromCanonical = await ids({ strict: true, canonicalPluginNames: true, typescript: { overrides: { '@typescript-eslint/no-confusing-non-null-assertion': 'off' } } })
-    const fromUnicorn = await ids({ strict: true, unicorn: { overrides: { 'unicorn/prefer-set-has': 'off' } } })
-    const fromDeprecated = await ids({ strict: true, overrides: { typescript: { 'ts/no-confusing-non-null-assertion': 'off' } } })
-    const fromJavascript = await ids({ strict: true, javascript: { overrides: { 'no-promise-executor-return': 'off' } } })
+    const [fromTypescript, fromCanonical, fromUnicorn, fromDeprecated, fromJavascript] = await Promise.all([
+      ids({ strict: true, typescript: { overrides: { 'ts/no-confusing-non-null-assertion': 'off' } } }),
+      ids({ strict: true, canonicalPluginNames: true, typescript: { overrides: { '@typescript-eslint/no-confusing-non-null-assertion': 'off' } } }),
+      ids({ strict: true, unicorn: { overrides: { 'unicorn/prefer-set-has': 'off' } } }),
+      ids({ strict: true, overrides: { typescript: { 'ts/no-confusing-non-null-assertion': 'off' } } }),
+      ids({ strict: true, javascript: { overrides: { 'no-promise-executor-return': 'off' } } }),
+    ])
 
     expect(fromTypescript).not.toContain('ts/no-confusing-non-null-assertion')
     expect(fromTypescript).toContain('eqeqeq')
@@ -241,34 +266,34 @@ describe('strict', () => {
 
   test('keeps strict outside the files a scoped plugin override applies to', async () => {
     const source = 'export const a = new Promise(resolve => resolve(1))\n'
-    const lintFile = async (options: Parameters<typeof pleaseai>[0], filePath: string) => {
-      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
-      const [result] = await eslint.lintText(source, { filePath })
-      return result!.messages.map(message => message.ruleId)
-    }
     const typescript = { strict: true, typescript: { overrides: { 'no-promise-executor-return': 'off' as const } } }
-    const test = { strict: true, test: { overrides: { 'no-promise-executor-return': 'off' as const } } }
+    const testGroup = { strict: true, test: { overrides: { 'no-promise-executor-return': 'off' as const } } }
+    const [tsOnTs, tsOnJs, testOnTest, testOnTs] = await Promise.all([
+      lintRuleIds(typescript, { code: source, filePath: 'src/a.ts' }),
+      lintRuleIds(typescript, { code: source, filePath: 'src/a.js' }),
+      lintRuleIds(testGroup, { code: source, filePath: 'src/a.test.ts' }),
+      lintRuleIds(testGroup, { code: source, filePath: 'src/a.ts' }),
+    ])
 
-    expect(await lintFile(typescript, 'src/a.ts')).not.toContain('no-promise-executor-return')
-    expect(await lintFile(typescript, 'src/a.js')).toContain('no-promise-executor-return')
-    expect(await lintFile(test, 'src/a.test.ts')).not.toContain('no-promise-executor-return')
-    expect(await lintFile(test, 'src/a.ts')).toContain('no-promise-executor-return')
+    expect(tsOnTs).not.toContain('no-promise-executor-return')
+    expect(tsOnJs).toContain('no-promise-executor-return')
+    expect(testOnTest).not.toContain('no-promise-executor-return')
+    expect(testOnTs).toContain('no-promise-executor-return')
   })
 
   test('does not leak a scoped override onto configs of another option group', async () => {
-    const lintFile = async (filePath: string) => {
-      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, typescript: { overrides: { eqeqeq: ['error', 'smart'] } } }) })
-      const code = filePath.endsWith('.ts') ? 'export const a = (x: unknown) => x == null\n' : 'export const a = x => x == null\n'
-      const [result] = await eslint.lintText(code, { filePath })
-      return result!.messages.map(message => message.ruleId)
-    }
+    const configs = await pleaseai({ strict: true, typescript: { overrides: { eqeqeq: ['error', 'smart'] } } })
+    const [fromJs, fromTs] = await Promise.all([
+      lintRuleIds(configs, { code: 'export const a = x => x == null\n', filePath: 'src/a.js' }),
+      lintRuleIds(configs, { code: 'export const a = (x: unknown) => x == null\n', filePath: 'src/a.ts' }),
+    ])
 
-    expect(await lintFile('src/a.js')).toContain('eqeqeq')
-    expect(await lintFile('src/a.ts')).not.toContain('eqeqeq')
+    expect(fromJs).toContain('eqeqeq')
+    expect(fromTs).not.toContain('eqeqeq')
   })
 
   test('lets every antfu option group\'s overrides beat strict', async () => {
-    const eqeqeqFor = async (options: Parameters<typeof pleaseai>[0]) => {
+    const eqeqeqFor = async (options: PleaseaiOptions) => {
       const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, ...options }) })
       const config = await eslint.calculateConfigForFile('src/a.js')
       return (config?.rules?.eqeqeq as unknown[] | undefined)?.[0]
@@ -281,20 +306,18 @@ describe('strict', () => {
   })
 
   test('ignores overrides of a plugin group antfu does not load', async () => {
-    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, unicorn: false, overrides: { unicorn: { eqeqeq: 'off' } } } as Parameters<typeof pleaseai>[0]) })
+    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true, unicorn: false, overrides: { unicorn: { eqeqeq: 'off' } } } as PleaseaiOptions) })
     const config = await eslint.calculateConfigForFile('src/a.js')
 
     expect(config?.rules?.eqeqeq).toEqual([2, 'always'])
   })
 
   test('skips a rule whose plugin antfu does not load', async () => {
-    const lintJs = async (options: Parameters<typeof pleaseai>[0]) => {
-      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options) })
-      const [result] = await eslint.lintText(code.replace('v! ==', 'v ==').replaceAll(': string | undefined', ''), { filePath: 'src/strict.js' })
-      return result!.messages.map(message => message.ruleId)
-    }
-    const withoutTs = await lintJs({ strict: true, typescript: false })
-    const withoutUnicorn = await ids({ strict: true, unicorn: false })
+    const jsCode = code.replace('v! ==', 'v ==').replaceAll(': string | undefined', '')
+    const [withoutTs, withoutUnicorn] = await Promise.all([
+      lintRuleIds({ strict: true, typescript: false }, { code: jsCode, filePath: 'src/strict.js' }),
+      ids({ strict: true, unicorn: false }),
+    ])
 
     expect(withoutTs).not.toContain('ts/no-confusing-non-null-assertion')
     expect(withoutTs).toContain('unicorn/prefer-set-has')
@@ -303,35 +326,23 @@ describe('strict', () => {
   })
 
   test('skips code blocks in Markdown', async () => {
-    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai({ strict: true }) })
     // `== null` is allowed by antfu's `'smart'` eqeqeq, so only strict would report it.
-    const [result] = await eslint.lintText(`# Example\n\n\`\`\`ts\n${code.replace('v! == w ||', '')}\`\`\`\n`, { filePath: 'docs/strict.md' })
+    const markdown = `# Example\n\n\`\`\`ts\n${code.replace('v! == w ||', '')}\`\`\`\n`
+    const messages = await lintMessages({ strict: true }, { code: markdown, filePath: 'docs/strict.md' })
 
-    expect(result!.messages.filter(message => message.fatal)).toEqual([])
-    expect(result!.messages.map(message => message.ruleId).filter(id => id && strictRules.has(id))).toEqual([])
+    expect(messages.filter(message => message.fatal)).toEqual([])
+    expect(messages.map(message => message.ruleId).filter(id => id && strictRules.has(id))).toEqual([])
   })
 })
 
 describe('strict import/no-self-import', () => {
-  const fixture = fileURLToPath(new URL('./fixtures/self-import.mjs', import.meta.url))
-  const lint = async (options: Parameters<typeof pleaseai>[0]) => {
-    const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options), cwd: fileURLToPath(new URL('..', import.meta.url)) })
-    const [result] = await eslint.lintFiles([fixture])
-    return result!.messages.map(message => message.ruleId)
-  }
+  const selfImport = fixtureFile('self-import.mjs')
 
   test('reports a self-import as import/no-self-import', async () => {
-    expect(await lint({ strict: true })).toContain('import/no-self-import')
+    expect(await lintRuleIds({ strict: true }, selfImport)).toContain('import/no-self-import')
   })
 
   describe('in a TypeScript file', () => {
-    const lintTs = async (name: string, options: Parameters<typeof pleaseai>[0]) => {
-      const file = fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url))
-      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options), cwd: fileURLToPath(new URL('..', import.meta.url)) })
-      const [result] = await eslint.lintFiles([file])
-      return result!.messages.map(message => message.ruleId)
-    }
-
     describe.each([
       ['default plugins', false],
       ['canonicalPluginNames', true],
@@ -340,112 +351,85 @@ describe('strict import/no-self-import', () => {
         ['extensionless', 'self-import-extensionless.ts'],
         ['.js specifier', 'self-import-js.ts'],
       ])('reports a %s self-import', async (_label, name) => {
-        expect(await lintTs(name, { strict: true, canonicalPluginNames })).toContain('import/no-self-import')
+        expect(await lintRuleIds({ strict: true, canonicalPluginNames }, fixtureFile(name))).toContain('import/no-self-import')
       })
 
       test('does not report a non-self import', async () => {
-        expect(await lintTs('non-self-import.ts', { strict: true, canonicalPluginNames })).not.toContain('import/no-self-import')
+        expect(await lintRuleIds({ strict: true, canonicalPluginNames }, fixtureFile('non-self-import.ts'))).not.toContain('import/no-self-import')
       })
 
       describe('through a tsconfig paths alias', () => {
-        const lintAlias = (name: string): (string | null)[] => {
+        let ruleIdsByFile: Record<string, (string | null)[]>
+
+        // One child process per mode: it lints both files in the fixture project.
+        beforeAll(async () => {
           const cwd = fileURLToPath(new URL('./fixtures/self-import-alias', import.meta.url))
           const runner = fileURLToPath(new URL('./fixtures/lint-alias.ts', import.meta.url))
-          const run = Bun.spawnSync([process.execPath, runner, `${cwd}/src/${name}`, canonicalPluginNames ? 'canonical' : 'default'], { cwd, stdout: 'pipe', stderr: 'pipe' })
-          expect(run.stderr.toString()).toBe('')
-          return JSON.parse(run.stdout.toString())
-        }
-
-        test('reports a self-import', async () => {
-          expect(lintAlias('alias-self.ts')).toContain('import/no-self-import')
+          const files = ['alias-self.ts', 'alias-non-self.ts'].map(name => `${cwd}/src/${name}`)
+          const proc = Bun.spawn([process.execPath, runner, canonicalPluginNames ? 'canonical' : 'default', ...files], { cwd, stdout: 'pipe', stderr: 'pipe' })
+          const [stdout, stderr] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited])
+          expect(stderr).toBe('')
+          ruleIdsByFile = JSON.parse(stdout)
         }, 30_000)
 
-        test('does not report a non-self import', async () => {
-          expect(lintAlias('alias-non-self.ts')).not.toContain('import/no-self-import')
-        }, 30_000)
+        test('reports a self-import', () => {
+          expect(ruleIdsByFile['alias-self.ts']).toContain('import/no-self-import')
+        })
+
+        test('does not report a non-self import', () => {
+          expect(ruleIdsByFile['alias-non-self.ts']).not.toContain('import/no-self-import')
+        })
       })
     })
   })
 
   describe('with a consumer import resolver', () => {
-    const resolverConfigs = (configs: Linter.Config[]) => configs.filter(config => config.name === 'pleaseai/strict/import-resolver')
-    const lintSelfJs = async (options: Parameters<typeof pleaseai>[0], ...user: TypedFlatConfigItem[]) => {
-      const file = fileURLToPath(new URL('./fixtures/self-import-js.ts', import.meta.url))
-      const eslint = new ESLint({ overrideConfigFile: true, overrideConfig: await pleaseai(options, ...user), cwd: fileURLToPath(new URL('..', import.meta.url)) })
-      const [result] = await eslint.lintFiles([file])
-      return result!.messages.map(message => message.ruleId)
-    }
+    const resolverConfigs = (configs: Linter.Config[]) => configs.filter(config => config.name === RESOLVER_NAME)
+    const canonical = { strict: true, canonicalPluginNames: true }
 
-    test('canonical: a consumer resolver for every file replaces the strict one', async () => {
-      const user = { settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
-      const options = { strict: true, canonicalPluginNames: true }
-
-      expect(resolverConfigs(await pleaseai(options, user))).toEqual([])
-      expect(await lintSelfJs(options, user)).not.toContain('import/no-self-import')
+    test.each<[string, PleaseaiOptions, TypedFlatConfigItem, number]>([
+      ['default: a consumer legacy resolver setting removes the strict resolver', { strict: true }, { settings: { 'import-x/resolver': { node: true } } }, 0],
+      ['canonical: a consumer resolver with its own ignores removes the strict resolver', canonical, { files: ['**/*.ts'], ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }, 0],
+      ['canonical: a files-less consumer resolver with its own ignores removes the strict resolver', canonical, { ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }, 0],
+      ['default: a consumer import-x/resolve setting removes the strict resolver', { strict: true }, { settings: { 'import-x/resolve': { extensions: ['.mjs'] } } }, 0],
+      ['canonical: an import-x resolver setting is not read by eslint-plugin-import, so the strict resolver stays', canonical, { settings: { 'import-x/resolver': { node: true } } }, 1],
+      ['canonical: a consumer resolver with negated files removes the strict resolver', canonical, { files: ['!**/fixtures/**'], settings: { 'import/resolver': { node: {} } } }, 0],
+    ])('%s', async (_label, options, user, expected) => {
+      expect(resolverConfigs(await pleaseai(options, user))).toHaveLength(expected)
     })
 
-    test('default: a consumer legacy resolver setting removes the strict resolver', async () => {
-      const configs = await pleaseai({ strict: true }, { settings: { 'import-x/resolver': { node: true } } })
+    test('canonical: a consumer resolver for every file replaces the strict one', async () => {
+      const configs = await pleaseai(canonical, { settings: { 'import/resolver': { node: { extensions: ['.js'] } } } })
 
       expect(resolverConfigs(configs)).toEqual([])
+      expect(await lintRuleIds(configs, fixtureFile('self-import-js.ts'))).not.toContain('import/no-self-import')
     })
 
     test('a file-scoped consumer resolver removes the strict resolver for every file', async () => {
-      const user = { files: ['**/other/**'], settings: { 'import/resolver': { node: {} } } }
-      const options = { strict: true, canonicalPluginNames: true }
+      const configs = await pleaseai(canonical, { files: ['**/other/**'], settings: { 'import/resolver': { node: {} } } })
 
-      expect(resolverConfigs(await pleaseai(options, user))).toEqual([])
-      expect(await lintSelfJs(options, user)).not.toContain('import/no-self-import')
+      expect(resolverConfigs(configs)).toEqual([])
+      expect(await lintRuleIds(configs, fixtureFile('self-import-js.ts'))).not.toContain('import/no-self-import')
     })
 
     test('default: a consumer import/resolver setting is not read by import-x, so the strict resolver stays', async () => {
-      const user = { settings: { 'import/resolver': { typescript: {} } } }
-
-      expect(resolverConfigs(await pleaseai({ strict: true }, user))).toHaveLength(1)
-      expect(await lintSelfJs({ strict: true }, user)).toContain('import/no-self-import')
-    })
-
-    test('canonical: a consumer resolver with its own ignores removes the strict resolver', async () => {
-      const user = { files: ['**/*.ts'], ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
-
-      expect(resolverConfigs(await pleaseai({ strict: true, canonicalPluginNames: true }, user))).toEqual([])
-    })
-
-    test('canonical: a files-less consumer resolver with its own ignores removes the strict resolver', async () => {
-      const user = { ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
-
-      expect(resolverConfigs(await pleaseai({ strict: true, canonicalPluginNames: true }, user))).toEqual([])
-    })
-
-    test('default: a consumer import-x/resolve setting removes the strict resolver', async () => {
-      const configs = await pleaseai({ strict: true }, { settings: { 'import-x/resolve': { extensions: ['.mjs'] } } })
-
-      expect(resolverConfigs(configs)).toEqual([])
-    })
-
-    test('canonical: an import-x resolver setting is not read by eslint-plugin-import, so the strict resolver stays', async () => {
-      const configs = await pleaseai({ strict: true, canonicalPluginNames: true }, { settings: { 'import-x/resolver': { node: true } } })
+      const configs = await pleaseai({ strict: true }, { settings: { 'import/resolver': { typescript: {} } } })
 
       expect(resolverConfigs(configs)).toHaveLength(1)
-    })
-
-    test('canonical: a consumer resolver with negated files removes the strict resolver', async () => {
-      const user = { files: ['!**/fixtures/**'], settings: { 'import/resolver': { node: {} } } }
-
-      expect(resolverConfigs(await pleaseai({ strict: true, canonicalPluginNames: true }, user))).toEqual([])
+      expect(await lintRuleIds(configs, fixtureFile('self-import-js.ts'))).toContain('import/no-self-import')
     })
   })
 
   test('reports it with canonicalPluginNames', async () => {
-    expect(await lint({ strict: true, canonicalPluginNames: true })).toContain('import/no-self-import')
+    expect(await lintRuleIds({ strict: true, canonicalPluginNames: true }, selfImport)).toContain('import/no-self-import')
   })
 
   test('reports it as import/no-self-import with autoRenamePlugins off', async () => {
-    expect(await lint({ strict: true, autoRenamePlugins: false })).toContain('import/no-self-import')
+    expect(await lintRuleIds({ strict: true, autoRenamePlugins: false }, selfImport)).toContain('import/no-self-import')
   })
 
   test('lints without a missing-plugin error when imports is off', async () => {
-    const found = await lint({ strict: true, imports: false })
+    const found = await lintRuleIds({ strict: true, imports: false }, selfImport)
 
     expect(found).not.toContain(null)
     expect(found.filter(id => id?.endsWith('no-self-import'))).toEqual([])
