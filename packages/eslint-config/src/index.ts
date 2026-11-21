@@ -1,6 +1,7 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import type { PleaseaiFormatters } from './bun-fmt'
+import { createRequire } from 'node:module'
 import antfu, { defaultPluginRenaming, getOverrides, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
@@ -140,6 +141,19 @@ async function typeScriptResolverConfig(): Promise<TypedFlatConfigItem> {
   }
 }
 
+/**
+ * The same TypeScript resolution for canonical mode's eslint-plugin-import, which loads resolvers by name or path
+ * relative to the linted file. An absolute path to this package's own copy works without hoisting.
+ */
+function canonicalTypeScriptResolverConfig(): TypedFlatConfigItem {
+  const resolver = createRequire(import.meta.url).resolve('eslint-import-resolver-typescript')
+  return {
+    name: 'pleaseai/strict/import-resolver',
+    files: [GLOB_SRC],
+    settings: { 'import/resolver': { [resolver]: {} } },
+  }
+}
+
 /** Gives every registration of the same original plugin the identical merged object, so ESLint sees one plugin. */
 function cachedNoSelfImport(): (original: ESLint.Plugin) => Promise<ESLint.Plugin> {
   const merged = new Map<ESLint.Plugin, Promise<ESLint.Plugin>>()
@@ -177,6 +191,28 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
     if (rules && entry !== undefined) {
       rules['import/consistent-type-specifier-style'] = toPreferTypeSpecifierStyle(entry)
     }
+  }
+}
+
+/** Adds the opt-in `strict` rules, and the import resolution `import/no-self-import` needs in either plugin mode. */
+function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConfig, canonicalPluginNames: boolean): void {
+  // Mirrors antfu's own defaults for the plugins the rules need.
+  const enableImports = antfuOptions.imports !== false
+  // antfu registers its import plugin (eslint-plugin-import-lite) as `import`, with or without `autoRenamePlugins`.
+  composer.insertBefore('antfu/disables/scripts', strict({
+    typescript: !!(antfuOptions.typescript ?? true),
+    unicorn: !!(antfuOptions.unicorn ?? true),
+    importPlugin: enableImports ? 'import' : false,
+    skip: userOverriddenRules(antfuOptions),
+  }))
+  if (!enableImports) {
+    return
+  }
+  // Placed before the user configs, so a consumer's own resolver settings still win.
+  composer.insertBefore('antfu/disables/scripts', canonicalPluginNames ? canonicalTypeScriptResolverConfig() : typeScriptResolverConfig())
+  if (!canonicalPluginNames) {
+    // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
+    composer.replacePlugin('import', cachedNoSelfImport())
   }
 }
 
@@ -223,22 +259,7 @@ export function pleaseai(
   }
 
   if (enableStrict) {
-    // Mirrors antfu's own defaults for the plugins the rules need.
-    const enableImports = antfuOptions.imports !== false
-    // antfu registers its import plugin (eslint-plugin-import-lite) as `import`, with or without `autoRenamePlugins`.
-    const importPlugin = enableImports ? 'import' : false
-    composer.insertBefore('antfu/disables/scripts', strict({
-      typescript: !!(antfuOptions.typescript ?? true),
-      unicorn: !!(antfuOptions.unicorn ?? true),
-      importPlugin,
-      skip: userOverriddenRules(antfuOptions),
-    }))
-    if (enableImports && !canonicalPluginNames) {
-      // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
-      composer.replacePlugin('import', cachedNoSelfImport())
-      // Placed before the user configs, so a consumer's own resolver settings still win.
-      composer.insertBefore('antfu/disables/scripts', typeScriptResolverConfig())
-    }
+    addStrict(composer, antfuOptions, canonicalPluginNames)
   }
 
   if (!canonicalPluginNames) {

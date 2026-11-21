@@ -270,7 +270,7 @@ export default pleaseai({
 - `import/no-self-import` reports a module that imports itself.
 - Every rule is an error on JS and TS files. Code blocks in Markdown are skipped.
 - A rule is skipped when its plugin is off: `ts/*` when `typescript` is `false`, `unicorn/*` when `unicorn` is `false`, and `import/no-self-import` when `imports` is `false`.
-- In the default mode, `import/no-self-import` comes from `eslint-plugin-import-x`. It is a regular dependency, and the config loads it only when `strict` is on. With `canonicalPluginNames`, the rule comes from `eslint-plugin-import`.
+- In the default mode, `import/no-self-import` comes from `eslint-plugin-import-x`. With `canonicalPluginNames`, the rule comes from `eslint-plugin-import`, and `eslint-import-resolver-typescript` resolves TypeScript sources for it. Both are regular dependencies, and the config loads them only when `strict` is on. In either mode the rule catches extensionless and `.js` specifiers that point at a `.ts` file.
 - Turn a single rule off in `rules`, as in the example above. Your `rules` and your own configs win over `strict`.
 - `eqeqeq` has no autofix for `== null`. Rewrite it by hand as `x === null || x === undefined`, or as a single check when only one of the two can reach it.
 

@@ -284,15 +284,20 @@ describe('strict import/no-self-import', () => {
       return result!.messages.map(message => message.ruleId)
     }
 
-    test.each([
-      ['extensionless', 'self-import-extensionless.ts'],
-      ['.js specifier', 'self-import-js.ts'],
-    ])('reports a %s self-import', async (_label, name) => {
-      expect(await lintTs(name, { strict: true })).toContain('import/no-self-import')
-    })
+    describe.each([
+      ['default plugins', false],
+      ['canonicalPluginNames', true],
+    ])('with %s', (_mode, canonicalPluginNames) => {
+      test.each([
+        ['extensionless', 'self-import-extensionless.ts'],
+        ['.js specifier', 'self-import-js.ts'],
+      ])('reports a %s self-import', async (_label, name) => {
+        expect(await lintTs(name, { strict: true, canonicalPluginNames })).toContain('import/no-self-import')
+      })
 
-    test('does not report a non-self import', async () => {
-      expect(await lintTs('non-self-import.ts', { strict: true })).not.toContain('import/no-self-import')
+      test('does not report a non-self import', async () => {
+        expect(await lintTs('non-self-import.ts', { strict: true, canonicalPluginNames })).not.toContain('import/no-self-import')
+      })
     })
   })
 
