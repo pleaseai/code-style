@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/pleaseai/code-style/compare/ast-grep-config-v0.1.0...ast-grep-config-v0.1.1) (2026-11-21)
+
+
+### Features
+
+* **eslint-config:** opt-in bun fmt Markdown formatter (formatters.markdown: 'bun') ([#92](https://github.com/pleaseai/code-style/issues/92)) ([aa0552c](https://github.com/pleaseai/code-style/commit/aa0552c14c2e7584b09ca56eeb7f15a0ad7967f9))
+
 ## [0.1.0](https://github.com/pleaseai/code-style/compare/ast-grep-config-v0.0.1...ast-grep-config-v0.1.0) (2026-10-13)
 
 
