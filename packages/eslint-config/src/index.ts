@@ -190,11 +190,12 @@ function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConf
   })
   composer.insertBefore('antfu/disables/scripts', strictConfigs)
   composer.onResolved(configs => strictOverrides(configs, antfuOptions))
-  composer.onResolved(yieldImportResolver)
+  const resolverKeys = canonicalPluginNames ? ['import/resolver'] : ['import-x/resolver-next', 'import-x/resolver', 'import-x/resolver-legacy']
+  composer.onResolved(configs => yieldImportResolver(configs, resolverKeys))
   if (!enableImports) {
     return
   }
-  // A fallback for consumers who configure no resolver: `yieldImportResolver` drops it, or excludes the files, where a consumer's own resolver setting applies.
+  // A fallback for consumers who configure no resolver: `yieldImportResolver` drops it, or excludes the files, where a consumer's own resolver setting applies. Only the settings the active import plugin reads count.
   composer.insertBefore('antfu/disables/scripts', canonicalPluginNames ? canonicalTypeScriptResolverConfig() : typeScriptResolverConfig())
   if (!canonicalPluginNames) {
     // Canonical mode swaps in eslint-plugin-import, which has the rule natively.

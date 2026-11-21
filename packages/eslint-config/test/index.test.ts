@@ -399,6 +399,33 @@ describe('strict import/no-self-import', () => {
       expect(resolver!.ignores).toContain('**/other/**')
       expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
     })
+
+    test('default: a consumer import/resolver setting is not read by import-x, so the strict resolver stays', async () => {
+      const user = { settings: { 'import/resolver': { typescript: {} } } }
+
+      expect(resolverConfigs(await pleaseai({ strict: true }, user))).toHaveLength(1)
+      expect(await lintSelfJs({ strict: true }, user)).toContain('import/no-self-import')
+    })
+
+    test('canonical: a consumer resolver does not cover the files its own ignores skip', async () => {
+      const user = { files: ['**/*.ts'], ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
+      const options = { strict: true, canonicalPluginNames: true }
+
+      expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
+    })
+
+    test('canonical: a files-less consumer resolver does not cover the files its own ignores skip', async () => {
+      const user = { ignores: ['**/fixtures/**'], settings: { 'import/resolver': { node: { extensions: ['.js'] } } } }
+      const options = { strict: true, canonicalPluginNames: true }
+
+      expect(await lintSelfJs(options, user)).toContain('import/no-self-import')
+    })
+
+    test('canonical: a consumer resolver with negated files removes the strict resolver', async () => {
+      const user = { files: ['!**/fixtures/**'], settings: { 'import/resolver': { node: {} } } }
+
+      expect(resolverConfigs(await pleaseai({ strict: true, canonicalPluginNames: true }, user))).toEqual([])
+    })
   })
 
   test('reports it with canonicalPluginNames', async () => {

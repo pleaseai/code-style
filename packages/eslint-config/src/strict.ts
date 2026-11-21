@@ -117,33 +117,57 @@ export function strictOverrides(configs: TypedFlatConfigItem[], options: Options
 }
 
 const RESOLVER_NAME = 'pleaseai/strict/import-resolver'
-const RESOLVER_KEYS = ['import/resolver', 'import-x/resolver', 'import-x/resolver-legacy', 'import-x/resolver-next']
 
-function setsResolver(config: TypedFlatConfigItem): boolean {
-  return config.name !== RESOLVER_NAME && RESOLVER_KEYS.some(key => config.settings !== undefined && key in config.settings)
+function setsResolver(config: TypedFlatConfigItem, keys: readonly string[]): boolean {
+  return config.name !== RESOLVER_NAME && keys.some(key => config.settings !== undefined && key in config.settings)
+}
+
+const isPlainGlob = (file: unknown): file is string => typeof file === 'string' && !file.startsWith('!')
+
+/** A consumer resolver config whose scope is plain `files` / `ignores` globs, so the fallback can step aside for exactly the files it covers. */
+function hasExpressibleScope(config: TypedFlatConfigItem): boolean {
+  return config.basePath === undefined
+    && (config.files ?? []).every(isPlainGlob)
+    && (config.ignores ?? []).every(isPlainGlob)
+}
+
+const filesOf = (config: TypedFlatConfigItem): string[] => (config.files ?? []) as string[]
+
+/**
+ * A fallback for the files a consumer resolver config skips through its own `ignores`: they match the fallback's files,
+ * the consumer's `files` and one of the consumer's `ignores`, and never a file another consumer resolver config covers.
+ */
+function ignoredFilesFallback(fallback: TypedFlatConfigItem, consumers: TypedFlatConfigItem[], index: number): TypedFlatConfigItem {
+  const consumer = consumers[index]!
+  const scope = consumer.files ? filesOf(consumer) : [undefined]
+  const others = consumers.filter((_, i) => i !== index).flatMap(filesOf)
+  const markdown = fallback.ignores?.includes(GLOB_MARKDOWN_CODE) ? [GLOB_MARKDOWN_CODE] : []
+  return {
+    ...fallback,
+    name: `${RESOLVER_NAME}/${consumer.name ?? index}`,
+    files: scope.flatMap(file => (consumer.ignores ?? []).map(ignore => [GLOB_SRC, ...file ? [file] : [], ignore])),
+    ignores: [...others, ...markdown],
+  }
 }
 
 /**
- * The strict resolver config is a fallback for consumers who configure no resolver. Run on the resolved configs: drops
- * it when a consumer config sets a resolver for every file (or for files it cannot express as globs), and otherwise
- * excludes the files a consumer's resolver config covers, so that resolver owns them.
+ * The strict resolver config is a fallback for consumers who configure no resolver. Run on the resolved configs, with
+ * `keys` the resolver settings the active import plugin reads (other resolver settings do not count). It drops the
+ * fallback when a consumer resolver config covers every file or has a scope that globs cannot express (`basePath`, negated
+ * or non-string `files`, negated `ignores`). Otherwise it excludes the files each consumer resolver config's `files`
+ * cover, and adds a fallback for the files a consumer's own `ignores` skip, so the consumer resolver owns exactly its files.
  */
-export function yieldImportResolver(configs: TypedFlatConfigItem[]): TypedFlatConfigItem[] {
+export function yieldImportResolver(configs: TypedFlatConfigItem[], keys: readonly string[]): TypedFlatConfigItem[] {
   const index = configs.findIndex(config => config.name === RESOLVER_NAME)
-  if (index === -1) {
+  const consumers = configs.filter(config => setsResolver(config, keys))
+  if (index === -1 || consumers.length === 0) {
     return configs
-  }
-  const consumers = configs.filter(setsResolver)
-  if (consumers.length === 0) {
-    return configs
-  }
-  const globs: string[] = []
-  for (const { files } of consumers) {
-    if (!files || files.some(file => typeof file !== 'string')) {
-      return configs.filter((_, i) => i !== index)
-    }
-    globs.push(...files as string[])
   }
   const fallback = configs[index]!
-  return configs.map((config, i) => i === index ? { ...fallback, ignores: [...fallback.ignores ?? [], ...globs] } : config)
+  const extras = consumers.flatMap((consumer, i) => consumer.ignores?.length ? [ignoredFilesFallback(fallback, consumers, i)] : [])
+  const covered = consumers.flatMap(filesOf)
+  const global = consumers.some(consumer => !consumer.files)
+  const base = !global && consumers.every(hasExpressibleScope) ? [{ ...fallback, ignores: [...fallback.ignores ?? [], ...covered] }] : []
+  const replacement = consumers.every(hasExpressibleScope) ? [...base, ...extras] : []
+  return configs.flatMap((config, i) => i === index ? replacement : [config])
 }
