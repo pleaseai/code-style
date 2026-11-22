@@ -100,6 +100,7 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
       Evidence: `bun run build && bun run lint` → exit 0, no findings; root `bun run test` → 5 turbo tasks successful (eslint-config 360 pass, 0 fail); `tsc --noEmit` on packages/cli and packages/ast-grep-config → clean
 - [x] (2026-11-21 KST) T004 Document `strict` (file: packages/eslint-config/README.md)
       Evidence: `bun run lint` (root) → exit 0; `bun run typecheck` in apps/docs → 0 errors, 0 warnings, 0 hints; `bun run lint:docs` → 22 files lint clean
+- [x] (2026-11-22 09:38 KST) Review-stage commits (SHA: `63918d1`, `d4895fb`, `4e9fdb4`, `8d8afb5`, `2e227ce`, `4a74b32`, `ee0a556`, `878ab76`, `2a6e8c8`, `9a39e2a`, `67789ae`, `de16021`)
 
 ## Decision Log
 
@@ -115,3 +116,31 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
   Date/Author: 2026-11-21 / implement-executor
 
 ## Surprises & Discoveries
+
+## Outcomes & Retrospective
+
+### What Was Shipped
+
+- `pleaseai({ strict: true })` turns on `eqeqeq: ['error', 'always']`, `no-promise-executor-return`, `ts/no-confusing-non-null-assertion`, `unicorn/prefer-set-has` and `import/no-self-import` on JS and TS files outside Markdown code blocks. It is off by default.
+- `import/no-self-import` comes from `eslint-plugin-import-x` (merged into antfu's `import` plugin) in the default mode and from `eslint-plugin-import` with `canonicalPluginNames`. Both modes resolve TypeScript sources with `eslint-import-resolver-typescript`, so extensionless, `.js` and tsconfig `paths` self-imports are reported.
+- Consumer per-group `overrides` are re-applied after the strict block on the files and option group antfu applied them to, and a consumer resolver setting the active import plugin reads replaces the strict resolver fallback for every file.
+- This repository runs with `strict: true`; `packages/cli` had 86 `eqeqeq`, 2 `unicorn/prefer-set-has` and 1 intentional fixture finding on the first run.
+- Docs in both READMEs and the en/ko `eslint-config/advanced.mdx` pages.
+
+### What Went Well
+
+- The two-engine ensemble (gpt + ocr) found real precedence bugs that the plan's Review Focus did not list, and several were reproduced directly before fixing (override leak across option groups, resolver key order under settings deep-merge, scoped consumer resolvers).
+- Fixture-based tests (`lintFiles` on self-importing files, a child-process run for the tsconfig `paths` case) caught resolver behaviour that config-shape assertions would have missed.
+
+### What Could Improve
+
+- The review loop ran four times. Most rounds fixed a regression introduced by the previous round's fix in the resolver fallback. Per-file scope narrowing against consumer `files`/`ignores` was the wrong altitude; the whole-config fallback the user chose at the end should have been the first design.
+- Consumer precedence over an inserted config block (overrides, resolver settings) was not in the plan's Review Focus. A plan that inserts a config block into antfu's composition should list "consumer overrides and settings still win" as a focus item up front.
+- The same "dead `!== null` half" finding came back in almost every round under new titles. The ledger is keyed by title, so reworded repeats had to be rejected by hand each time.
+
+### Tech Debt Created
+
+- `StrictOptions.importPlugin` is typed `string | false` but `addStrict` only ever passes `'import'` or `false`; a boolean would do.
+- `packages/cli/src/commands.ts`: `pkg !== undefined` no longer guards a `package.json` whose whole content is `null` (the old `!= null` did). Other code in the same flow already crashes on that input.
+- The `eqeqeq` rewrite in `packages/cli` keeps both `!== null` and `!== undefined` for values read from runtime data (`spawnSync().error`, ast-grep `vars`, parsed JSON), as the Decision Log records; reviewers repeatedly flag these as dead halves.
+- `eslint-import-resolver-typescript` finds `tsconfig.json` from the process working directory only, so running ESLint from outside the project root does not resolve that project's `paths` aliases (documented).
