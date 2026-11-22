@@ -423,6 +423,14 @@ describe('strict import/no-self-import', () => {
       expect(resolverConfigs(configs)).toHaveLength(1)
       expect(await lintRuleIds(configs, fixtureFile('self-import-js.ts'))).toContain('import/no-self-import')
     })
+
+    test('leaves a null settings value to ESLint\'s own config validation', async () => {
+      // An untyped user config, the way a plain-JS eslint.config.js can pass it.
+      const user: TypedFlatConfigItem = JSON.parse('{"settings":null}')
+      const configs = await pleaseai({ strict: true }, user)
+
+      expect(resolverConfigs(configs)).toHaveLength(1)
+    })
   })
 
   test('reports it with canonicalPluginNames', async () => {

@@ -125,7 +125,7 @@ export function strictOverrides(configs: TypedFlatConfigItem[], options: Options
 }
 
 function setsResolver({ name, settings }: TypedFlatConfigItem, keys: readonly string[]): boolean {
-  return name !== RESOLVER_NAME && settings !== undefined && keys.some(key => key in settings)
+  return name !== RESOLVER_NAME && typeof settings === 'object' && settings !== null && keys.some(key => key in settings)
 }
 
 /**
