@@ -430,6 +430,7 @@ describe('strict import/no-self-import', () => {
       const configs = await pleaseai({ strict: true }, user)
 
       expect(resolverConfigs(configs)).toHaveLength(1)
+      await expect(lintRuleIds(configs, fixtureFile('self-import-js.ts'))).rejects.toThrow('Key "settings": Expected an object.')
     })
   })
 
