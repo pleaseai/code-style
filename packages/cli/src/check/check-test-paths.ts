@@ -92,7 +92,7 @@ function inspectUnitTestFile(file: string, unit: Unit, layout: TestLayout, fileS
     return 'fixture'
   }
   const testRoot = unit.testRoots.find(root => isUnder(rel, root) && rel !== root)
-  if (testRoot == null) {
+  if (testRoot === undefined) {
     return layout.reportOutsideRoot(rel, unit) ? outsideRootFinding(file, unit, layout) : null
   }
   if (layout.helperDirs(unit).some(dir => isUnder(rel, dir))) {
@@ -147,14 +147,14 @@ export function inspectTestPaths(
         continue
       }
       const unit = unitOf(file, units)
-      const outcome = unit == null ? null : inspectUnitTestFile(file, unit, layout, fileSet)
-      if (unit == null) {
+      const outcome = unit === undefined ? null : inspectUnitTestFile(file, unit, layout, fileSet)
+      if (unit === undefined) {
         unitless.push(file)
       }
       else if (outcome === 'fixture') {
         inFixtures.push(file)
       }
-      else if (outcome != null) {
+      else if (outcome !== null) {
         findings.push(outcome)
       }
     }

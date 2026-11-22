@@ -72,7 +72,7 @@ function baseName(path: string): string {
 
 /** Is unit `dir` the requested `scope`, one of its ancestors, or inside it? */
 function onScopePath(dir: string, scope: string | undefined): boolean {
-  return scope == null || scope === '' || dir === '' || dir === scope || scope.startsWith(`${dir}/`) || dir.startsWith(`${scope}/`)
+  return scope === undefined || scope === '' || dir === '' || dir === scope || scope.startsWith(`${dir}/`) || dir.startsWith(`${scope}/`)
 }
 
 function withConfig(rootDir: string, dir: string, base: CodeOrganizationConfig): CodeOrganizationConfig {
@@ -100,7 +100,7 @@ function splitFixtureProjects(markerDirs: string[], testRoots: string[]): SplitF
   const fixtures = new Map<string, string[]>()
   for (const dir of [...markerDirs].sort((a, b) => a.length - b.length)) {
     const owner = kept.find(k => dir !== k && isUnder(dir, k) && testRoots.some(root => isUnder(relativeTo(dir, k), root)))
-    if (owner == null) {
+    if (owner === undefined) {
       kept.push(dir)
     }
     else {
@@ -203,11 +203,11 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
       const kmpSets = new Map<string, Set<string>>()
       for (const f of files) {
         const m = sourceSet.exec(f)
-        if (m != null) {
+        if (m !== null) {
           dirs.add(m[1] ?? '')
         }
         const k = kmpSet.exec(f)
-        if (k != null && !(k[3] === 'Test' && KMP_UNMIRRORED_TESTS.has(k[2]))) {
+        if (k !== null && !(k[3] === 'Test' && KMP_UNMIRRORED_TESTS.has(k[2]))) {
           const dir = k[1] ?? ''
           kmpSets.set(dir, (kmpSets.get(dir) ?? new Set()).add(`${k[2]}${k[3]}`))
         }
@@ -227,12 +227,12 @@ function jvmLayout(language: 'kotlin' | 'java', ext: '.kt' | '.java'): TestLayou
         const mains = kmp?.filter(s => s.endsWith('Main')) ?? []
         return {
           dir,
-          testRoots: kmp == null ? [`src/test/${language}`] : kmp.filter(s => s.endsWith('Test')).map(s => `src/${s}/${language}`),
-          sourceRoots: kmp == null ? [`src/main/${language}`] : mains.map(s => `src/${s}/${language}`),
-          alternateSourceRoots: kmp == null ? [`src/main/${sibling}`] : mains.map(s => `src/${s}/${sibling}`),
+          testRoots: kmp === null ? [`src/test/${language}`] : kmp.filter(s => s.endsWith('Test')).map(s => `src/${s}/${language}`),
+          sourceRoots: kmp === null ? [`src/main/${language}`] : mains.map(s => `src/${s}/${language}`),
+          alternateSourceRoots: kmp === null ? [`src/main/${sibling}`] : mains.map(s => `src/${s}/${sibling}`),
           keepRootName: false,
           envSegments: withConfig(rootDir, dir, base).envSegments,
-          multiplatform: kmp != null,
+          multiplatform: kmp !== null,
         }
       })
     },
@@ -257,7 +257,7 @@ export const TEST_LAYOUTS: readonly TestLayout[] = [TYPESCRIPT_LAYOUT, DART_LAYO
 export function unitOf(path: string, units: Unit[]): Unit | undefined {
   let best: Unit | undefined
   for (const unit of units) {
-    if (isUnder(path, unit.dir) && (best == null || unit.dir.length > best.dir.length)) {
+    if (isUnder(path, unit.dir) && (best === undefined || unit.dir.length > best.dir.length)) {
       best = unit
     }
   }

@@ -35,15 +35,15 @@ export interface RustCheckResult {
 export function cargoMetadataFromCli(dir: string): CargoMetadata {
   const cargo = process.env.CARGO ?? 'cargo'
   const probe = spawnSync(cargo, ['--version'], { encoding: 'utf-8' })
-  if (probe.error != null || probe.status !== 0) {
-    throw new CargoUnavailableError(`\`${cargo} --version\` failed${probe.error != null ? `: ${probe.error.message}` : ''}`)
+  if ((probe.error !== null && probe.error !== undefined) || probe.status !== 0) {
+    throw new CargoUnavailableError(`\`${cargo} --version\` failed${probe.error !== null && probe.error !== undefined ? `: ${probe.error.message}` : ''}`)
   }
   const res = spawnSync(cargo, ['metadata', '--no-deps', '--format-version', '1'], {
     cwd: dir,
     encoding: 'utf-8',
     maxBuffer: 256 * 1024 * 1024,
   })
-  if (res.error != null) {
+  if (res.error !== null && res.error !== undefined) {
     throw new Error(res.error.message)
   }
   if (res.status !== 0) {
@@ -78,7 +78,7 @@ function metadataFor(provider: CargoMetadataProvider, rootDir: string, dir: stri
     notices.push(`Rust: test-path and helper checks skipped that crate (\`cargo metadata\` failed in ${dir}: ${err instanceof Error ? err.message : String(err)}).`)
     return null
   }
-  if (metadata == null) {
+  if (metadata === null) {
     notices.push(`Rust: test-path and helper checks skipped that crate (\`cargo metadata\` returned no metadata in ${dir}).`)
   }
   return metadata
@@ -89,7 +89,7 @@ function rustPackage(rootDir: string, manifestRel: string, pkg: CargoMetadata['p
   const testRoots: string[] = []
   for (const target of pkg.targets) {
     const src = toRootRelative(rootDir, target.src_path)
-    if (src == null) {
+    if (src === null) {
       continue
     }
     roots.push(src)
@@ -121,7 +121,7 @@ function loadPackages(
     const metadata = metadataFor(provider, rootDir, posix.dirname(manifest), notices)
     for (const pkg of metadata?.packages ?? []) {
       const manifestRel = toRootRelative(rootDir, pkg.manifest_path)
-      if (manifestRel != null && !seen.has(manifestRel)) {
+      if (manifestRel !== null && !seen.has(manifestRel)) {
         seen.set(manifestRel, rustPackage(rootDir, manifestRel, pkg))
       }
     }
@@ -132,7 +132,7 @@ function loadPackages(
 /** Files `mod name;` in `file` may load (Rust 2018 module resolution). */
 function modCandidates(file: string, decl: ModDecl, modRs: boolean): string[] {
   const dir = posix.dirname(file) === '.' ? '' : posix.dirname(file)
-  if (decl.path != null) {
+  if (decl.path !== undefined) {
     // Outside inline blocks, `#[path]` is relative to the declaring file's directory.
     return [posix.normalize(joinPath(dir, decl.path))]
   }
@@ -148,9 +148,9 @@ function reachable(entry: string, decls: Map<string, ModDecl[]>, fileSet: Set<st
     const { file, modRs } = queue.pop()!
     for (const decl of decls.get(file) ?? []) {
       const target = modCandidates(file, decl, modRs).find(c => fileSet.has(c))
-      if (target != null && target !== entry && !out.has(target)) {
+      if (target !== undefined && target !== entry && !out.has(target)) {
         out.add(target)
-        queue.push({ file: target, modRs: decl.path != null || posix.basename(target) === 'mod.rs' })
+        queue.push({ file: target, modRs: decl.path !== undefined || posix.basename(target) === 'mod.rs' })
       }
     }
   }
@@ -228,7 +228,7 @@ function recordModDecl(index: RustMatchIndex, m: ExtractMatch): void {
   // `mod r#async;` loads `async.rs`. `mod-decl-cfg-path` matches the attribute (one per conditional `path`), so the module name is `$NAME`.
   const name = m.ruleId === 'mod-decl-cfg-path' ? (m.vars.NAME ?? '') : m.text
   index.decls.set(m.file, [...(index.decls.get(m.file) ?? []), { name: name.replace(/^r#/, ''), path: m.vars.PATH }])
-  if (m.vars.PATH != null) {
+  if (m.vars.PATH !== null && m.vars.PATH !== undefined) {
     const dir = posix.dirname(m.file) === '.' ? '' : posix.dirname(m.file)
     index.pathLoaded.add(posix.normalize(joinPath(dir, m.vars.PATH)))
   }
@@ -358,7 +358,7 @@ function buildPackageContext(
 
 function sharedHelperFinding(file: string, ctx: PackageContext): Finding | null {
   const users = ctx.fromTarget.get(file)
-  if (users == null || users.size < 2 || isUnder(file, ctx.commonDir)) {
+  if (users === undefined || users.size < 2 || isUnder(file, ctx.commonDir)) {
     return null
   }
   return {
@@ -414,13 +414,13 @@ function unreachableUnitTest(file: string, ctx: PackageContext, index: RustMatch
 
 function classifyRustFile(file: string, ctx: PackageContext, index: RustMatchIndex, state: ScanState): void {
   const shared = sharedHelperFinding(file, ctx)
-  if (shared != null) {
+  if (shared !== null) {
     state.findings.push(shared)
   }
   const finding = isUnder(file, ctx.testsDir)
     ? undiscoveredIntegrationTest(file, ctx, state)
     : unreachableUnitTest(file, ctx, index, state)
-  if (finding != null) {
+  if (finding !== null) {
     state.findings.push(finding)
   }
 }

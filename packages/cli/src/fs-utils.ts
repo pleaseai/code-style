@@ -36,7 +36,7 @@ export function installCommand(pm: PackageManager, packages: string[], cwd: stri
     case 'bun':
       return ['bun', ['add', '-d', ...packages]]
     case 'pnpm':
-      return readFileOrNull(resolve(cwd, 'pnpm-workspace.yaml')) == null
+      return readFileOrNull(resolve(cwd, 'pnpm-workspace.yaml')) === null
         ? ['pnpm', ['add', '-D', ...packages]]
         : ['pnpm', ['add', '-D', '-w', ...packages]]
     case 'yarn':
@@ -59,9 +59,17 @@ export function execCommand(pm: PackageManager): string {
   }
 }
 
+export function isJsonObject(value: unknown): value is object {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 export function readPackageJson(cwd: string = process.cwd()): PackageJson {
   const pkgPath = resolve(cwd, 'package.json')
-  return JSON.parse(readFileSync(pkgPath, 'utf-8')) as PackageJson
+  const parsed: unknown = JSON.parse(readFileSync(pkgPath, 'utf-8'))
+  if (!isJsonObject(parsed)) {
+    throw new Error(`${pkgPath} does not contain a JSON object`)
+  }
+  return parsed as PackageJson
 }
 
 export function writePackageJson(pkg: PackageJson, cwd: string = process.cwd()): void {
@@ -97,7 +105,7 @@ export function readMarkerBlock(content: string): string | undefined {
  */
 export function upsertMarkerBlock(existing: string | null, body: string): string {
   const block = buildMarkerBlock(body)
-  if (existing == null) {
+  if (existing === null) {
     return `${block}\n`
   }
 

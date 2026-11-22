@@ -1,0 +1,15 @@
+{
+  "track_id": "opt-in-strict-rules-20261121",
+  "type": "feature",
+  "status": "completed",
+  "created_at": "2026-11-21T03:03:00Z",
+  "updated_at": "2026-11-22T02:19:27Z",
+  "issue": "#96",
+  "pr": "#97",
+  "project": "",
+  "project_item_id": "",
+  "issue_linked": false,
+  "code_pr": "#97",
+  "code_branch": "tracks/opt-in-strict-rules-20261121",
+  "stack_tool": "gh-stack"
+}

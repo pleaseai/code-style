@@ -133,6 +133,34 @@ export default pleaseai({
 
 When `quality: true` was first turned on, this repository reported 29 findings: 13 `no-known-value-widening`, 10 `no-array-filter-map`, 3 `no-unsafe-dictionary-type`, 2 `no-conditional-empty-object-spread` and 1 `no-unknown-returns`. A larger private monorepo (2,669 files) reports 4,396 findings in 1,172 files, 61% of them in tests. The most frequent are `no-chained-type-assertions` (1,282), `no-unsafe-dictionary-type` (1,240), `no-known-value-widening` (745) and `no-conditional-empty-object-spread` (658). That volume is why the option is off by default. The findings in this repository are fixed, and it now lints itself with `quality: true`. See [issue #77](https://github.com/pleaseai/code-style/issues/77).
 
+## Strict Rules
+
+`strict: true` turns on rules adopted from [cloudflare/oxlint-config](https://github.com/cloudflare/oxlint-config) that need no type information. The option is off by default.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  strict: true,
+  rules: {
+    'unicorn/prefer-set-has': 'off',
+  },
+})
+```
+
+- `no-promise-executor-return` reports a value returned from a Promise executor function.
+- `eqeqeq` is set to `'always'` instead of antfu's `'smart'`, so `value == null` is reported too.
+- `unicorn/prefer-set-has` reports an array that you only use for membership checks and could be a `Set`.
+- `ts/no-confusing-non-null-assertion` reports a non-null assertion that reads like part of an equality or assignment operator, such as `a! == b`. With `canonicalPluginNames` it is `@typescript-eslint/no-confusing-non-null-assertion`.
+- `import/no-self-import` reports a module that imports itself.
+- Every rule is an error on JS and TS files. Code blocks in Markdown are skipped.
+- A rule is skipped when its plugin is off: `ts/*` when `typescript` is `false`, `unicorn/*` when `unicorn` is `false`, and `import/no-self-import` when `imports` is `false`.
+- In the default mode, `import/no-self-import` comes from `eslint-plugin-import-x`. With `canonicalPluginNames`, the rule comes from `eslint-plugin-import`. In both modes, `eslint-import-resolver-typescript` resolves TypeScript sources. `eslint-plugin-import-x` and `eslint-import-resolver-typescript` are regular dependencies that the config loads only when `strict` is on, while `canonicalPluginNames` still needs the optional peer `eslint-plugin-import` installed (`bun add -D eslint-plugin-import`). In either mode the rule catches extensionless specifiers, `.js` specifiers that point at a `.ts` file, and tsconfig `paths` aliases. The resolver finds `tsconfig.json` from the directory where you run ESLint. If any of your configs sets a resolver the active import plugin reads (`import-x/resolver-next`, `import-x/resolver`, `import-x/resolver-legacy` or `import-x/resolve` by default; `import/resolver` with `canonicalPluginNames`), the strict resolver is dropped for every file and your resolver decides how imports resolve.
+- Turn a single rule off in `rules`, as in the example above. Your `rules` and your own configs win over `strict`.
+- `eqeqeq` has no autofix for `== null`. Rewrite it by hand as `x === null || x === undefined`, or as a single check when only one of the two can reach it.
+
+When `strict: true` was first turned on, this repository reported 88 findings in 18 files: 86 `eqeqeq` (mostly `== null` and `!= null`) and 2 `unicorn/prefer-set-has`. The other rules reported nothing, apart from one `import/no-self-import` on a test fixture that imports itself on purpose, which `eslint.config.ts` excludes from linting. The findings are fixed, and this repository now lints itself with `strict: true`. See [issue #96](https://github.com/pleaseai/code-style/issues/96).
+
 ## Plugins Renaming
 
 `@pleaseai/eslint-config` inherits `@antfu/eslint-config`'s plugin renaming for a shorter, consistent DX:

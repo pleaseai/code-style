@@ -1,10 +1,12 @@
 import type { OptionsConfig, TypedFlatConfigItem } from '@antfu/eslint-config'
 import type { ESLint, Linter } from 'eslint'
 import type { PleaseaiFormatters } from './bun-fmt'
-import antfu, { defaultPluginRenaming } from '@antfu/eslint-config'
+import { createRequire } from 'node:module'
+import antfu, { defaultPluginRenaming, GLOB_SRC } from '@antfu/eslint-config'
 import { resolveAntislop, scopeAntislopToParsedFiles } from './antislop'
 import { bunFmt, splitBunFormatter } from './bun-fmt'
 import { quality } from './quality'
+import { RESOLVER_NAME, strict, strictOverrides, yieldImportResolver } from './strict'
 
 export type { PleaseaiFormatters } from './bun-fmt'
 
@@ -65,6 +67,21 @@ export interface PleaseaiOptions extends Omit<OptionsConfig, 'formatters'>, Omit
    * @default false
    */
   quality?: boolean
+  /**
+   * Enable stricter rules that antfu leaves off or loose:
+   * `no-promise-executor-return`, `eqeqeq` (`'always'` instead of `'smart'`),
+   * `unicorn/prefer-set-has`, `ts/no-confusing-non-null-assertion`
+   * (`@typescript-eslint/...` with `canonicalPluginNames`) and
+   * `import/no-self-import`. The last comes from `eslint-plugin-import-x`, or
+   * from `eslint-plugin-import` with `canonicalPluginNames`.
+   *
+   * Every rule is an error on JS and TS files, outside Markdown code blocks.
+   * A rule is skipped when antfu does not load its plugin (`typescript: false`,
+   * `unicorn: false` or `imports: false`). Turn one off with `rules: { eqeqeq: 'off' }`.
+   *
+   * @default false
+   */
+  strict?: boolean
 }
 
 const { '@typescript-eslint': _ts, 'import-lite': _importLite, ...keptPluginRenaming } = defaultPluginRenaming
@@ -94,6 +111,49 @@ async function loadEslintPluginImport(): Promise<ESLint.Plugin> {
   }
 }
 
+const noSelfImportMerged = new WeakMap<ESLint.Plugin, Promise<ESLint.Plugin>>()
+
+/**
+ * Adds `eslint-plugin-import-x`'s `no-self-import` to antfu's import plugin, loading import-x only when needed. Every
+ * registration of the same original plugin gets the identical merged object, so ESLint sees one plugin.
+ */
+function addNoSelfImport(original: ESLint.Plugin): Promise<ESLint.Plugin> {
+  const cached = noSelfImportMerged.get(original)
+  if (cached) {
+    return cached
+  }
+  const merged = import('eslint-plugin-import-x/rules/no-self-import').then(({ default: rule }: { default: object }): ESLint.Plugin => ({
+    ...original,
+    // The rule is typed against import-x's own context, which ESLint's plugin type cannot express.
+    rules: { ...original.rules, 'no-self-import': rule as NonNullable<ESLint.Plugin['rules']>[string] },
+  }))
+  noSelfImportMerged.set(original, merged)
+  return merged
+}
+
+/**
+ * The strict resolver fallback: lets the import plugin resolve TypeScript sources through
+ * `eslint-import-resolver-typescript` (`.ts` extensions, `.js`-style specifiers that point at `.ts` files, and
+ * tsconfig `paths` aliases). Loaded only when `strict` is on.
+ */
+function resolverConfig(settings: TypedFlatConfigItem['settings']): TypedFlatConfigItem {
+  return { name: RESOLVER_NAME, files: [GLOB_SRC], settings }
+}
+
+async function typeScriptResolverSettings(): Promise<TypedFlatConfigItem['settings']> {
+  const { createTypeScriptImportResolver } = await import('eslint-import-resolver-typescript')
+  return { 'import-x/resolver-next': [createTypeScriptImportResolver()] }
+}
+
+/**
+ * Canonical mode's eslint-plugin-import loads resolvers by name or path relative to the linted file. An absolute path
+ * to this package's own copy of the resolver works without hoisting.
+ */
+function canonicalResolverSettings(): TypedFlatConfigItem['settings'] {
+  const resolver = createRequire(import.meta.url).resolve('eslint-import-resolver-typescript')
+  return { 'import/resolver': { [resolver]: {} } }
+}
+
 function toPreferTypeSpecifierStyle(entry: Linter.RuleEntry): Linter.RuleEntry {
   if (!Array.isArray(entry) || typeof entry[1] !== 'string') {
     return entry
@@ -114,11 +174,36 @@ function useEslintPluginImportOptions(configs: TypedFlatConfigItem[]): void {
   }
 }
 
+/** Adds the opt-in `strict` rules, and the import resolution `import/no-self-import` needs in either plugin mode. */
+function addStrict(composer: ReturnType<typeof antfu>, antfuOptions: OptionsConfig, canonicalPluginNames: boolean): void {
+  // Mirrors antfu's own defaults for the plugins the rules need.
+  const enableImports = antfuOptions.imports !== false
+  // antfu registers its import plugin (eslint-plugin-import-lite) as `import`, with or without `autoRenamePlugins`.
+  const strictConfigs = strict({
+    typescript: !!(antfuOptions.typescript ?? true),
+    unicorn: !!(antfuOptions.unicorn ?? true),
+    importPlugin: enableImports ? 'import' : false,
+  })
+  composer.insertBefore('antfu/disables/scripts', strictConfigs)
+  composer.onResolved(configs => strictOverrides(configs, antfuOptions))
+  if (!enableImports) {
+    return
+  }
+  const resolverKeys = canonicalPluginNames ? ['import/resolver'] : ['import-x/resolver-next', 'import-x/resolver', 'import-x/resolver-legacy', 'import-x/resolve']
+  composer.onResolved(configs => yieldImportResolver(configs, resolverKeys))
+  // A fallback for consumers who configure no resolver: `yieldImportResolver` drops it entirely once any config sets a resolver setting the active import plugin reads.
+  composer.insertBefore('antfu/disables/scripts', canonicalPluginNames ? resolverConfig(canonicalResolverSettings()) : typeScriptResolverSettings().then(resolverConfig))
+  if (!canonicalPluginNames) {
+    // Canonical mode swaps in eslint-plugin-import, which has the rule natively.
+    composer.replacePlugin('import', addNoSelfImport)
+  }
+}
+
 export function pleaseai(
   options: PleaseaiOptions = {},
   ...userConfigs: TypedFlatConfigItem[]
 ): ReturnType<typeof antfu> {
-  const { canonicalPluginNames = false, formatters, quality: enableQuality = false, ...antfuOptions } = options
+  const { canonicalPluginNames = false, formatters, quality: enableQuality = false, strict: enableStrict = false, ...antfuOptions } = options
   const autoRenamePlugins = antfuOptions.autoRenamePlugins ?? true
   const { antfu: antfuFormatters, bun: enableBunFmt } = splitBunFormatter(formatters)
   // The severity moves onto the Markdown and MDX configs: in antfu's files-less `rules` config it would run bun fmt on every file.
@@ -154,6 +239,10 @@ export function pleaseai(
 
   if (enableQuality) {
     composer.insertBefore('antfu/disables/scripts', quality())
+  }
+
+  if (enableStrict) {
+    addStrict(composer, antfuOptions, canonicalPluginNames)
   }
 
   if (!canonicalPluginNames) {

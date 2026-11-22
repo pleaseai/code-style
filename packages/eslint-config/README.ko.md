@@ -248,6 +248,34 @@ export default pleaseai({
 
 이 저장소에서 `quality: true`를 처음 켰을 때 29건이 보고되었습니다. `no-known-value-widening` 13건, `no-array-filter-map` 10건, `no-unsafe-dictionary-type` 3건, `no-conditional-empty-object-spread` 2건, `no-unknown-returns` 1건입니다. 더 큰 private 모노레포(파일 2,669개)에서는 1,172개 파일에서 4,396건이 보고되었고, 그중 61%가 테스트 코드였습니다. 가장 많은 규칙은 `no-chained-type-assertions`(1,282건), `no-unsafe-dictionary-type`(1,240건), `no-known-value-widening`(745건), `no-conditional-empty-object-spread`(658건)입니다. 이 정도 양이라 기본값을 꺼짐으로 두었습니다. 이 저장소의 보고 건은 모두 고쳤고, 지금은 `quality: true`를 켠 상태로 린트합니다. 측정 결과는 [이슈 #77](https://github.com/pleaseai/code-style/issues/77)에 있습니다.
 
+### Strict 규칙
+
+`strict: true`는 [cloudflare/oxlint-config](https://github.com/cloudflare/oxlint-config)에서 가져온, 타입 정보가 필요 없는 규칙들을 켭니다. 기본값은 꺼짐입니다.
+
+```js
+import pleaseai from '@pleaseai/eslint-config'
+
+export default pleaseai({
+  strict: true,
+  rules: {
+    'unicorn/prefer-set-has': 'off',
+  },
+})
+```
+
+- `no-promise-executor-return`은 Promise executor 함수에서 값을 반환하는 코드를 보고합니다.
+- `eqeqeq`는 antfu의 `'smart'` 대신 `'always'`로 설정되므로 `value == null`도 보고합니다.
+- `unicorn/prefer-set-has`는 멤버십 확인에만 쓰는 배열이라 `Set`으로 바꿀 수 있는 경우를 보고합니다.
+- `ts/no-confusing-non-null-assertion`은 `a! == b`처럼 동등 비교나 대입 연산자의 일부처럼 읽히는 non-null 단언을 보고합니다. `canonicalPluginNames`를 켜면 `@typescript-eslint/no-confusing-non-null-assertion`입니다.
+- `import/no-self-import`는 자기 자신을 import하는 모듈을 보고합니다.
+- 모든 규칙은 JS와 TS 파일에서 오류입니다. Markdown의 코드 블록은 검사하지 않습니다.
+- 규칙의 플러그인이 꺼져 있으면 그 규칙은 건너뜁니다. `typescript`가 `false`이면 `ts/*`, `unicorn`이 `false`이면 `unicorn/*`, `imports`가 `false`이면 `import/no-self-import`를 건너뜁니다.
+- 기본 모드에서 `import/no-self-import`는 `eslint-plugin-import-x`가 제공합니다. `canonicalPluginNames`를 켜면 `eslint-plugin-import`가 제공합니다. 두 모드 모두 TypeScript 소스는 `eslint-import-resolver-typescript`가 찾습니다. `eslint-plugin-import-x`와 `eslint-import-resolver-typescript`는 일반 dependency라서 `strict`를 켰을 때만 불러오고, `canonicalPluginNames`는 optional peer인 `eslint-plugin-import`를 따로 설치해야 합니다(`bun add -D eslint-plugin-import`). 두 모드 모두 확장자 없는 경로, `.ts` 파일을 가리키는 `.js` 경로, tsconfig `paths` 별칭도 잡습니다. 리졸버는 ESLint를 실행하는 디렉터리에서 `tsconfig.json`을 찾습니다. 설정 중 하나라도 활성 import 플러그인이 읽는 resolver(기본 모드는 `import-x/resolver-next`, `import-x/resolver`, `import-x/resolver-legacy`, `import-x/resolve`, `canonicalPluginNames`를 켜면 `import/resolver`)를 지정하면 strict 리졸버는 모든 파일에서 빠지고, import 해석은 직접 지정한 resolver가 맡습니다.
+- 규칙 하나만 끄려면 위 예시처럼 `rules`에서 끄세요. 사용자의 `rules`와 설정이 `strict`보다 우선합니다.
+- `eqeqeq`는 `== null`을 자동 수정하지 않습니다. `x === null || x === undefined`로 직접 고치거나, 둘 중 하나만 올 수 있으면 한 가지 검사만 쓰세요.
+
+이 저장소에서 `strict: true`를 처음 켰을 때 18개 파일에서 88건이 보고되었습니다. `eqeqeq` 86건(대부분 `== null`과 `!= null`)과 `unicorn/prefer-set-has` 2건이고, 나머지 규칙은 보고하지 않았습니다. 보고 건은 모두 고쳤고, 지금은 `strict: true`를 켠 상태로 린트합니다. 측정 결과는 [이슈 #96](https://github.com/pleaseai/code-style/issues/96)에 있습니다.
+
 ## 선택적 설정
 
 ### React

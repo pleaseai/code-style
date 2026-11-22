@@ -50,11 +50,11 @@ function extract(root: string, files: string[], fileSet: Set<string>, language: 
 export function checkCodeOrganization(options: CheckOptions = {}): CheckResult {
   const requested = realpathSync(resolve(options.root ?? process.cwd()))
   const root = findScanRoot(requested)
-  if (options.configPath != null && !existsSync(options.configPath)) {
+  if (options.configPath !== undefined && !existsSync(options.configPath)) {
     throw new ConfigError(`config file not found: ${options.configPath}`)
   }
   const scope = relative(root, requested).split('\\').join('/')
-  const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath != null, scope }
+  const base = { ...readConfigFile(options.configPath ?? join(root, CONFIG_FILE)), explicit: options.configPath !== undefined, scope }
   const files = listFiles(root)
   const fileSet = new Set(files)
   // The requested directory's own install (a monorepo package's ast-grep) wins over the scan root's.

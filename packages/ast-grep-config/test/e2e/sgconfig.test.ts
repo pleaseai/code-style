@@ -21,7 +21,7 @@ function astGrepBinary(): string {
   try {
     const { resolveBinaryPath } = require(join(CLI_DIR, 'postinstall.js')) as { resolveBinaryPath: () => string | null }
     const native = resolveBinaryPath()
-    if (native != null && existsSync(native)) {
+    if (native !== null && existsSync(native)) {
       return native
     }
   }
@@ -99,7 +99,7 @@ const EXPECTED = [
 
 function scan(cwd: string, args: string[]): string[] {
   const res = spawnSync(AST_GREP, ['scan', ...args, '--json=stream', '.'], { cwd, encoding: 'utf-8' })
-  if (res.error != null || res.status !== 0) {
+  if ((res.error !== null && res.error !== undefined) || res.status !== 0) {
     throw new Error(`ast-grep scan failed (${AST_GREP}): ${res.error?.message ?? res.stderr}`)
   }
   expect(res.status).toBe(0)
