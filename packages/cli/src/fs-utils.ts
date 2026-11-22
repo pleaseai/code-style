@@ -59,7 +59,7 @@ export function execCommand(pm: PackageManager): string {
   }
 }
 
-export function isJsonObject(value: unknown): value is PackageJson {
+export function isJsonObject(value: unknown): value is object {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
@@ -69,7 +69,7 @@ export function readPackageJson(cwd: string = process.cwd()): PackageJson {
   if (!isJsonObject(parsed)) {
     throw new Error(`${pkgPath} does not contain a JSON object`)
   }
-  return parsed
+  return parsed as PackageJson
 }
 
 export function writePackageJson(pkg: PackageJson, cwd: string = process.cwd()): void {

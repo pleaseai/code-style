@@ -30,7 +30,7 @@ function readPackageJsonOrNull(cwd: string): PackageJson | null {
   }
   try {
     const parsed: unknown = JSON.parse(raw)
-    return isJsonObject(parsed) ? parsed : null
+    return isJsonObject(parsed) ? parsed as PackageJson : null
   }
   catch {
     return null
