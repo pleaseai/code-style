@@ -136,6 +136,11 @@ describe('package.json I/O', () => {
     expect(reread.name).toBe('demo')
     expect(reread.prettier).toBe('@pleaseai/prettier-config')
   })
+
+  test.each(['null', '[]', '"demo"'])('rejects a package.json whose content is %s', (content) => {
+    writeFileSync(join(dir, 'package.json'), content)
+    expect(() => readPackageJson(dir)).toThrow('does not contain a JSON object')
+  })
 })
 
 // ---------------------------------------------------------------------------

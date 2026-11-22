@@ -23,9 +23,9 @@ Facts checked against the installed packages:
 
 - antfu appends the `options.rules` config after `disables()`, and `userConfigs` after that. A block inserted before `antfu/disables/scripts` (as `quality()` is) overrides antfu's `eqeqeq: ['error', 'smart']` and is still overridden by the user (FR-7).
 - Rules need `files: [GLOB_SRC]`. Applied without it, `unicorn/prefer-set-has` fails with "rules do not support the language markdown/gfm".
-- import-lite is named `import` only through `autoRenamePlugins`. With `autoRenamePlugins: false` it stays `import-lite`. In the `canonicalPluginNames` mode `import` is `eslint-plugin-import`, which has `no-self-import`.
+- antfu registers import-lite as `import` itself, so the plugin and its rules stay `import` with `autoRenamePlugins: false` too (corrected during implementation; see the Decision Log). In the `canonicalPluginNames` mode `import` is `eslint-plugin-import`, which has `no-self-import`.
 - `eslint-plugin-import-x` 4.18.1 supports ESLint 10, ships `no-self-import`, and resolves paths with its bundled `unrs-resolver` when no resolver is configured.
-- Probe of this repository with the four non-import rules: 86 `eqeqeq` (mostly `== null` in `packages/cli`) and 1 `unicorn/prefer-set-has`, in 17 files.
+- Pre-implementation probe of this repository with the four non-import rules: 86 `eqeqeq` (mostly `== null` in `packages/cli`) and 1 `unicorn/prefer-set-has`, in 17 files. The first run of the shipped config found 2 `unicorn/prefer-set-has` and the self-import fixture; the Decision Log has the final counts.
 
 ### STOP Conditions
 
@@ -46,7 +46,7 @@ The block uses `ts/…`. The canonical mode's existing `renamePlugins` call runs
 
 For the self-import rule:
 
-- Default mode: `composer.replacePlugin(name, original => ({ ...original, rules: { ...original.rules, 'no-self-import': … } }))`, where `name` is `import`, or `import-lite` when `autoRenamePlugins` is false. import-x is loaded by dynamic import inside the callback, so projects without `strict` never load it (NFR-1). It is a regular `dependency` (user decision).
+- Default mode: `composer.replacePlugin(name, original => ({ ...original, rules: { ...original.rules, 'no-self-import': … } }))`, where `name` is `import` in every mode (antfu registers the plugin as `import` even with `autoRenamePlugins: false`; see the Decision Log). import-x is loaded by dynamic import inside the callback, so projects without `strict` never load it (NFR-1). It is a regular `dependency` (user decision).
 - Canonical mode: no merge. `eslint-plugin-import` already provides the rule.
 
 Rejected: import-x under its own name (the rule ID would be `import-x/no-self-import`, breaking FR-5), and a local reimplementation (the user chose a dependency).
@@ -57,7 +57,7 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
       Validation: AC-001 to AC-005, AC-008, AC-009, AC-011 and AC-012 hold. `strict` with `typescript: false` or `unicorn: false` lints without a missing-plugin error. A user `eqeqeq` setting still wins. Markdown files and code blocks get no strict findings and no language error.
       Method: `bun test` in `packages/eslint-config` (a `describe('strict')` block in `test/index.test.ts`, modeled on the `quality` cases)
 - [x] T002 Report `import/no-self-import` under `strict` in both plugin modes (file: packages/eslint-config/src/index.ts) (depends on T001) [FR-5, AC-006, AC-007]
-      Validation: AC-006 and AC-007 hold. With `autoRenamePlugins: false` the finding is `import-lite/no-self-import`. `imports: false` lints without a missing-plugin error. Without `strict`, the import plugin is import-lite's own object. `eslint-plugin-import-x` is in `dependencies` and `bun.lock`.
+      Validation: AC-006 and AC-007 hold. With `autoRenamePlugins: false` the finding is still `import/no-self-import` (see the Decision Log). `imports: false` lints without a missing-plugin error. Without `strict`, the import plugin is import-lite's own object. `eslint-plugin-import-x` is in `dependencies` and `bun.lock`.
       Method: `bun test` in `packages/eslint-config`, linting a fixture that imports itself
       STOP: see `### STOP Conditions`
 - [x] T003 Turn `strict` on in this repository and fix its findings (file: eslint.config.ts) (depends on T002) [FR-9, AC-010]
@@ -77,10 +77,10 @@ Rejected: import-x under its own name (the rule ID would be `import-x/no-self-im
 
 ## Verification
 
-- [ ] `bun run build` and `bun run test` pass
-- [ ] `mise exec -- bun run lint` passes at the root with `strict: true`
-- [ ] `bun run typecheck` and `bun run lint:docs` pass in `apps/docs`
-- [ ] Every AC from AC-001 to AC-012 maps to a T001 or T002 test, or to T003's lint run
+- [x] `bun run build` and `bun run test` pass
+- [x] `mise exec -- bun run lint` passes at the root with `strict: true`
+- [x] `bun run typecheck` and `bun run lint:docs` pass in `apps/docs`
+- [x] Every AC from AC-001 to AC-012 maps to a T001 or T002 test, or to T003's lint run
 
 ## Review Focus
 

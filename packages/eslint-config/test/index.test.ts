@@ -342,6 +342,11 @@ describe('strict import/no-self-import', () => {
     expect(await lintRuleIds({ strict: true }, selfImport)).toContain('import/no-self-import')
   })
 
+  test('still reports a self-import when another strict rule is turned off', async () => {
+    const options = { strict: true, rules: { 'unicorn/prefer-set-has': 'off' as const } }
+    expect(await lintRuleIds(options, selfImport)).toContain('import/no-self-import')
+  })
+
   describe('in a TypeScript file', () => {
     describe.each([
       ['default plugins', false],

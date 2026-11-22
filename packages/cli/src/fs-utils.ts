@@ -59,9 +59,17 @@ export function execCommand(pm: PackageManager): string {
   }
 }
 
+export function isJsonObject(value: unknown): value is PackageJson {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 export function readPackageJson(cwd: string = process.cwd()): PackageJson {
   const pkgPath = resolve(cwd, 'package.json')
-  return JSON.parse(readFileSync(pkgPath, 'utf-8')) as PackageJson
+  const parsed: unknown = JSON.parse(readFileSync(pkgPath, 'utf-8'))
+  if (!isJsonObject(parsed)) {
+    throw new Error(`${pkgPath} does not contain a JSON object`)
+  }
+  return parsed
 }
 
 export function writePackageJson(pkg: PackageJson, cwd: string = process.cwd()): void {

@@ -96,9 +96,8 @@ cd apps/docs && bun run typecheck && bun run lint:docs   # when docs change
 
 ### Integration Testing
 
-- Test complete user flows
-- Verify data transactions
-- Test authentication and authorization
+- Lint real fixture files end to end through the built configs (`bun run test` in each package)
+- Run the ast-grep rule tests (`bun run test` in `packages/ast-grep-config`, which runs `ast-grep test`)
 
 ## Commit Guidelines
 
@@ -113,6 +112,10 @@ Follow the project's commit convention. See `Skill("standards:commit-convention"
 - `refactor`: Code change without behavior change
 - `test`: Adding or updating tests
 - `chore`: Maintenance tasks
+- `build`: Build system or dependency changes
+- `ci`: CI configuration changes
+- `perf`: Performance improvements
+- `revert`: Reverts a previous commit
 
 ## Definition of Done
 

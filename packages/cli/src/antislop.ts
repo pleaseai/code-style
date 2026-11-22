@@ -1,7 +1,7 @@
 import type { PackageJson } from './fs-utils.js'
 import { resolve } from 'node:path'
 import { TOOLS } from './appliers.js'
-import { isPackageInstalled, readFileOrNull } from './fs-utils.js'
+import { isJsonObject, isPackageInstalled, readFileOrNull } from './fs-utils.js'
 
 const ESLINT_CONFIG_NAMES = ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'].map(ext => `eslint.config.${ext}`)
 const ANTISLOP_OPT_OUT = /\bantislop\s*:\s*false\b/
@@ -30,7 +30,7 @@ function readPackageJsonOrNull(cwd: string): PackageJson | null {
   }
   try {
     const parsed: unknown = JSON.parse(raw)
-    return parsed !== null && parsed !== undefined && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as PackageJson : null
+    return isJsonObject(parsed) ? parsed : null
   }
   catch {
     return null

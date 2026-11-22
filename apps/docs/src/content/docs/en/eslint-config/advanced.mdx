@@ -159,7 +159,7 @@ export default pleaseai({
 - Turn a single rule off in `rules`, as in the example above. Your `rules` and your own configs win over `strict`.
 - `eqeqeq` has no autofix for `== null`. Rewrite it by hand as `x === null || x === undefined`, or as a single check when only one of the two can reach it.
 
-When `strict: true` was first turned on, this repository reported 88 findings in 18 files: 86 `eqeqeq` (mostly `== null` and `!= null`) and 2 `unicorn/prefer-set-has`. The other rules reported nothing. The findings are fixed, and this repository now lints itself with `strict: true`. See [issue #96](https://github.com/pleaseai/code-style/issues/96).
+When `strict: true` was first turned on, this repository reported 88 findings in 18 files: 86 `eqeqeq` (mostly `== null` and `!= null`) and 2 `unicorn/prefer-set-has`. The other rules reported nothing, apart from one `import/no-self-import` on a test fixture that imports itself on purpose, which `eslint.config.ts` excludes from linting. The findings are fixed, and this repository now lints itself with `strict: true`. See [issue #96](https://github.com/pleaseai/code-style/issues/96).
 
 ## Plugins Renaming
 

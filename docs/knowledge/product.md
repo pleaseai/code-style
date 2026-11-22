@@ -27,7 +27,7 @@ The docs site (`apps/docs`) publishes the guides at https://code-style.pages.dev
 ## Core features
 
 - Opinionated defaults on top of `@antfu/eslint-config`: 2-space indent, single quotes, no semicolons, `lessOpinionated` with `curly: all`, top-level `function` declarations.
-- Opt-in stricter rule sets that stay off by default so upgrades do not flood existing projects with errors (`antislop`, `quality`).
+- Opt-in stricter rule sets that stay off by default so upgrades do not flood existing projects with errors (`antislop`, `quality`, `strict`).
 - A CLI that installs the selected tools, reports missing pieces (`doctor`), and checks code organization (`check`).
 
 ## Constraints
