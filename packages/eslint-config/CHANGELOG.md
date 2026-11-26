@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.3](https://github.com/pleaseai/code-style/compare/eslint-config-v0.1.2...eslint-config-v0.1.3) (2026-11-22)
+
+
+### Features
+
+* **eslint-config:** add opt-in `strict` rule set ([#97](https://github.com/pleaseai/code-style/issues/97)) ([b8c65b3](https://github.com/pleaseai/code-style/commit/b8c65b39e15716ed0692ac101e19be2881308bad))
+* **eslint-config:** opt-in bun fmt Markdown formatter (formatters.markdown: 'bun') ([#92](https://github.com/pleaseai/code-style/issues/92)) ([aa0552c](https://github.com/pleaseai/code-style/commit/aa0552c14c2e7584b09ca56eeb7f15a0ad7967f9))
+
+
+### Bug Fixes
+
+* **eslint-config:** reject canary and debug Bun builds for formatters.markdown: 'bun' ([#94](https://github.com/pleaseai/code-style/issues/94)) ([0839046](https://github.com/pleaseai/code-style/commit/0839046b09ce3a6bdfc607005acb4bf6d58a3d24))
+
 ## [0.1.2](https://github.com/pleaseai/code-style/compare/eslint-config-v0.1.1...eslint-config-v0.1.2) (2026-11-20)
 
 

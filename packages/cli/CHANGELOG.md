@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/pleaseai/code-style/compare/code-style-v0.1.3...code-style-v0.1.4) (2026-11-22)
+
+
+### Features
+
+* **eslint-config:** add opt-in `strict` rule set ([#97](https://github.com/pleaseai/code-style/issues/97)) ([b8c65b3](https://github.com/pleaseai/code-style/commit/b8c65b39e15716ed0692ac101e19be2881308bad))
+* **eslint-config:** opt-in bun fmt Markdown formatter (formatters.markdown: 'bun') ([#92](https://github.com/pleaseai/code-style/issues/92)) ([aa0552c](https://github.com/pleaseai/code-style/commit/aa0552c14c2e7584b09ca56eeb7f15a0ad7967f9))
+
 ## [0.1.3](https://github.com/pleaseai/code-style/compare/code-style-v0.1.2...code-style-v0.1.3) (2026-11-20)
 
 
